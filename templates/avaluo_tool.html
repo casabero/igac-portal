@@ -3,94 +3,269 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Análisis Incremento - IGAC</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Incremento - IGAC</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-    <script>
-        tailwind.config = { theme: { extend: { fontFamily: { sans: ["Inter", "sans-serif"] }, colors: { primary: "#2563eb" } } } }
-    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .money {
+            font-family: 'Inter', monospace;
+            text-align: right;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-gray-50 text-slate-800 min-h-screen flex flex-col">
 
-    <nav class="w-full border-b bg-white py-4 px-6 sticky top-0 z-50">
-        <div class="max-w-[800px] mx-auto flex items-center gap-3">
-            <a href="/" class="text-slate-400 hover:text-slate-800 transition-colors"><span
+    <!-- Navbar -->
+    <nav class="bg-white border-b px-6 py-3 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <a href="/" class="text-slate-400 hover:text-slate-800"><span
                     class="material-symbols-outlined">arrow_back</span></a>
-            <h1 class="text-sm font-semibold text-slate-700">Análisis de Incremento de Avalúos</h1>
+            <h1 class="font-bold text-slate-700">Análisis Interactivo de Incremento</h1>
         </div>
+        {% if resultados %}
+        <a href="/avaluos" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1 rounded">Nuevo
+            Análisis</a>
+        {% endif %}
     </nav>
 
-    <div class="flex-1 flex justify-center py-10 px-4">
-        <div class="w-full max-w-[800px] bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+    <main class="flex-1 p-6 max-w-[1200px] mx-auto w-full">
 
-            <div class="mb-6 border-b pb-4">
-                <h2 class="text-lg font-semibold text-gray-900">Parámetros de Comparación</h2>
-                <p class="text-sm text-gray-500">Compara el precierre vs postcierre aplicando redondeo catastral (-3).
-                </p>
-            </div>
-
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}<div class="bg-red-50 text-red-700 p-3 rounded mb-6 text-sm border border-red-200">{{
-                messages[0] }}</div>{% endif %}
-            {% endwith %}
-
+        <!-- ESTADO 1: FORMULARIO DE CARGA (Se oculta si hay resultados) -->
+        {% if not resultados %}
+        <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-200 mt-10">
+            <h2 class="text-xl font-bold mb-4">Cargar Archivos SNC</h2>
             <form method="POST" enctype="multipart/form-data" class="space-y-6">
-
-                <!-- Archivos -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">1. Archivo Precierre
-                            (Base)</label>
+                        <label class="block text-xs font-bold uppercase mb-1">Precierre (Base)</label>
                         <input type="file" name="file_pre"
-                            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
+                            class="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700"
                             required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">2. Archivo Postcierre
-                            (Final)</label>
+                        <label class="block text-xs font-bold uppercase mb-1">Postcierre (Final)</label>
                         <input type="file" name="file_post"
-                            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
+                            class="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700"
                             required>
                     </div>
                 </div>
-
-                <!-- Porcentajes -->
-                <div class="bg-blue-50 p-4 rounded-md border border-blue-100">
-                    <h3 class="text-sm font-bold text-blue-800 mb-3 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[18px]">percent</span> Configuración de Incremento
-                    </h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs text-blue-700 mb-1">Incremento Urbano (%)</label>
-                            <input type="number" step="0.01" name="pct_urbano"
-                                class="w-full rounded border-gray-300 text-sm focus:ring-primary focus:border-primary"
-                                placeholder="Ej: 4.5" required>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-blue-700 mb-1">Incremento Rural (%)</label>
-                            <input type="number" step="0.01" name="pct_rural"
-                                class="w-full rounded border-gray-300 text-sm focus:ring-primary focus:border-primary"
-                                placeholder="Ej: 3.0" required>
-                        </div>
+                <div class="bg-blue-50 p-4 rounded border border-blue-100 grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-blue-800 font-bold">Inc. Urbano (%)</label>
+                        <input type="number" step="0.01" name="pct_urbano"
+                            class="w-full rounded border-gray-300 text-sm" placeholder="4.5" required>
                     </div>
-                    <p class="text-[10px] text-blue-500 mt-2">* Si es el mismo porcentaje, ingrese el valor en ambos
-                        campos.</p>
+                    <div>
+                        <label class="block text-xs text-blue-800 font-bold">Inc. Rural (%)</label>
+                        <input type="number" step="0.01" name="pct_rural" class="w-full rounded border-gray-300 text-sm"
+                            placeholder="3.0" required>
+                    </div>
                 </div>
-
-                <div class="pt-4">
-                    <button type="submit"
-                        class="w-full bg-slate-900 text-white font-medium py-3 rounded hover:bg-black transition shadow-lg flex justify-center items-center gap-2">
-                        <span class="material-symbols-outlined">analytics</span>
-                        EJECUTAR ANÁLISIS
-                    </button>
-                </div>
+                <button type="submit"
+                    class="w-full bg-slate-900 text-white py-3 rounded hover:bg-black transition font-bold">PROCESAR
+                    DATOS</button>
             </form>
         </div>
-    </div>
+        {% endif %}
+
+        <!-- ESTADO 2: DASHBOARD INTERACTIVO -->
+        {% if resultados %}
+        <div id="dashboard">
+
+            <!-- A. Tarjetas Globales -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white p-4 rounded border border-gray-200">
+                    <p class="text-xs text-gray-500 uppercase">Total Predios</p>
+                    <p class="text-2xl font-bold">{{ resultados.stats.total_predios }}</p>
+                </div>
+                <div class="bg-white p-4 rounded border border-gray-200">
+                    <p class="text-xs text-gray-500 uppercase">Avalúo Base (Precierre)</p>
+                    <p class="text-lg font-bold text-blue-600 money">{{
+                        "${:,.0f}".format(resultados.stats.total_avaluo_pre) }}</p>
+                </div>
+                <div class="bg-white p-4 rounded border border-gray-200">
+                    <p class="text-xs text-gray-500 uppercase">Avalúo Sistema (Post)</p>
+                    <p class="text-lg font-bold text-green-600 money">{{
+                        "${:,.0f}".format(resultados.stats.total_avaluo_post) }}</p>
+                </div>
+                <div class="bg-white p-4 rounded border border-red-200 bg-red-50">
+                    <p class="text-xs text-red-700 uppercase">Inconsistencias</p>
+                    <p class="text-2xl font-bold text-red-700">{{ resultados.stats.inconsistencias }}</p>
+                </div>
+            </div>
+
+            <!-- B. Buscador -->
+            <div class="bg-white p-6 rounded-t-lg border border-gray-200 border-b-0 shadow-sm">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Buscar y Agregar Predio</label>
+                <div class="flex gap-2">
+                    <input type="text" id="searchInput" placeholder="Escribe el Número Predial (o parte de él)..."
+                        class="flex-1 rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <button onclick="buscarPredio()"
+                        class="bg-blue-600 text-white px-6 py-2 rounded font-medium hover:bg-blue-700 transition">
+                        Buscar
+                    </button>
+                </div>
+                <p id="searchMsg" class="text-xs mt-2 text-gray-500 h-4"></p>
+            </div>
+
+            <!-- C. Tabla Acumulativa -->
+            <div class="bg-white border border-gray-200 rounded-b-lg overflow-hidden shadow-sm mb-20">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-gray-100 text-gray-600 font-semibold uppercase text-xs">
+                        <tr>
+                            <th class="px-4 py-3">Predial Nacional</th>
+                            <th class="px-4 py-3">Zona</th>
+                            <th class="px-4 py-3 text-right">Avalúo Pre</th>
+                            <th class="px-4 py-3 text-right">Calculado (Py)</th>
+                            <th class="px-4 py-3 text-right">Sistema (Post)</th>
+                            <th class="px-4 py-3 text-center">Estado</th>
+                            <th class="px-4 py-3 text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparisonTable" class="divide-y divide-gray-100">
+                        <!-- Aquí se inyectan las filas con JS -->
+                    </tbody>
+                    <!-- Footer con Sumatorias Dinámicas -->
+                    <tfoot class="bg-slate-50 font-bold text-slate-800 border-t-2 border-slate-200">
+                        <tr>
+                            <td colspan="2" class="px-4 py-4 text-right">TOTAL SELECCIONADO:</td>
+                            <td class="px-4 py-4 text-right money" id="sumPre">$0</td>
+                            <td class="px-4 py-4 text-right money" id="sumCalc">$0</td>
+                            <td class="px-4 py-4 text-right money" id="sumPost">$0</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- JAVASCRIPT PARA LA LÓGICA DEL CLIENTE -->
+        <script>
+            // Cargamos todos los datos que envió Python en una variable JS
+            const dataset = {{ resultados.data | tojson }};
+            const tableBody = document.getElementById('comparisonTable');
+            const msgLabel = document.getElementById('searchMsg');
+
+            // Variables para los acumuladores
+            let totalPre = 0;
+            let totalCalc = 0;
+            let totalPost = 0;
+
+            // Formateador de moneda
+            const formatter = new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0
+            });
+
+            function buscarPredio() {
+                const query = document.getElementById('searchInput').value.trim();
+                if (query.length < 5) {
+                    msgLabel.textContent = "Escribe al menos 5 dígitos para buscar.";
+                    msgLabel.className = "text-xs mt-2 text-red-500 font-bold h-4";
+                    return;
+                }
+
+                // Buscamos en el dataset
+                const found = dataset.find(p => p.Predial_Nacional.includes(query));
+
+                if (found) {
+                    agregarFila(found);
+                    msgLabel.textContent = "Predio encontrado y agregado.";
+                    msgLabel.className = "text-xs mt-2 text-green-600 font-bold h-4";
+                    document.getElementById('searchInput').value = ""; // Limpiar
+                } else {
+                    msgLabel.textContent = "No se encontró ningún predio con ese número.";
+                    msgLabel.className = "text-xs mt-2 text-red-500 font-bold h-4";
+                }
+            }
+
+            function agregarFila(item) {
+                // Verificar si ya está en la tabla para no repetir visualmente
+                if (document.getElementById(`row-${item.Predial_Nacional}`)) {
+                    msgLabel.textContent = "Este predio ya está en la lista.";
+                    return;
+                }
+
+                // Crear fila
+                const tr = document.createElement('tr');
+                tr.id = `row-${item.Predial_Nacional}`;
+                tr.className = "hover:bg-blue-50 transition-colors";
+
+                // Estilos de estado
+                let badgeClass = "bg-green-100 text-green-700";
+                if (item.Estado === 'INCONSISTENCIA') badgeClass = "bg-red-100 text-red-700";
+                if (item.Estado === 'SIN_AUMENTO') badgeClass = "bg-yellow-100 text-yellow-700";
+                if (item.Estado === 'NO_CRUZA') badgeClass = "bg-gray-100 text-gray-700";
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-mono text-xs">${item.Predial_Nacional}</td>
+                    <td class="px-4 py-3 text-xs">${item.Zona}</td>
+                    <td class="px-4 py-3 text-right money">${formatter.format(item.Avaluo)}</td>
+                    <td class="px-4 py-3 text-right money text-blue-600">${formatter.format(item.Avaluo_Calc)}</td>
+                    <td class="px-4 py-3 text-right money text-green-600 font-bold">${formatter.format(item.Avaluo_Post)}</td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold ${badgeClass}">${item.Estado}</span>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <button onclick="eliminarFila('${item.Predial_Nacional}', ${item.Avaluo}, ${item.Avaluo_Calc}, ${item.Avaluo_Post})" 
+                                class="text-red-400 hover:text-red-600">
+                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                    </td>
+                `;
+
+                // Agregar al inicio de la tabla (como un stack)
+                tableBody.insertBefore(tr, tableBody.firstChild);
+
+                // Actualizar Sumas
+                actualizarTotales(item.Avaluo, item.Avaluo_Calc, item.Avaluo_Post, 'sumar');
+            }
+
+            function eliminarFila(id, vPre, vCalc, vPost) {
+                const row = document.getElementById(`row-${id}`);
+                if (row) {
+                    row.remove();
+                    actualizarTotales(vPre, vCalc, vPost, 'restar');
+                }
+            }
+
+            function actualizarTotales(vPre, vCalc, vPost, operacion) {
+                if (operacion === 'sumar') {
+                    totalPre += vPre;
+                    totalCalc += vCalc;
+                    totalPost += vPost;
+                } else {
+                    totalPre -= vPre;
+                    totalCalc -= vCalc;
+                    totalPost -= vPost;
+                }
+
+                document.getElementById('sumPre').textContent = formatter.format(totalPre);
+                document.getElementById('sumCalc').textContent = formatter.format(totalCalc);
+                document.getElementById('sumPost').textContent = formatter.format(totalPost);
+            }
+
+            // Permitir buscar con Enter
+            document.getElementById('searchInput').addEventListener("keypress", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    buscarPredio();
+                }
+            });
+        </script>
+        {% endif %}
+
+    </main>
 </body>
 
 </html>
