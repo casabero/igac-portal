@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Transformador SNC - Portal IGAC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#144bb8",
+                        "background-light": "#ffffff",
+                        "border-retro": "#e7ebf3",
+                        "text-main": "#0e121b",
+                        "text-muted": "#4e6797",
+                    },
+                    fontFamily: { "display": ["Space Grotesk", "sans-serif"] },
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 text-text-main font-display antialiased min-h-screen flex flex-col">
+
+    <!-- Header simple con botón volver -->
+    <header class="w-full border-b border-border-retro bg-white sticky top-0 z-50">
+        <div class="mx-auto flex h-16 max-w-[960px] items-center justify-between px-4">
+            <a href="/" class="flex items-center gap-2 text-text-muted hover:text-primary transition-colors font-bold">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Volver al Portal
+            </a>
+            <h1 class="text-lg font-bold">TRANSFORMADOR SNC</h1>
+        </div>
+    </header>
+
+    <div class="flex-1 flex justify-center py-10 px-4">
+        <div class="w-full max-w-2xl">
+
+            <!-- Tarjeta Principal -->
+            <div class="bg-white border border-border-retro rounded-xl shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-border-retro bg-gray-50">
+                    <h2 class="text-2xl font-bold text-primary flex items-center gap-2">
+                        <span class="material-symbols-outlined">upload_file</span>
+                        Cargar Archivo Plano
+                    </h2>
+                    <p class="text-text-muted mt-1">Selecciona el tipo de registro y sube tu archivo .TXT o .PRN</p>
+                </div>
+
+                <div class="p-8">
+                    <!-- Mensajes de Error (Flash) -->
+                    {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                    <div
+                        class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-center gap-2">
+                        <span class="material-symbols-outlined">error</span>
+                        {{ messages[0] }}
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+
+                        <!-- Selector -->
+                        <div>
+                            <label class="block text-sm font-bold text-text-main mb-2">1. Tipo de Archivo</label>
+                            <select name="opcion"
+                                class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary py-3"
+                                required>
+                                <option value="" selected disabled>-- Selecciona una opción --</option>
+                                <option value="1">Registro 1 SNC (Datos Básicos)</option>
+                                <option value="2">Registro 2 SNC (Detalles Constructivos)</option>
+                                <option value="3">Resoluciones Tipo 1 (Trámites Generales)</option>
+                                <option value="4">Resoluciones Tipo 2 (Detalles Físicos/Econ)</option>
+                                <option value="5">Resoluciones Tipo 3 (Decretos/Motivación)</option>
+                            </select>
+                        </div>
+
+                        <!-- Input Archivo -->
+                        <div>
+                            <label class="block text-sm font-bold text-text-main mb-2">2. Archivo del Servidor</label>
+                            <div
+                                class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition-colors relative">
+                                <div class="space-y-1 text-center">
+                                    <span class="material-symbols-outlined text-4xl text-gray-400">description</span>
+                                    <div class="flex text-sm text-gray-600 justify-center">
+                                        <label for="file-upload"
+                                            class="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-blue-700 focus-within:outline-none">
+                                            <span>Subir un archivo</span>
+                                            <input id="file-upload" name="archivo" type="file" class="sr-only" required>
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500">TXT, PRN hasta 50MB</p>
+                                </div>
+                                <!-- Pequeño script para mostrar nombre de archivo seleccionado -->
+                                <script>
+                                    document.getElementById('file-upload').onchange = function () {
+                                        alert('Archivo seleccionado: ' + this.files[0].name);
+                                    };
+                                </script>
+                            </div>
+                        </div>
+
+                        <!-- Botón Submit -->
+                        <div class="pt-4">
+                            <button type="submit"
+                                class="w-full flex justify-center items-center gap-2 py-4 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all active:scale-[0.98]">
+                                <span class="material-symbols-outlined">download</span>
+                                PROCESAR Y DESCARGAR EXCEL
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="bg-gray-50 px-8 py-4 border-t border-border-retro">
+                    <p class="text-xs text-center text-text-muted">El procesamiento se realiza en memoria RAM. No se
+                        guardan copias en el servidor.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
