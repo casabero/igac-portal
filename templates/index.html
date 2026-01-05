@@ -4,155 +4,120 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Portal IGAC - Casabero</title>
-    <!-- Google Fonts: Space Grotesk -->
-    <link href="https://fonts.googleapis.com" rel="preconnect" />
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap"
+    <title>Portal IGAC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
-    <!-- Material Symbols -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <!-- Theme Configuration -->
-    <script id="tailwind-config">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
         tailwind.config = {
-            darkMode: "class",
             theme: {
                 extend: {
-                    colors: {
-                        "primary": "#144bb8",
-                        "background-light": "#ffffff",
-                        "background-dark": "#111621",
-                        "border-retro": "#e7ebf3",
-                        "text-main": "#0e121b",
-                        "text-muted": "#4e6797",
-                    },
-                    fontFamily: {
-                        "display": ["Space Grotesk", "sans-serif"]
-                    },
-                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-                },
-            },
+                    fontFamily: { sans: ["Inter", "sans-serif"] },
+                    colors: { gray: { 900: "#111827", 700: "#374151", 500: "#6B7280", 200: "#E5E7EB", 50: "#F9FAFB" } }
+                }
+            }
         }
     </script>
-    <style>
-        .bg-retro-grid {
-            background-size: 40px 40px;
-            background-image:
-                linear-gradient(to right, #f0f0f0 1px, transparent 1px),
-                linear-gradient(to bottom, #f0f0f0 1px, transparent 1px);
-        }
-
-        .dark .bg-retro-grid {
-            background-image:
-                linear-gradient(to right, #1f2937 1px, transparent 1px),
-                linear-gradient(to bottom, #1f2937 1px, transparent 1px);
-        }
-    </style>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-text-main font-display antialiased overflow-x-hidden">
-    <div class="relative flex min-h-screen w-full flex-col group/design-root">
+<body class="bg-gray-50 text-gray-900 font-sans antialiased min-h-screen flex flex-col items-center">
 
-        <!-- Header -->
-        <header
-            class="sticky top-0 z-50 w-full border-b border-border-retro bg-background-light/95 backdrop-blur dark:bg-background-dark/95 dark:border-gray-800">
-            <div class="mx-auto flex h-16 max-w-[960px] items-center justify-between px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center gap-3 text-text-main">
-                    <span class="material-symbols-outlined text-primary text-3xl">dns</span>
-                    <h1 class="text-lg font-bold tracking-tight">PORTAL IGAC</h1>
-                </div>
-                <div class="hidden md:flex items-center gap-8">
-                    <div class="flex items-center gap-2">
-                        <span class="relative flex h-2 w-2">
-                            <span
-                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                        </span>
-                        <span class="text-xs font-bold text-text-muted">SERVER: 192.168.1.12</span>
-                    </div>
-                </div>
-            </div>
-        </header>
+    <!-- Contenedor Principal Centrado -->
+    <div class="w-full max-w-[800px] px-6 py-12">
 
-        <!-- Main Content -->
-        <div class="flex flex-1 justify-center bg-retro-grid">
-            <div class="flex flex-col max-w-[960px] w-full px-4 sm:px-6 lg:px-8 py-10 gap-12">
-
-                <!-- Hero -->
-                <section
-                    class="flex flex-col items-center justify-center text-center gap-6 py-12 md:py-20 border-b border-border-retro dark:border-gray-800 border-dashed">
-                    <div class="space-y-4 max-w-2xl">
-                        <div
-                            class="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-bold text-primary">
-                            <span class="material-symbols-outlined text-[14px]">rocket_launch</span>
-                            v1.0 Producción
-                        </div>
-                        <h2 class="text-4xl md:text-6xl font-black leading-tight tracking-tight text-text-main">
-                            Herramientas Catastrales
-                        </h2>
-                        <p class="text-lg md:text-xl text-text-muted font-normal">
-                            Plataforma centralizada para el procesamiento, validación y transformación de datos del
-                            IGAC.
-                        </p>
-                    </div>
-                </section>
-
-                <!-- Apps Grid -->
-                <div class="flex flex-col gap-6">
-                    <!-- App 1: Transformador SNC -->
-                    <article
-                        class="group relative flex flex-col md:flex-row items-stretch overflow-hidden rounded-xl border border-border-retro bg-white dark:bg-gray-800 dark:border-gray-700 shadow-sm transition-all hover:shadow-md hover:border-primary/50">
-                        <div class="flex flex-1 flex-col justify-between p-6 gap-6">
-                            <div class="space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="text-xl font-bold text-text-main">Transformador SNC</h4>
-                                    <span
-                                        class="rounded bg-green-100 dark:bg-green-900 px-2 py-0.5 text-xs font-bold text-green-700 dark:text-green-300">ONLINE</span>
-                                </div>
-                                <p class="text-text-muted text-base">Convierte archivos planos (.TXT/.PRN) de registros
-                                    catastrales a Excel automáticamente.</p>
-                            </div>
-                            <a href="/snc"
-                                class="flex w-fit items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-700">
-                                Abrir Herramienta
-                                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-                            </a>
-                        </div>
-                    </article>
-
-                    <!-- App 2: Placeholder -->
-                    <article
-                        class="group relative flex flex-col md:flex-row items-stretch overflow-hidden rounded-xl border border-border-retro bg-white dark:bg-gray-800 dark:border-gray-700 shadow-sm opacity-60">
-                        <div class="flex flex-1 flex-col justify-between p-6 gap-6">
-                            <div class="space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="text-xl font-bold text-text-main">Validador Geográfico</h4>
-                                    <span
-                                        class="rounded bg-yellow-100 dark:bg-yellow-900 px-2 py-0.5 text-xs font-bold text-yellow-700 dark:text-yellow-300">PRÓXIMAMENTE</span>
-                                </div>
-                                <p class="text-text-muted text-base">Validación de predios duplicados y cruce espacial.
-                                </p>
-                            </div>
-                            <button disabled
-                                class="flex w-fit items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-bold text-gray-400 cursor-not-allowed">
-                                En Desarrollo <span class="material-symbols-outlined text-[18px]">lock</span>
-                            </button>
-                        </div>
-                    </article>
-                </div>
-
-                <!-- Footer -->
-                <footer class="mt-8 border-t border-border-retro dark:border-gray-800 pt-8 pb-4">
-                    <div class="text-sm text-text-muted text-center">
-                        © 2025 Portal IGAC - Casabero HomeLab.
-                    </div>
-                </footer>
-            </div>
+        <!-- Encabezado Minimalista (Solo un pequeño título discreto) -->
+        <div class="mb-8 border-b border-gray-200 pb-4">
+            <h1 class="text-xl font-semibold tracking-tight text-gray-900 flex items-center gap-2">
+                <span class="material-symbols-outlined text-gray-500">grid_view</span>
+                Panel de Aplicaciones
+            </h1>
         </div>
+
+        <!-- Lista de Apps (Diseño Compacto) -->
+        <div class="flex flex-col gap-4">
+
+            <!-- App 1: Convertidor (ACTIVA) -->
+            <div
+                class="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 bg-white border border-gray-200 rounded-lg hover:border-gray-400 hover:shadow-sm transition-all duration-200">
+                <div class="flex gap-4 items-start">
+                    <!-- Icono discreto -->
+                    <div
+                        class="p-2 bg-gray-50 rounded-md border border-gray-100 text-gray-500 group-hover:text-gray-900 transition-colors">
+                        <span class="material-symbols-outlined text-[24px]">table_view</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-sm font-semibold text-gray-900">Convertidor Registros Catastrales</h3>
+                            <span
+                                class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">v1.0</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Carga secuenciales SNC en formato Excel (*xlsx)</p>
+                    </div>
+                </div>
+
+                <a href="/snc"
+                    class="mt-4 sm:mt-0 flex items-center gap-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 px-3 py-1.5 rounded hover:bg-gray-50 hover:text-black transition-colors">
+                    Abrir
+                    <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                </a>
+            </div>
+
+            <!-- App 2: Validador (ACTIVA) -->
+            <div
+                class="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 bg-white border border-gray-200 rounded-lg hover:border-gray-400 hover:shadow-sm transition-all duration-200">
+                <div class="flex gap-4 items-start">
+                    <div
+                        class="p-2 bg-gray-50 rounded-md border border-gray-100 text-gray-500 group-hover:text-gray-900 transition-colors">
+                        <span class="material-symbols-outlined text-[24px]">verified</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-sm font-semibold text-gray-900">Validador Geográfico</h3>
+                            <span
+                                class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">ONLINE</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Auditoría de longitudes en códigos prediales</p>
+                    </div>
+                </div>
+
+                <a href="/geo"
+                    class="mt-4 sm:mt-0 flex items-center gap-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 px-3 py-1.5 rounded hover:bg-gray-50 hover:text-black transition-colors">
+                    Abrir
+                    <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                </a>
+            </div>
+
+            <!-- App 3: Placeholder (Inactiva - Gris más claro) -->
+            <div
+                class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 bg-gray-50 border border-gray-200 rounded-lg opacity-60">
+                <div class="flex gap-4 items-start">
+                    <div class="p-2 bg-white rounded-md border border-gray-100 text-gray-400">
+                        <span class="material-symbols-outlined text-[24px]">analytics</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-sm font-semibold text-gray-500">Analítica de Avalúos</h3>
+                            <span
+                                class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-200 text-gray-500">PRÓXIMAMENTE</span>
+                        </div>
+                        <p class="text-sm text-gray-400 mt-1">Dashboard interactivo de tendencias</p>
+                    </div>
+                </div>
+                <!-- Botón deshabilitado -->
+                <button disabled
+                    class="mt-4 sm:mt-0 text-xs font-medium text-gray-400 border border-gray-200 px-3 py-1.5 rounded cursor-not-allowed">
+                    Bloqueado
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Footer discreto -->
+        <footer class="mt-12 text-center border-t border-gray-200 pt-6">
+            <p class="text-xs text-gray-400 font-mono">casabero.com/igac &bull; Acceso Privado</p>
+        </footer>
+
     </div>
 </body>
 
