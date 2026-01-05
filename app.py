@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, send_file, flash, redirect, url_for
 from modules.snc_processor import procesar_dataframe
 from modules.db_logger import init_db, registrar_visita  # <--- IMPORTANTE
+from modules.avaluo_analisis import procesar_incremento
+
 import os
 
 app = Flask(__name__)
@@ -71,6 +73,33 @@ def ver_logs():
         html += f"<tr><td>{log[0]}</td><td>{log[1]}</td><td>{log[2]}</td><td>{log[3]}</td><td>{log[6]}</td><td>{log[5][:30]}...</td></tr>"
     html += "</table>"
     return html
+# --- RUTA 4: ANALISIS AVALUOS ---
+@app.route('/avaluos', methods=['GET', 'POST'])
+def avaluos_tool():
+    registrar_visita('/avaluos')
+    
+    if request.method == 'POST':
+        if 'file_pre' not in request.files or 'file_post' not in request.files:
+            flash('Faltan archivos')
+            return redirect(request.url)
+        
+        f_pre = request.files['file_pre']
+        f_post = request.files['file_post']
+        pct_u = request.form.get('pct_urbano')
+        pct_r = request.form.get('pct_rural')
+        
+        if f_pre.filename == '' or f_post.filename == '':
+            flash('Seleccione ambos archivos')
+            return redirect(request.url)
+
+        try:
+            output, filename = procesar_incremento(f_pre, f_post, pct_u, pct_r, f_pre.filename)
+            return send_file(output, as_attachment=True, download_name=filename, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        except Exception as e:
+            flash(f"Error en análisis: {str(e)}")
+            return redirect(request.url)
+            
+    return render_template('avaluo_tool.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)

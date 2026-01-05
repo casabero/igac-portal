@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Portal IGAC</title>
+    <title>IGAC Apps</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
@@ -23,25 +23,21 @@
 
 <body class="bg-gray-50 text-gray-900 font-sans antialiased min-h-screen flex flex-col items-center">
 
-    <!-- Contenedor Principal Centrado -->
     <div class="w-full max-w-[800px] px-6 py-12">
 
-        <!-- Encabezado Minimalista (Solo un pequeño título discreto) -->
         <div class="mb-8 border-b border-gray-200 pb-4">
             <h1 class="text-xl font-semibold tracking-tight text-gray-900 flex items-center gap-2">
                 <span class="material-symbols-outlined text-gray-500">grid_view</span>
-                Panel de Apps
+                Panel de Aplicaciones
             </h1>
         </div>
 
-        <!-- Lista de Apps (Diseño Compacto) -->
         <div class="flex flex-col gap-4">
 
             <!-- App 1: Convertidor (ACTIVA) -->
             <div
                 class="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 bg-white border border-gray-200 rounded-lg hover:border-gray-400 hover:shadow-sm transition-all duration-200">
                 <div class="flex gap-4 items-start">
-                    <!-- Icono discreto -->
                     <div
                         class="p-2 bg-gray-50 rounded-md border border-gray-100 text-gray-500 group-hover:text-gray-900 transition-colors">
                         <span class="material-symbols-outlined text-[24px]">table_view</span>
@@ -55,56 +51,51 @@
                         <p class="text-sm text-gray-500 mt-1">Carga secuenciales SNC en formato Excel (*xlsx)</p>
                     </div>
                 </div>
-
                 <a href="/snc"
                     class="mt-4 sm:mt-0 flex items-center gap-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 px-3 py-1.5 rounded hover:bg-gray-50 hover:text-black transition-colors">
-                    Abrir
-                    <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                    Abrir <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                 </a>
             </div>
 
-            <!-- App 2: Validador (ACTIVA) -->
+            <!-- App 2: Análisis Avalúos (ACTIVA - AHORA EN POSICIÓN 2) -->
             <div
                 class="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 bg-white border border-gray-200 rounded-lg hover:border-gray-400 hover:shadow-sm transition-all duration-200">
                 <div class="flex gap-4 items-start">
                     <div
                         class="p-2 bg-gray-50 rounded-md border border-gray-100 text-gray-500 group-hover:text-gray-900 transition-colors">
-                        <span class="material-symbols-outlined text-[24px]">verified</span>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h3 class="text-sm font-semibold text-gray-900">Validador Geográfico</h3>
-                            <span
-                                class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">ONLINE</span>
-                        </div>
-                        <p class="text-sm text-gray-500 mt-1">Auditoría de longitudes en códigos prediales</p>
-                    </div>
-                </div>
-
-                <a href="/geo"
-                    class="mt-4 sm:mt-0 flex items-center gap-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 px-3 py-1.5 rounded hover:bg-gray-50 hover:text-black transition-colors">
-                    Abrir
-                    <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-                </a>
-            </div>
-
-            <!-- App 3: Placeholder (Inactiva - Gris más claro) -->
-            <div
-                class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 bg-gray-50 border border-gray-200 rounded-lg opacity-60">
-                <div class="flex gap-4 items-start">
-                    <div class="p-2 bg-white rounded-md border border-gray-100 text-gray-400">
                         <span class="material-symbols-outlined text-[24px]">analytics</span>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h3 class="text-sm font-semibold text-gray-500">Analítica de Avalúos</h3>
+                            <h3 class="text-sm font-semibold text-gray-900">Análisis Incremento de Avalúos</h3>
                             <span
-                                class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-200 text-gray-500">PRÓXIMAMENTE</span>
+                                class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-50 text-green-700 border border-green-200">BETA</span>
                         </div>
-                        <p class="text-sm text-gray-400 mt-1">Dashboard interactivo de tendencias</p>
+                        <p class="text-sm text-gray-500 mt-1">Comparativa Precierre vs Postcierre (Redondeo -3)</p>
                     </div>
                 </div>
-                <!-- Botón deshabilitado -->
+                <a href="/avaluos"
+                    class="mt-4 sm:mt-0 flex items-center gap-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 px-3 py-1.5 rounded hover:bg-gray-50 hover:text-black transition-colors">
+                    Abrir <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                </a>
+            </div>
+
+            <!-- App 3: Placeholder (PRÓXIMAMENTE) -->
+            <div
+                class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 bg-gray-50 border border-gray-200 rounded-lg opacity-60">
+                <div class="flex gap-4 items-start">
+                    <div class="p-2 bg-white rounded-md border border-gray-100 text-gray-400">
+                        <span class="material-symbols-outlined text-[24px]">rocket_launch</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-sm font-semibold text-gray-500">Herramienta en Desarrollo</h3>
+                            <span
+                                class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-200 text-gray-500">PRONTO</span>
+                        </div>
+                        <p class="text-sm text-gray-400 mt-1">Disponible en próximas versiones</p>
+                    </div>
+                </div>
                 <button disabled
                     class="mt-4 sm:mt-0 text-xs font-medium text-gray-400 border border-gray-200 px-3 py-1.5 rounded cursor-not-allowed">
                     Bloqueado
@@ -113,7 +104,6 @@
 
         </div>
 
-        <!-- Footer discreto -->
         <footer class="mt-12 text-center border-t border-gray-200 pt-6">
             <p class="text-xs text-gray-400 font-mono">casabero.com/igac &bull; Acceso Privado</p>
         </footer>
