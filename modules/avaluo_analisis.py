@@ -19,6 +19,7 @@ def redondear_excel(valor):
 
 def cargar_snc(stream):
     colspecs = generar_colspecs(CORTES_R1)
+    # dtype=str es fundamental para no perder ceros
     df = pd.read_fwf(stream, colspecs=colspecs, header=None, encoding='latin-1', dtype=str)
     
     if len(df.columns) == len(COLS_R1):
@@ -26,70 +27,53 @@ def cargar_snc(stream):
     else:
         df.columns = COLS_R1[:len(df.columns)]
     
-    # Limpieza
+    # Limpieza de espacios
     df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
+    
+    # Limpieza numérica del Avalúo
     df['Avaluo'] = df['Avaluo'].astype(str).str.replace(r'[$,]', '', regex=True)
     df['Avaluo'] = pd.to_numeric(df['Avaluo'], errors='coerce').fillna(0)
     
-    # --- CONSTRUCCIÓN INTELIGENTE DE LA LLAVE (30 DÍGITOS) ---
-    def construir_llave(row):
-        d = str(row['Departamento']).zfill(2)
-        m = str(row['Municipio']).zfill(3)
-        p = str(row['NoPredial'])
-        
-        # Si el predial ya es largo (ej. 30 digitos), asumimos que ya tiene Dept+Mun
-        if len(p) >= 25:
-            # A veces el SNC trae el predial completo en la columna NoPredial
-            # Verificamos si empieza con el Dept y Mun
-            if p.startswith(d + m):
-                return p # Ya está completo
-            elif len(p) == 25:
-                # Es el formato estándar de 25, le pegamos el encabezado
-                return d + m + p
-            else:
-                # Caso raro, forzamos concatenación estándar
-                return d + m + p.zfill(25)
-        else:
-            # Caso corto (ej. sector urbano), rellenamos a 25 y pegamos
-            return d + m + p.zfill(25)
-
-    df['Predial_Nacional'] = df.apply(construir_llave, axis=1)
+    # --- CONSTRUCCIÓN RIGIDA DE LA LLAVE (30 DÍGITOS) ---
+    # Depto (2) + Mpio (3) + Predio (25)
+    # Usamos zfill para rellenar con ceros a la izquierda si hiciera falta
+    df['Predial_Nacional'] = (
+        df['Departamento'].astype(str).str.zfill(2) + 
+        df['Municipio'].astype(str).str.zfill(3) + 
+        df['NoPredial'].astype(str).str.zfill(25)
+    )
     
-    # Eliminar duplicados de llave (Solo registros únicos de Predial)
+    # Eliminamos duplicados exactos de llave para no ensuciar la data
     df = df.drop_duplicates(subset=['Predial_Nacional'], keep='first')
     return df
 
 def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural):
-    # 1. Cargar Precierre (Nuestra Base Maestra)
+    # 1. Cargar Base Maestra (Precierre)
     df_pre = cargar_snc(file_pre)
     
-    # 2. Cargar Postcierre (Solo para consultar valores)
+    # 2. Cargar Referencia (Postcierre)
     df_post = cargar_snc(file_post)
+    # Solo nos interesa la llave y el avaluo
     df_post_subset = df_post[['Predial_Nacional', 'Avaluo']].rename(columns={'Avaluo': 'Avaluo_Post'})
     
-    # 3. EMPAREJAMIENTO (Left Join)
-    # "Busca cada predio de Precierre dentro de Postcierre. Si no está, pon vacío."
+    # 3. EMPAREJAMIENTO (LEFT JOIN)
+    # "Traeme todo lo de Precierre, y si encuentras el precio en Postcierre, pónmelo al lado"
     df_final = pd.merge(df_pre, df_post_subset, on='Predial_Nacional', how='left')
     
-    # Si no encontró el predio en postcierre, ponemos -1 para control interno (luego mostramos $0)
-    df_final['Avaluo_Post'] = df_final['Avaluo_Post'].fillna(-1)
+    # Si no encontró el avalúo en Postcierre, ponemos 0 (pero el registro EXISTE)
+    df_final['Avaluo_Post'] = df_final['Avaluo_Post'].fillna(0)
 
     pct_urb_decimal = float(pct_urbano) / 100
     pct_rur_decimal = float(pct_rural) / 100
     
     def aplicar_logica(row):
         avaluo_base = row['Avaluo']
-        predial_30 = str(row['Predial_Nacional'])
+        # Usamos el fragmento original de 25 dígitos para la zona
+        # El SNC estándar tiene el sector en los primeros dígitos de la columna NoPredial
+        fragmento = str(row['NoPredial']).zfill(25)
         
-        # Lógica de Zona usando el Predial Nacional de 30 dígitos
-        # Estructura: Dept(2) Mun(3) Zona(2) ...
-        # Posición 0-1: Dept
-        # Posición 2-4: Mun
-        # Posición 5-6: ZONA (Indices 5:7)
-        
-        zona_code = predial_30[5:7] 
-        
-        if zona_code == '00':
+        # Lógica de Zona (00 = Rural)
+        if fragmento.startswith('00'):
             factor = 1 + pct_rur_decimal
             pct_teorico = pct_rur_decimal
             zona = 'RURAL'
@@ -101,45 +85,41 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural):
         calculado = redondear_excel(avaluo_base * factor)
         avaluo_post = row['Avaluo_Post']
 
-        # Lógica de Estados
-        if avaluo_post == -1:
-            estado = 'NO_EN_POST' # Existe en precierre, no en post
-            avaluo_post_real = 0
-            diferencia = 0
-            pct_sistema = 0
+        # Cálculo de diferencias
+        diferencia = calculado - avaluo_post
+        
+        # Cálculo de % Sistema Real
+        if avaluo_base > 0:
+            pct_sistema = (avaluo_post / avaluo_base) - 1
         else:
-            avaluo_post_real = avaluo_post
-            diferencia = calculado - avaluo_post_real
-            
-            if avaluo_base > 0:
-                pct_sistema = (avaluo_post_real / avaluo_base) - 1
-            else:
-                pct_sistema = 0
+            pct_sistema = 0
 
-            if diferencia == 0: estado = 'OK'
-            elif avaluo_base == calculado: estado = 'SIN_AUMENTO'
-            else: estado = 'INCONSISTENCIA'
-            
-        return calculado, zona, estado, diferencia, pct_teorico, pct_sistema, avaluo_post_real
+        # Estados simplificados
+        if diferencia == 0: 
+            estado = 'OK'
+        elif avaluo_base == calculado and pct_teorico > 0: 
+            estado = 'SIN_AUMENTO' # El redondeo se comió el aumento
+        else: 
+            estado = 'DIFERENCIA' # Hay discrepancia
+
+        return calculado, zona, estado, diferencia, pct_teorico, pct_sistema
 
     # Aplicamos lógica
     res = df_final.apply(aplicar_logica, axis=1, result_type='expand')
-    df_final[['Avaluo_Calc', 'Zona', 'Estado', 'Diferencia', 'Pct_Teorico', 'Pct_Sistema', 'Avaluo_Post_Final']] = res
+    df_final[['Avaluo_Calc', 'Zona', 'Estado', 'Diferencia', 'Pct_Teorico', 'Pct_Sistema']] = res
     
-    # Estadísticas para el Dashboard
+    # Estadísticas Limpias
     stats = {
-        'total_predios_base': int(len(df_pre)), # Total precierre
-        'total_predios_post': int(len(df_post)), # Total postcierre (referencia)
-        'encontrados_post': int((df_final['Avaluo_Post'] != -1).sum()), # Cuántos cruzaron
-        'inconsistencias': int((df_final['Estado'] == 'INCONSISTENCIA').sum())
+        'total_predios': int(len(df_pre)), # Universo total
+        'total_post': int(len(df_post)),   # Referencia
+        'diferencias': int((df_final['Estado'] == 'DIFERENCIA').sum())
     }
 
     # Datos Web
     cols = ['Predial_Nacional', 'Nombre', 'DestinoEconomico', 'Zona', 
-            'Avaluo', 'Avaluo_Calc', 'Avaluo_Post_Final', 
+            'Avaluo', 'Avaluo_Calc', 'Avaluo_Post', 
             'Estado', 'Pct_Teorico', 'Pct_Sistema', 'Diferencia']
             
-    df_export = df_final[cols].rename(columns={'Avaluo_Post_Final': 'Avaluo_Post'})
-    records = df_export.to_dict(orient='records')
+    records = df_final[cols].to_dict(orient='records')
 
     return {'stats': stats, 'data': records}

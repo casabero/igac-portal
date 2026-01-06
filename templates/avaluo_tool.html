@@ -26,6 +26,21 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        /* Animación suave para nueva fila */
+        @keyframes highlight {
+            0% {
+                background-color: #dbeafe;
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+
+        .new-row {
+            animation: highlight 2s ease-out;
+        }
     </style>
 </head>
 
@@ -48,7 +63,6 @@
 
     <main class="flex-1 p-6 max-w-[1600px] mx-auto w-full">
 
-        <!-- FORMULARIO DE CARGA -->
         {% if not resultados %}
         <div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-slate-200 mt-10">
             <h2 class="text-lg font-bold mb-6 text-slate-800 flex items-center gap-2">
@@ -92,33 +106,33 @@
         </div>
         {% endif %}
 
-        <!-- DASHBOARD DE RESULTADOS -->
         {% if resultados %}
         <div id="dashboard" class="space-y-6">
 
             <!-- KPIs -->
             <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
                 <div class="bg-white p-3 rounded border border-slate-200 shadow-sm">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Total Precierre (Base)</p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase">Predios Precierre</p>
                     <p class="text-xl font-bold text-slate-800">{{ resultados.stats.total_predios_base }}</p>
                 </div>
                 <div class="bg-white p-3 rounded border border-slate-200 shadow-sm">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Total Postcierre (Ref)</p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase">Predios Postcierre</p>
                     <p class="text-xl font-bold text-slate-800">{{ resultados.stats.total_predios_post }}</p>
                 </div>
                 <div class="bg-white p-3 rounded border border-slate-200 shadow-sm">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Emparejados</p>
-                    <p class="text-xl font-bold text-blue-600">{{ resultados.stats.encontrados_post }}</p>
-                </div>
-                <div class="bg-white p-3 rounded border border-red-200 bg-red-50 shadow-sm">
-                    <p class="text-[10px] text-red-400 font-bold uppercase">Inconsistencias</p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase">Diferencias</p>
                     <p class="text-xl font-bold text-red-600">{{ resultados.stats.inconsistencias }}</p>
                 </div>
-                <!-- Buscador -->
-                <div class="bg-slate-800 p-3 rounded border border-slate-900 shadow-sm flex flex-col justify-center">
-                    <input type="text" id="searchInput" placeholder="Buscar Predial (Enter)..."
-                        class="bg-slate-700 border-none text-white text-sm rounded placeholder-slate-400 focus:ring-1 focus:ring-blue-400 w-full h-8">
-                    <p id="searchMsg" class="text-[9px] text-slate-400 mt-1 h-3"></p>
+                <!-- Buscador Flexible -->
+                <div
+                    class="col-span-2 bg-slate-800 p-3 rounded border border-slate-900 shadow-sm flex flex-col justify-center relative">
+                    <div class="flex gap-2">
+                        <input type="text" id="searchInput" placeholder="Buscar por Predial (corto o largo) o Nombre..."
+                            class="bg-slate-700 border-none text-white text-sm rounded placeholder-slate-400 focus:ring-1 focus:ring-blue-400 w-full h-9">
+                        <button onclick="ejecutarBusqueda()"
+                            class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded text-xs font-bold">BUSCAR</button>
+                    </div>
+                    <p id="searchMsg" class="text-[10px] text-slate-400 mt-1 h-3 absolute bottom-1 left-3"></p>
                 </div>
             </div>
 
@@ -129,7 +143,9 @@
                         Predios en Muestra: <span id="countSelected" class="text-slate-800">0</span>
                     </span>
                     <button onclick="limpiarTabla()"
-                        class="text-[10px] text-red-500 hover:text-red-700 font-medium">Limpiar Todo</button>
+                        class="text-[10px] text-red-500 hover:text-red-700 font-medium flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar
+                    </button>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -140,7 +156,7 @@
                                 <th class="px-3 py-2">Nombre Propietario</th>
                                 <th class="px-3 py-2 w-10 text-center">Des</th>
                                 <th class="px-3 py-2 text-right">Precierre ($)</th>
-                                <th class="px-3 py-2 text-center text-[10px]">% Apl</th>
+                                <th class="px-3 py-2 text-center text-[10px]">% Dec</th>
                                 <th class="px-3 py-2 text-right">Calculado ($)</th>
                                 <th class="px-3 py-2 text-right border-l font-bold text-slate-700">Postcierre ($)</th>
                                 <th class="px-3 py-2 text-center text-green-600 font-bold">% Real</th>
@@ -150,7 +166,7 @@
                             </tr>
                         </thead>
                         <tbody id="comparisonTable" class="divide-y divide-slate-100">
-                            <!-- Filas dinámicas -->
+                            <!-- Filas JS -->
                         </tbody>
                         <tfoot class="bg-slate-50 font-bold text-slate-700 border-t-2 border-slate-200">
                             <tr>
@@ -181,31 +197,48 @@
             const fmtMoney = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
             const fmtPct = new Intl.NumberFormat('es-CO', { style: 'percent', minimumFractionDigits: 2 });
 
+            // Evento ENTER en el input
             searchInput.addEventListener("keypress", function (e) {
                 if (e.key === "Enter") {
                     e.preventDefault();
-                    const query = this.value.trim();
-                    if (query.length < 5) return;
-
-                    // Buscamos coincidencia parcial
-                    const found = dataset.find(p => p.Predial_Nacional.includes(query));
-                    if (found) {
-                        agregarFila(found);
-                        this.value = "";
-                        msgLabel.textContent = "Agregado: " + found.Predial_Nacional;
-                        msgLabel.className = "text-[9px] text-green-400 mt-1 h-3";
-                        setTimeout(() => { msgLabel.textContent = ""; msgLabel.className = "text-[9px] text-slate-400 mt-1 h-3"; }, 3000);
-                    } else {
-                        msgLabel.textContent = "No encontrado en Precierre";
-                        msgLabel.className = "text-[9px] text-red-400 mt-1 h-3";
-                    }
+                    ejecutarBusqueda();
                 }
             });
 
-            function agregarFila(item) {
-                if (selectedItems.some(i => i.Predial_Nacional === item.Predial_Nacional)) return;
+            function ejecutarBusqueda() {
+                const query = searchInput.value.trim().toUpperCase(); // Normalizamos a mayúsculas
+                if (query.length < 4) {
+                    msgLabel.textContent = "Escribe al menos 4 caracteres";
+                    return;
+                }
 
-                // Nuevos arriba (LIFO)
+                // LÓGICA DE BÚSQUEDA FLEXIBLE
+                // Busca si el predial INCLUYE el texto (flexible) O si el Nombre INCLUYE el texto
+                const found = dataset.find(p =>
+                    p.Predial_Nacional.includes(query) ||
+                    (p.Nombre && p.Nombre.toString().includes(query))
+                );
+
+                if (found) {
+                    agregarFila(found);
+                    searchInput.value = ""; // Limpiar input
+                    msgLabel.textContent = "Encontrado: " + found.Predial_Nacional;
+                    msgLabel.className = "text-[10px] text-green-400 mt-1 h-3 absolute bottom-1 left-3";
+                    setTimeout(() => { msgLabel.textContent = ""; }, 3000);
+                } else {
+                    msgLabel.textContent = "No encontrado en Precierre";
+                    msgLabel.className = "text-[10px] text-red-400 mt-1 h-3 absolute bottom-1 left-3";
+                }
+            }
+
+            function agregarFila(item) {
+                // Si ya existe, avisar visualmente (opcional) o no hacer nada
+                if (selectedItems.some(i => i.Predial_Nacional === item.Predial_Nacional)) {
+                    // Mover al inicio para que el usuario vea que ya estaba
+                    eliminarFila(item.Predial_Nacional);
+                }
+
+                // Agregar al inicio (LIFO - Último agregado aparece primero)
                 selectedItems.unshift(item);
                 renderTable();
             }
@@ -226,14 +259,15 @@
 
                 let sumPre = 0, sumCalc = 0, sumPost = 0, sumDif = 0;
 
-                selectedItems.forEach(item => {
+                selectedItems.forEach((item, index) => {
                     sumPre += item.Avaluo;
                     sumCalc += item.Avaluo_Calc;
                     sumPost += item.Avaluo_Post;
                     sumDif += item.Diferencia;
 
                     const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50 transition-colors group";
+                    // Clase new-row solo para el primero (efecto visual)
+                    tr.className = "hover:bg-slate-50 transition-colors group border-b border-slate-50 " + (index === 0 ? "new-row" : "");
 
                     let statusClass = "bg-green-100 text-green-700";
                     if (item.Estado === 'INCONSISTENCIA') statusClass = "bg-red-100 text-red-700";
