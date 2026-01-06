@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard Catastral</title>
+    <title>Auditoría Catastral</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
@@ -20,23 +20,23 @@
             text-align: right;
         }
 
-        .pct {
-            font-size: 0.75rem;
-            font-weight: 600;
+        .truncate-name {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     </style>
 </head>
 
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- Navbar -->
     <nav class="bg-white border-b px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm">
         <div class="flex items-center gap-4">
             <a href="/" class="text-slate-400 hover:text-slate-800"><span
                     class="material-symbols-outlined">arrow_back</span></a>
             <div>
                 <h1 class="font-bold text-slate-800 text-sm">Auditoría de Incremento Catastral</h1>
-                <p class="text-[10px] text-slate-500">Comparativa Precierre vs Postcierre (Redondeo -3)</p>
             </div>
         </div>
         {% if resultados %}
@@ -46,9 +46,8 @@
         {% endif %}
     </nav>
 
-    <main class="flex-1 p-6 max-w-[1400px] mx-auto w-full">
+    <main class="flex-1 p-6 max-w-[1600px] mx-auto w-full">
 
-        <!-- ESTADO 1: CARGA DE ARCHIVOS -->
         {% if not resultados %}
         <div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-slate-200 mt-10">
             <h2 class="text-lg font-bold mb-6 text-slate-800 flex items-center gap-2">
@@ -92,53 +91,58 @@
         </div>
         {% endif %}
 
-        <!-- ESTADO 2: RESULTADOS -->
         {% if resultados %}
         <div id="dashboard" class="space-y-6">
 
-            <!-- A. Tarjetas KPIs -->
+            <!-- KPIs -->
             <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
                 <div class="bg-white p-3 rounded border border-slate-200 shadow-sm">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Archivo Precierre</p>
-                    <p class="text-xl font-bold text-slate-800">{{ resultados.stats.count_pre }} <span
-                            class="text-xs font-normal text-slate-400">predios</span></p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase">Predios Precierre</p>
+                    <p class="text-xl font-bold text-slate-800">{{ resultados.stats.count_pre }}</p>
                 </div>
                 <div class="bg-white p-3 rounded border border-slate-200 shadow-sm">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Archivo Postcierre</p>
-                    <p class="text-xl font-bold text-slate-800">{{ resultados.stats.count_post }} <span
-                            class="text-xs font-normal text-slate-400">predios</span></p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase">Predios Postcierre</p>
+                    <p class="text-xl font-bold text-slate-800">{{ resultados.stats.count_post }}</p>
                 </div>
                 <div class="bg-white p-3 rounded border border-slate-200 shadow-sm">
                     <p class="text-[10px] text-slate-400 font-bold uppercase">Cruce Exitoso</p>
-                    <p class="text-xl font-bold text-blue-600">{{ resultados.stats.count_cruce }} <span
-                            class="text-xs font-normal text-slate-400">matches</span></p>
+                    <p class="text-xl font-bold text-blue-600">{{ resultados.stats.count_cruce }}</p>
                 </div>
                 <div class="bg-white p-3 rounded border border-red-200 bg-red-50 shadow-sm">
                     <p class="text-[10px] text-red-400 font-bold uppercase">Inconsistencias</p>
                     <p class="text-xl font-bold text-red-600">{{ resultados.stats.inconsistencias }}</p>
                 </div>
-                <!-- Mini buscador -->
                 <div class="bg-slate-800 p-3 rounded border border-slate-900 shadow-sm flex flex-col justify-center">
-                    <input type="text" id="searchInput" placeholder="Buscar Predial..."
-                        class="bg-slate-700 border-none text-white text-sm rounded placeholder-slate-400 focus:ring-1 focus:ring-blue-400 w-full">
+                    <input type="text" id="searchInput" placeholder="Buscar Predial (Enter)..."
+                        class="bg-slate-700 border-none text-white text-sm rounded placeholder-slate-400 focus:ring-1 focus:ring-blue-400 w-full h-8">
                     <p id="searchMsg" class="text-[9px] text-slate-400 mt-1 h-3"></p>
                 </div>
             </div>
 
-            <!-- B. Tabla Detallada -->
+            <!-- Tabla Detallada -->
             <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                <!-- Barra de Herramientas Tabla -->
+                <div class="bg-slate-50 border-b border-slate-200 px-4 py-2 flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-500 uppercase">
+                        Predios en Muestra: <span id="countSelected" class="text-slate-800">0</span>
+                    </span>
+                    <button onclick="limpiarTabla()"
+                        class="text-[10px] text-red-500 hover:text-red-700 font-medium">Limpiar Todo</button>
+                </div>
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs text-left">
-                        <thead class="bg-slate-50 text-slate-500 font-bold uppercase border-b border-slate-200">
+                        <thead class="bg-white text-slate-500 font-bold uppercase border-b border-slate-200">
                             <tr>
                                 <th class="px-3 py-2 w-32">Predial Nacional</th>
+                                <th class="px-3 py-2">Nombre Propietario</th>
+                                <th class="px-3 py-2 w-10 text-center">Des</th>
                                 <th class="px-3 py-2 text-right">Base ($)</th>
-                                <th class="px-3 py-2 text-center border-l">% Decr</th>
+                                <th class="px-3 py-2 text-center text-[10px]">% Dec</th>
                                 <th class="px-3 py-2 text-right">Calculado ($)</th>
-                                <th class="px-3 py-2 text-center text-blue-600">% Calc</th>
                                 <th class="px-3 py-2 text-right border-l font-bold text-slate-700">Sistema ($)</th>
                                 <th class="px-3 py-2 text-center text-green-600 font-bold">% Sist</th>
-                                <th class="px-3 py-2 text-right text-red-600">Diferencia</th>
+                                <th class="px-3 py-2 text-right text-red-600">Dif</th>
                                 <th class="px-3 py-2 text-center">Estado</th>
                                 <th class="px-1 py-2"></th>
                             </tr>
@@ -148,13 +152,13 @@
                         </tbody>
                         <tfoot class="bg-slate-50 font-bold text-slate-700 border-t-2 border-slate-200">
                             <tr>
-                                <td class="px-3 py-3 text-right">TOTALES:</td>
+                                <td colspan="3" class="px-3 py-3 text-right uppercase text-[10px] text-slate-400">
+                                    Totales Muestra:</td>
                                 <td class="px-3 py-3 num" id="sumPre">$0</td>
-                                <td class="px-3 py-3 text-center text-slate-400">-</td>
+                                <td class="px-3 py-3"></td>
                                 <td class="px-3 py-3 num" id="sumCalc">$0</td>
-                                <td class="px-3 py-3 text-center text-blue-600" id="avgPctCalc">0%</td>
                                 <td class="px-3 py-3 num" id="sumPost">$0</td>
-                                <td class="px-3 py-3 text-center text-green-600" id="avgPctSist">0%</td>
+                                <td class="px-3 py-3"></td>
                                 <td class="px-3 py-3 num text-red-600" id="sumDif">$0</td>
                                 <td colspan="2"></td>
                             </tr>
@@ -162,9 +166,6 @@
                     </table>
                 </div>
             </div>
-
-            <p class="text-xs text-slate-400 text-center">Los promedios (%) son ponderados sobre el total seleccionado.
-            </p>
         </div>
 
         <script>
@@ -172,23 +173,17 @@
             const tableBody = document.getElementById('comparisonTable');
             const searchInput = document.getElementById('searchInput');
             const msgLabel = document.getElementById('searchMsg');
+            const countLabel = document.getElementById('countSelected');
 
-            // Estado de la tabla
             let selectedItems = [];
-
-            // Formateadores
             const fmtMoney = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
             const fmtPct = new Intl.NumberFormat('es-CO', { style: 'percent', minimumFractionDigits: 2 });
 
-            // Buscador
             searchInput.addEventListener("keypress", function (e) {
                 if (e.key === "Enter") {
                     e.preventDefault();
                     const query = this.value.trim();
-                    if (query.length < 5) {
-                        msgLabel.textContent = "Mínimo 5 dígitos";
-                        return;
-                    }
+                    if (query.length < 5) return;
 
                     const found = dataset.find(p => p.Predial_Nacional.includes(query));
                     if (found) {
@@ -204,10 +199,10 @@
             });
 
             function agregarFila(item) {
-                // Evitar duplicados
                 if (selectedItems.some(i => i.Predial_Nacional === item.Predial_Nacional)) return;
 
-                selectedItems.unshift(item); // Agregar al inicio
+                // PUSH para agregar al final (abajo), como pediste
+                selectedItems.push(item);
                 renderTable();
             }
 
@@ -216,8 +211,14 @@
                 renderTable();
             }
 
+            function limpiarTabla() {
+                selectedItems = [];
+                renderTable();
+            }
+
             function renderTable() {
                 tableBody.innerHTML = "";
+                countLabel.textContent = selectedItems.length;
 
                 let sumPre = 0, sumCalc = 0, sumPost = 0, sumDif = 0;
 
@@ -230,7 +231,6 @@
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-50 transition-colors group";
 
-                    // Colores de estado
                     let statusClass = "bg-green-100 text-green-700";
                     if (item.Estado === 'INCONSISTENCIA') statusClass = "bg-red-100 text-red-700";
                     if (item.Estado === 'NO_CRUZA') statusClass = "bg-gray-100 text-gray-500";
@@ -238,12 +238,13 @@
 
                     tr.innerHTML = `
                         <td class="px-3 py-2 font-mono text-[10px] text-slate-600 truncate" title="${item.Predial_Nacional}">${item.Predial_Nacional}</td>
+                        <td class="px-3 py-2 font-bold text-slate-700 truncate-name" title="${item.Nombre}">${item.Nombre}</td>
+                        <td class="px-3 py-2 text-center text-[10px] text-slate-500">${item.DestinoEconomico}</td>
                         <td class="px-3 py-2 num text-slate-500">${fmtMoney.format(item.Avaluo)}</td>
-                        <td class="px-3 py-2 text-center text-slate-400 border-l">${fmtPct.format(item.Pct_Teorico)}</td>
-                        <td class="px-3 py-2 num font-medium">${fmtMoney.format(item.Avaluo_Calc)}</td>
-                        <td class="px-3 py-2 text-center text-blue-600 text-[10px] bg-blue-50/50">${fmtPct.format(item.Pct_Calc)}</td>
-                        <td class="px-3 py-2 num font-bold text-slate-700 border-l">${fmtMoney.format(item.Avaluo_Post)}</td>
-                        <td class="px-3 py-2 text-center text-green-600 text-[10px] bg-green-50/50 font-bold">${item.Avaluo_Post > 0 ? fmtPct.format(item.Pct_Sistema) : '-'}</td>
+                        <td class="px-3 py-2 text-center text-slate-400 border-l text-[9px]">${fmtPct.format(item.Pct_Teorico)}</td>
+                        <td class="px-3 py-2 num font-medium text-blue-600">${fmtMoney.format(item.Avaluo_Calc)}</td>
+                        <td class="px-3 py-2 num font-bold text-slate-800 border-l">${fmtMoney.format(item.Avaluo_Post)}</td>
+                        <td class="px-3 py-2 text-center text-green-600 text-[10px] font-bold">${item.Avaluo_Post > 0 ? fmtPct.format(item.Pct_Sistema) : '-'}</td>
                         <td class="px-3 py-2 num ${item.Diferencia !== 0 ? 'text-red-600 font-bold' : 'text-slate-300'}">${fmtMoney.format(item.Diferencia)}</td>
                         <td class="px-3 py-2 text-center">
                             <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${statusClass}">${item.Estado}</span>
@@ -254,22 +255,13 @@
                             </button>
                         </td>
                     `;
-                    tableBody.appendChild(tr);
+                    tableBody.appendChild(tr); // Agrega abajo
                 });
 
-                // Actualizar Totales
                 document.getElementById('sumPre').textContent = fmtMoney.format(sumPre);
                 document.getElementById('sumCalc').textContent = fmtMoney.format(sumCalc);
                 document.getElementById('sumPost').textContent = fmtMoney.format(sumPost);
                 document.getElementById('sumDif').textContent = fmtMoney.format(sumDif);
-
-                // Calcular Promedios Ponderados (Variación Global)
-                // (TotalNuevo / TotalViejo) - 1
-                let avgCalc = sumPre > 0 ? (sumCalc / sumPre) - 1 : 0;
-                let avgSist = sumPre > 0 && sumPost > 0 ? (sumPost / sumPre) - 1 : 0;
-
-                document.getElementById('avgPctCalc').textContent = fmtPct.format(avgCalc);
-                document.getElementById('avgPctSist').textContent = fmtPct.format(avgSist);
             }
         </script>
         {% endif %}
