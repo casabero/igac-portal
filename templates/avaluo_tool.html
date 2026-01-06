@@ -21,7 +21,7 @@
         }
 
         .truncate-name {
-            max-width: 200px;
+            max-width: 250px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -48,6 +48,7 @@
 
     <main class="flex-1 p-6 max-w-[1600px] mx-auto w-full">
 
+        <!-- FORMULARIO DE CARGA -->
         {% if not resultados %}
         <div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-slate-200 mt-10">
             <h2 class="text-lg font-bold mb-6 text-slate-800 flex items-center gap-2">
@@ -86,32 +87,34 @@
                 </div>
                 <button type="submit"
                     class="w-full bg-blue-600 text-white py-2.5 rounded hover:bg-blue-700 transition font-medium text-sm shadow-sm">EJECUTAR
-                    CRUCE</button>
+                    ANÁLISIS</button>
             </form>
         </div>
         {% endif %}
 
+        <!-- DASHBOARD DE RESULTADOS -->
         {% if resultados %}
         <div id="dashboard" class="space-y-6">
 
             <!-- KPIs -->
             <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
                 <div class="bg-white p-3 rounded border border-slate-200 shadow-sm">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Predios Precierre</p>
-                    <p class="text-xl font-bold text-slate-800">{{ resultados.stats.count_pre }}</p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase">Total Precierre (Base)</p>
+                    <p class="text-xl font-bold text-slate-800">{{ resultados.stats.total_predios_base }}</p>
                 </div>
                 <div class="bg-white p-3 rounded border border-slate-200 shadow-sm">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Predios Postcierre</p>
-                    <p class="text-xl font-bold text-slate-800">{{ resultados.stats.count_post }}</p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase">Total Postcierre (Ref)</p>
+                    <p class="text-xl font-bold text-slate-800">{{ resultados.stats.total_predios_post }}</p>
                 </div>
                 <div class="bg-white p-3 rounded border border-slate-200 shadow-sm">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Cruce Exitoso</p>
-                    <p class="text-xl font-bold text-blue-600">{{ resultados.stats.count_cruce }}</p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase">Emparejados</p>
+                    <p class="text-xl font-bold text-blue-600">{{ resultados.stats.encontrados_post }}</p>
                 </div>
                 <div class="bg-white p-3 rounded border border-red-200 bg-red-50 shadow-sm">
                     <p class="text-[10px] text-red-400 font-bold uppercase">Inconsistencias</p>
                     <p class="text-xl font-bold text-red-600">{{ resultados.stats.inconsistencias }}</p>
                 </div>
+                <!-- Buscador -->
                 <div class="bg-slate-800 p-3 rounded border border-slate-900 shadow-sm flex flex-col justify-center">
                     <input type="text" id="searchInput" placeholder="Buscar Predial (Enter)..."
                         class="bg-slate-700 border-none text-white text-sm rounded placeholder-slate-400 focus:ring-1 focus:ring-blue-400 w-full h-8">
@@ -121,7 +124,6 @@
 
             <!-- Tabla Detallada -->
             <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-                <!-- Barra de Herramientas Tabla -->
                 <div class="bg-slate-50 border-b border-slate-200 px-4 py-2 flex justify-between items-center">
                     <span class="text-xs font-bold text-slate-500 uppercase">
                         Predios en Muestra: <span id="countSelected" class="text-slate-800">0</span>
@@ -137,18 +139,18 @@
                                 <th class="px-3 py-2 w-32">Predial Nacional</th>
                                 <th class="px-3 py-2">Nombre Propietario</th>
                                 <th class="px-3 py-2 w-10 text-center">Des</th>
-                                <th class="px-3 py-2 text-right">Base ($)</th>
-                                <th class="px-3 py-2 text-center text-[10px]">% Dec</th>
+                                <th class="px-3 py-2 text-right">Precierre ($)</th>
+                                <th class="px-3 py-2 text-center text-[10px]">% Apl</th>
                                 <th class="px-3 py-2 text-right">Calculado ($)</th>
-                                <th class="px-3 py-2 text-right border-l font-bold text-slate-700">Sistema ($)</th>
-                                <th class="px-3 py-2 text-center text-green-600 font-bold">% Sist</th>
+                                <th class="px-3 py-2 text-right border-l font-bold text-slate-700">Postcierre ($)</th>
+                                <th class="px-3 py-2 text-center text-green-600 font-bold">% Real</th>
                                 <th class="px-3 py-2 text-right text-red-600">Dif</th>
                                 <th class="px-3 py-2 text-center">Estado</th>
                                 <th class="px-1 py-2"></th>
                             </tr>
                         </thead>
                         <tbody id="comparisonTable" class="divide-y divide-slate-100">
-                            <!-- Filas JS -->
+                            <!-- Filas dinámicas -->
                         </tbody>
                         <tfoot class="bg-slate-50 font-bold text-slate-700 border-t-2 border-slate-200">
                             <tr>
@@ -185,15 +187,17 @@
                     const query = this.value.trim();
                     if (query.length < 5) return;
 
+                    // Buscamos coincidencia parcial
                     const found = dataset.find(p => p.Predial_Nacional.includes(query));
                     if (found) {
                         agregarFila(found);
                         this.value = "";
-                        msgLabel.textContent = "Agregado";
-                        setTimeout(() => msgLabel.textContent = "", 2000);
+                        msgLabel.textContent = "Agregado: " + found.Predial_Nacional;
+                        msgLabel.className = "text-[9px] text-green-400 mt-1 h-3";
+                        setTimeout(() => { msgLabel.textContent = ""; msgLabel.className = "text-[9px] text-slate-400 mt-1 h-3"; }, 3000);
                     } else {
-                        msgLabel.textContent = "No encontrado";
-                        msgLabel.classList.add("text-red-400");
+                        msgLabel.textContent = "No encontrado en Precierre";
+                        msgLabel.className = "text-[9px] text-red-400 mt-1 h-3";
                     }
                 }
             });
@@ -201,8 +205,8 @@
             function agregarFila(item) {
                 if (selectedItems.some(i => i.Predial_Nacional === item.Predial_Nacional)) return;
 
-                // PUSH para agregar al final (abajo), como pediste
-                selectedItems.push(item);
+                // Nuevos arriba (LIFO)
+                selectedItems.unshift(item);
                 renderTable();
             }
 
@@ -233,17 +237,17 @@
 
                     let statusClass = "bg-green-100 text-green-700";
                     if (item.Estado === 'INCONSISTENCIA') statusClass = "bg-red-100 text-red-700";
-                    if (item.Estado === 'NO_CRUZA') statusClass = "bg-gray-100 text-gray-500";
+                    if (item.Estado === 'NO_EN_POST') statusClass = "bg-gray-100 text-gray-500";
                     if (item.Estado === 'SIN_AUMENTO') statusClass = "bg-yellow-100 text-yellow-700";
 
                     tr.innerHTML = `
                         <td class="px-3 py-2 font-mono text-[10px] text-slate-600 truncate" title="${item.Predial_Nacional}">${item.Predial_Nacional}</td>
-                        <td class="px-3 py-2 font-bold text-slate-700 truncate-name" title="${item.Nombre}">${item.Nombre}</td>
-                        <td class="px-3 py-2 text-center text-[10px] text-slate-500">${item.DestinoEconomico}</td>
+                        <td class="px-3 py-2 font-bold text-slate-700 truncate-name" title="${item.Nombre}">${item.Nombre || 'N/A'}</td>
+                        <td class="px-3 py-2 text-center text-[10px] text-slate-500">${item.DestinoEconomico || '-'}</td>
                         <td class="px-3 py-2 num text-slate-500">${fmtMoney.format(item.Avaluo)}</td>
                         <td class="px-3 py-2 text-center text-slate-400 border-l text-[9px]">${fmtPct.format(item.Pct_Teorico)}</td>
                         <td class="px-3 py-2 num font-medium text-blue-600">${fmtMoney.format(item.Avaluo_Calc)}</td>
-                        <td class="px-3 py-2 num font-bold text-slate-800 border-l">${fmtMoney.format(item.Avaluo_Post)}</td>
+                        <td class="px-3 py-2 num font-bold text-slate-800 border-l">${item.Avaluo_Post > 0 ? fmtMoney.format(item.Avaluo_Post) : '<span class="text-red-300">No Encontrado</span>'}</td>
                         <td class="px-3 py-2 text-center text-green-600 text-[10px] font-bold">${item.Avaluo_Post > 0 ? fmtPct.format(item.Pct_Sistema) : '-'}</td>
                         <td class="px-3 py-2 num ${item.Diferencia !== 0 ? 'text-red-600 font-bold' : 'text-slate-300'}">${fmtMoney.format(item.Diferencia)}</td>
                         <td class="px-3 py-2 text-center">
@@ -255,7 +259,7 @@
                             </button>
                         </td>
                     `;
-                    tableBody.appendChild(tr); // Agrega abajo
+                    tableBody.appendChild(tr);
                 });
 
                 document.getElementById('sumPre').textContent = fmtMoney.format(sumPre);
