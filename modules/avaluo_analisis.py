@@ -35,7 +35,6 @@ def cargar_snc(stream):
     df['Avaluo'] = pd.to_numeric(df['Avaluo'], errors='coerce').fillna(0)
     
     # 3. Construcción Robustez de Llave (Predial Nacional)
-    # Aseguramos que Dept sea 2 digitos, Mun 3 digitos, Predial 25 digitos
     df['Predial_Nacional'] = (
         df['Departamento'].astype(str).str.zfill(2) + 
         df['Municipio'].astype(str).str.zfill(3) + 
@@ -63,10 +62,12 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural):
     pct_urb_decimal = float(pct_urbano) / 100
     pct_rur_decimal = float(pct_rural) / 100
     
-def aplicar_logica(row):
+    def aplicar_logica(row):
         avaluo_base = row['Avaluo']
+        # Tomamos el NoPredial (los 25 digitos) para ver la zona
         fragmento = str(row['NoPredial']).zfill(25) 
         
+        # ZONA: Posiciones 1 y 2 del fragmento (00=Rural)
         if fragmento.startswith('00'):
             factor = 1 + pct_rur_decimal
             pct_teorico = pct_rur_decimal
@@ -79,6 +80,7 @@ def aplicar_logica(row):
         calculado = redondear_excel(avaluo_base * factor)
         avaluo_post = row['Avaluo_Post']
 
+        # Estados
         if avaluo_post == -1:
             estado = 'NO_CRUZA'
             diferencia = 0
@@ -88,6 +90,7 @@ def aplicar_logica(row):
             avaluo_post_real = avaluo_post
             diferencia = calculado - avaluo_post_real
             
+            # Calculo % Sistema
             if avaluo_base > 0:
                 pct_sistema = (avaluo_post_real / avaluo_base) - 1
             else:
@@ -99,9 +102,7 @@ def aplicar_logica(row):
             
         return calculado, zona, estado, diferencia, pct_teorico, pct_sistema, avaluo_post_real
 
-    # Nota: Hacemos el calculo fila por fila
-    # Optimización: Vectorización parcial
-    # Pero mantenemos apply para legibilidad de la lógica de Zona
+    # Aplicamos logica fila por fila
     res = df_final.apply(aplicar_logica, axis=1, result_type='expand')
     
     df_final[['Avaluo_Calc', 'Zona', 'Estado', 'Diferencia', 'Pct_Teorico', 'Pct_Sistema', 'Avaluo_Post_Final']] = res
@@ -114,7 +115,7 @@ def aplicar_logica(row):
         'inconsistencias': int((df_final['Estado'] == 'INCONSISTENCIA').sum())
     }
 
-    # Datos para Web (Incluimos Nombre y Destino)
+    # Datos para Web
     cols = ['Predial_Nacional', 'Nombre', 'DestinoEconomico', 'Zona', 
             'Avaluo', 'Avaluo_Calc', 'Avaluo_Post_Final', 
             'Estado', 'Pct_Teorico', 'Pct_Sistema', 'Diferencia']
