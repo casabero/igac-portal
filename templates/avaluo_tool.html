@@ -249,4 +249,32 @@
                             <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${statusClass}">${item.Estado}</span>
                         </td>
                         <td class="px-1 py-2 text-center">
-                            <button onclick="eliminarFila('$
+                            <button onclick="eliminarFila('${item.Predial_Nacional}')" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span class="material-symbols-outlined text-[16px]">close</span>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+
+                // Actualizar Totales
+                document.getElementById('sumPre').textContent = fmtMoney.format(sumPre);
+                document.getElementById('sumCalc').textContent = fmtMoney.format(sumCalc);
+                document.getElementById('sumPost').textContent = fmtMoney.format(sumPost);
+                document.getElementById('sumDif').textContent = fmtMoney.format(sumDif);
+
+                // Calcular Promedios Ponderados (Variación Global)
+                // (TotalNuevo / TotalViejo) - 1
+                let avgCalc = sumPre > 0 ? (sumCalc / sumPre) - 1 : 0;
+                let avgSist = sumPre > 0 && sumPost > 0 ? (sumPost / sumPre) - 1 : 0;
+
+                document.getElementById('avgPctCalc').textContent = fmtPct.format(avgCalc);
+                document.getElementById('avgPctSist').textContent = fmtPct.format(avgSist);
+            }
+        </script>
+        {% endif %}
+
+    </main>
+</body>
+
+</html>
