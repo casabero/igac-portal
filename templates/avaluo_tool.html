@@ -20,17 +20,17 @@
                         "sans": ["Inter", "sans-serif"],
                         "display": ["Outfit", "sans-serif"],
                         "mono": ["Fira Code", "monospace"],
-                    },
-                    colors: {
-                        primary: "#111827",
-                        'primary-hover': "#374151",
-                        main: "#111827",
-                        secondary: "#6B7280",
-                        'ui-element': "#F9FAFB"
+
+                        colors: {
+                            primary: "#111827",
+                            'primary-hover': "#374151",
+                            main: "#111827",
+                            secondary: "#6B7280",
+                            'ui-element': "#F9FAFB"
+                        }
                     }
                 }
             }
-        }
     </script>
     <style>
         /* --- BASE VARIABLES --- */
@@ -891,7 +891,7 @@
             setTimeout(() => {
                 toast.style.animation = 'toastSlideOut 0.3s ease-out forwards';
                 setTimeout(() => toast.remove(), 300);
-            }, duration);
+     duration);
         }
 
         // --- COUNTUP ANIMATION ---
@@ -966,17 +966,17 @@
                         ],
                         borderRadius: 4
                     }]
-                },
+        
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, grid: { display: false } },
-                        x: { grid: { display: false } }
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { display: false } },
+                            x: { grid: { display: false } }
+                        }
                     }
-                }
-            });
+                });
         }
 
         // Chart 2: Doughnut (Resumen)
@@ -994,16 +994,16 @@
                         backgroundColor: ['#64748b', '#cbd5e1'],
                         hoverOffset: 4
                     }]
-                },
+        
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    plugins: {
-                        legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 10 } } }
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 10 } } }
+                        }
                     }
-                }
-            });
+                });
         }
         });
     </script>
