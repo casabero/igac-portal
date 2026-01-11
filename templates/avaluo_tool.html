@@ -19,18 +19,18 @@
                     fontFamily: {
                         "sans": ["Inter", "sans-serif"],
                         "display": ["Outfit", "sans-serif"],
-                        "mono": ["Fira Code", "monospace"],
-
-                        colors: {
-                            primary: "#111827",
-                            'primary-hover': "#374151",
-                            main: "#111827",
-                            secondary: "#6B7280",
-                            'ui-element': "#F9FAFB"
-                        }
+                        "mono": ["Fira Code", "monospace"]
+                    },
+                    colors: {
+                        primary: "#111827",
+                        'primary-hover': "#374151",
+                        main: "#111827",
+                        secondary: "#6B7280",
+                        'ui-element': "#F9FAFB"
                     }
                 }
             }
+        };
     </script>
     <style>
         /* --- BASE VARIABLES --- */
@@ -540,33 +540,7 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN 2: GRÁFICOS (New Features) -->
-            {% if resultados.stats.total_registros > 0 %}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <!-- CHART 1: Distribución Percentil -->
-                <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-4 h-80">
-                    <h3 class="text-xs font-bold text-secondary uppercase mb-2 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[16px]">bar_chart</span>
-                        Distribución de Estados
-                    </h3>
-                    <div class="relative h-64 w-full">
-                        <canvas id="chartStates"></canvas>
-                    </div>
-                </div>
-                <!-- CHART 2: Histograma (Placeholder simple por ahora, o Pie de otra cosa) -->
-                <!-- Mejor usamos un Pie de Estados que es muy util -->
-                <!-- Y un Bar Chart de Rangos de Incremento -->
-                <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-4 h-80">
-                    <h3 class="text-xs font-bold text-secondary uppercase mb-2 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[16px]">pie_chart</span>
-                        Resumen General
-                    </h3>
-                    <div class="relative h-64 w-full flex justify-center">
-                        <canvas id="chartSummary"></canvas>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
+
 
             <!-- 3. Tabla Detallada -->
             <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden mt-6">
@@ -891,7 +865,7 @@
             setTimeout(() => {
                 toast.style.animation = 'toastSlideOut 0.3s ease-out forwards';
                 setTimeout(() => toast.remove(), 300);
-     duration);
+            }, duration);
         }
 
         // --- COUNTUP ANIMATION ---
@@ -935,69 +909,7 @@
         });
     </script>
 
-    <!-- CHARTS RENDER -->
-    {% if resultados %}
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Data from Backend
-            const stats = {{ resultados.stats | tojson | safe
-        }};
 
-        // Chart 1: Bar Chart (Estados)
-        const ctxStates = document.getElementById('chartStates');
-        if (ctxStates) {
-            new Chart(ctxStates, {
-                type: 'bar',
-                data: {
-                    labels: ['OK', 'Nuevos', 'Desaparecidos', 'Inconsistencias'],
-                    datasets: [{
-                        label: 'Cantidad de Predios',
-                        data: [stats.ok, stats.nuevos, stats.desaparecidos, stats.inconsistencias],
-                        backgroundColor: ['#22d3ee', '#2563eb', '#f97316', '#dc2626'],
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, grid: { display: false } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        // Chart 2: Doughnut (Resumen)
-        const ctxSummary = document.getElementById('chartSummary');
-        if (ctxSummary) {
-            new Chart(ctxSummary, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Con Cambios', 'Sin Cambios (OK)'],
-                    datasets: [{
-                        data: [
-                            stats.nuevos + stats.desaparecidos + stats.inconsistencias,
-                            stats.ok
-                        ],
-                        backgroundColor: ['#64748b', '#cbd5e1'],
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    plugins: {
-                        legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 10 } } }
-                    }
-                }
-            });
-        }
-        });
-    </script>
-    {% endif %}
 </body>
 
 </html>
