@@ -26,78 +26,75 @@ def generar_colspecs(cortes):
     return df[['Predial_Nacional', 'Avaluo', 'Nombre', 'DestinoEconomico']]
 
 def cargar_snc(stream):
-    """Carga data desde archivo plano (Fixed Width) o Excel (.xlsx)"""
-    # Detectar tipo por extensión (si disponible) o magic bytes si es necesario.
-    # Asumimos que stream tiene atributo filename si viene de Flask/Werkzeug
+    """Carga data desde archivo plano (Fixed Width), CSV o Excel (.xlsx) con detección de encoding"""
     filename = getattr(stream, 'filename', '').lower()
     
-    # 1. Carga
+    # helper for reading with encoding fallback
+    def read_with_fallback(func, **kwargs):
+        encodings = ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']
+        pos = stream.tell() if hasattr(stream, 'tell') else 0
+        for enc in encodings:
+            try:
+                if hasattr(stream, 'seek'): stream.seek(pos)
+                return func(stream, encoding=enc, **kwargs)
+            except (UnicodeDecodeError, Exception):
+                continue
+        # Last resort: let pandas decide
+        if hasattr(stream, 'seek'): stream.seek(pos)
+        return func(stream, **kwargs)
+
+    # 1. Carga segun formato
     if filename.endswith(('.xlsx', '.xls')):
-        # Carga Excel
-        # Asumimos que el Excel tiene encabezados en la fila 0 y nombres de columnas similares
-        # O si no tiene headers, usamos header=None y asignamos. 
-        # Para compatibilidad, intentaremos leer y luego normalizar columnas.
-        # Si el usuario guarda el TXT como Excel, probablemente tenga las columnas separadas o todo en una.
-        # Asumiremos un Excel "bien formado" con columnas separadas.
         try:
             df = pd.read_excel(stream, dtype=str)
-             # Normalización básica de nombres de columnas si vienen del Excel
-            # Si el excel no tiene headers, asumimos el orden estándar
-            if len(df.columns) == len(COLS_R1):
-                 df.columns = COLS_R1
-            
-            # Limpieza básica
-            df = df.fillna('')
         except Exception as e:
-             raise ValueError(f"Error leyendo Excel: {str(e)}")
+            raise ValueError(f"Error leyendo Excel: {str(e)}")
+    elif filename.endswith('.csv'):
+        # Detectar delimitador (coma o punto y coma)
+        df = read_with_fallback(pd.read_csv, sep=None, engine='python', dtype=str)
     else:
-        # Carga Archivo Plano (Lógica Original)
-        # validar_archivo(stream) # Ya no validamos extensiones restrictivamente, o solo bloqueamos binarios NO excel
+        # FWF (Fixed Width File)
         colspecs = generar_colspecs(CORTES_R1)
-        
-        # INTENTO 1: Leer como UTF-8 (Estándar moderno)
-        try:
-            # Necesitamos 'seek(0)' si el stream ya fue leído, pero aquí es la primera vez (para pandas)
-            # Pero pd.read_fwf puede consumir el stream. Hacemos copia o reiniciamos stream si falla?
-            # Stream de Flask suele ser seekable.
-            pos = stream.tell() if hasattr(stream, 'tell') else 0
-            df = pd.read_fwf(stream, colspecs=colspecs, header=None, encoding='utf-8', dtype=str)
-        except (UnicodeDecodeError, Exception):
-            # INTENTO 2: Fallback a Latin-1 (Legacy común)
-            if hasattr(stream, 'seek'): stream.seek(pos)
-            df = pd.read_fwf(stream, colspecs=colspecs, header=None, encoding='latin-1', dtype=str)
+        df = read_with_fallback(pd.read_fwf, colspecs=colspecs, header=None, dtype=str)
 
-        if len(df.columns) == len(COLS_R1):
-            df.columns = COLS_R1
-        else:
-             df.columns = COLS_R1[:len(df.columns)]
-    
-    # 2. Procesamiento Común
-    # Limpieza
+    # Normalización de Columnas
+    if len(df.columns) >= len(COLS_R1):
+        df.columns = COLS_R1[:len(df.columns)]
+    else:
+        # Asignar nombres hasta donde alcance
+        new_cols = list(COLS_R1[:len(df.columns)])
+        df.columns = new_cols
+
+    # 2. Procesamiento Común y Limpieza de Encoding
+    df = df.fillna('')
     df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
     
-    # FIX ENCODING: Reparar Mojibake en Nombres (ej: PEÃ‘A -> PEÑA)
-    if 'Nombre' in df.columns:
+    # REPARACIÓN DE ENCODING (MojiBake)
+    def fix_mojibake(text):
+        if not text or not isinstance(text, str): return text
         if ftfy:
-            df['Nombre'] = df['Nombre'].apply(lambda x: ftfy.fix_text(str(x)))
-        else:
-            # Reparación manual básica si no hay FTFY
-            # Detecta patrones UTF-8 interpretados como Latin-1
-            # Ã‘ -> Ñ
-            replacements = {
-                'Ã‘': 'Ñ', 'Ã±': 'ñ',
-                'Ã ': 'Á', 'Ã¡': 'á',
-                'Ã‰': 'É', 'Ã©': 'é',
-                'Ã ': 'Í', 'Ãed': 'í', 
-                'Ã“': 'Ó', 'Ã³': 'ó',
-                'Ãš': 'Ú', 'Ãº': 'ú',
-                'Ãœ': 'Ü', 'Ã¼': 'ü'
-            }
-            # Un replace simple puede no cubrir todo, pero ayuda.
-            for bad, good in replacements.items():
-                df['Nombre'] = df['Nombre'].str.replace(bad, good, regex=False)
-    df['Avaluo'] = df['Avaluo'].astype(str).str.replace(r'[$,]', '', regex=True)
-    df['Avaluo'] = pd.to_numeric(df['Avaluo'], errors='coerce').fillna(0)
+            try: return ftfy.fix_text(text)
+            except: pass
+        
+        # Fallback manual robusto
+        replacements = {
+            'Ã‘': 'Ñ', 'Ã±': 'ñ', 'Ã ': 'Á', 'Ã¡': 'á', 'Ã‰': 'É', 'Ã©': 'é',
+            'Ã ': 'Í', 'Ãid': 'í', 'Ã“': 'Ó', 'Ã³': 'ó', 'Ãš': 'Ú', 'Ãº': 'ú',
+            'Ãœ': 'Ü', 'Ã¼': 'ü', 'â€“': '-', 'â€”': '-', 'Âº': 'º', 'Âª': 'ª',
+            '\xc3\x91': 'Ñ', '\xc3\xb1': 'ñ', # Raw bytes cases
+        }
+        for bad, good in replacements.items():
+            text = text.replace(bad, good)
+        return text
+
+    for col in df.columns:
+        if df[col].dtype == 'object':
+            df[col] = df[col].apply(fix_mojibake)
+    
+    # Limpieza de Avalúo
+    if 'Avaluo' in df.columns:
+        df['Avaluo'] = df['Avaluo'].astype(str).str.replace(r'[$,]', '', regex=True)
+        df['Avaluo'] = pd.to_numeric(df['Avaluo'], errors='coerce').fillna(0)
     
     # Construcción Llave 30 Dígitos
     # Aseguramos que existan las columnas necesarias
