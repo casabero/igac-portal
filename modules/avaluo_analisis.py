@@ -153,31 +153,11 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_p
              df_pre = df_pre[~df_pre['Predial_Nacional'].str.slice(5, 7).isin(['00', '01'])]
              df_post = df_post[~df_post['Predial_Nacional'].str.slice(5, 7).isin(['00', '01'])]
 
-    # 1.2 MUESTREO POR PORCENTAJE
-    sample_pct = float(sample_pct)
-    is_sample = (sample_pct < 100)
+    # 1.2 MUESTREO (MOVED AFTER MERGE/CALCS to allow Universe Stats)
+    # Anteriormente aquí se hacía sampling antes del merge.
+    # AHORA: Haremos merge del universo filtrado, calculamos todo, y al final hacemos sampling para la vista 'data'.
     
-    if is_sample:
-        # Universo de llaves (Unión de ambos archivos)
-        keys_pre = set(df_pre['Predial_Nacional'].unique())
-        keys_post = set(df_post['Predial_Nacional'].unique())
-        all_keys = list(keys_pre.union(keys_post))
-        
-        total_keys = len(all_keys)
-        n_sample = int(total_keys * (sample_pct / 100))
-        
-        # Mínimo 1 registro si hay data
-        if total_keys > 0 and n_sample == 0: 
-            n_sample = 1
-            
-        if n_sample < total_keys:
-            sample_keys = np.random.choice(all_keys, size=n_sample, replace=False)
-            
-            # Filtrar DataFrames
-            df_pre = df_pre[df_pre['Predial_Nacional'].isin(sample_keys)]
-            df_post = df_post[df_post['Predial_Nacional'].isin(sample_keys)]
-    
-    # 2. Unión Total (Outer Join) para detectar novedades
+    # 2. Unión Total (Outer Join) del Universo Filtrado
     df_final = pd.merge(
         df_pre, 
         df_post, 
@@ -327,6 +307,14 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_p
         'Avaluo_pre': 'Base',
         'Avaluo_post': 'Sistema'
     })
+    
+    # APLICAR MUESTREO AQUÍ (SOLO PARA LA VISTA DE TABLA)
+    sample_pct = float(sample_pct)
+    if sample_pct < 100:
+        n_sample = int(len(df_export) * (sample_pct / 100))
+        if n_sample < 1: n_sample = 1
+        if n_sample < len(df_export):
+             df_export = df_export.sample(n=n_sample)
     
     records = df_export.to_dict(orient='records')
 

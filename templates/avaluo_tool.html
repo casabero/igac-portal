@@ -124,23 +124,9 @@
 
 <body class="bg-white text-main min-h-screen flex flex-col font-sans cursor-auto">
     <nav class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-4">
-            <a href="/" class="text-main hover:text-accent transition-transform hover:scale-110">
-                <!-- CASABERO LOGO (Mini 32x32) -->
-                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-main">
-                    <path d="M 76 20 L 32 20 Q 20 20 20 32 L 20 68 Q 20 80 32 80 L 70 80" stroke="currentColor"
-                        stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
-                    <rect x="70" y="76" width="8" height="8" rx="1" fill="currentColor" />
-                    <rect x="26" y="26" width="8" height="8" fill="currentColor" />
-                    <rect x="66" y="26" width="8" height="8" fill="currentColor" />
-                    <rect x="26" y="66" width="8" height="8" fill="currentColor" />
-                    <rect x="66" y="66" width="8" height="8" fill="currentColor" />
-                </svg>
-            </a>
-            <div>
-                <h1 class="font-display font-bold text-main text-lg tracking-wide">Auditoría de Incremento Catastral
-                </h1>
-            </div>
+        <div class="flex flex-col">
+            <h1 class="font-sans font-bold text-main text-lg tracking-wide">Auditoría de Incremento Catastral</h1>
+            <p id="reportSubtitle" class="text-xs text-secondary font-medium uppercase hidden mt-0.5"></p>
         </div>
         {% if resultados %}
         <a href="/avaluos"
@@ -408,7 +394,6 @@
                                 <th class="px-2 py-2 text-center text-green-600 font-extrabold">%Real</th>
                                 <th class="px-2 py-2 text-right text-red-600">Dif.</th>
                                 <th class="px-2 py-2 text-center">Estado</th>
-                                <th class="px-2 py-2 text-[8px] text-secondary whitespace-nowrap">Mun/Zona</th>
                                 <th class="px-1 py-1"></th>
                             </tr>
                         </thead>
@@ -573,12 +558,6 @@
                         <td class="px-2 py-1 text-center">
                             <span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${badge}">${item.Estado.substring(0, 10)}</span>
                         </td>
-                        <td class="px-2 py-1 text-xs text-secondary">
-                             <div class="flex flex-col leading-none">
-                                <span class="font-bold">${item.Municipio || '-'}</span>
-                                <span class="text-[8px] opacity-70">Z: ${item.Zona || '-'}</span>
-                             </div>
-                        </td>
                         <td class="px-1 py-1 text-center">
                             <button onclick="eliminarFila('${item.Predial_Nacional}')" class="text-slate-300 hover:text-red-500 transition-colors">
                                 <span class="material-symbols-outlined text-[14px]">close</span>
@@ -645,6 +624,17 @@
 
                 // AUTO-LOAD TABLE (Only if dataset is defined)
                 if (typeof dataset !== 'undefined' && dataset && dataset.length > 0) {
+
+                    // Set Header Info (Mun/Zona)
+                    const first = dataset[0];
+                    if (first) {
+                        const subTitle = document.getElementById('reportSubtitle');
+                        if (subTitle) {
+                            subTitle.textContent = `${first.Municipio} - ZONA: ${first.Zona}`;
+                            subTitle.classList.remove('hidden');
+                        }
+                    }
+
                     // Cargar los primeros 1000 registros automáticamente
                     if (typeof selectedItems !== 'undefined') {
                         selectedItems = dataset.slice(0, 1000);
