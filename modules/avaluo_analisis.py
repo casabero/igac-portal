@@ -349,7 +349,7 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_p
             
             # Ordenar por magnitud de desviación (absoluta)
             outliers_df['deviation_mag'] = (outliers_df['Pct_Real'] - df_analysis['Pct_Real'].median()).abs()
-            outliers_df = outliers_df.sort_values('deviation_mag', ascending=False).head(50) # Top 50 outliers
+            outliers_df = outliers_df.sort_values('deviation_mag', ascending=False).head(10) # Top 10 outliers
             
             # Seleccionar columnas
             cols_out = ['Predial_Nacional', 'Nombre', 'Zona', 'Avaluo_pre', 'Avaluo_post', 'Pct_Real']
