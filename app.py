@@ -75,18 +75,42 @@ def ver_logs():
     return html
 
 # --- RUTA 4: ANALISIS AVALUOS ---
+UPLOAD_FOLDER = 'temp_uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
 @app.route('/avaluos', methods=['GET', 'POST'])
 def avaluos_tool():
+    from flask import session
     registrar_visita('/avaluos')
     
     if request.method == 'POST':
-        if 'file_pre' not in request.files or 'file_post' not in request.files:
-            flash('Faltan archivos')
+        # Intentar obtener archivos de la sesión si no vienen en el request
+        f_pre = request.files.get('file_pre')
+        f_post = request.files.get('file_post')
+
+        # Persistencia: Si se suben archivos nuevos, guardarlos en temp
+        if f_pre and f_pre.filename:
+            path_pre = os.path.join(UPLOAD_FOLDER, f"pre_{session.sid if hasattr(session, 'sid') else 'user'}_{f_pre.filename}")
+            f_pre.save(path_pre)
+            session['path_pre'] = path_pre
+            session['name_pre'] = f_pre.filename
+        
+        if f_post and f_post.filename:
+            path_post = os.path.join(UPLOAD_FOLDER, f"post_{session.sid if hasattr(session, 'sid') else 'user'}_{f_post.filename}")
+            f_post.save(path_post)
+            session['path_post'] = path_post
+            session['name_post'] = f_post.filename
+
+        # Validar que tengamos archivos (ya sea por subida o por sesión)
+        f_pre_final = session.get('path_pre')
+        f_post_final = session.get('path_post')
+
+        if not f_pre_final or not f_post_final:
+            flash('Faltan archivos (Base o Sistema)')
             return redirect(request.url)
         
-        f_pre = request.files['file_pre']
-        f_post = request.files['file_post']
-        # Get params with defaults (si el input está oculto, puede no enviarse o llegar vacío)
+        # Get params
         def get_float_param(key):
              val = request.form.get(key, '')
              if not val: return 0.0
@@ -97,21 +121,38 @@ def avaluos_tool():
         pct_r = get_float_param('pct_rural')
         
         try:
-            # Leer nuevos parámetros
             sample_pct = request.form.get('sample_pct', 100)
             zona_filter = request.form.get('zona_filter', 'TODOS')
             
-            # Ahora llamamos a la función WEB con los nuevos argumentos
-            resultados = procesar_incremento_web(f_pre, f_post, pct_u, pct_r, sample_pct=sample_pct, zona_filter=zona_filter)
+            # procesar_incremento_web ya acepta paths o file objects
+            resultados = procesar_incremento_web(f_pre_final, f_post_final, pct_u, pct_r, sample_pct=sample_pct, zona_filter=zona_filter)
             
-            # Renderizamos la MISMA plantilla, pero ahora con datos
-            return render_template('avaluo_tool.html', resultados=resultados)
+            return render_template('avaluo_tool.html', resultados=resultados, session_data=session)
             
         except Exception as e:
             flash(f"Error en análisis: {str(e)}")
             return redirect(request.url)
             
-    return render_template('avaluo_tool.html', resultados=None)
+    return render_template('avaluo_tool.html', resultados=None, session_data=session)
+
+@app.route('/clear_analysis')
+def clear_analysis():
+    from flask import session
+    # Borrar archivos físicos
+    for key in ['path_pre', 'path_post']:
+        path = session.get(key)
+        if path and os.path.exists(path):
+            try: os.remove(path)
+            except: pass
+    
+    # Limpiar sesión
+    session.pop('path_pre', None)
+    session.pop('name_pre', None)
+    session.pop('path_post', None)
+    session.pop('name_post', None)
+    
+    flash('Sesión y archivos temporales eliminados.')
+    return redirect(url_for('avaluos_tool'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)

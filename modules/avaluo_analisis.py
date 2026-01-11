@@ -181,17 +181,16 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_p
     
     # --- LOGICA VECTORIZADA ---
     
-    # 1. Detectar Zona (Rural si 5-6 caracteres son '00')
-    # Convertimos a string y sacamos slice. Ojo con NaN o cortos.
-    # Zfill ya garantizó 30 dígitos en 'Predial_Nacional' en cargar_snc, así que es seguro.
+    # 1. Detectar Zona
+    # 01 = URBANO, 00 = RURAL, otros (CORREG) = RURAL para propósitos de variación
     zona_vals = df_final['Predial_Nacional'].astype(str).str.slice(5, 7)
-    is_rural = (zona_vals == '00')
+    is_urbano = (zona_vals == '01')
     
-    df_final['Zona'] = np.where(is_rural, 'RURAL', 'URBANO')
+    df_final['Zona'] = np.where(is_urbano, 'URBANO', 'RURAL')
     
     # 2. Factores y Pct Teorico
-    # Si es rural: pct_rur_decimal, sino pct_urb_decimal
-    df_final['Pct_Teorico'] = np.where(is_rural, pct_rur_decimal, pct_urb_decimal)
+    # Si es urbano: pct_urb_decimal, sino (rural/correg): pct_rur_decimal
+    df_final['Pct_Teorico'] = np.where(is_urbano, pct_urb_decimal, pct_rur_decimal)
     
     # factor n = 1 + pct
     factors = 1 + df_final['Pct_Teorico']
