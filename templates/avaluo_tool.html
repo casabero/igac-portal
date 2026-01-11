@@ -938,6 +938,7 @@
     });
 
     // --- CHARTS RENDER ---
+    {% if resultados %}
     document.addEventListener('DOMContentLoaded', () => {
     // Data from Backend
     const stats = {
@@ -1005,6 +1006,7 @@
     });
     }
     });
+    {% endif %}
     </script>
 </body>
 
