@@ -1,6 +1,12 @@
 import pandas as pd
 import numpy as np
 
+# Intentar importar ftfy para arreglar encoding
+try:
+    import ftfy
+except ImportError:
+    ftfy = None
+
 
 # Configuración de cortes Registro 1 (SNC Estándar)
 CORTES_R1 = [0, 2, 5, 30, 31, 34, 37, 137, 138, 139, 151, 251, 252, 253, 268, 274, 289, 297, 312]
@@ -48,7 +54,19 @@ def cargar_snc(stream):
         # Carga Archivo Plano (Lógica Original)
         # validar_archivo(stream) # Ya no validamos extensiones restrictivamente, o solo bloqueamos binarios NO excel
         colspecs = generar_colspecs(CORTES_R1)
-        df = pd.read_fwf(stream, colspecs=colspecs, header=None, encoding='latin-1', dtype=str)
+        
+        # INTENTO 1: Leer como UTF-8 (Estándar moderno)
+        try:
+            # Necesitamos 'seek(0)' si el stream ya fue leído, pero aquí es la primera vez (para pandas)
+            # Pero pd.read_fwf puede consumir el stream. Hacemos copia o reiniciamos stream si falla?
+            # Stream de Flask suele ser seekable.
+            pos = stream.tell() if hasattr(stream, 'tell') else 0
+            df = pd.read_fwf(stream, colspecs=colspecs, header=None, encoding='utf-8', dtype=str)
+        except (UnicodeDecodeError, Exception):
+            # INTENTO 2: Fallback a Latin-1 (Legacy común)
+            if hasattr(stream, 'seek'): stream.seek(pos)
+            df = pd.read_fwf(stream, colspecs=colspecs, header=None, encoding='latin-1', dtype=str)
+
         if len(df.columns) == len(COLS_R1):
             df.columns = COLS_R1
         else:
@@ -57,6 +75,27 @@ def cargar_snc(stream):
     # 2. Procesamiento Común
     # Limpieza
     df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
+    
+    # FIX ENCODING: Reparar Mojibake en Nombres (ej: PEÃ‘A -> PEÑA)
+    if 'Nombre' in df.columns:
+        if ftfy:
+            df['Nombre'] = df['Nombre'].apply(lambda x: ftfy.fix_text(str(x)))
+        else:
+            # Reparación manual básica si no hay FTFY
+            # Detecta patrones UTF-8 interpretados como Latin-1
+            # Ã‘ -> Ñ
+            replacements = {
+                'Ã‘': 'Ñ', 'Ã±': 'ñ',
+                'Ã ': 'Á', 'Ã¡': 'á',
+                'Ã‰': 'É', 'Ã©': 'é',
+                'Ã ': 'Í', 'Ãed': 'í', 
+                'Ã“': 'Ó', 'Ã³': 'ó',
+                'Ãš': 'Ú', 'Ãº': 'ú',
+                'Ãœ': 'Ü', 'Ã¼': 'ü'
+            }
+            # Un replace simple puede no cubrir todo, pero ayuda.
+            for bad, good in replacements.items():
+                df['Nombre'] = df['Nombre'].str.replace(bad, good, regex=False)
     df['Avaluo'] = df['Avaluo'].astype(str).str.replace(r'[$,]', '', regex=True)
     df['Avaluo'] = pd.to_numeric(df['Avaluo'], errors='coerce').fillna(0)
     
@@ -155,6 +194,7 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_p
     # Si es nuevo, toma nombre del post; si es viejo, del pre
     df_final['Nombre'] = df_final['Nombre_pre'].combine_first(df_final['Nombre_post']).fillna('SIN NOMBRE')
     df_final['Destino'] = df_final['DestinoEconomico_pre'].combine_first(df_final['DestinoEconomico_post']).fillna('-')
+    df_final['Municipio'] = df_final['Municipio_pre'].combine_first(df_final['Municipio_post']).fillna('000')
 
     pct_urb_decimal = float(pct_urbano) / 100
     pct_rur_decimal = float(pct_rural) / 100
@@ -279,7 +319,7 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_p
     ade_stats = [] # Se mantiene vacío para compatibilidad o se elimina uso en front
 
     # 6. Preparar Data Detallada
-    cols = ['Predial_Nacional', 'Nombre', 'Destino', 'Zona', 
+    cols = ['Predial_Nacional', 'Nombre', 'Destino', 'Zona', 'Municipio',
             'Avaluo_pre', 'Calculado', 'Avaluo_post', 
             'Estado', 'Pct_Teorico', 'Pct_Real', 'Diferencia']
             
@@ -290,4 +330,48 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_p
     
     records = df_export.to_dict(orient='records')
 
-    return {'stats': stats, 'ade_stats': ade_stats, 'data': records}
+    # 7. OUTLIERS (Análisis Estadístico)
+    # Definición: Usaremos IQR (Rango Intercuartílico) sobre 'Pct_Real'.
+    # Q1 = p25, Q3 = p75
+    # IQR = Q3 - Q1
+    # Lower Bound = Q1 - 1.5 * IQR
+    # Upper Bound = Q3 + 1.5 * IQR
+    # Solo consideramos outliers aquellos que tengan Base > 0 (para evitar división por cero infinita afectando)
+    
+    outliers_list = []
+    
+    # Filtramos data con Base > 0 para análisis de outliers
+    df_analysis = df_final[df_final['Avaluo_pre'] > 0].copy()
+    
+    if len(df_analysis) > 5: # Mínimo de datos para estadística robusta
+        try:
+            Q1 = df_analysis['Pct_Real'].quantile(0.25)
+            Q3 = df_analysis['Pct_Real'].quantile(0.75)
+            IQR = Q3 - Q1
+            
+            lower_bound = Q1 - 1.5 * IQR
+            upper_bound = Q3 + 1.5 * IQR
+            
+            # Identificar outliers
+            # Nos interesan principalmente los aumentos EXTREMOS (Upper Bound) o disminuciones extremas (Lower Bound)
+            outliers_df = df_analysis[
+                (df_analysis['Pct_Real'] < lower_bound) | 
+                (df_analysis['Pct_Real'] > upper_bound)
+            ]
+            
+            # Ordenar por magnitud de desviación (absoluta)
+            outliers_df['deviation_mag'] = (outliers_df['Pct_Real'] - df_analysis['Pct_Real'].median()).abs()
+            outliers_df = outliers_df.sort_values('deviation_mag', ascending=False).head(50) # Top 50 outliers
+            
+            # Seleccionar columnas
+            cols_out = ['Predial_Nacional', 'Nombre', 'Zona', 'Avaluo_pre', 'Avaluo_post', 'Pct_Real']
+            outliers_list = outliers_df[cols_out].rename(columns={
+                'Avaluo_pre': 'Base', 
+                'Avaluo_post': 'Sistema'
+            }).to_dict(orient='records')
+            
+        except Exception as e:
+            print(f"Error calculando outliers: {e}")
+            outliers_list = []
+
+    return {'stats': stats, 'ade_stats': ade_stats, 'data': records, 'outliers': outliers_list}
