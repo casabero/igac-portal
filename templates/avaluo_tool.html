@@ -187,6 +187,26 @@
 
     <main class="flex-1 p-6 max-w-[1600px] mx-auto w-full">
 
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+            <div
+                class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r shadow-sm flex items-center justify-between animate-pulse">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined text-red-500 mr-2">warning</span>
+                    <p class="text-sm font-bold text-red-700">{{ message }}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
         <!-- FORMULARIO INICIAL -->
         {% if not resultados %}
         <div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-slate-200 mt-10">
@@ -428,23 +448,6 @@
 
             let selectedItems = [];
 
-            // --- CASABERO CURSOR LOGIC ---
-            const cursorBox = document.getElementById("cursor-pickbox");
-            const cursorX = document.getElementById("cursor-x-axis");
-            const cursorY = document.getElementById("cursor-y-axis");
-
-            if (cursorBox && cursorX && cursorY) {
-                window.addEventListener("mousemove", (e) => {
-                    requestAnimationFrame(() => {
-                        cursorBox.style.left = `${e.clientX}px`;
-                        cursorBox.style.top = `${e.clientY}px`;
-                        cursorX.style.top = `${e.clientY}px`;
-                        cursorY.style.left = `${e.clientX}px`;
-                    });
-                });
-            }
-            // -----------------------------
-
             const fmtMoney = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
             const fmtPct = new Intl.NumberFormat('es-CO', { style: 'percent', minimumFractionDigits: 2 });
 
@@ -590,6 +593,24 @@
             }
         </script>
         {% endif %}
+
+        <script>
+            // --- CASABERO CURSOR LOGIC (GLOBAL) ---
+            const cursorBox = document.getElementById("cursor-pickbox");
+            const cursorX = document.getElementById("cursor-x-axis");
+            const cursorY = document.getElementById("cursor-y-axis");
+
+            if (cursorBox && cursorX && cursorY) {
+                window.addEventListener("mousemove", (e) => {
+                    requestAnimationFrame(() => {
+                        cursorBox.style.left = `${e.clientX}px`;
+                        cursorBox.style.top = `${e.clientY}px`;
+                        cursorX.style.top = `${e.clientY}px`;
+                        cursorY.style.left = `${e.clientX}px`;
+                    });
+                });
+            }
+        </script>
 
     </main>
 </body>
