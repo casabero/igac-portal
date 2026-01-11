@@ -277,9 +277,9 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_p
     mode_series = avaluos_sist_full.mode()
     mode_val = mode_series.iloc[0] if not mode_series.empty else 0
 
-    # COMPARADOR GLOBAL: Extraer listas completas antes del muestreo
-    nuevos_full = df_final[df_final['Estado'] == 'NUEVO'][['Predial_Nacional', 'Nombre', 'Zona', 'Avaluo_post']].rename(columns={'Avaluo_post': 'Sistema'}).to_dict(orient='records')
-    desaparecidos_full = df_final[df_final['Estado'] == 'DESAPARECIDO'][['Predial_Nacional', 'Nombre', 'Zona', 'Avaluo_pre']].rename(columns={'Avaluo_pre': 'Base'}).to_dict(orient='records')
+    # COMPARADOR GLOBAL: Extraer listas completas del universo FILTRADO por zona
+    nuevos_full = df_final[df_final['_merge'] == 'right_only'][['Predial_Nacional', 'Nombre', 'Zona', 'Avaluo_post']].rename(columns={'Avaluo_post': 'Sistema'}).to_dict(orient='records')
+    desaparecidos_full = df_final[df_final['_merge'] == 'left_only'][['Predial_Nacional', 'Nombre', 'Zona', 'Avaluo_pre']].rename(columns={'Avaluo_pre': 'Base'}).to_dict(orient='records')
 
     # 6. Preparar Data Detallada
     cols = ['Predial_Nacional', 'Nombre', 'Destino', 'Zona', 'Municipio',
