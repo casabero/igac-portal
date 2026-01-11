@@ -202,8 +202,9 @@
                         <select name="zona_filter" id="zona_filter" onchange="updateFormVisibility()"
                             class="w-full text-sm border-gray-300 rounded-md focus:ring-black focus:border-black py-2.5">
                             <option value="TODOS">Todas las Zonas (Completo)</option>
-                            <option value="URBANO">Solo Urbano (01)</option>
-                            <option value="RURAL">Solo Rural (00)</option>
+                            <option value="URBANO">Urbano (01)</option>
+                            <option value="RURAL">Rural (00)</option>
+                            <option value="CORREG">Corregimientos (>01)</option>
                         </select>
                     </div>
 
@@ -332,14 +333,14 @@
 
 
                 <!-- 2. Estadísticas Avanzadas (Mean, Median, Mode, Std) -->
-                <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-4 relative">
-                    <button onclick="window.print()"
-                        class="no-print absolute top-4 right-4 bg-main text-white px-3 py-1 rounded text-xs font-bold hover:bg-black transition flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[14px]">print</span> Imprimir Reporte
-                    </button>
-                    <h3 class="text-xs font-bold text-secondary uppercase mb-4 border-b border-slate-100 pb-2">
-                        Estadísticas
-                        del Avalúo (Sistema)</h3>
+                <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-6 relative">
+                    <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                        <h3 class="text-sm font-bold text-secondary uppercase">Estadísticas del Avalúo (Sistema)</h3>
+                        <button onclick="window.print()"
+                            class="no-print bg-main text-white px-4 py-2 rounded text-xs font-bold hover:bg-black transition flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[16px]">print</span> Imprimir Reporte
+                        </button>
+                    </div>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div class="p-3 bg-ui-element rounded border border-slate-100">
@@ -570,14 +571,33 @@
                 } else if (zona === 'RURAL') {
                     divRural.classList.remove('hidden');
                     valRural.required = true;
+                } else if (zona === 'CORREG') {
+                    // Corregimientos podría usar pct Rural o uno propio. 
+                    // Por ahora se deja opción de introducir ambos o solo rural si se definiera. 
+                    // Asumiremos RURAL para Corregimientos por defecto o mostramos Rural?
+                    // Mostremos AMBOS para seguridad, o solo el relevante.
+                    // Si es corregimiento, suele ser rural, pero dejemos el rural visible.
+                    divRural.classList.remove('hidden');
+                    valRural.required = true;
+                    // Cambiamos label dinámicamente? No, dejemos input RURAL.
                 }
             }
 
             // Initialize on load
-            document.addEventListener('DOMContentLoaded', updateFormVisibility);
+            document.addEventListener('DOMContentLoaded', () => {
+                updateFormVisibility();
 
-            // --- GLOBAL LOGIC ---
-            // (Cursor logic removed as requested)
+                // AUTO-LOAD TABLE
+                if (dataset && dataset.length > 0) {
+                    // Cargar los primeros 1000 registros automáticamente
+                    selectedItems = dataset.slice(0, 1000);
+                    renderTable();
+
+                    if (dataset.length > 1000) {
+                        document.getElementById('countSelected').textContent = "1000 (de " + dataset.length + ")";
+                    }
+                }
+            });
         </script>
 
     </main>
