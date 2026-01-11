@@ -15,35 +15,218 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        "main": "#111111",       // Negro Tinta
-                        "secondary": "#666666",  // Gris Tecnológico
-                        "ui-element": "#F3F4F6", // Gris Fondo UI
-                        "json-key": "#111111",   // Keys en JSON
-                        "json-string": "#555555",// Values en JSON
-                        "accent": "#000000"      // Acentos fuertes
-                    },
                     fontFamily: {
-                        "display": ["Outfit", "sans-serif"], // Títulos Grandes
-                        "sans": ["Inter", "sans-serif"],     // Texto de lectura
-                        "mono": ["Fira Code", "monospace"],  // Código y Datos
+                        "sans": ["Inter", "sans-serif"],
+                        "display": ["Outfit", "sans-serif"],
+                        "mono": ["Fira Code", "monospace"],
                     },
-                    cursor: {
-                        'none': 'none',
+                    colors: {
+                        primary: "#111827",
+                        'primary-hover': "#374151",
+                        main: "#111827",
+                        secondary: "#6B7280",
+                        'ui-element': "#F9FAFB"
                     }
-                },
-            },
+                }
+            }
         }
     </script>
     <style>
+        /* --- BASE & DARK MODE VARIABLES --- */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #F9FAFB;
+            --bg-card: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --border-color: #E5E7EB;
+            --accent: #2563eb;
+        }
+
+        html.dark {
+            --bg-primary: #111827;
+            --bg-secondary: #1F2937;
+            --bg-card: #1F2937;
+            --text-primary: #F9FAFB;
+            --text-secondary: #9CA3AF;
+            --border-color: #374151;
+            --accent: #3B82F6;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .dark-card {
+            background-color: var(--bg-card);
+            border-color: var(--border-color);
         }
 
         .num {
             font-feature-settings: "tnum";
             font-variant-numeric: tabular-nums;
             text-align: right;
+        }
+
+        /* --- SKELETON LOADER --- */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        html.dark .skeleton {
+            background: linear-gradient(90deg, #374151 25%, #4B5563 50%, #374151 75%);
+            background-size: 200% 100%;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* --- CUSTOM TOOLTIP --- */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-4px);
+            padding: 6px 10px;
+            background: #111827;
+            color: white;
+            font-size: 11px;
+            border-radius: 6px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 1000;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-8px);
+        }
+
+        /* --- TOAST NOTIFICATIONS --- */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 12px 16px;
+            background: #111827;
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: toastSlideIn 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.success {
+            background: #059669;
+        }
+
+        .toast.error {
+            background: #DC2626;
+        }
+
+        .toast.info {
+            background: #2563EB;
+        }
+
+        @keyframes toastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes toastSlideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        /* --- CARD GRADIENT --- */
+        .gradient-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+        }
+
+        /* --- COUNTUP ANIMATION --- */
+        .countup {
+            display: inline-block;
+        }
+
+        /* --- LOGO ANIMATION (Nodes Pulse) --- */
+        .logo-node {
+            transition: opacity 0.2s;
+        }
+
+        .logo-group:hover .logo-node:nth-child(1) {
+            animation: nodePulse 0.6s infinite 0s;
+        }
+
+        .logo-group:hover .logo-node:nth-child(2) {
+            animation: nodePulse 0.6s infinite 0.15s;
+        }
+
+        .logo-group:hover .logo-node:nth-child(3) {
+            animation: nodePulse 0.6s infinite 0.3s;
+        }
+
+        .logo-group:hover .logo-node:nth-child(4) {
+            animation: nodePulse 0.6s infinite 0.45s;
+        }
+
+        @keyframes nodePulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                fill: #111;
+            }
+
+            50% {
+                opacity: 0.3;
+                fill: #666;
+            }
         }
 
         .truncate-name {
@@ -123,17 +306,31 @@
 </head>
 
 <body class="bg-white text-main min-h-screen flex flex-col font-sans cursor-auto">
-    <nav class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex flex-col">
-            <h1 class="font-sans font-bold text-main text-lg tracking-wide">Auditoría de Incremento Catastral</h1>
-            <p id="reportSubtitle" class="text-xs text-secondary font-medium uppercase hidden mt-0.5"></p>
+    <nav class="w-full border-b border-gray-100 dark:border-gray-800 py-4 px-6 dark-card">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="/" class="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                </a>
+                <span class="h-4 w-px bg-gray-200 dark:bg-gray-700"></span>
+                <div class="flex flex-col">
+                    <h1 class="text-sm font-semibold text-slate-700 dark:text-gray-200 tracking-tight">Auditoría de
+                        Incremento Catastral</h1>
+                    <p id="reportSubtitle" class="text-xs text-secondary font-medium uppercase hidden mt-0.5"></p>
+                </div>
+            </div>
+            <!-- Dark Mode Toggle -->
+            <button onclick="toggleDarkMode()"
+                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors tooltip"
+                data-tip="Cambiar tema">
+                <span id="themeIcon"
+                    class="material-symbols-outlined text-[20px] text-gray-500 dark:text-gray-400">dark_mode</span>
+            </button>
         </div>
-        {% if resultados %}
-        <a href="/avaluos"
-            class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded font-medium border border-slate-200">Nuevo
-            Análisis</a>
-        {% endif %}
     </nav>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
 
     <main class="flex-1 p-6 max-w-[1600px] mx-auto w-full">
 
@@ -303,31 +500,35 @@
                 <!-- A. KPIs Principales -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div
-                        class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between h-24">
+                        class="gradient-card dark-card p-4 rounded-lg border border-slate-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-24">
                         <p class="text-[10px] text-secondary font-bold uppercase tracking-wider">Universo</p>
-                        <p class="text-3xl font-bold text-main">{{ resultados.stats.total_registros }}</p>
+                        <p class="text-3xl font-bold text-main dark:text-white countup"
+                            data-countup="{{ resultados.stats.total_registros }}">0</p>
                     </div>
                     <div
-                        class="bg-white p-4 rounded-lg border border-blue-100 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden">
+                        class="gradient-card dark-card p-4 rounded-lg border border-blue-100 dark:border-blue-900 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden">
                         <div class="absolute right-0 top-0 p-2 opacity-10"><span
                                 class="material-symbols-outlined text-4xl text-blue-500">new_releases</span></div>
                         <p class="text-[10px] text-blue-500 font-bold uppercase tracking-wider">Nuevos</p>
-                        <p class="text-3xl font-bold text-blue-600">{{ resultados.stats.nuevos }}</p>
+                        <p class="text-3xl font-bold text-blue-600 countup"
+                            data-countup="{{ resultados.stats.nuevos }}">0</p>
                     </div>
                     <div
-                        class="bg-white p-4 rounded-lg border border-orange-100 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden">
+                        class="gradient-card dark-card p-4 rounded-lg border border-orange-100 dark:border-orange-900 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden">
                         <div class="absolute right-0 top-0 p-2 opacity-10"><span
                                 class="material-symbols-outlined text-4xl text-orange-500">do_not_disturb_on</span>
                         </div>
                         <p class="text-[10px] text-orange-500 font-bold uppercase tracking-wider">Desaparecidos</p>
-                        <p class="text-3xl font-bold text-orange-600">{{ resultados.stats.desaparecidos }}</p>
+                        <p class="text-3xl font-bold text-orange-600 countup"
+                            data-countup="{{ resultados.stats.desaparecidos }}">0</p>
                     </div>
                     <div
-                        class="bg-white p-4 rounded-lg border border-red-100 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden">
+                        class="gradient-card dark-card p-4 rounded-lg border border-red-100 dark:border-red-900 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden">
                         <div class="absolute right-0 top-0 p-2 opacity-10"><span
                                 class="material-symbols-outlined text-4xl text-red-500">warning</span></div>
                         <p class="text-[10px] text-red-500 font-bold uppercase tracking-wider">Inconsistencias</p>
-                        <p class="text-3xl font-bold text-red-600">{{ resultados.stats.inconsistencias }}</p>
+                        <p class="text-3xl font-bold text-red-600 countup"
+                            data-countup="{{ resultados.stats.inconsistencias }}">0</p>
                     </div>
                 </div>
 
@@ -546,8 +747,13 @@
                     }
 
                     tr.innerHTML = `
-                        <td class="px-2 py-1 font-mono text-[9px] text-secondary border-r border-slate-50" title="${item.Predial_Nacional}">${item.Predial_Nacional}</td>
-                        <td class="px-2 py-1 font-bold text-main max-w-[120px] truncate" title="${item.Nombre}">${item.Nombre}</td>
+                        <td class="px-2 py-1 font-mono text-[9px] text-secondary border-r border-slate-50 group/cell">
+                            <span class="tooltip" data-tip="Click para copiar">${item.Predial_Nacional}</span>
+                            <button onclick="copyToClipboard('${item.Predial_Nacional}')" class="ml-1 opacity-0 group-hover/cell:opacity-100 text-slate-400 hover:text-blue-600 transition-all">
+                                <span class="material-symbols-outlined text-[12px]">content_copy</span>
+                            </button>
+                        </td>
+                        <td class="px-2 py-1 font-bold text-main dark:text-gray-200 max-w-[120px] truncate" title="${item.Nombre}">${item.Nombre}</td>
                         <td class="px-2 py-1 text-center text-[9px] text-secondary">${item.Destino}</td>
                         <td class="px-2 py-1 num text-slate-500">${fmtMoney.format(item.Base)}</td>
                         <td class="px-2 py-1 text-center text-[9px] text-blue-500">${fmtPct.format(item.Pct_Teorico)}</td>
@@ -593,28 +799,26 @@
                 const divRural = document.getElementById('div_rural');
                 const valUrbano = document.getElementById('val_urbano');
                 const valRural = document.getElementById('val_rural');
+                const pctInputsContainer = document.getElementById('pct_inputs');
 
-                // Reset classes
+                // Reset: Hide all
                 if (divUrbano) divUrbano.classList.add('hidden');
                 if (divRural) divRural.classList.add('hidden');
                 if (valUrbano) { valUrbano.required = false; valUrbano.value = ''; }
                 if (valRural) { valRural.required = false; valRural.value = ''; }
+                if (pctInputsContainer) pctInputsContainer.classList.add('hidden');
 
-                if (zona === 'TODOS') {
-                    if (divUrbano) divUrbano.classList.remove('hidden');
-                    if (divRural) divRural.classList.remove('hidden');
-                    if (valUrbano) valUrbano.required = true;
-                    if (valRural) valRural.required = true;
-                } else if (zona === 'URBANO') {
+                // ONLY show inputs if a SPECIFIC zone is selected (not TODOS)
+                if (zona === 'URBANO') {
+                    if (pctInputsContainer) pctInputsContainer.classList.remove('hidden');
                     if (divUrbano) divUrbano.classList.remove('hidden');
                     if (valUrbano) valUrbano.required = true;
-                } else if (zona === 'RURAL') {
-                    if (divRural) divRural.classList.remove('hidden');
-                    if (valRural) valRural.required = true;
-                } else if (zona === 'CORREG') {
+                } else if (zona === 'RURAL' || zona === 'CORREG') {
+                    if (pctInputsContainer) pctInputsContainer.classList.remove('hidden');
                     if (divRural) divRural.classList.remove('hidden');
                     if (valRural) valRural.required = true;
                 }
+                // If 'TODOS' is selected, inputs remain hidden.
             }
 
             // Initialize on load
@@ -650,6 +854,104 @@
         </script>
 
     </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-gray-100 py-6 px-6 mt-8">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-center gap-3">
+            <a href="https://casabero.com" target="_blank" rel="noopener noreferrer"
+                class="logo-group flex items-center gap-2 text-slate-400 hover:text-slate-700 transition-colors">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
+                    <path d="M 76 20 L 32 20 Q 20 20 20 32 L 20 68 Q 20 80 32 80 L 70 80" stroke="currentColor"
+                        stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+                    <rect x="70" y="76" width="8" height="8" rx="1" fill="currentColor" />
+                    <g class="logo-group">
+                        <rect class="logo-node" x="26" y="26" width="8" height="8" fill="currentColor" />
+                        <rect class="logo-node" x="66" y="26" width="8" height="8" fill="currentColor" />
+                        <rect class="logo-node" x="26" y="66" width="8" height="8" fill="currentColor" />
+                        <rect class="logo-node" x="66" y="66" width="8" height="8" fill="currentColor" />
+                    </g>
+                </svg>
+                <span class="text-xs font-medium">by casabero.com</span>
+            </a>
+        </div>
+    </footer>
+
+    <!-- GLOBAL PREMIUM UI SCRIPTS -->
+    <script>
+        // --- DARK MODE ---
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+            if (icon) icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+            showToast(isDark ? 'Modo oscuro activado' : 'Modo claro activado', 'info');
+        }
+
+        // Check saved preference on load
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.textContent = 'light_mode';
+        }
+
+        // --- TOAST NOTIFICATIONS ---
+        function showToast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span class="material-symbols-outlined text-[16px]">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}</span>${message}`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'toastSlideOut 0.3s ease-out forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // --- COUNTUP ANIMATION ---
+        function animateCountUp(element, target, duration = 1500) {
+            const start = 0;
+            const startTime = performance.now();
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeOut = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
+                const current = Math.floor(start + (target - start) * easeOut);
+                element.textContent = current.toLocaleString('es-CO');
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    element.textContent = target.toLocaleString('es-CO');
+                }
+            }
+            requestAnimationFrame(update);
+        }
+
+        // --- COPY TO CLIPBOARD ---
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('✓ Copiado: ' + text.substring(0, 20) + '...', 'success');
+            }).catch(() => {
+                showToast('Error al copiar', 'error');
+            });
+        }
+
+        // --- AUTO COUNTUP ON LOAD ---
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-countup]').forEach(el => {
+                const target = parseInt(el.dataset.countup, 10);
+                if (!isNaN(target)) {
+                    animateCountUp(el, target);
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
