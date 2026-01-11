@@ -21,13 +21,16 @@
         }
 
         .truncate-name {
-            max-width: 250px;
+            max-width: 220px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        /* Animación suave para nueva fila */
+        .new-row {
+            animation: highlight 1.5s ease-out;
+        }
+
         @keyframes highlight {
             0% {
                 background-color: #dbeafe;
@@ -36,10 +39,6 @@
             100% {
                 background-color: transparent;
             }
-        }
-
-        .new-row {
-            animation: highlight 2s ease-out;
         }
     </style>
 </head>
@@ -63,6 +62,7 @@
 
     <main class="flex-1 p-6 max-w-[1600px] mx-auto w-full">
 
+        <!-- CARGA DE ARCHIVOS -->
         {% if not resultados %}
         <div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-slate-200 mt-10">
             <h2 class="text-lg font-bold mb-6 text-slate-800 flex items-center gap-2">
@@ -89,63 +89,64 @@
                     <div>
                         <label class="block text-xs text-slate-700 font-bold mb-1">% Urbano</label>
                         <input type="number" step="0.01" name="pct_urbano"
-                            class="w-full rounded border-slate-300 text-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Ej: 4.5" required>
+                            class="w-full rounded border-slate-300 text-sm" placeholder="Ej: 4.5" required>
                     </div>
                     <div>
                         <label class="block text-xs text-slate-700 font-bold mb-1">% Rural</label>
                         <input type="number" step="0.01" name="pct_rural"
-                            class="w-full rounded border-slate-300 text-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Ej: 3.0" required>
+                            class="w-full rounded border-slate-300 text-sm" placeholder="Ej: 3.0" required>
                     </div>
                 </div>
                 <button type="submit"
                     class="w-full bg-blue-600 text-white py-2.5 rounded hover:bg-blue-700 transition font-medium text-sm shadow-sm">EJECUTAR
-                    ANÁLISIS</button>
+                    CRUCE</button>
             </form>
         </div>
         {% endif %}
 
+        <!-- RESULTADOS -->
         {% if resultados %}
         <div id="dashboard" class="space-y-6">
 
-            <!-- KPIs -->
+            <!-- TARJETAS DE ESTADÍSTICAS -->
             <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
                 <div class="bg-white p-3 rounded border border-slate-200 shadow-sm">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Predios Precierre</p>
-                    <p class="text-xl font-bold text-slate-800">{{ resultados.stats.total_predios_base }}</p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase">Total Analizados</p>
+                    <p class="text-xl font-bold text-slate-800">{{ resultados.stats.total_registros }}</p>
                 </div>
-                <div class="bg-white p-3 rounded border border-slate-200 shadow-sm">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Predios Postcierre</p>
-                    <p class="text-xl font-bold text-slate-800">{{ resultados.stats.total_predios_post }}</p>
+                <div class="bg-white p-3 rounded border border-blue-200 bg-blue-50 shadow-sm">
+                    <p class="text-[10px] text-blue-400 font-bold uppercase">Predios Nuevos</p>
+                    <p class="text-xl font-bold text-blue-600">{{ resultados.stats.nuevos }}</p>
                 </div>
-                <div class="bg-white p-3 rounded border border-slate-200 shadow-sm">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Diferencias</p>
+                <div class="bg-white p-3 rounded border border-orange-200 bg-orange-50 shadow-sm">
+                    <p class="text-[10px] text-orange-400 font-bold uppercase">Desaparecidos</p>
+                    <p class="text-xl font-bold text-orange-600">{{ resultados.stats.desaparecidos }}</p>
+                </div>
+                <div class="bg-white p-3 rounded border border-red-200 bg-red-50 shadow-sm">
+                    <p class="text-[10px] text-red-400 font-bold uppercase">Inconsistencias</p>
                     <p class="text-xl font-bold text-red-600">{{ resultados.stats.inconsistencias }}</p>
                 </div>
-                <!-- Buscador Flexible -->
+                <!-- BUSCADOR -->
                 <div
-                    class="col-span-2 bg-slate-800 p-3 rounded border border-slate-900 shadow-sm flex flex-col justify-center relative">
+                    class="bg-slate-800 p-3 rounded border border-slate-900 shadow-sm flex flex-col justify-center relative">
                     <div class="flex gap-2">
-                        <input type="text" id="searchInput" placeholder="Buscar por Predial (corto o largo) o Nombre..."
+                        <input type="text" id="searchInput" placeholder="Buscar Predial o Nombre..."
                             class="bg-slate-700 border-none text-white text-sm rounded placeholder-slate-400 focus:ring-1 focus:ring-blue-400 w-full h-9">
                         <button onclick="ejecutarBusqueda()"
-                            class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded text-xs font-bold">BUSCAR</button>
+                            class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded text-xs font-bold">IR</button>
                     </div>
                     <p id="searchMsg" class="text-[10px] text-slate-400 mt-1 h-3 absolute bottom-1 left-3"></p>
                 </div>
             </div>
 
-            <!-- Tabla Detallada -->
+            <!-- TABLA -->
             <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
                 <div class="bg-slate-50 border-b border-slate-200 px-4 py-2 flex justify-between items-center">
                     <span class="text-xs font-bold text-slate-500 uppercase">
-                        Predios en Muestra: <span id="countSelected" class="text-slate-800">0</span>
+                        En Muestra: <span id="countSelected" class="text-slate-800">0</span>
                     </span>
                     <button onclick="limpiarTabla()"
-                        class="text-[10px] text-red-500 hover:text-red-700 font-medium flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar
-                    </button>
+                        class="text-[10px] text-red-500 hover:text-red-700 font-medium">Limpiar</button>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -153,14 +154,14 @@
                         <thead class="bg-white text-slate-500 font-bold uppercase border-b border-slate-200">
                             <tr>
                                 <th class="px-3 py-2 w-32">Predial Nacional</th>
-                                <th class="px-3 py-2">Nombre Propietario</th>
+                                <th class="px-3 py-2">Propietario</th>
                                 <th class="px-3 py-2 w-10 text-center">Des</th>
-                                <th class="px-3 py-2 text-right">Precierre ($)</th>
+                                <th class="px-3 py-2 text-right">Base ($)</th>
                                 <th class="px-3 py-2 text-center text-[10px]">% Dec</th>
                                 <th class="px-3 py-2 text-right">Calculado ($)</th>
-                                <th class="px-3 py-2 text-right border-l font-bold text-slate-700">Postcierre ($)</th>
+                                <th class="px-3 py-2 text-right border-l font-bold text-slate-700">Sistema ($)</th>
                                 <th class="px-3 py-2 text-center text-green-600 font-bold">% Real</th>
-                                <th class="px-3 py-2 text-right text-red-600">Dif</th>
+                                <th class="px-3 py-2 text-right text-red-600">Diferencia</th>
                                 <th class="px-3 py-2 text-center">Estado</th>
                                 <th class="px-1 py-2"></th>
                             </tr>
@@ -171,11 +172,11 @@
                         <tfoot class="bg-slate-50 font-bold text-slate-700 border-t-2 border-slate-200">
                             <tr>
                                 <td colspan="3" class="px-3 py-3 text-right uppercase text-[10px] text-slate-400">
-                                    Totales Muestra:</td>
-                                <td class="px-3 py-3 num" id="sumPre">$0</td>
+                                    Totales:</td>
+                                <td class="px-3 py-3 num" id="sumBase">$0</td>
                                 <td class="px-3 py-3"></td>
                                 <td class="px-3 py-3 num" id="sumCalc">$0</td>
-                                <td class="px-3 py-3 num" id="sumPost">$0</td>
+                                <td class="px-3 py-3 num" id="sumSist">$0</td>
                                 <td class="px-3 py-3"></td>
                                 <td class="px-3 py-3 num text-red-600" id="sumDif">$0</td>
                                 <td colspan="2"></td>
@@ -187,7 +188,9 @@
         </div>
 
         <script>
-            const dataset = {{ resultados.data | tojson }};
+            // Data inyectada desde Python
+            const dataset = {{ resultados.data | tojson | safe }} || [];
+
             const tableBody = document.getElementById('comparisonTable');
             const searchInput = document.getElementById('searchInput');
             const msgLabel = document.getElementById('searchMsg');
@@ -197,7 +200,6 @@
             const fmtMoney = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
             const fmtPct = new Intl.NumberFormat('es-CO', { style: 'percent', minimumFractionDigits: 2 });
 
-            // Evento ENTER en el input
             searchInput.addEventListener("keypress", function (e) {
                 if (e.key === "Enter") {
                     e.preventDefault();
@@ -206,39 +208,36 @@
             });
 
             function ejecutarBusqueda() {
-                const query = searchInput.value.trim().toUpperCase(); // Normalizamos a mayúsculas
-                if (query.length < 4) {
-                    msgLabel.textContent = "Escribe al menos 4 caracteres";
+                const query = searchInput.value.trim().toUpperCase();
+                if (query.length < 3) {
+                    msgLabel.textContent = "Min 3 caracteres";
+                    msgLabel.className = "text-[10px] text-red-400 mt-1 h-3 absolute bottom-1 left-3";
                     return;
                 }
 
-                // LÓGICA DE BÚSQUEDA FLEXIBLE
-                // Busca si el predial INCLUYE el texto (flexible) O si el Nombre INCLUYE el texto
-                const found = dataset.find(p =>
-                    p.Predial_Nacional.includes(query) ||
-                    (p.Nombre && p.Nombre.toString().includes(query))
-                );
+                // Buscar por Predial o Nombre (Seguro contra nulos)
+                const found = dataset.find(p => {
+                    const predial = String(p.Predial_Nacional || "");
+                    const nombre = String(p.Nombre || "").toUpperCase();
+                    return predial.includes(query) || nombre.includes(query);
+                });
 
                 if (found) {
                     agregarFila(found);
-                    searchInput.value = ""; // Limpiar input
+                    searchInput.value = "";
                     msgLabel.textContent = "Encontrado: " + found.Predial_Nacional;
                     msgLabel.className = "text-[10px] text-green-400 mt-1 h-3 absolute bottom-1 left-3";
-                    setTimeout(() => { msgLabel.textContent = ""; }, 3000);
+                    setTimeout(() => msgLabel.textContent = "", 3000);
                 } else {
-                    msgLabel.textContent = "No encontrado en Precierre";
+                    msgLabel.textContent = "No encontrado en ningún archivo";
                     msgLabel.className = "text-[10px] text-red-400 mt-1 h-3 absolute bottom-1 left-3";
                 }
             }
 
             function agregarFila(item) {
-                // Si ya existe, avisar visualmente (opcional) o no hacer nada
                 if (selectedItems.some(i => i.Predial_Nacional === item.Predial_Nacional)) {
-                    // Mover al inicio para que el usuario vea que ya estaba
-                    eliminarFila(item.Predial_Nacional);
+                    eliminarFila(item.Predial_Nacional); // Lo movemos al inicio
                 }
-
-                // Agregar al inicio (LIFO - Último agregado aparece primero)
                 selectedItems.unshift(item);
                 renderTable();
             }
@@ -257,36 +256,36 @@
                 tableBody.innerHTML = "";
                 countLabel.textContent = selectedItems.length;
 
-                let sumPre = 0, sumCalc = 0, sumPost = 0, sumDif = 0;
+                let sumBase = 0, sumCalc = 0, sumSist = 0, sumDif = 0;
 
                 selectedItems.forEach((item, index) => {
-                    sumPre += item.Avaluo;
-                    sumCalc += item.Avaluo_Calc;
-                    sumPost += item.Avaluo_Post;
+                    sumBase += item.Base;
+                    sumCalc += item.Calculado;
+                    sumSist += item.Sistema;
                     sumDif += item.Diferencia;
 
                     const tr = document.createElement('tr');
-                    // Clase new-row solo para el primero (efecto visual)
                     tr.className = "hover:bg-slate-50 transition-colors group border-b border-slate-50 " + (index === 0 ? "new-row" : "");
 
-                    let statusClass = "bg-green-100 text-green-700";
-                    if (item.Estado === 'INCONSISTENCIA') statusClass = "bg-red-100 text-red-700";
-                    if (item.Estado === 'DESAPARECIDO') statusClass = "bg-orange-100 text-orange-700";
-                    if (item.Estado === 'NUEVO_PREDIO') statusClass = "bg-blue-100 text-blue-700";
-                    if (item.Estado === 'SIN_AUMENTO') statusClass = "bg-yellow-100 text-yellow-700";
+                    // Colores de Estado
+                    let badge = "bg-green-100 text-green-700";
+                    if (item.Estado === 'INCONSISTENCIA') badge = "bg-red-100 text-red-700";
+                    if (item.Estado === 'DESAPARECIDO') badge = "bg-orange-100 text-orange-700";
+                    if (item.Estado === 'NUEVO') badge = "bg-blue-100 text-blue-700";
+                    if (item.Estado === 'SIN_AUMENTO') badge = "bg-yellow-100 text-yellow-700";
 
                     tr.innerHTML = `
                         <td class="px-3 py-2 font-mono text-[10px] text-slate-600 truncate" title="${item.Predial_Nacional}">${item.Predial_Nacional}</td>
-                        <td class="px-3 py-2 font-bold text-slate-700 truncate-name" title="${item.Nombre}">${item.Nombre || 'N/A'}</td>
-                        <td class="px-3 py-2 text-center text-[10px] text-slate-500">${item.DestinoEconomico || '-'}</td>
-                        <td class="px-3 py-2 num text-slate-500">${fmtMoney.format(item.Avaluo)}</td>
+                        <td class="px-3 py-2 font-bold text-slate-700 truncate-name" title="${item.Nombre}">${item.Nombre}</td>
+                        <td class="px-3 py-2 text-center text-[10px] text-slate-500">${item.Destino}</td>
+                        <td class="px-3 py-2 num text-slate-500">${fmtMoney.format(item.Base)}</td>
                         <td class="px-3 py-2 text-center text-slate-400 border-l text-[9px]">${fmtPct.format(item.Pct_Teorico)}</td>
-                        <td class="px-3 py-2 num font-medium text-blue-600">${fmtMoney.format(item.Avaluo_Calc)}</td>
-                        <td class="px-3 py-2 num font-bold text-slate-800 border-l">${item.Avaluo_Post > 0 ? fmtMoney.format(item.Avaluo_Post) : '<span class="text-red-300">No Encontrado</span>'}</td>
-                        <td class="px-3 py-2 text-center text-green-600 text-[10px] font-bold">${item.Avaluo_Post > 0 ? fmtPct.format(item.Pct_Sistema) : '-'}</td>
+                        <td class="px-3 py-2 num font-medium text-blue-600">${fmtMoney.format(item.Calculado)}</td>
+                        <td class="px-3 py-2 num font-bold text-slate-800 border-l">${fmtMoney.format(item.Sistema)}</td>
+                        <td class="px-3 py-2 text-center text-green-600 text-[10px] font-bold">${item.Base > 0 ? fmtPct.format(item.Pct_Real) : '-'}</td>
                         <td class="px-3 py-2 num ${item.Diferencia !== 0 ? 'text-red-600 font-bold' : 'text-slate-300'}">${fmtMoney.format(item.Diferencia)}</td>
                         <td class="px-3 py-2 text-center">
-                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${statusClass}">${item.Estado}</span>
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${badge}">${item.Estado}</span>
                         </td>
                         <td class="px-1 py-2 text-center">
                             <button onclick="eliminarFila('${item.Predial_Nacional}')" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -297,9 +296,9 @@
                     tableBody.appendChild(tr);
                 });
 
-                document.getElementById('sumPre').textContent = fmtMoney.format(sumPre);
+                document.getElementById('sumBase').textContent = fmtMoney.format(sumBase);
                 document.getElementById('sumCalc').textContent = fmtMoney.format(sumCalc);
-                document.getElementById('sumPost').textContent = fmtMoney.format(sumPost);
+                document.getElementById('sumSist').textContent = fmtMoney.format(sumSist);
                 document.getElementById('sumDif').textContent = fmtMoney.format(sumDif);
             }
         </script>
