@@ -333,31 +333,41 @@
 
 
                 <!-- 2. Estadísticas Avanzadas (Mean, Median, Mode, Std) -->
-                <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-6 relative">
-                    <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-6">
+                    <div
+                        class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-slate-100 pb-4 gap-4">
                         <h3 class="text-sm font-bold text-secondary uppercase">Estadísticas del Avalúo (Sistema)</h3>
                         <button onclick="window.print()"
-                            class="no-print bg-main text-white px-4 py-2 rounded text-xs font-bold hover:bg-black transition flex items-center gap-2">
+                            class="no-print bg-main text-white px-4 py-2 rounded text-xs font-bold hover:bg-black transition flex items-center gap-2 shadow-sm">
                             <span class="material-symbols-outlined text-[16px]">print</span> Imprimir Reporte
                         </button>
                     </div>
 
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="p-3 bg-ui-element rounded border border-slate-100">
-                            <p class="text-[10px] text-secondary uppercase font-bold">Promedio (Mean)</p>
-                            <p class="text-lg font-bold text-main money-format">{{ resultados.stats.mean }}</p>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div
+                            class="p-4 bg-ui-element rounded-lg border border-slate-100 flex flex-col justify-center items-start">
+                            <p class="text-[10px] text-secondary uppercase font-bold tracking-wider mb-1">Promedio</p>
+                            <p class="text-2xl font-bold text-main money-format tracking-tight">{{ resultados.stats.mean
+                                }}</p>
                         </div>
-                        <div class="p-3 bg-ui-element rounded border border-slate-100">
-                            <p class="text-[10px] text-secondary uppercase font-bold">Mediana</p>
-                            <p class="text-lg font-bold text-blue-600 money-format">{{ resultados.stats.median }}</p>
+                        <div
+                            class="p-4 bg-ui-element rounded-lg border border-slate-100 flex flex-col justify-center items-start">
+                            <p class="text-[10px] text-secondary uppercase font-bold tracking-wider mb-1">Mediana</p>
+                            <p class="text-2xl font-bold text-blue-600 money-format tracking-tight">{{
+                                resultados.stats.median }}</p>
                         </div>
-                        <div class="p-3 bg-ui-element rounded border border-slate-100">
-                            <p class="text-[10px] text-secondary uppercase font-bold">Moda</p>
-                            <p class="text-lg font-bold text-purple-600 money-format">{{ resultados.stats.mode }}</p>
+                        <div
+                            class="p-4 bg-ui-element rounded-lg border border-slate-100 flex flex-col justify-center items-start">
+                            <p class="text-[10px] text-secondary uppercase font-bold tracking-wider mb-1">Moda</p>
+                            <p class="text-2xl font-bold text-purple-600 money-format tracking-tight">{{
+                                resultados.stats.mode }}</p>
                         </div>
-                        <div class="p-3 bg-ui-element rounded border border-slate-100">
-                            <p class="text-[10px] text-secondary uppercase font-bold">Desviación Est.</p>
-                            <p class="text-lg font-bold text-orange-600 money-format">{{ resultados.stats.std }}</p>
+                        <div
+                            class="p-4 bg-ui-element rounded-lg border border-slate-100 flex flex-col justify-center items-start">
+                            <p class="text-[10px] text-secondary uppercase font-bold tracking-wider mb-1">Desviación
+                                Est.</p>
+                            <p class="text-2xl font-bold text-orange-600 money-format tracking-tight">{{
+                                resultados.stats.std }}</p>
                         </div>
                     </div>
                 </div>
@@ -546,55 +556,54 @@
         <script>
             // --- DYNAMIC FORM LOGIC ---
             function updateFormVisibility() {
-                const zona = document.getElementById('zona_filter').value;
+                const zonaInput = document.getElementById('zona_filter');
+                if (!zonaInput) return; // Exit if not on the form page
+
+                const zona = zonaInput.value;
                 const divUrbano = document.getElementById('div_urbano');
                 const divRural = document.getElementById('div_rural');
                 const valUrbano = document.getElementById('val_urbano');
                 const valRural = document.getElementById('val_rural');
 
                 // Reset classes
-                divUrbano.classList.add('hidden');
-                divRural.classList.add('hidden');
-                valUrbano.required = false;
-                valRural.required = false;
-                valUrbano.value = ''; // Clear values when hidden
-                valRural.value = ''; // Clear values when hidden
+                if (divUrbano) divUrbano.classList.add('hidden');
+                if (divRural) divRural.classList.add('hidden');
+                if (valUrbano) { valUrbano.required = false; valUrbano.value = ''; }
+                if (valRural) { valRural.required = false; valRural.value = ''; }
 
                 if (zona === 'TODOS') {
-                    divUrbano.classList.remove('hidden');
-                    divRural.classList.remove('hidden');
-                    valUrbano.required = true;
-                    valRural.required = true;
+                    if (divUrbano) divUrbano.classList.remove('hidden');
+                    if (divRural) divRural.classList.remove('hidden');
+                    if (valUrbano) valUrbano.required = true;
+                    if (valRural) valRural.required = true;
                 } else if (zona === 'URBANO') {
-                    divUrbano.classList.remove('hidden');
-                    valUrbano.required = true;
+                    if (divUrbano) divUrbano.classList.remove('hidden');
+                    if (valUrbano) valUrbano.required = true;
                 } else if (zona === 'RURAL') {
-                    divRural.classList.remove('hidden');
-                    valRural.required = true;
+                    if (divRural) divRural.classList.remove('hidden');
+                    if (valRural) valRural.required = true;
                 } else if (zona === 'CORREG') {
-                    // Corregimientos podría usar pct Rural o uno propio. 
-                    // Por ahora se deja opción de introducir ambos o solo rural si se definiera. 
-                    // Asumiremos RURAL para Corregimientos por defecto o mostramos Rural?
-                    // Mostremos AMBOS para seguridad, o solo el relevante.
-                    // Si es corregimiento, suele ser rural, pero dejemos el rural visible.
-                    divRural.classList.remove('hidden');
-                    valRural.required = true;
-                    // Cambiamos label dinámicamente? No, dejemos input RURAL.
+                    if (divRural) divRural.classList.remove('hidden');
+                    if (valRural) valRural.required = true;
                 }
             }
 
             // Initialize on load
             document.addEventListener('DOMContentLoaded', () => {
+                // Try to initialize form if it exists
                 updateFormVisibility();
 
-                // AUTO-LOAD TABLE
-                if (dataset && dataset.length > 0) {
+                // AUTO-LOAD TABLE (Only if dataset is defined)
+                if (typeof dataset !== 'undefined' && dataset && dataset.length > 0) {
                     // Cargar los primeros 1000 registros automáticamente
-                    selectedItems = dataset.slice(0, 1000);
-                    renderTable();
+                    if (typeof selectedItems !== 'undefined') {
+                        selectedItems = dataset.slice(0, 1000);
+                        renderTable();
 
-                    if (dataset.length > 1000) {
-                        document.getElementById('countSelected').textContent = "1000 (de " + dataset.length + ")";
+                        const countLabel = document.getElementById('countSelected');
+                        if (dataset.length > 1000 && countLabel) {
+                            countLabel.textContent = "1000 (de " + dataset.length + ")";
+                        }
                     }
                 }
             });
