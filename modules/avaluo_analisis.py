@@ -269,34 +269,17 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_p
     # 4. Estadísticas Generales (KPIs)
     # 4. Estadísticas Generales (KPIs)
     
-    # Calculo Estadísticos Avanzados (Sobre Avaluo Sistema)
-    avaluos_sist = df_final['Avaluo_post']
-    
-    mean_val = avaluos_sist.mean()
-    median_val = avaluos_sist.median()
-    std_val = avaluos_sist.std()
-    
-    # Moda (puede haber múltiples, tomamos la primera o 0 si vacía)
-    mode_series = avaluos_sist.mode()
+    # 4. Estadísticas Generales (KPIs) (Sobre el Universo para cálculos globales)
+    avaluos_sist_full = df_final['Avaluo_post']
+    mean_val = avaluos_sist_full.mean()
+    median_val = avaluos_sist_full.median()
+    std_val = avaluos_sist_full.std()
+    mode_series = avaluos_sist_full.mode()
     mode_val = mode_series.iloc[0] if not mode_series.empty else 0
 
-    stats = {
-        'sample_pct': sample_pct,
-        'zona_filter': zona_filter,
-        'total_registros': int(len(df_final)),
-        'ok': int((df_final['Estado'] == 'OK').sum()),
-        'nuevos': int((df_final['Estado'] == 'NUEVO').sum()),
-        'desaparecidos': int((df_final['Estado'] == 'DESAPARECIDO').sum()),
-        'inconsistencias': int((df_final['Estado'] == 'INCONSISTENCIA').sum()),
-        # Advanced Stats
-        'mean': float(mean_val) if not np.isnan(mean_val) else 0,
-        'median': float(median_val) if not np.isnan(median_val) else 0,
-        'mode': float(mode_val) if not np.isnan(mode_val) else 0,
-        'std': float(std_val) if not np.isnan(std_val) else 0
-    }
-
-    # 5. Estadísticas ADE (ELIMINADO por solicitud, reemplazado por Stats Avanzados)
-    ade_stats = [] # Se mantiene vacío para compatibilidad o se elimina uso en front
+    # COMPARADOR GLOBAL: Extraer listas completas antes del muestreo
+    nuevos_full = df_final[df_final['Estado'] == 'NUEVO'][['Predial_Nacional', 'Nombre', 'Zona', 'Avaluo_post']].rename(columns={'Avaluo_post': 'Sistema'}).to_dict(orient='records')
+    desaparecidos_full = df_final[df_final['Estado'] == 'DESAPARECIDO'][['Predial_Nacional', 'Nombre', 'Zona', 'Avaluo_pre']].rename(columns={'Avaluo_pre': 'Base'}).to_dict(orient='records')
 
     # 6. Preparar Data Detallada
     cols = ['Predial_Nacional', 'Nombre', 'Destino', 'Zona', 'Municipio',
@@ -309,13 +292,31 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_p
     })
     
     # APLICAR MUESTREO AQUÍ (SOLO PARA LA VISTA DE TABLA)
-    sample_pct = float(sample_pct)
-    if sample_pct < 100:
-        n_sample = int(len(df_export) * (sample_pct / 100))
+    sample_pct_val = float(sample_pct)
+    if sample_pct_val < 100:
+        n_sample = int(len(df_export) * (sample_pct_val / 100))
         if n_sample < 1: n_sample = 1
         if n_sample < len(df_export):
              df_export = df_export.sample(n=n_sample)
     
+    # Estadísticas de la MUESTRA (Para los KPIs del Header)
+    stats = {
+        'sample_pct': sample_pct,
+        'zona_filter': zona_filter,
+        'total_registros_muestra': int(len(df_export)),
+        'total_registros_universo': int(len(df_final)),
+        'ok': int((df_export['Estado'] == 'OK').sum()),
+        'nuevos': int((df_export['Estado'] == 'NUEVO').sum()),
+        'desaparecidos': int((df_export['Estado'] == 'DESAPARECIDO').sum()),
+        'inconsistencias': int((df_export['Estado'] == 'INCONSISTENCIA').sum()),
+        # Stats Avanzados (Siguen siendo del Universo o de la Muestra? El usuario no especificó para estos, 
+        # pero usualmente stats financieras son del universo. Los mantendremos del universo pero los KPIs de conteo de la muestra.)
+        'mean': float(mean_val) if not np.isnan(mean_val) else 0,
+        'median': float(median_val) if not np.isnan(median_val) else 0,
+        'mode': float(mode_val) if not np.isnan(mode_val) else 0,
+        'std': float(std_val) if not np.isnan(std_val) else 0
+    }
+
     records = df_export.to_dict(orient='records')
 
     # 7. OUTLIERS (Análisis Estadístico)
@@ -362,4 +363,4 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_p
             print(f"Error calculando outliers: {e}")
             outliers_list = []
 
-    return {'stats': stats, 'ade_stats': ade_stats, 'data': records, 'outliers': outliers_list}
+    return {'stats': stats, 'ade_stats': [], 'data': records, 'outliers': outliers_list, 'nuevos_full': nuevos_full, 'desaparecidos_full': desaparecidos_full}

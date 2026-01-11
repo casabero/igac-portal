@@ -468,19 +468,13 @@
 
             <!-- SECCIÓN 1: KPIs y Estadísticas (Full Width Stack) -->
             <div class="space-y-4">
-                <!-- A. KPIs Principales -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div
-                        class="gradient-card p-4 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between h-24">
-                        <p class="text-[10px] text-gray-600 font-bold uppercase tracking-wider">Universo</p>
-                        <p class="text-3xl font-bold text-gray-900 countup"
-                            data-countup="{{ resultados.stats.total_registros }}">0</p>
-                    </div>
+                <!-- A. KPIs Principales (Muestra) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     <div
                         class="gradient-card p-4 rounded-lg border border-blue-100 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden">
                         <div class="absolute right-0 top-0 p-2 opacity-10"><span
                                 class="material-symbols-outlined text-4xl text-blue-500">new_releases</span></div>
-                        <p class="text-[10px] text-blue-600 font-bold uppercase tracking-wider">Nuevos</p>
+                        <p class="text-[10px] text-blue-600 font-bold uppercase tracking-wider">Nuevos (En Muestra)</p>
                         <p class="text-3xl font-bold text-blue-700 countup"
                             data-countup="{{ resultados.stats.nuevos }}">0</p>
                     </div>
@@ -489,7 +483,8 @@
                         <div class="absolute right-0 top-0 p-2 opacity-10"><span
                                 class="material-symbols-outlined text-4xl text-orange-500">do_not_disturb_on</span>
                         </div>
-                        <p class="text-[10px] text-orange-600 font-bold uppercase tracking-wider">Desaparecidos</p>
+                        <p class="text-[10px] text-orange-600 font-bold uppercase tracking-wider">Desaparecidos (En
+                            Muestra)</p>
                         <p class="text-3xl font-bold text-orange-700 countup"
                             data-countup="{{ resultados.stats.desaparecidos }}">0</p>
                     </div>
@@ -497,7 +492,8 @@
                         class="gradient-card p-4 rounded-lg border border-red-100 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden">
                         <div class="absolute right-0 top-0 p-2 opacity-10"><span
                                 class="material-symbols-outlined text-4xl text-red-500">warning</span></div>
-                        <p class="text-[10px] text-red-600 font-bold uppercase tracking-wider">Inconsistencias</p>
+                        <p class="text-[10px] text-red-600 font-bold uppercase tracking-wider">Inconsistencias (En
+                            Muestra)</p>
                         <p class="text-3xl font-bold text-red-700 countup"
                             data-countup="{{ resultados.stats.inconsistencias }}">0</p>
                     </div>
@@ -592,47 +588,90 @@
                 </div>
             </div>
 
-            <!-- 4. Sección de Outliers (Variaciones Atípicas) -->
-            {% if resultados.outliers and resultados.outliers|length > 0 %}
-            <div class="bg-white border border-red-100 rounded-lg shadow-sm overflow-hidden mt-6">
-                <div class="bg-red-50/50 border-b border-red-100 px-4 py-3 flex justify-between items-center">
-                    <span class="text-[11px] font-bold text-red-600 uppercase tracking-wider flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[16px]">crisis_alert</span>
-                        OUTLIERS: VARIACIONES ATÍPICAS DETECTADAS
-                    </span>
-                    <span class="text-[9px] text-red-400 bg-white px-2 py-0.5 rounded border border-red-100">Top 10
-                        Extreme Cases</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead
-                            class="bg-white text-secondary font-bold uppercase border-b border-red-100/50 text-[9px] tracking-wide">
-                            <tr>
-                                <th class="px-2 py-2 font-mono">Predial</th>
-                                <th class="px-2 py-2">Propietario</th>
-                                <th class="px-2 py-2 text-center">Zona</th>
-                                <th class="px-2 py-2 text-right">Avalúo Precierre</th>
-                                <th class="px-2 py-2 text-right">Avalúo Poscierre</th>
-                                <th class="px-2 py-2 text-center font-extrabold text-red-600">% Var. Real</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-red-50/50 text-[10px]">
-                            {% for out in resultados.outliers %}
-                            <tr class="hover:bg-red-50/20 transition-colors">
-                                <td class="px-2 py-1 font-mono text-secondary">{{ out.Predial_Nacional }}</td>
-                                <td class="px-2 py-1 font-bold text-main">{{ out.Nombre }}</td>
-                                <td class="px-2 py-1 text-center">{{ out.Zona }}</td>
-                                <td class="px-2 py-1 text-right text-slate-500 money-format">{{ out.Base }}</td>
-                                <td class="px-2 py-1 text-right font-bold text-main money-format">{{ out.Sistema }}</td>
-                                <td class="px-2 py-1 text-center font-extrabold text-red-600">{{
-                                    "%.2f"|format(out.Pct_Real * 100) }}%</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <!-- 5. Comparador Global (Full Data) -->
+            <div class="mt-8 space-y-6">
+                <h2 class="text-lg font-bold text-main flex items-center gap-2 border-b border-slate-200 pb-2">
+                    <span class="material-symbols-outlined text-blue-600">compare_arrows</span>
+                    Comparador Global de Cambios (Independiente de la Muestra)
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Tabla: Nuevos -->
+                    <div
+                        class="bg-white border border-blue-100 rounded-lg shadow-sm overflow-hidden h-96 flex flex-col">
+                        <div class="bg-blue-50 px-4 py-3 border-b border-blue-100 flex justify-between items-center">
+                            <span class="text-[11px] font-bold text-blue-700 uppercase tracking-wider">
+                                Registros Nuevos ({{ resultados.nuevos_full|length }})
+                            </span>
+                        </div>
+                        <div class="overflow-y-auto flex-1">
+                            <table class="w-full text-left border-collapse">
+                                <thead
+                                    class="sticky top-0 bg-white shadow-sm text-secondary font-bold uppercase border-b border-slate-200 text-[9px] z-10">
+                                    <tr>
+                                        <th class="px-2 py-2">Predial</th>
+                                        <th class="px-2 py-2">Nombre</th>
+                                        <th class="px-2 py-2 text-right">Avalúo</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-50 text-[10px]">
+                                    {% for item in resultados.nuevos_full %}
+                                    <tr class="hover:bg-blue-50/10">
+                                        <td class="px-2 py-1 font-mono text-secondary">{{ item.Predial_Nacional }}</td>
+                                        <td class="px-2 py-1 font-medium">{{ item.Nombre }}</td>
+                                        <td class="px-2 py-1 text-right font-bold money-format">{{ item.Sistema }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% if not resultados.nuevos_full %}
+                                    <tr>
+                                        <td colspan="3" class="px-4 py-8 text-center text-slate-400 italic">No hay
+                                            registros nuevos</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tabla: Desaparecidos -->
+                    <div
+                        class="bg-white border border-orange-100 rounded-lg shadow-sm overflow-hidden h-96 flex flex-col">
+                        <div
+                            class="bg-orange-50 px-4 py-3 border-b border-orange-100 flex justify-between items-center">
+                            <span class="text-[11px] font-bold text-orange-700 uppercase tracking-wider">
+                                Registros Desaparecidos ({{ resultados.desaparecidos_full|length }})
+                            </span>
+                        </div>
+                        <div class="overflow-y-auto flex-1">
+                            <table class="w-full text-left border-collapse">
+                                <thead
+                                    class="sticky top-0 bg-white shadow-sm text-secondary font-bold uppercase border-b border-slate-200 text-[9px] z-10">
+                                    <tr>
+                                        <th class="px-2 py-2">Predial</th>
+                                        <th class="px-2 py-2">Nombre</th>
+                                        <th class="px-2 py-2 text-right">Avalúo</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-50 text-[10px]">
+                                    {% for item in resultados.desaparecidos_full %}
+                                    <tr class="hover:bg-orange-50/10">
+                                        <td class="px-2 py-1 font-mono text-secondary">{{ item.Predial_Nacional }}</td>
+                                        <td class="px-2 py-1 font-medium">{{ item.Nombre }}</td>
+                                        <td class="px-2 py-1 text-right font-bold money-format">{{ item.Base }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% if not resultados.desaparecidos_full %}
+                                    <tr>
+                                        <td colspan="3" class="px-4 py-8 text-center text-slate-400 italic">No hay
+                                            registros desaparecidos</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
-            {% endif %}
         </div>
 
         <script>
