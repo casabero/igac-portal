@@ -5,10 +5,36 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Auditoría Catastral</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "main": "#111111",       // Negro Tinta
+                        "secondary": "#666666",  // Gris Tecnológico
+                        "ui-element": "#F3F4F6", // Gris Fondo UI
+                        "json-key": "#111111",   // Keys en JSON
+                        "json-string": "#555555",// Values en JSON
+                        "accent": "#000000"      // Acentos fuertes
+                    },
+                    fontFamily: {
+                        "display": ["Outfit", "sans-serif"], // Títulos Grandes
+                        "sans": ["Inter", "sans-serif"],     // Texto de lectura
+                        "mono": ["Fira Code", "monospace"],  // Código y Datos
+                    },
+                    cursor: {
+                        'none': 'none',
+                    }
+                },
+            },
+        }
+    </script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -21,7 +47,7 @@
         }
 
         .truncate-name {
-            max-width: 220px;
+            max-width: 200px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -40,17 +66,116 @@
                 background-color: transparent;
             }
         }
+
+        /* --- CASABERO FX --- */
+        body {
+            cursor: none;
+        }
+
+        /* Ocultar cursor nativo */
+
+        .cad-cursor-line {
+            position: fixed;
+            background-color: #111111;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.4;
+        }
+
+        #cursor-x-axis {
+            height: 1px;
+            width: 100vw;
+            left: 0;
+            top: 0;
+        }
+
+        #cursor-y-axis {
+            width: 1px;
+            height: 100vh;
+            top: 0;
+            left: 0;
+        }
+
+        #cursor-pickbox {
+            position: fixed;
+            width: 14px;
+            height: 14px;
+            border: 1.5px solid #111111;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+        }
+
+        /* Interacción hover */
+        body:has(a:hover) #cursor-pickbox,
+        body:has(button:hover) #cursor-pickbox,
+        body:has(input:hover) #cursor-pickbox,
+        body:has(label:hover) #cursor-pickbox {
+            border-width: 2.5px;
+            width: 18px;
+            height: 18px;
+            transition: all 0.1s ease;
+            background-color: rgba(17, 17, 17, 0.1);
+        }
+
+        /* Glitch Effect */
+        .glitch-hover:hover {
+            animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+        }
+
+        @keyframes glitch {
+            0% {
+                transform: translate(0)
+            }
+
+            20% {
+                transform: translate(-2px, 2px)
+            }
+
+            40% {
+                transform: translate(-2px, -2px)
+            }
+
+            60% {
+                transform: translate(2px, 2px)
+            }
+
+            80% {
+                transform: translate(2px, -2px)
+            }
+
+            100% {
+                transform: translate(0)
+            }
+        }
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-ui-element text-main min-h-screen flex flex-col font-sans">
+    <!-- ENGINEER CURSOR -->
+    <div id="cursor-x-axis" class="cad-cursor-line hidden md:block"></div>
+    <div id="cursor-y-axis" class="cad-cursor-line hidden md:block"></div>
+    <div id="cursor-pickbox" class="hidden md:block"></div>
 
     <nav class="bg-white border-b px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm">
         <div class="flex items-center gap-4">
-            <a href="/" class="text-slate-400 hover:text-slate-800"><span
-                    class="material-symbols-outlined">arrow_back</span></a>
+            <a href="/" class="text-main hover:text-accent transition-transform hover:scale-110">
+                <!-- CASABERO LOGO (Mini 32x32) -->
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-main">
+                    <path d="M 76 20 L 32 20 Q 20 20 20 32 L 20 68 Q 20 80 32 80 L 70 80" stroke="currentColor"
+                        stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+                    <rect x="70" y="76" width="8" height="8" rx="1" fill="currentColor" />
+                    <rect x="26" y="26" width="8" height="8" fill="currentColor" />
+                    <rect x="66" y="26" width="8" height="8" fill="currentColor" />
+                    <rect x="26" y="66" width="8" height="8" fill="currentColor" />
+                    <rect x="66" y="66" width="8" height="8" fill="currentColor" />
+                </svg>
+            </a>
             <div>
-                <h1 class="font-bold text-slate-800 text-sm">Auditoría de Incremento Catastral</h1>
+                <h1 class="font-display font-bold text-main text-lg glitch-hover tracking-wide">Auditoría de Incremento
+                    Catastral</h1>
             </div>
         </div>
         {% if resultados %}
@@ -62,44 +187,63 @@
 
     <main class="flex-1 p-6 max-w-[1600px] mx-auto w-full">
 
-        <!-- CARGA DE ARCHIVOS -->
+        <!-- FORMULARIO INICIAL -->
         {% if not resultados %}
         <div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-slate-200 mt-10">
-            <h2 class="text-lg font-bold mb-6 text-slate-800 flex items-center gap-2">
+            <h2 class="text-lg font-bold mb-6 text-main flex items-center gap-2">
                 <span class="material-symbols-outlined text-blue-600">upload_file</span> Cargar Archivos Planos
             </h2>
             <form method="POST" enctype="multipart/form-data" class="space-y-6">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] font-bold uppercase mb-1 text-slate-500">1. Precierre
+                        <label class="block text-[10px] font-bold uppercase mb-1 text-secondary">1. Precierre
                             (Base)</label>
                         <input type="file" name="file_pre"
                             class="block w-full text-xs file:mr-3 file:py-2 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 cursor-pointer border border-slate-200 rounded"
                             required>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold uppercase mb-1 text-slate-500">2. Postcierre
+                        <label class="block text-[10px] font-bold uppercase mb-1 text-secondary">2. Postcierre
                             (Final)</label>
                         <input type="file" name="file_post"
                             class="block w-full text-xs file:mr-3 file:py-2 file:px-3 file:rounded file:border-0 file:bg-green-50 file:text-green-700 cursor-pointer border border-slate-200 rounded"
                             required>
                     </div>
                 </div>
-                <div class="bg-slate-50 p-4 rounded border border-slate-200 grid grid-cols-2 gap-4">
+                <div class="bg-ui-element p-4 rounded border border-slate-200 grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs text-slate-700 font-bold mb-1">% Urbano</label>
+                        <label class="block text-xs text-main font-bold mb-1">% Urbano</label>
                         <input type="number" step="0.01" name="pct_urbano"
                             class="w-full rounded border-slate-300 text-sm" placeholder="Ej: 4.5" required>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-700 font-bold mb-1">% Rural</label>
+                        <label class="block text-xs text-main font-bold mb-1">% Rural</label>
                         <input type="number" step="0.01" name="pct_rural"
                             class="w-full rounded border-slate-300 text-sm" placeholder="Ej: 3.0" required>
                     </div>
                 </div>
-                <button type="submit"
-                    class="w-full bg-blue-600 text-white py-2.5 rounded hover:bg-blue-700 transition font-medium text-sm shadow-sm">EJECUTAR
-                    CRUCE</button>
+
+                <div class="bg-blue-50 p-4 rounded border border-blue-100 mt-4">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center h-5">
+                            <input id="sample_mode" name="sample_mode" type="checkbox"
+                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                        </div>
+                        <div class="ml-2 text-sm">
+                            <label for="sample_mode" class="font-bold text-main">🧪 Modo Prueba (Muestra
+                                Aleatoria)</label>
+                            <p id="helper-checkbox-text" class="text-xs font-normal text-secondary">Analizar solo una
+                                muestra de 5,000 predios para verificar integridad rápidamente.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <button type="submit"
+                        class="w-full bg-blue-600 text-white py-2.5 rounded hover:bg-blue-700 transition font-medium text-sm shadow-sm flex justify-center items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">rocket_launch</span> EJECUTAR ANÁLISIS
+                    </button>
+                </div>
             </form>
         </div>
         {% endif %}
@@ -108,11 +252,73 @@
         {% if resultados %}
         <div id="dashboard" class="space-y-6">
 
-            <!-- TARJETAS DE ESTADÍSTICAS -->
+            <!-- ALERTA DE MODO MUESTRA -->
+            {% if resultados.stats.sample_mode %}
+            <div
+                class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r shadow-sm flex items-center justify-between">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined text-yellow-500 mr-2">science</span>
+                    <div>
+                        <p class="text-sm font-bold text-yellow-700">VISTA DE MUESTRA ACTIVA</p>
+                        <p class="text-xs text-yellow-600">Mostrando análisis sobre una muestra aleatoria de ~5,000
+                            predios. Los totales financieros son estimados.</p>
+                    </div>
+                </div>
+                <a href="/avaluos"
+                    class="text-xs bg-white border border-yellow-300 px-3 py-1 rounded text-yellow-700 hover:bg-yellow-100 font-bold">Cargar
+                    Todo</a>
+            </div>
+            {% endif %}
+
+            <!-- DASHBOARD DE INTEGRIDAD (NUEVO) -->
+            {% if resultados.stats.desaparecidos > 0 or resultados.stats.nuevos > 0 %}
+            <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                <div class="bg-ui-element px-4 py-2 border-b border-slate-200 flex justify-between items-center">
+                    <h3 class="font-bold text-main text-xs uppercase flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px] text-purple-600">health_and_safety</span>
+                        Reporte de Integridad de Cruce
+                    </h3>
+                </div>
+                <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Desaparecidos -->
+                    <div class="flex items-start gap-3">
+                        <div class="p-2 bg-orange-100 text-orange-600 rounded-lg">
+                            <span class="material-symbols-outlined">person_off</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-orange-700">Predios Desaparecidos</p>
+                            <p class="text-2xl font-bold text-main">{{ resultados.stats.desaparecidos }}</p>
+                            <p class="text-xs text-secondary leading-tight mt-1">
+                                Estaban en el Precierre pero NO aparecen en el Postcierre.
+                                <br><a href="#" onclick="filtrarEstado('DESAPARECIDO')"
+                                    class="text-blue-600 hover:underline font-bold">Ver lista</a>
+                            </p>
+                        </div>
+                    </div>
+                    <!-- Nuevos -->
+                    <div class="flex items-start gap-3 border-l border-slate-100 pl-6">
+                        <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                            <span class="material-symbols-outlined">person_add</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-blue-700">Predios Nuevos</p>
+                            <p class="text-2xl font-bold text-main">{{ resultados.stats.nuevos }}</p>
+                            <p class="text-xs text-secondary leading-tight mt-1">
+                                Aparecen en el Postcierre pero NO estaban en el Precierre.
+                                <br><a href="#" onclick="filtrarEstado('NUEVO')"
+                                    class="text-blue-600 hover:underline font-bold">Ver lista</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 1. KPIs Globales -->
             <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
                 <div class="bg-white p-3 rounded border border-slate-200 shadow-sm">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Total Analizados</p>
-                    <p class="text-xl font-bold text-slate-800">{{ resultados.stats.total_registros }}</p>
+                    <p class="text-[10px] text-secondary font-bold uppercase">Universo Analizado</p>
+                    <p class="text-xl font-bold text-main">{{ resultados.stats.total_registros }}</p>
                 </div>
                 <div class="bg-white p-3 rounded border border-blue-200 bg-blue-50 shadow-sm">
                     <p class="text-[10px] text-blue-400 font-bold uppercase">Predios Nuevos</p>
@@ -126,7 +332,7 @@
                     <p class="text-[10px] text-red-400 font-bold uppercase">Inconsistencias</p>
                     <p class="text-xl font-bold text-red-600">{{ resultados.stats.inconsistencias }}</p>
                 </div>
-                <!-- BUSCADOR -->
+                <!-- Mini Buscador -->
                 <div
                     class="bg-slate-800 p-3 rounded border border-slate-900 shadow-sm flex flex-col justify-center relative">
                     <div class="flex gap-2">
@@ -135,50 +341,75 @@
                         <button onclick="ejecutarBusqueda()"
                             class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded text-xs font-bold">IR</button>
                     </div>
-                    <p id="searchMsg" class="text-[10px] text-slate-400 mt-1 h-3 absolute bottom-1 left-3"></p>
+                    <p id="searchMsg" class="text-[10px] text-secondary mt-1 h-3 absolute bottom-1 left-3"></p>
                 </div>
             </div>
 
-            <!-- TABLA -->
+            <!-- 2. Sección ADE (Análisis Destino Económico) -->
+            <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-4">
+                <h3 class="text-xs font-bold text-secondary uppercase mb-3 border-b border-slate-100 pb-2">Resumen por
+                    Destino Económico (ADE)</h3>
+                <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+                    {% for ade in resultados.ade_stats %}
+                    <div class="bg-ui-element p-2 rounded border border-slate-200">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-bold bg-slate-200 px-1.5 rounded text-main">{{ ade.Destino
+                                }}</span>
+                            <span class="text-[10px] text-secondary">{{ ade.Cantidad }} predios</span>
+                        </div>
+                        <p class="text-sm font-bold text-main text-right money-format">{{ ade.Total_Avaluo }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 3. Tabla Detallada -->
             <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-                <div class="bg-slate-50 border-b border-slate-200 px-4 py-2 flex justify-between items-center">
-                    <span class="text-xs font-bold text-slate-500 uppercase">
-                        En Muestra: <span id="countSelected" class="text-slate-800">0</span>
+                <div class="bg-ui-element border-b border-slate-200 px-4 py-2 flex justify-between items-center">
+                    <span class="text-xs font-bold text-secondary uppercase">
+                        Predios en Muestra: <span id="countSelected" class="text-main">0</span>
                     </span>
                     <button onclick="limpiarTabla()"
-                        class="text-[10px] text-red-500 hover:text-red-700 font-medium">Limpiar</button>
+                        class="text-[10px] text-red-500 hover:text-red-700 font-medium flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar
+                    </button>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs text-left">
-                        <thead class="bg-white text-slate-500 font-bold uppercase border-b border-slate-200">
+                        <thead class="bg-white text-secondary font-bold uppercase border-b border-slate-200">
                             <tr>
-                                <th class="px-3 py-2 w-32">Predial Nacional</th>
-                                <th class="px-3 py-2">Propietario</th>
-                                <th class="px-3 py-2 w-10 text-center">Des</th>
-                                <th class="px-3 py-2 text-right">Base ($)</th>
-                                <th class="px-3 py-2 text-center text-[10px]">% Dec</th>
-                                <th class="px-3 py-2 text-right">Calculado ($)</th>
-                                <th class="px-3 py-2 text-right border-l font-bold text-slate-700">Sistema ($)</th>
+                                <th class="px-3 py-2 w-32 border-r border-slate-100">Predial Nacional</th>
+                                <th class="px-3 py-2 border-r border-slate-100">Propietario</th>
+                                <th class="px-3 py-2 w-10 text-center border-r border-slate-100">Des</th>
+
+                                <th class="px-3 py-2 text-right bg-ui-element/50">Base (Pre)</th>
+                                <th class="px-3 py-2 text-center text-[10px] text-blue-600">% Dec</th>
+                                <th class="px-3 py-2 text-right bg-blue-50/10 font-medium text-blue-700">Calculado</th>
+
+                                <th class="px-3 py-2 text-right border-l font-bold text-main bg-green-50/10">
+                                    Sistema (Post)</th>
                                 <th class="px-3 py-2 text-center text-green-600 font-bold">% Real</th>
-                                <th class="px-3 py-2 text-right text-red-600">Diferencia</th>
+
+                                <th class="px-3 py-2 text-right text-red-600 border-l border-slate-100">Diferencia</th>
                                 <th class="px-3 py-2 text-center">Estado</th>
                                 <th class="px-1 py-2"></th>
                             </tr>
                         </thead>
                         <tbody id="comparisonTable" class="divide-y divide-slate-100">
-                            <!-- Filas JS -->
+                            <!-- Filas -->
                         </tbody>
-                        <tfoot class="bg-slate-50 font-bold text-slate-700 border-t-2 border-slate-200">
+                        <tfoot class="bg-ui-element font-bold text-main border-t-2 border-slate-200">
                             <tr>
-                                <td colspan="3" class="px-3 py-3 text-right uppercase text-[10px] text-slate-400">
-                                    Totales:</td>
-                                <td class="px-3 py-3 num" id="sumBase">$0</td>
+                                <td colspan="3" class="px-3 py-3 text-right uppercase text-[10px] text-secondary">
+                                    Totales Muestra:</td>
+                                <td class="px-3 py-3 num text-slate-600" id="sumBase">$0</td>
                                 <td class="px-3 py-3"></td>
-                                <td class="px-3 py-3 num" id="sumCalc">$0</td>
-                                <td class="px-3 py-3 num" id="sumSist">$0</td>
-                                <td class="px-3 py-3"></td>
-                                <td class="px-3 py-3 num text-red-600" id="sumDif">$0</td>
+                                <td class="px-3 py-3 num text-blue-700" id="sumCalc">$0</td>
+                                <td class="px-3 py-3 num text-slate-900 border-l border-slate-200" id="sumSist">$0</td>
+                                <td class="px-3 py-3 text-center text-green-700 font-extrabold text-[11px]"
+                                    id="avgPctReal">0%</td>
+                                <td class="px-3 py-3 num text-red-600 border-l border-slate-200" id="sumDif">$0</td>
                                 <td colspan="2"></td>
                             </tr>
                         </tfoot>
@@ -188,7 +419,6 @@
         </div>
 
         <script>
-            // Data inyectada desde Python
             const dataset = {{ resultados.data | tojson | safe }} || [];
 
             const tableBody = document.getElementById('comparisonTable');
@@ -197,8 +427,32 @@
             const countLabel = document.getElementById('countSelected');
 
             let selectedItems = [];
+
+            // --- CASABERO CURSOR LOGIC ---
+            const cursorBox = document.getElementById("cursor-pickbox");
+            const cursorX = document.getElementById("cursor-x-axis");
+            const cursorY = document.getElementById("cursor-y-axis");
+
+            if (cursorBox && cursorX && cursorY) {
+                window.addEventListener("mousemove", (e) => {
+                    requestAnimationFrame(() => {
+                        cursorBox.style.left = `${e.clientX}px`;
+                        cursorBox.style.top = `${e.clientY}px`;
+                        cursorX.style.top = `${e.clientY}px`;
+                        cursorY.style.left = `${e.clientX}px`;
+                    });
+                });
+            }
+            // -----------------------------
+
             const fmtMoney = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
             const fmtPct = new Intl.NumberFormat('es-CO', { style: 'percent', minimumFractionDigits: 2 });
+
+            // Formatear las tarjetas ADE al cargar
+            document.querySelectorAll('.money-format').forEach(el => {
+                const val = parseFloat(el.textContent);
+                el.textContent = fmtMoney.format(val);
+            });
 
             searchInput.addEventListener("keypress", function (e) {
                 if (e.key === "Enter") {
@@ -210,12 +464,11 @@
             function ejecutarBusqueda() {
                 const query = searchInput.value.trim().toUpperCase();
                 if (query.length < 3) {
-                    msgLabel.textContent = "Min 3 caracteres";
+                    msgLabel.textContent = "Mínimo 3 caracteres";
                     msgLabel.className = "text-[10px] text-red-400 mt-1 h-3 absolute bottom-1 left-3";
                     return;
                 }
 
-                // Buscar por Predial o Nombre (Seguro contra nulos)
                 const found = dataset.find(p => {
                     const predial = String(p.Predial_Nacional || "");
                     const nombre = String(p.Nombre || "").toUpperCase();
@@ -225,18 +478,18 @@
                 if (found) {
                     agregarFila(found);
                     searchInput.value = "";
-                    msgLabel.textContent = "Encontrado: " + found.Predial_Nacional;
+                    msgLabel.textContent = "Agregado: " + found.Predial_Nacional;
                     msgLabel.className = "text-[10px] text-green-400 mt-1 h-3 absolute bottom-1 left-3";
                     setTimeout(() => msgLabel.textContent = "", 3000);
                 } else {
-                    msgLabel.textContent = "No encontrado en ningún archivo";
+                    msgLabel.textContent = "No encontrado";
                     msgLabel.className = "text-[10px] text-red-400 mt-1 h-3 absolute bottom-1 left-3";
                 }
             }
 
             function agregarFila(item) {
                 if (selectedItems.some(i => i.Predial_Nacional === item.Predial_Nacional)) {
-                    eliminarFila(item.Predial_Nacional); // Lo movemos al inicio
+                    eliminarFila(item.Predial_Nacional);
                 }
                 selectedItems.unshift(item);
                 renderTable();
@@ -252,6 +505,30 @@
                 renderTable();
             }
 
+            function filtrarEstado(estado) {
+                // Filtrar del dataset global
+                const filtrados = dataset.filter(p => p.Estado === estado);
+
+                if (filtrados.length === 0) {
+                    alert("No hay registros con estado: " + estado);
+                    return;
+                }
+
+                // Reemplazamos la selección actual con estos registros
+                // Limitamos a 500 para no explotar el DOM si son muchos
+                if (filtrados.length > 500) {
+                    alert(`Se encontraron ${filtrados.length} registros. Se mostrarán los primeros 500.`);
+                    selectedItems = filtrados.slice(0, 500);
+                } else {
+                    selectedItems = [...filtrados];
+                }
+
+                renderTable();
+
+                // Scroll a la tabla
+                document.getElementById('comparisonTable').scrollIntoView({ behavior: 'smooth' });
+            }
+
             function renderTable() {
                 tableBody.innerHTML = "";
                 countLabel.textContent = selectedItems.length;
@@ -265,30 +542,34 @@
                     sumDif += item.Diferencia;
 
                     const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50 transition-colors group border-b border-slate-50 " + (index === 0 ? "new-row" : "");
+                    tr.className = "hover:bg-ui-element transition-colors group border-b border-ui-element " + (index === 0 ? "new-row" : "");
 
-                    // Colores de Estado
-                    let badge = "bg-green-100 text-green-700";
-                    if (item.Estado === 'INCONSISTENCIA') badge = "bg-red-100 text-red-700";
-                    if (item.Estado === 'DESAPARECIDO') badge = "bg-orange-100 text-orange-700";
-                    if (item.Estado === 'NUEVO') badge = "bg-blue-100 text-blue-700";
-                    if (item.Estado === 'SIN_AUMENTO') badge = "bg-yellow-100 text-yellow-700";
+                    let badge = "bg-green-100 text-green-700 border border-green-200";
+                    if (item.Estado === 'INCONSISTENCIA') badge = "bg-red-100 text-red-700 border border-red-200";
+                    if (item.Estado === 'DESAPARECIDO') badge = "bg-orange-100 text-orange-700 border border-orange-200";
+                    if (item.Estado === 'NUEVO') badge = "bg-blue-100 text-blue-700 border border-blue-200";
+                    if (item.Estado === 'SIN_AUMENTO') badge = "bg-yellow-100 text-yellow-700 border border-yellow-200";
+
+                    let pctRealUnitario = 0;
+                    if (item.Base > 0 && item.Sistema > 0) {
+                        pctRealUnitario = (item.Sistema / item.Base) - 1;
+                    }
 
                     tr.innerHTML = `
-                        <td class="px-3 py-2 font-mono text-[10px] text-slate-600 truncate" title="${item.Predial_Nacional}">${item.Predial_Nacional}</td>
-                        <td class="px-3 py-2 font-bold text-slate-700 truncate-name" title="${item.Nombre}">${item.Nombre}</td>
-                        <td class="px-3 py-2 text-center text-[10px] text-slate-500">${item.Destino}</td>
-                        <td class="px-3 py-2 num text-slate-500">${fmtMoney.format(item.Base)}</td>
-                        <td class="px-3 py-2 text-center text-slate-400 border-l text-[9px]">${fmtPct.format(item.Pct_Teorico)}</td>
+                        <td class="px-3 py-2 font-mono text-[10px] text-secondary truncate border-r border-ui-element" title="${item.Predial_Nacional}">${item.Predial_Nacional}</td>
+                        <td class="px-3 py-2 font-bold text-main truncate-name" title="${item.Nombre}">${item.Nombre}</td>
+                        <td class="px-3 py-2 text-center text-[10px] text-secondary border-r border-ui-element">${item.Destino}</td>
+                        <td class="px-3 py-2 num text-secondary">${fmtMoney.format(item.Base)}</td>
+                        <td class="px-3 py-2 text-center text-secondary border-l text-[9px]">${fmtPct.format(item.Pct_Teorico)}</td>
                         <td class="px-3 py-2 num font-medium text-blue-600">${fmtMoney.format(item.Calculado)}</td>
-                        <td class="px-3 py-2 num font-bold text-slate-800 border-l">${fmtMoney.format(item.Sistema)}</td>
-                        <td class="px-3 py-2 text-center text-green-600 text-[10px] font-bold">${item.Base > 0 ? fmtPct.format(item.Pct_Real) : '-'}</td>
-                        <td class="px-3 py-2 num ${item.Diferencia !== 0 ? 'text-red-600 font-bold' : 'text-slate-300'}">${fmtMoney.format(item.Diferencia)}</td>
+                        <td class="px-3 py-2 num font-bold text-main border-l">${fmtMoney.format(item.Sistema)}</td>
+                        <td class="px-3 py-2 text-center text-green-600 text-[10px] font-bold bg-green-50/30">${item.Base > 0 ? fmtPct.format(pctRealUnitario) : '-'}</td>
+                        <td class="px-3 py-2 num ${item.Diferencia !== 0 ? 'text-red-600 font-bold bg-red-50/30' : 'text-secondary/30'} border-l border-ui-element">${fmtMoney.format(item.Diferencia)}</td>
                         <td class="px-3 py-2 text-center">
                             <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${badge}">${item.Estado}</span>
                         </td>
                         <td class="px-1 py-2 text-center">
-                            <button onclick="eliminarFila('${item.Predial_Nacional}')" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="eliminarFila('${item.Predial_Nacional}')" class="text-secondary/30 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <span class="material-symbols-outlined text-[16px]">close</span>
                             </button>
                         </td>
@@ -300,6 +581,12 @@
                 document.getElementById('sumCalc').textContent = fmtMoney.format(sumCalc);
                 document.getElementById('sumSist').textContent = fmtMoney.format(sumSist);
                 document.getElementById('sumDif').textContent = fmtMoney.format(sumDif);
+
+                let avgRealPonderado = 0;
+                if (sumBase > 0 && sumSist > 0) {
+                    avgRealPonderado = (sumSist / sumBase) - 1;
+                }
+                document.getElementById('avgPctReal').textContent = fmtPct.format(avgRealPonderado);
             }
         </script>
         {% endif %}

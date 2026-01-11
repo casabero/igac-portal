@@ -90,8 +90,11 @@ def avaluos_tool():
         pct_r = request.form.get('pct_rural')
         
         try:
+            # Leer checkbox de 'Muestra Aleatoria' (valores 'on' o None)
+            is_sample = (request.form.get('sample_mode') == 'on')
+            
             # Ahora llamamos a la función WEB que devuelve JSON
-            resultados = procesar_incremento_web(f_pre, f_post, pct_u, pct_r)
+            resultados = procesar_incremento_web(f_pre, f_post, pct_u, pct_r, sample_mode=is_sample)
             
             # Renderizamos la MISMA plantilla, pero ahora con datos
             return render_template('avaluo_tool.html', resultados=resultados)
