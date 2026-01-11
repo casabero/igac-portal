@@ -27,7 +27,11 @@ def generar_colspecs(cortes):
 
 def cargar_snc(stream):
     """Carga data desde archivo plano (Fixed Width), CSV o Excel (.xlsx) con detección de encoding"""
-    filename = getattr(stream, 'filename', '').lower()
+    # Detectar el nombre del archivo si es un path o un objeto de Flask
+    if isinstance(stream, str):
+        filename = stream.lower()
+    else:
+        filename = getattr(stream, 'filename', '').lower()
     
     # helper for reading with encoding fallback
     def read_with_fallback(func, **kwargs):
