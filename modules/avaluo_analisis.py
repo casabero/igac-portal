@@ -15,33 +15,68 @@ def generar_colspecs(cortes):
 
 
 
+    return df[['Predial_Nacional', 'Avaluo', 'Nombre', 'DestinoEconomico']]
+
+    return df[['Predial_Nacional', 'Avaluo', 'Nombre', 'DestinoEconomico']]
+
 def cargar_snc(stream):
-    """Carga, limpieza y generación de llave única de 30 dígitos"""
-    colspecs = generar_colspecs(CORTES_R1)
-    df = pd.read_fwf(stream, colspecs=colspecs, header=None, encoding='latin-1', dtype=str)
+    """Carga data desde archivo plano (Fixed Width) o Excel (.xlsx)"""
+    # Detectar tipo por extensión (si disponible) o magic bytes si es necesario.
+    # Asumimos que stream tiene atributo filename si viene de Flask/Werkzeug
+    filename = getattr(stream, 'filename', '').lower()
     
-    if len(df.columns) == len(COLS_R1):
-        df.columns = COLS_R1
+    # 1. Carga
+    if filename.endswith(('.xlsx', '.xls')):
+        # Carga Excel
+        # Asumimos que el Excel tiene encabezados en la fila 0 y nombres de columnas similares
+        # O si no tiene headers, usamos header=None y asignamos. 
+        # Para compatibilidad, intentaremos leer y luego normalizar columnas.
+        # Si el usuario guarda el TXT como Excel, probablemente tenga las columnas separadas o todo en una.
+        # Asumiremos un Excel "bien formado" con columnas separadas.
+        try:
+            df = pd.read_excel(stream, dtype=str)
+             # Normalización básica de nombres de columnas si vienen del Excel
+            # Si el excel no tiene headers, asumimos el orden estándar
+            if len(df.columns) == len(COLS_R1):
+                 df.columns = COLS_R1
+            
+            # Limpieza básica
+            df = df.fillna('')
+        except Exception as e:
+             raise ValueError(f"Error leyendo Excel: {str(e)}")
     else:
-        df.columns = COLS_R1[:len(df.columns)]
+        # Carga Archivo Plano (Lógica Original)
+        # validar_archivo(stream) # Ya no validamos extensiones restrictivamente, o solo bloqueamos binarios NO excel
+        colspecs = generar_colspecs(CORTES_R1)
+        df = pd.read_fwf(stream, colspecs=colspecs, header=None, encoding='latin-1', dtype=str)
+        if len(df.columns) == len(COLS_R1):
+            df.columns = COLS_R1
+        else:
+             df.columns = COLS_R1[:len(df.columns)]
     
+    # 2. Procesamiento Común
     # Limpieza
     df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
     df['Avaluo'] = df['Avaluo'].astype(str).str.replace(r'[$,]', '', regex=True)
     df['Avaluo'] = pd.to_numeric(df['Avaluo'], errors='coerce').fillna(0)
     
-    # Construcción Llave 30 Dígitos (Depto 2 + Mun 3 + Predial 25)
-    # .str.replace('.0', '') previene errores si pandas lee "70" como "70.0"
+    # Construcción Llave 30 Dígitos
+    # Aseguramos que existan las columnas necesarias
+    required_cols = ['Departamento', 'Municipio', 'NoPredial']
+    if not all(col in df.columns for col in required_cols):
+         # Intentar mapping si los nombres son diferentes en Excel?
+         # Por ahora asumimos que si es Excel, tiene los encabezados O el orden correcto.
+         pass 
+
     df['Predial_Nacional'] = (
         df['Departamento'].astype(str).str.replace(r'\.0$', '', regex=True).str.zfill(2) + 
         df['Municipio'].astype(str).str.replace(r'\.0$', '', regex=True).str.zfill(3) + 
         df['NoPredial'].astype(str).str.replace(r'\.0$', '', regex=True).str.zfill(25)
     )
     
-    # Eliminar duplicados para tener 1 registro por predio
+    # Eliminar duplicados
     df = df.drop_duplicates(subset=['Predial_Nacional'], keep='first')
     
-    # Retornar columnas clave
     return df[['Predial_Nacional', 'Avaluo', 'Nombre', 'DestinoEconomico']]
 
 def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_mode=False):
