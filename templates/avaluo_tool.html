@@ -150,6 +150,36 @@
                 transform: translate(0)
             }
         }
+
+        /* --- PRINT STYLES --- */
+        @media print {
+            body {
+                cursor: auto !important;
+                background: white;
+            }
+
+            nav,
+            .no-print,
+            .cad-cursor-line,
+            #cursor-pickbox {
+                display: none !important;
+            }
+
+            .print-only {
+                display: block !important;
+            }
+
+            main {
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .shadow-sm,
+            .shadow-md {
+                box-shadow: none !important;
+                border: 1px solid #ddd;
+            }
+        }
     </style>
 </head>
 
@@ -243,18 +273,27 @@
                     </div>
                 </div>
 
-                <div class="bg-blue-50 p-4 rounded border border-blue-100 mt-4">
-                    <div class="flex items-center gap-4">
-                        <div class="flex items-center h-5">
-                            <input id="sample_mode" name="sample_mode" type="checkbox"
-                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                        </div>
-                        <div class="ml-2 text-sm">
-                            <label for="sample_mode" class="font-bold text-main">🧪 Modo Prueba (Muestra
-                                Aleatoria)</label>
-                            <p id="helper-checkbox-text" class="text-xs font-normal text-secondary">Analizar solo una
-                                muestra de 5,000 predios para verificar integridad rápidamente.</p>
-                        </div>
+                <div class="bg-blue-50 p-4 rounded border border-blue-100 mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Configuración Muestra -->
+                    <div>
+                        <label class="block text-xs font-bold text-main mb-1">Muestreo (%) <span id="lblPct"
+                                class="bg-blue-200 text-blue-800 px-1 rounded">100%</span></label>
+                        <input type="range" name="sample_pct" id="sample_pct" min="1" max="100" value="100"
+                            class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
+                            oninput="document.getElementById('lblPct').textContent = this.value + '%'">
+                        <p class="text-[10px] text-secondary mt-1">Arrastra para reducir la muestra y acelerar el
+                            proceso.</p>
+                    </div>
+                    <!-- Filtro Zonal -->
+                    <div>
+                        <label class="block text-xs font-bold text-main mb-1">Filtrar por Zona</label>
+                        <select name="zona_filter" class="w-full text-xs border-slate-300 rounded focus:ring-blue-500">
+                            <option value="TODOS">Todas las Zonas</option>
+                            <option value="URBANO">Urbano (01)</option>
+                            <option value="RURAL">Rural (00)</option>
+                            <option value="CORREG">Corregimientos (>01)</option>
+                        </select>
+                        <p class="text-[10px] text-secondary mt-1">Pre-filtra los datos antes de cargar.</p>
                     </div>
                 </div>
 
@@ -365,21 +404,32 @@
                 </div>
             </div>
 
-            <!-- 2. Sección ADE (Análisis Destino Económico) -->
-            <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-4">
-                <h3 class="text-xs font-bold text-secondary uppercase mb-3 border-b border-slate-100 pb-2">Resumen por
-                    Destino Económico (ADE)</h3>
-                <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-                    {% for ade in resultados.ade_stats %}
-                    <div class="bg-ui-element p-2 rounded border border-slate-200">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs font-bold bg-slate-200 px-1.5 rounded text-main">{{ ade.Destino
-                                }}</span>
-                            <span class="text-[10px] text-secondary">{{ ade.Cantidad }} predios</span>
-                        </div>
-                        <p class="text-sm font-bold text-main text-right money-format">{{ ade.Total_Avaluo }}</p>
+            <!-- 2. Estadísticas Avanzadas (Mean, Median, Mode, Std) -->
+            <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-4 relative">
+                <button onclick="window.print()"
+                    class="no-print absolute top-4 right-4 bg-main text-white px-3 py-1 rounded text-xs font-bold hover:bg-black transition flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[14px]">print</span> Imprimir Reporte
+                </button>
+                <h3 class="text-xs font-bold text-secondary uppercase mb-4 border-b border-slate-100 pb-2">Estadísticas
+                    del Avalúo (Sistema)</h3>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="p-3 bg-ui-element rounded border border-slate-100">
+                        <p class="text-[10px] text-secondary uppercase font-bold">Promedio (Mean)</p>
+                        <p class="text-lg font-bold text-main money-format">{{ resultados.stats.mean }}</p>
                     </div>
-                    {% endfor %}
+                    <div class="p-3 bg-ui-element rounded border border-slate-100">
+                        <p class="text-[10px] text-secondary uppercase font-bold">Mediana</p>
+                        <p class="text-lg font-bold text-blue-600 money-format">{{ resultados.stats.median }}</p>
+                    </div>
+                    <div class="p-3 bg-ui-element rounded border border-slate-100">
+                        <p class="text-[10px] text-secondary uppercase font-bold">Moda</p>
+                        <p class="text-lg font-bold text-purple-600 money-format">{{ resultados.stats.mode }}</p>
+                    </div>
+                    <div class="p-3 bg-ui-element rounded border border-slate-100">
+                        <p class="text-[10px] text-secondary uppercase font-bold">Desviación Est.</p>
+                        <p class="text-lg font-bold text-orange-600 money-format">{{ resultados.stats.std }}</p>
+                    </div>
                 </div>
             </div>
 

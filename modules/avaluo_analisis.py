@@ -79,23 +79,48 @@ def cargar_snc(stream):
     
     return df[['Predial_Nacional', 'Avaluo', 'Nombre', 'DestinoEconomico']]
 
-def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_mode=False):
+def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_pct=100, zona_filter='TODOS'):
     # 1. Cargar DataFrames
     df_pre = cargar_snc(file_pre)
     df_post = cargar_snc(file_post)
     
-    # 1.1 MUESTREO ALEATORIO (Si es solicitado)
-    if sample_mode:
+    # 1.1 FILTRO ZONAL (Optimización Previa)
+    # Zona está en posiciones 5:7 del Predial Nacional (Depto 2 + Mun 3 + ZONA 2 ...)
+    if zona_filter != 'TODOS':
+        # Función auxiliar para filtrar
+        def filtrar_por_zona(df, codigo_zona):
+            # Extraer slice 5:7
+            zonas = df['Predial_Nacional'].astype(str).str.slice(5, 7)
+            if codigo_zona == 'URBANO':
+                return df[zonas == '01']
+            elif codigo_zona == 'RURAL':
+                return df[zonas == '00']
+            elif codigo_zona == 'CORREG':
+                return df[~zonas.isin(['00', '01'])]
+            return df
+
+        df_pre = filtrar_por_zona(df_pre, zona_filter)
+        df_post = filtrar_por_zona(df_post, zona_filter)
+
+    # 1.2 MUESTREO POR PORCENTAJE
+    sample_pct = float(sample_pct)
+    is_sample = (sample_pct < 100)
+    
+    if is_sample:
         # Universo de llaves (Unión de ambos archivos)
         keys_pre = set(df_pre['Predial_Nacional'].unique())
         keys_post = set(df_post['Predial_Nacional'].unique())
         all_keys = list(keys_pre.union(keys_post))
         
-        # Seleccionar muestra (ej: 5000)
-        # Usamos np.random.choice para eficiencia
-        N_SAMPLE = 5000
-        if len(all_keys) > N_SAMPLE:
-            sample_keys = np.random.choice(all_keys, size=N_SAMPLE, replace=False)
+        total_keys = len(all_keys)
+        n_sample = int(total_keys * (sample_pct / 100))
+        
+        # Mínimo 1 registro si hay data
+        if total_keys > 0 and n_sample == 0: 
+            n_sample = 1
+            
+        if n_sample < total_keys:
+            sample_keys = np.random.choice(all_keys, size=n_sample, replace=False)
             
             # Filtrar DataFrames
             df_pre = df_pre[df_pre['Predial_Nacional'].isin(sample_keys)]
@@ -210,20 +235,36 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_m
     df_final['Diferencia'] = df_final['Diferencia'].astype(int)
     
     # 4. Estadísticas Generales (KPIs)
+    # 4. Estadísticas Generales (KPIs)
+    
+    # Calculo Estadísticos Avanzados (Sobre Avaluo Sistema)
+    avaluos_sist = df_final['Avaluo_post']
+    
+    mean_val = avaluos_sist.mean()
+    median_val = avaluos_sist.median()
+    std_val = avaluos_sist.std()
+    
+    # Moda (puede haber múltiples, tomamos la primera o 0 si vacía)
+    mode_series = avaluos_sist.mode()
+    mode_val = mode_series.iloc[0] if not mode_series.empty else 0
+
     stats = {
-        'sample_mode': sample_mode,
+        'sample_pct': sample_pct,
+        'zona_filter': zona_filter,
         'total_registros': int(len(df_final)),
         'ok': int((df_final['Estado'] == 'OK').sum()),
         'nuevos': int((df_final['Estado'] == 'NUEVO').sum()),
         'desaparecidos': int((df_final['Estado'] == 'DESAPARECIDO').sum()),
-        'inconsistencias': int((df_final['Estado'] == 'INCONSISTENCIA').sum())
+        'inconsistencias': int((df_final['Estado'] == 'INCONSISTENCIA').sum()),
+        # Advanced Stats
+        'mean': float(mean_val) if not np.isnan(mean_val) else 0,
+        'median': float(median_val) if not np.isnan(median_val) else 0,
+        'mode': float(mode_val) if not np.isnan(mode_val) else 0,
+        'std': float(std_val) if not np.isnan(std_val) else 0
     }
 
-    # 5. Estadísticas ADE (Resumen por Destino Económico)
-    # Agrupamos por Destino y sumamos avalúo sistema (actual) y contamos predios
-    ade_group = df_final.groupby('Destino')['Avaluo_post'].agg(['count', 'sum']).reset_index()
-    ade_group.columns = ['Destino', 'Cantidad', 'Total_Avaluo']
-    ade_stats = ade_group.to_dict(orient='records')
+    # 5. Estadísticas ADE (ELIMINADO por solicitud, reemplazado por Stats Avanzados)
+    ade_stats = [] # Se mantiene vacío para compatibilidad o se elimina uso en front
 
     # 6. Preparar Data Detallada
     cols = ['Predial_Nacional', 'Nombre', 'Destino', 'Zona', 
