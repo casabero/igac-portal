@@ -940,13 +940,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Data from Backend
-            const stats = {
-                ok: {{ resultados.stats.ok }
-        },
-            nuevos: {{ resultados.stats.nuevos }},
-            desaparecidos: {{ resultados.stats.desaparecidos }},
-            inconsistencias: {{ resultados.stats.inconsistencias }}
-            };
+            const stats = {{ resultados.stats | tojson | safe
+        }};
 
         // Chart 1: Bar Chart (Estados)
         const ctxStates = document.getElementById('chartStates');
@@ -958,25 +953,20 @@
                     datasets: [{
                         label: 'Cantidad de Predios',
                         data: [stats.ok, stats.nuevos, stats.desaparecidos, stats.inconsistencias],
-                        backgroundColor: [
-                            '#22d3ee', // Cyan (OK)
-                            '#2563eb', // Blue (Nuevos)
-                            '#f97316', // Orange (Desap)
-                            '#dc2626'  // Red (Error)
-                        ],
+                        backgroundColor: ['#22d3ee', '#2563eb', '#f97316', '#dc2626'],
                         borderRadius: 4
                     }]
-        
+                },
                 options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: { beginAtZero: true, grid: { display: false } },
-                            x: { grid: { display: false } }
-                        }
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { display: false } },
+                        x: { grid: { display: false } }
                     }
-                });
+                }
+            });
         }
 
         // Chart 2: Doughnut (Resumen)
@@ -994,16 +984,16 @@
                         backgroundColor: ['#64748b', '#cbd5e1'],
                         hoverOffset: 4
                     }]
-        
+                },
                 options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '70%',
-                        plugins: {
-                            legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 10 } } }
-                        }
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 10 } } }
                     }
-                });
+                }
+            });
         }
         });
     </script>
