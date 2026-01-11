@@ -192,13 +192,12 @@ def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_m
 
     # 6. Preparar Data Detallada
     cols = ['Predial_Nacional', 'Nombre', 'Destino', 'Zona', 
-            'Avaluo_pre', 'Avaluo_Calc', 'Avaluo_post', 
+            'Avaluo_pre', 'Calculado', 'Avaluo_post', 
             'Estado', 'Pct_Teorico', 'Pct_Real', 'Diferencia']
             
     df_export = df_final[cols].rename(columns={
         'Avaluo_pre': 'Base',
-        'Avaluo_post': 'Sistema',
-        'Avaluo_Calc': 'Calculado'
+        'Avaluo_post': 'Sistema'
     })
     
     records = df_export.to_dict(orient='records')
