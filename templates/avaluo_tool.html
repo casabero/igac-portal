@@ -271,7 +271,8 @@
 
                     let statusClass = "bg-green-100 text-green-700";
                     if (item.Estado === 'INCONSISTENCIA') statusClass = "bg-red-100 text-red-700";
-                    if (item.Estado === 'NO_EN_POST') statusClass = "bg-gray-100 text-gray-500";
+                    if (item.Estado === 'DESAPARECIDO') statusClass = "bg-orange-100 text-orange-700";
+                    if (item.Estado === 'NUEVO_PREDIO') statusClass = "bg-blue-100 text-blue-700";
                     if (item.Estado === 'SIN_AUMENTO') statusClass = "bg-yellow-100 text-yellow-700";
 
                     tr.innerHTML = `
