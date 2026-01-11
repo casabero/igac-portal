@@ -13,15 +13,55 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ["Inter", "sans-serif"] },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"],
+                        "display": ["Outfit", "sans-serif"],
+                        "mono": ["Fira Code", "monospace"],
+                    },
                     colors: {
-                        primary: "#2563eb", /* Azul sutil (Blue 600) */
+                        primary: "#2563eb",
                         primary_hover: "#1d4ed8",
                     }
                 }
             }
         }
     </script>
+    <style>
+        /* --- LOGO ANIMATION (Nodes Pulse) --- */
+        .logo-node {
+            transition: opacity 0.2s;
+        }
+
+        .logo-group:hover .logo-node:nth-child(1) {
+            animation: nodePulse 0.6s infinite 0s;
+        }
+
+        .logo-group:hover .logo-node:nth-child(2) {
+            animation: nodePulse 0.6s infinite 0.15s;
+        }
+
+        .logo-group:hover .logo-node:nth-child(3) {
+            animation: nodePulse 0.6s infinite 0.3s;
+        }
+
+        .logo-group:hover .logo-node:nth-child(4) {
+            animation: nodePulse 0.6s infinite 0.45s;
+        }
+
+        @keyframes nodePulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                fill: #111;
+            }
+
+            50% {
+                opacity: 0.3;
+                fill: #666;
+            }
+        }
+    </style>
 </head>
 
 <body class="bg-white text-slate-800 font-sans antialiased min-h-screen flex flex-col">
@@ -99,6 +139,26 @@
         </div>
     </main>
 
+    <!-- FOOTER -->
+    <footer class="border-t border-gray-100 py-6 px-6 mt-8">
+        <div class="max-w-[600px] mx-auto flex items-center justify-center gap-3">
+            <a href="https://casabero.com" target="_blank" rel="noopener noreferrer"
+                class="logo-group flex items-center gap-2 text-slate-400 hover:text-slate-700 transition-colors">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
+                    <path d="M 76 20 L 32 20 Q 20 20 20 32 L 20 68 Q 20 80 32 80 L 70 80" stroke="currentColor"
+                        stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+                    <rect x="70" y="76" width="8" height="8" rx="1" fill="currentColor" />
+                    <g class="logo-group">
+                        <rect class="logo-node" x="26" y="26" width="8" height="8" fill="currentColor" />
+                        <rect class="logo-node" x="66" y="26" width="8" height="8" fill="currentColor" />
+                        <rect class="logo-node" x="26" y="66" width="8" height="8" fill="currentColor" />
+                        <rect class="logo-node" x="66" y="66" width="8" height="8" fill="currentColor" />
+                    </g>
+                </svg>
+                <span class="text-xs font-medium">by casabero.com</span>
+            </a>
+        </div>
+    </footer>
 </body>
 
 </html>

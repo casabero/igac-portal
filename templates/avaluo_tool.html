@@ -32,7 +32,7 @@
         }
     </script>
     <style>
-        /* --- BASE & DARK MODE VARIABLES --- */
+        /* --- BASE VARIABLES --- */
         :root {
             --bg-primary: #ffffff;
             --bg-secondary: #F9FAFB;
@@ -43,26 +43,11 @@
             --accent: #2563eb;
         }
 
-        html.dark {
-            --bg-primary: #111827;
-            --bg-secondary: #1F2937;
-            --bg-card: #1F2937;
-            --text-primary: #F9FAFB;
-            --text-secondary: #9CA3AF;
-            --border-color: #374151;
-            --accent: #3B82F6;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-primary);
             color: var(--text-primary);
             transition: background-color 0.3s, color 0.3s;
-        }
-
-        .dark-card {
-            background-color: var(--bg-card);
-            border-color: var(--border-color);
         }
 
         .num {
@@ -77,11 +62,6 @@
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
             border-radius: 4px;
-        }
-
-        html.dark .skeleton {
-            background: linear-gradient(90deg, #374151 25%, #4B5563 50%, #374151 75%);
-            background-size: 200% 100%;
         }
 
         @keyframes shimmer {
@@ -186,7 +166,7 @@
 
         /* --- CARD GRADIENT --- */
         .gradient-card {
-            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #F9FAFB 100%);
         }
 
         /* --- COUNTUP ANIMATION --- */
@@ -306,26 +286,16 @@
 </head>
 
 <body class="bg-white text-main min-h-screen flex flex-col font-sans cursor-auto">
-    <nav class="w-full border-b border-gray-100 dark:border-gray-800 py-4 px-6 dark-card">
-        <div class="max-w-[1600px] mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <a href="/" class="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">
-                    <span class="material-symbols-outlined text-[20px]">arrow_back</span>
-                </a>
-                <span class="h-4 w-px bg-gray-200 dark:bg-gray-700"></span>
-                <div class="flex flex-col">
-                    <h1 class="text-sm font-semibold text-slate-700 dark:text-gray-200 tracking-tight">Auditoría de
-                        Incremento Catastral</h1>
-                    <p id="reportSubtitle" class="text-xs text-secondary font-medium uppercase hidden mt-0.5"></p>
-                </div>
+    <nav class="w-full border-b border-gray-100 py-4 px-6 bg-white">
+        <div class="max-w-[1600px] mx-auto flex items-center gap-3">
+            <a href="/" class="text-slate-400 hover:text-slate-800 transition-colors">
+                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+            </a>
+            <span class="h-4 w-px bg-gray-200"></span>
+            <div class="flex flex-col">
+                <h1 class="text-sm font-semibold text-slate-700 tracking-tight">Auditoría de Incremento Catastral</h1>
+                <p id="reportSubtitle" class="text-xs text-gray-500 font-medium uppercase hidden mt-0.5"></p>
             </div>
-            <!-- Dark Mode Toggle -->
-            <button onclick="toggleDarkMode()"
-                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors tooltip"
-                data-tip="Cambiar tema">
-                <span id="themeIcon"
-                    class="material-symbols-outlined text-[20px] text-gray-500 dark:text-gray-400">dark_mode</span>
-            </button>
         </div>
     </nav>
 
@@ -500,34 +470,34 @@
                 <!-- A. KPIs Principales -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div
-                        class="gradient-card dark-card p-4 rounded-lg border border-slate-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-24">
-                        <p class="text-[10px] text-secondary font-bold uppercase tracking-wider">Universo</p>
-                        <p class="text-3xl font-bold text-main dark:text-white countup"
+                        class="gradient-card p-4 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between h-24">
+                        <p class="text-[10px] text-gray-600 font-bold uppercase tracking-wider">Universo</p>
+                        <p class="text-3xl font-bold text-gray-900 countup"
                             data-countup="{{ resultados.stats.total_registros }}">0</p>
                     </div>
                     <div
-                        class="gradient-card dark-card p-4 rounded-lg border border-blue-100 dark:border-blue-900 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden">
+                        class="gradient-card p-4 rounded-lg border border-blue-100 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden">
                         <div class="absolute right-0 top-0 p-2 opacity-10"><span
                                 class="material-symbols-outlined text-4xl text-blue-500">new_releases</span></div>
-                        <p class="text-[10px] text-blue-500 font-bold uppercase tracking-wider">Nuevos</p>
-                        <p class="text-3xl font-bold text-blue-600 countup"
+                        <p class="text-[10px] text-blue-600 font-bold uppercase tracking-wider">Nuevos</p>
+                        <p class="text-3xl font-bold text-blue-700 countup"
                             data-countup="{{ resultados.stats.nuevos }}">0</p>
                     </div>
                     <div
-                        class="gradient-card dark-card p-4 rounded-lg border border-orange-100 dark:border-orange-900 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden">
+                        class="gradient-card p-4 rounded-lg border border-orange-100 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden">
                         <div class="absolute right-0 top-0 p-2 opacity-10"><span
                                 class="material-symbols-outlined text-4xl text-orange-500">do_not_disturb_on</span>
                         </div>
-                        <p class="text-[10px] text-orange-500 font-bold uppercase tracking-wider">Desaparecidos</p>
-                        <p class="text-3xl font-bold text-orange-600 countup"
+                        <p class="text-[10px] text-orange-600 font-bold uppercase tracking-wider">Desaparecidos</p>
+                        <p class="text-3xl font-bold text-orange-700 countup"
                             data-countup="{{ resultados.stats.desaparecidos }}">0</p>
                     </div>
                     <div
-                        class="gradient-card dark-card p-4 rounded-lg border border-red-100 dark:border-red-900 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden">
+                        class="gradient-card p-4 rounded-lg border border-red-100 shadow-sm flex flex-col justify-between h-24 relative overflow-hidden">
                         <div class="absolute right-0 top-0 p-2 opacity-10"><span
                                 class="material-symbols-outlined text-4xl text-red-500">warning</span></div>
-                        <p class="text-[10px] text-red-500 font-bold uppercase tracking-wider">Inconsistencias</p>
-                        <p class="text-3xl font-bold text-red-600 countup"
+                        <p class="text-[10px] text-red-600 font-bold uppercase tracking-wider">Inconsistencias</p>
+                        <p class="text-3xl font-bold text-red-700 countup"
                             data-countup="{{ resultados.stats.inconsistencias }}">0</p>
                     </div>
                 </div>
@@ -747,13 +717,13 @@
                     }
 
                     tr.innerHTML = `
-                        <td class="px-2 py-1 font-mono text-[9px] text-secondary border-r border-slate-50 group/cell">
+                        <td class="px-2 py-1 font-mono text-[9px] text-gray-600 border-r border-slate-50 group/cell">
                             <span class="tooltip" data-tip="Click para copiar">${item.Predial_Nacional}</span>
                             <button onclick="copyToClipboard('${item.Predial_Nacional}')" class="ml-1 opacity-0 group-hover/cell:opacity-100 text-slate-400 hover:text-blue-600 transition-all">
                                 <span class="material-symbols-outlined text-[12px]">content_copy</span>
                             </button>
                         </td>
-                        <td class="px-2 py-1 font-bold text-main dark:text-gray-200 max-w-[120px] truncate" title="${item.Nombre}">${item.Nombre}</td>
+                        <td class="px-2 py-1 font-bold text-gray-900 max-w-[120px] truncate" title="${item.Nombre}">${item.Nombre}</td>
                         <td class="px-2 py-1 text-center text-[9px] text-secondary">${item.Destino}</td>
                         <td class="px-2 py-1 num text-slate-500">${fmtMoney.format(item.Base)}</td>
                         <td class="px-2 py-1 text-center text-[9px] text-blue-500">${fmtPct.format(item.Pct_Teorico)}</td>
@@ -878,24 +848,6 @@
 
     <!-- GLOBAL PREMIUM UI SCRIPTS -->
     <script>
-        // --- DARK MODE ---
-        function toggleDarkMode() {
-            const html = document.documentElement;
-            const icon = document.getElementById('themeIcon');
-            html.classList.toggle('dark');
-            const isDark = html.classList.contains('dark');
-            localStorage.setItem('darkMode', isDark);
-            if (icon) icon.textContent = isDark ? 'light_mode' : 'dark_mode';
-            showToast(isDark ? 'Modo oscuro activado' : 'Modo claro activado', 'info');
-        }
-
-        // Check saved preference on load
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.documentElement.classList.add('dark');
-            const icon = document.getElementById('themeIcon');
-            if (icon) icon.textContent = 'light_mode';
-        }
-
         // --- TOAST NOTIFICATIONS ---
         function showToast(message, type = 'info', duration = 3000) {
             const container = document.getElementById('toastContainer');
