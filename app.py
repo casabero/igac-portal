@@ -85,6 +85,7 @@ def avaluos_tool():
             return redirect(request.url)
         
         f_pre = request.files['file_pre']
+        f_post = request.files['file_post']
         # Get params with defaults (si el input está oculto, puede no enviarse o llegar vacío)
         def get_float_param(key):
              val = request.form.get(key, '')
