@@ -124,7 +124,7 @@ def cargar_snc(stream):
     df = df.drop_duplicates(subset=['Predial_Nacional'], keep='first')
     
     # Retornar columnas clave y el NoPredial limpio para filtrar
-    return df[['Predial_Nacional', 'Avaluo', 'Nombre', 'DestinoEconomico']]
+    return df[['Predial_Nacional', 'Avaluo', 'Nombre', 'DestinoEconomico', 'Municipio']]
 
 def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_pct=100, zona_filter='TODOS'):
     # Leer Dataframes
