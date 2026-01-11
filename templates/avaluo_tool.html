@@ -91,105 +91,39 @@
 
         #cursor-y-axis {
             width: 1px;
-            height: 100vh;
-            top: 0;
-            left: 0;
-        }
 
-        #cursor-pickbox {
-            position: fixed;
-            width: 14px;
-            height: 14px;
-            border: 1.5px solid #111111;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 9999;
-            top: 0;
-            left: 0;
-        }
+            /* --- PRINT STYLES --- */
+            @media print {
+                body {
+                    cursor: auto !important;
+                    background: white;
+                }
 
-        /* Interacción hover */
-        body:has(a:hover) #cursor-pickbox,
-        body:has(button:hover) #cursor-pickbox,
-        body:has(input:hover) #cursor-pickbox,
-        body:has(label:hover) #cursor-pickbox {
-            border-width: 2.5px;
-            width: 18px;
-            height: 18px;
-            transition: all 0.1s ease;
-            background-color: rgba(17, 17, 17, 0.1);
-        }
+                nav,
+                .no-print {
+                    display: none !important;
+                }
 
-        /* Glitch Effect */
-        .glitch-hover:hover {
-            animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
-        }
+                .print-only {
+                    display: block !important;
+                }
 
-        @keyframes glitch {
-            0% {
-                transform: translate(0)
+                main {
+                    padding: 0 !important;
+                    max-width: 100% !important;
+                }
+
+                .shadow-sm,
+                .shadow-md {
+                    box-shadow: none !important;
+                    border: 1px solid #ddd;
+                }
             }
-
-            20% {
-                transform: translate(-2px, 2px)
-            }
-
-            40% {
-                transform: translate(-2px, -2px)
-            }
-
-            60% {
-                transform: translate(2px, 2px)
-            }
-
-            80% {
-                transform: translate(2px, -2px)
-            }
-
-            100% {
-                transform: translate(0)
-            }
-        }
-
-        /* --- PRINT STYLES --- */
-        @media print {
-            body {
-                cursor: auto !important;
-                background: white;
-            }
-
-            nav,
-            .no-print,
-            .cad-cursor-line,
-            #cursor-pickbox {
-                display: none !important;
-            }
-
-            .print-only {
-                display: block !important;
-            }
-
-            main {
-                padding: 0 !important;
-                max-width: 100% !important;
-            }
-
-            .shadow-sm,
-            .shadow-md {
-                box-shadow: none !important;
-                border: 1px solid #ddd;
-            }
-        }
     </style>
 </head>
 
-<body class="bg-ui-element text-main min-h-screen flex flex-col font-sans">
-    <!-- ENGINEER CURSOR -->
-    <div id="cursor-x-axis" class="cad-cursor-line hidden md:block"></div>
-    <div id="cursor-y-axis" class="cad-cursor-line hidden md:block"></div>
-    <div id="cursor-pickbox" class="hidden md:block"></div>
-
-    <nav class="bg-white border-b px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+<body class="bg-white text-main min-h-screen flex flex-col font-sans">
+    <nav class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50">
         <div class="flex items-center gap-4">
             <a href="/" class="text-main hover:text-accent transition-transform hover:scale-110">
                 <!-- CASABERO LOGO (Mini 32x32) -->
@@ -204,8 +138,8 @@
                 </svg>
             </a>
             <div>
-                <h1 class="font-display font-bold text-main text-lg glitch-hover tracking-wide">Auditoría de Incremento
-                    Catastral</h1>
+                <h1 class="font-display font-bold text-main text-lg tracking-wide">Auditoría de Incremento Catastral
+                </h1>
             </div>
         </div>
         {% if resultados %}
@@ -260,47 +194,51 @@
                             required>
                     </div>
                 </div>
-                <div class="bg-ui-element p-4 rounded border border-slate-200 grid grid-cols-2 gap-4">
+                <div class="space-y-6">
+                    <!-- 1. Selección de Zona (Principal) -->
                     <div>
-                        <label class="block text-xs text-main font-bold mb-1">% Urbano</label>
-                        <input type="number" step="0.01" name="pct_urbano"
-                            class="w-full rounded border-slate-300 text-sm" placeholder="Ej: 4.5" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-main font-bold mb-1">% Rural</label>
-                        <input type="number" step="0.01" name="pct_rural"
-                            class="w-full rounded border-slate-300 text-sm" placeholder="Ej: 3.0" required>
-                    </div>
-                </div>
-
-                <div class="bg-blue-50 p-4 rounded border border-blue-100 mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Configuración Muestra -->
-                    <div>
-                        <label class="block text-xs font-bold text-main mb-1">Muestreo (%) <span id="lblPct"
-                                class="bg-blue-200 text-blue-800 px-1 rounded">100%</span></label>
-                        <input type="range" name="sample_pct" id="sample_pct" min="1" max="100" value="100"
-                            class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
-                            oninput="document.getElementById('lblPct').textContent = this.value + '%'">
-                        <p class="text-[10px] text-secondary mt-1">Arrastra para reducir la muestra y acelerar el
-                            proceso.</p>
-                    </div>
-                    <!-- Filtro Zonal -->
-                    <div>
-                        <label class="block text-xs font-bold text-main mb-1">Filtrar por Zona</label>
-                        <select name="zona_filter" class="w-full text-xs border-slate-300 rounded focus:ring-blue-500">
-                            <option value="TODOS">Todas las Zonas</option>
-                            <option value="URBANO">Urbano (01)</option>
-                            <option value="RURAL">Rural (00)</option>
-                            <option value="CORREG">Corregimientos (>01)</option>
+                        <label class="block text-xs font-bold text-main mb-2 uppercase tracking-wider">Paso 1:
+                            Seleccionar Zona a Analizar</label>
+                        <select name="zona_filter" id="zona_filter" onchange="updateFormVisibility()"
+                            class="w-full text-sm border-gray-300 rounded-md focus:ring-black focus:border-black py-2.5">
+                            <option value="TODOS">Todas las Zonas (Completo)</option>
+                            <option value="URBANO">Solo Urbano (01)</option>
+                            <option value="RURAL">Solo Rural (00)</option>
                         </select>
-                        <p class="text-[10px] text-secondary mt-1">Pre-filtra los datos antes de cargar.</p>
+                    </div>
+
+                    <!-- 2. Inputs de Porcentaje (Dinámicos) -->
+                    <div id="pct_inputs" class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                        <!-- Urbano -->
+                        <div id="div_urbano" class="hidden">
+                            <label class="block text-xs font-bold text-main mb-1">% Incremento URBANO</label>
+                            <input type="number" step="0.01" name="pct_urbano" id="val_urbano"
+                                class="w-full rounded border-gray-300 text-sm focus:ring-black focus:border-black"
+                                placeholder="Ej: 4.5">
+                        </div>
+                        <!-- Rural -->
+                        <div id="div_rural" class="hidden mt-4">
+                            <label class="block text-xs font-bold text-main mb-1">% Incremento RURAL</label>
+                            <input type="number" step="0.01" name="pct_rural" id="val_rural"
+                                class="w-full rounded border-gray-300 text-sm focus:ring-black focus:border-black"
+                                placeholder="Ej: 3.0">
+                        </div>
+                    </div>
+
+                    <!-- 3. Muestreo -->
+                    <div>
+                        <label class="block text-xs font-bold text-main mb-1">Tamaño de la Muestra: <span id="lblPct"
+                                class="font-normal text-secondary">100%</span></label>
+                        <input type="range" name="sample_pct" id="sample_pct" min="1" max="100" value="100"
+                            class="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
+                            oninput="document.getElementById('lblPct').textContent = this.value + '%'">
                     </div>
                 </div>
 
-                <div class="mt-6">
+                <div class="mt-8">
                     <button type="submit"
-                        class="w-full bg-blue-600 text-white py-2.5 rounded hover:bg-blue-700 transition font-medium text-sm shadow-sm flex justify-center items-center gap-2">
-                        <span class="material-symbols-outlined text-[18px]">rocket_launch</span> EJECUTAR ANÁLISIS
+                        class="w-full bg-main text-white py-3 rounded-lg hover:bg-black transition font-bold text-sm tracking-widest shadow-lg flex justify-center items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">play_arrow</span> EJECUTAR ANÁLISIS
                     </button>
                 </div>
             </form>
@@ -379,236 +317,195 @@
                     <p class="text-[10px] text-secondary font-bold uppercase">Universo Analizado</p>
                     <p class="text-xl font-bold text-main">{{ resultados.stats.total_registros }}</p>
                 </div>
-                <div class="bg-white p-3 rounded border border-blue-200 bg-blue-50 shadow-sm">
+                <div class="bg-white p-3 rounded border border-blue-200 shadow-sm">
                     <p class="text-[10px] text-blue-400 font-bold uppercase">Predios Nuevos</p>
                     <p class="text-xl font-bold text-blue-600">{{ resultados.stats.nuevos }}</p>
                 </div>
-                <div class="bg-white p-3 rounded border border-orange-200 bg-orange-50 shadow-sm">
+                <div class="bg-white p-3 rounded border border-orange-200 shadow-sm">
                     <p class="text-[10px] text-orange-400 font-bold uppercase">Desaparecidos</p>
                     <p class="text-xl font-bold text-orange-600">{{ resultados.stats.desaparecidos }}</p>
                 </div>
-                <div class="bg-white p-3 rounded border border-red-200 bg-red-50 shadow-sm">
+                <div class="bg-white p-3 rounded border border-red-200 shadow-sm">
                     <p class="text-[10px] text-red-400 font-bold uppercase">Inconsistencias</p>
                     <p class="text-xl font-bold text-red-600">{{ resultados.stats.inconsistencias }}</p>
                 </div>
-                <!-- Mini Buscador -->
-                <div
-                    class="bg-slate-800 p-3 rounded border border-slate-900 shadow-sm flex flex-col justify-center relative">
-                    <div class="flex gap-2">
-                        <input type="text" id="searchInput" placeholder="Buscar Predial o Nombre..."
-                            class="bg-slate-700 border-none text-white text-sm rounded placeholder-slate-400 focus:ring-1 focus:ring-blue-400 w-full h-9">
-                        <button onclick="ejecutarBusqueda()"
-                            class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded text-xs font-bold">IR</button>
-                    </div>
-                    <p id="searchMsg" class="text-[10px] text-secondary mt-1 h-3 absolute bottom-1 left-3"></p>
-                </div>
-            </div>
 
-            <!-- 2. Estadísticas Avanzadas (Mean, Median, Mode, Std) -->
-            <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-4 relative">
-                <button onclick="window.print()"
-                    class="no-print absolute top-4 right-4 bg-main text-white px-3 py-1 rounded text-xs font-bold hover:bg-black transition flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[14px]">print</span> Imprimir Reporte
-                </button>
-                <h3 class="text-xs font-bold text-secondary uppercase mb-4 border-b border-slate-100 pb-2">Estadísticas
-                    del Avalúo (Sistema)</h3>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="p-3 bg-ui-element rounded border border-slate-100">
-                        <p class="text-[10px] text-secondary uppercase font-bold">Promedio (Mean)</p>
-                        <p class="text-lg font-bold text-main money-format">{{ resultados.stats.mean }}</p>
-                    </div>
-                    <div class="p-3 bg-ui-element rounded border border-slate-100">
-                        <p class="text-[10px] text-secondary uppercase font-bold">Mediana</p>
-                        <p class="text-lg font-bold text-blue-600 money-format">{{ resultados.stats.median }}</p>
-                    </div>
-                    <div class="p-3 bg-ui-element rounded border border-slate-100">
-                        <p class="text-[10px] text-secondary uppercase font-bold">Moda</p>
-                        <p class="text-lg font-bold text-purple-600 money-format">{{ resultados.stats.mode }}</p>
-                    </div>
-                    <div class="p-3 bg-ui-element rounded border border-slate-100">
-                        <p class="text-[10px] text-secondary uppercase font-bold">Desviación Est.</p>
-                        <p class="text-lg font-bold text-orange-600 money-format">{{ resultados.stats.std }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. Tabla Detallada -->
-            <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-                <div class="bg-ui-element border-b border-slate-200 px-4 py-2 flex justify-between items-center">
-                    <span class="text-xs font-bold text-secondary uppercase">
-                        Predios en Muestra: <span id="countSelected" class="text-main">0</span>
-                    </span>
-                    <button onclick="limpiarTabla()"
-                        class="text-[10px] text-red-500 hover:text-red-700 font-medium flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar
+                <!-- 2. Estadísticas Avanzadas (Mean, Median, Mode, Std) -->
+                <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-4 relative">
+                    <button onclick="window.print()"
+                        class="no-print absolute top-4 right-4 bg-main text-white px-3 py-1 rounded text-xs font-bold hover:bg-black transition flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[14px]">print</span> Imprimir Reporte
                     </button>
+                    <h3 class="text-xs font-bold text-secondary uppercase mb-4 border-b border-slate-100 pb-2">
+                        Estadísticas
+                        del Avalúo (Sistema)</h3>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="p-3 bg-ui-element rounded border border-slate-100">
+                            <p class="text-[10px] text-secondary uppercase font-bold">Promedio (Mean)</p>
+                            <p class="text-lg font-bold text-main money-format">{{ resultados.stats.mean }}</p>
+                        </div>
+                        <div class="p-3 bg-ui-element rounded border border-slate-100">
+                            <p class="text-[10px] text-secondary uppercase font-bold">Mediana</p>
+                            <p class="text-lg font-bold text-blue-600 money-format">{{ resultados.stats.median }}</p>
+                        </div>
+                        <div class="p-3 bg-ui-element rounded border border-slate-100">
+                            <p class="text-[10px] text-secondary uppercase font-bold">Moda</p>
+                            <p class="text-lg font-bold text-purple-600 money-format">{{ resultados.stats.mode }}</p>
+                        </div>
+                        <div class="p-3 bg-ui-element rounded border border-slate-100">
+                            <p class="text-[10px] text-secondary uppercase font-bold">Desviación Est.</p>
+                            <p class="text-lg font-bold text-orange-600 money-format">{{ resultados.stats.std }}</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left">
-                        <thead class="bg-white text-secondary font-bold uppercase border-b border-slate-200">
-                            <tr>
-                                <th class="px-3 py-2 w-32 border-r border-slate-100">Predial Nacional</th>
-                                <th class="px-3 py-2 border-r border-slate-100">Propietario</th>
-                                <th class="px-3 py-2 w-10 text-center border-r border-slate-100">Des</th>
+                <!-- 3. Tabla Detallada -->
+                <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                    <div class="bg-ui-element border-b border-slate-200 px-4 py-2 flex justify-between items-center">
+                        <span class="text-xs font-bold text-secondary uppercase">
+                            Predios en Muestra: <span id="countSelected" class="text-main">0</span>
+                        </span>
+                        <button onclick="limpiarTabla()"
+                            class="text-[10px] text-red-500 hover:text-red-700 font-medium flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">delete_sweep</span> Limpiar
+                        </button>
+                    </div>
 
-                                <th class="px-3 py-2 text-right bg-ui-element/50">Base (Pre)</th>
-                                <th class="px-3 py-2 text-center text-[10px] text-blue-600">% Dec</th>
-                                <th class="px-3 py-2 text-right bg-blue-50/10 font-medium text-blue-700">Calculado</th>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left">
+                            <thead class="bg-white text-secondary font-bold uppercase border-b border-slate-200">
+                                <tr>
+                                    <th class="px-3 py-2 w-32 border-r border-slate-100">Predial Nacional</th>
+                                    <th class="px-3 py-2 border-r border-slate-100">Propietario</th>
+                                    <th class="px-3 py-2 w-10 text-center border-r border-slate-100">Des</th>
 
-                                <th class="px-3 py-2 text-right border-l font-bold text-main bg-green-50/10">
-                                    Sistema (Post)</th>
-                                <th class="px-3 py-2 text-center text-green-600 font-bold">% Real</th>
+                                    <th class="px-3 py-2 text-right bg-ui-element/50">Base (Pre)</th>
+                                    <th class="px-3 py-2 text-center text-[10px] text-blue-600">% Dec</th>
+                                    <th class="px-3 py-2 text-right bg-blue-50/10 font-medium text-blue-700">
+                                        Calculado</th>
 
-                                <th class="px-3 py-2 text-right text-red-600 border-l border-slate-100">Diferencia</th>
-                                <th class="px-3 py-2 text-center">Estado</th>
-                                <th class="px-1 py-2"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="comparisonTable" class="divide-y divide-slate-100">
-                            <!-- Filas -->
-                        </tbody>
-                        <tfoot class="bg-ui-element font-bold text-main border-t-2 border-slate-200">
-                            <tr>
-                                <td colspan="3" class="px-3 py-3 text-right uppercase text-[10px] text-secondary">
-                                    Totales Muestra:</td>
-                                <td class="px-3 py-3 num text-slate-600" id="sumBase">$0</td>
-                                <td class="px-3 py-3"></td>
-                                <td class="px-3 py-3 num text-blue-700" id="sumCalc">$0</td>
-                                <td class="px-3 py-3 num text-slate-900 border-l border-slate-200" id="sumSist">$0</td>
-                                <td class="px-3 py-3 text-center text-green-700 font-extrabold text-[11px]"
-                                    id="avgPctReal">0%</td>
-                                <td class="px-3 py-3 num text-red-600 border-l border-slate-200" id="sumDif">$0</td>
-                                <td colspan="2"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                                    <th class="px-3 py-2 text-right border-l font-bold text-main bg-green-50/10">
+                                        Sistema (Post)</th>
+                                    <th class="px-3 py-2 text-center text-green-600 font-bold">% Real</th>
+
+                                    <th class="px-3 py-2 text-right text-red-600 border-l border-slate-100">
+                                        Diferencia</th>
+                                    <th class="px-3 py-2 text-center">Estado</th>
+                                    <th class="px-1 py-2"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparisonTable" class="divide-y divide-slate-100">
+                                <!-- Filas -->
+                            </tbody>
+                            <tfoot class="bg-ui-element font-bold text-main border-t-2 border-slate-200">
+                                <tr>
+                                    <td colspan="3" class="px-3 py-3 text-right uppercase text-[10px] text-secondary">
+                                        Totales Muestra:</td>
+                                    <td class="px-3 py-3 num text-slate-600" id="sumBase">$0</td>
+                                    <td class="px-3 py-3"></td>
+                                    <td class="px-3 py-3 num text-blue-700" id="sumCalc">$0</td>
+                                    <td class="px-3 py-3 num text-slate-900 border-l border-slate-200" id="sumSist">
+                                        $0</td>
+                                    <td class="px-3 py-3 text-center text-green-700 font-extrabold text-[11px]"
+                                        id="avgPctReal">0%</td>
+                                    <td class="px-3 py-3 num text-red-600 border-l border-slate-200" id="sumDif">$0
+                                    </td>
+                                    <td colspan="2"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <script>
-            const dataset = {{ resultados.data | tojson | safe }} || [];
+            <script>
+                const dataset = {{ resultados.data | tojson | safe }} || [];
 
-            const tableBody = document.getElementById('comparisonTable');
-            const searchInput = document.getElementById('searchInput');
-            const msgLabel = document.getElementById('searchMsg');
-            const countLabel = document.getElementById('countSelected');
+                const tableBody = document.getElementById('comparisonTable');
+                const countLabel = document.getElementById('countSelected');
 
-            let selectedItems = [];
+                let selectedItems = [];
 
-            const fmtMoney = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
-            const fmtPct = new Intl.NumberFormat('es-CO', { style: 'percent', minimumFractionDigits: 2 });
+                const fmtMoney = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+                const fmtPct = new Intl.NumberFormat('es-CO', { style: 'percent', minimumFractionDigits: 2 });
 
-            // Formatear las tarjetas ADE al cargar
-            document.querySelectorAll('.money-format').forEach(el => {
-                const val = parseFloat(el.textContent);
-                el.textContent = fmtMoney.format(val);
-            });
-
-            searchInput.addEventListener("keypress", function (e) {
-                if (e.key === "Enter") {
-                    e.preventDefault();
-                    ejecutarBusqueda();
-                }
-            });
-
-            function ejecutarBusqueda() {
-                const query = searchInput.value.trim().toUpperCase();
-                if (query.length < 3) {
-                    msgLabel.textContent = "Mínimo 3 caracteres";
-                    msgLabel.className = "text-[10px] text-red-400 mt-1 h-3 absolute bottom-1 left-3";
-                    return;
-                }
-
-                const found = dataset.find(p => {
-                    const predial = String(p.Predial_Nacional || "");
-                    const nombre = String(p.Nombre || "").toUpperCase();
-                    return predial.includes(query) || nombre.includes(query);
+                // Formatear las tarjetas ADE al cargar
+                document.querySelectorAll('.money-format').forEach(el => {
+                    const val = parseFloat(el.textContent);
+                    el.textContent = fmtMoney.format(val);
                 });
 
-                if (found) {
-                    agregarFila(found);
-                    searchInput.value = "";
-                    msgLabel.textContent = "Agregado: " + found.Predial_Nacional;
-                    msgLabel.className = "text-[10px] text-green-400 mt-1 h-3 absolute bottom-1 left-3";
-                    setTimeout(() => msgLabel.textContent = "", 3000);
-                } else {
-                    msgLabel.textContent = "No encontrado";
-                    msgLabel.className = "text-[10px] text-red-400 mt-1 h-3 absolute bottom-1 left-3";
-                }
-            }
-
-            function agregarFila(item) {
-                if (selectedItems.some(i => i.Predial_Nacional === item.Predial_Nacional)) {
-                    eliminarFila(item.Predial_Nacional);
-                }
-                selectedItems.unshift(item);
-                renderTable();
-            }
-
-            function eliminarFila(predial) {
-                selectedItems = selectedItems.filter(i => i.Predial_Nacional !== predial);
-                renderTable();
-            }
-
-            function limpiarTabla() {
-                selectedItems = [];
-                renderTable();
-            }
-
-            function filtrarEstado(estado) {
-                // Filtrar del dataset global
-                const filtrados = dataset.filter(p => p.Estado === estado);
-
-                if (filtrados.length === 0) {
-                    alert("No hay registros con estado: " + estado);
-                    return;
+                function agregarFila(item) {
+                    if (selectedItems.some(i => i.Predial_Nacional === item.Predial_Nacional)) {
+                        eliminarFila(item.Predial_Nacional);
+                    }
+                    selectedItems.unshift(item);
+                    renderTable();
                 }
 
-                // Reemplazamos la selección actual con estos registros
-                // Limitamos a 500 para no explotar el DOM si son muchos
-                if (filtrados.length > 500) {
-                    alert(`Se encontraron ${filtrados.length} registros. Se mostrarán los primeros 500.`);
-                    selectedItems = filtrados.slice(0, 500);
-                } else {
-                    selectedItems = [...filtrados];
+                function eliminarFila(predial) {
+                    selectedItems = selectedItems.filter(i => i.Predial_Nacional !== predial);
+                    renderTable();
                 }
 
-                renderTable();
+                function limpiarTabla() {
+                    selectedItems = [];
+                    renderTable();
+                }
 
-                // Scroll a la tabla
-                document.getElementById('comparisonTable').scrollIntoView({ behavior: 'smooth' });
-            }
+                function filtrarEstado(estado) {
+                    // Filtrar del dataset global
+                    const filtrados = dataset.filter(p => p.Estado === estado);
 
-            function renderTable() {
-                tableBody.innerHTML = "";
-                countLabel.textContent = selectedItems.length;
-
-                let sumBase = 0, sumCalc = 0, sumSist = 0, sumDif = 0;
-
-                selectedItems.forEach((item, index) => {
-                    sumBase += item.Base;
-                    sumCalc += item.Calculado;
-                    sumSist += item.Sistema;
-                    sumDif += item.Diferencia;
-
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-ui-element transition-colors group border-b border-ui-element " + (index === 0 ? "new-row" : "");
-
-                    let badge = "bg-green-100 text-green-700 border border-green-200";
-                    if (item.Estado === 'INCONSISTENCIA') badge = "bg-red-100 text-red-700 border border-red-200";
-                    if (item.Estado === 'DESAPARECIDO') badge = "bg-orange-100 text-orange-700 border border-orange-200";
-                    if (item.Estado === 'NUEVO') badge = "bg-blue-100 text-blue-700 border border-blue-200";
-                    if (item.Estado === 'SIN_AUMENTO') badge = "bg-yellow-100 text-yellow-700 border border-yellow-200";
-
-                    let pctRealUnitario = 0;
-                    if (item.Base > 0 && item.Sistema > 0) {
-                        pctRealUnitario = (item.Sistema / item.Base) - 1;
+                    if (filtrados.length === 0) {
+                        alert("No hay registros con estado: " + estado);
+                        return;
                     }
 
-                    tr.innerHTML = `
+                    // Reemplazamos la selección actual con estos registros
+                    // Limitamos a 500 para no explotar el DOM si son muchos
+                    if (filtrados.length > 500) {
+                        alert(`Se encontraron ${filtrados.length} registros. Se mostrarán los primeros 500.`);
+                        selectedItems = filtrados.slice(0, 500);
+                    } else {
+                        selectedItems = [...filtrados];
+                    }
+
+                    renderTable();
+
+                    // Scroll a la tabla
+                    document.getElementById('comparisonTable').scrollIntoView({ behavior: 'smooth' });
+                }
+
+                function renderTable() {
+                    tableBody.innerHTML = "";
+                    countLabel.textContent = selectedItems.length;
+
+                    let sumBase = 0, sumCalc = 0, sumSist = 0, sumDif = 0;
+
+                    selectedItems.forEach((item, index) => {
+                        sumBase += item.Base;
+                        sumCalc += item.Calculado;
+                        sumSist += item.Sistema;
+                        sumDif += item.Diferencia;
+
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-ui-element transition-colors group border-b border-ui-element " + (index === 0 ? "new-row" : "");
+
+                        let badge = "bg-green-100 text-green-700 border border-green-200";
+                        if (item.Estado === 'INCONSISTENCIA') badge = "bg-red-100 text-red-700 border border-red-200";
+                        if (item.Estado === 'DESAPARECIDO') badge = "bg-orange-100 text-orange-700 border border-orange-200";
+                        if (item.Estado === 'NUEVO') badge = "bg-blue-100 text-blue-700 border border-blue-200";
+                        if (item.Estado === 'SIN_AUMENTO') badge = "bg-yellow-100 text-yellow-700 border border-yellow-200";
+
+                        let pctRealUnitario = 0;
+                        if (item.Base > 0 && item.Sistema > 0) {
+                            pctRealUnitario = (item.Sistema / item.Base) - 1;
+                        }
+
+                        tr.innerHTML = `
                         <td class="px-3 py-2 font-mono text-[10px] text-secondary truncate border-r border-ui-element" title="${item.Predial_Nacional}">${item.Predial_Nacional}</td>
                         <td class="px-3 py-2 font-bold text-main truncate-name" title="${item.Nombre}">${item.Nombre}</td>
                         <td class="px-3 py-2 text-center text-[10px] text-secondary border-r border-ui-element">${item.Destino}</td>
@@ -627,39 +524,60 @@
                             </button>
                         </td>
                     `;
-                    tableBody.appendChild(tr);
-                });
+                        tableBody.appendChild(tr);
+                    });
 
-                document.getElementById('sumBase').textContent = fmtMoney.format(sumBase);
-                document.getElementById('sumCalc').textContent = fmtMoney.format(sumCalc);
-                document.getElementById('sumSist').textContent = fmtMoney.format(sumSist);
-                document.getElementById('sumDif').textContent = fmtMoney.format(sumDif);
+                    document.getElementById('sumBase').textContent = fmtMoney.format(sumBase);
+                    document.getElementById('sumCalc').textContent = fmtMoney.format(sumCalc);
+                    document.getElementById('sumSist').textContent = fmtMoney.format(sumSist);
+                    document.getElementById('sumDif').textContent = fmtMoney.format(sumDif);
 
-                let avgRealPonderado = 0;
-                if (sumBase > 0 && sumSist > 0) {
-                    avgRealPonderado = (sumSist / sumBase) - 1;
+                    let avgRealPonderado = 0;
+                    if (sumBase > 0 && sumSist > 0) {
+                        avgRealPonderado = (sumSist / sumBase) - 1;
+                    }
+                    document.getElementById('avgPctReal').textContent = fmtPct.format(avgRealPonderado);
                 }
-                document.getElementById('avgPctReal').textContent = fmtPct.format(avgRealPonderado);
-            }
-        </script>
+            </script>
+        </div>
         {% endif %}
 
         <script>
-            // --- CASABERO CURSOR LOGIC (GLOBAL) ---
-            const cursorBox = document.getElementById("cursor-pickbox");
-            const cursorX = document.getElementById("cursor-x-axis");
-            const cursorY = document.getElementById("cursor-y-axis");
+            // --- DYNAMIC FORM LOGIC ---
+            function updateFormVisibility() {
+                const zona = document.getElementById('zona_filter').value;
+                const divUrbano = document.getElementById('div_urbano');
+                const divRural = document.getElementById('div_rural');
+                const valUrbano = document.getElementById('val_urbano');
+                const valRural = document.getElementById('val_rural');
 
-            if (cursorBox && cursorX && cursorY) {
-                window.addEventListener("mousemove", (e) => {
-                    requestAnimationFrame(() => {
-                        cursorBox.style.left = `${e.clientX}px`;
-                        cursorBox.style.top = `${e.clientY}px`;
-                        cursorX.style.top = `${e.clientY}px`;
-                        cursorY.style.left = `${e.clientX}px`;
-                    });
-                });
+                // Reset classes
+                divUrbano.classList.add('hidden');
+                divRural.classList.add('hidden');
+                valUrbano.required = false;
+                valRural.required = false;
+                valUrbano.value = ''; // Clear values when hidden
+                valRural.value = ''; // Clear values when hidden
+
+                if (zona === 'TODOS') {
+                    divUrbano.classList.remove('hidden');
+                    divRural.classList.remove('hidden');
+                    valUrbano.required = true;
+                    valRural.required = true;
+                } else if (zona === 'URBANO') {
+                    divUrbano.classList.remove('hidden');
+                    valUrbano.required = true;
+                } else if (zona === 'RURAL') {
+                    divRural.classList.remove('hidden');
+                    valRural.required = true;
+                }
             }
+
+            // Initialize on load
+            document.addEventListener('DOMContentLoaded', updateFormVisibility);
+
+            // --- GLOBAL LOGIC ---
+            // (Cursor logic removed as requested)
         </script>
 
     </main>

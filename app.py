@@ -85,12 +85,18 @@ def avaluos_tool():
             return redirect(request.url)
         
         f_pre = request.files['file_pre']
-        f_post = request.files['file_post']
-        pct_u = request.form.get('pct_urbano')
-        pct_r = request.form.get('pct_rural')
+        # Get params with defaults (si el input está oculto, puede no enviarse o llegar vacío)
+        def get_float_param(key):
+             val = request.form.get(key, '')
+             if not val: return 0.0
+             try: return float(val)
+             except: return 0.0
+
+        pct_u = get_float_param('pct_urbano')
+        pct_r = get_float_param('pct_rural')
         
         try:
-            # Leer nuevos parámetros del formulario
+            # Leer nuevos parámetros
             sample_pct = request.form.get('sample_pct', 100)
             zona_filter = request.form.get('zona_filter', 'TODOS')
             

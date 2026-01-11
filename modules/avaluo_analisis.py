@@ -64,10 +64,17 @@ def cargar_snc(stream):
     # Aseguramos que existan las columnas necesarias
     required_cols = ['Departamento', 'Municipio', 'NoPredial']
     if not all(col in df.columns for col in required_cols):
-         # Intentar mapping si los nombres son diferentes en Excel?
-         # Por ahora asumimos que si es Excel, tiene los encabezados O el orden correcto.
          pass 
 
+    # IMPORTANTE: NoPredial suele tener 25 dígitos. Los primeros 2 son la ZONA.
+    # Si viene sin ceros a la izquierda (ej: Excel), zfill(25) los pone.
+    # Ej: ZONA 01 -> "1..." -> zfill -> "...01..." (MAL)
+    # Ej: ZONA 01 -> "01..." -> zfill -> "01..." (BIEN)
+    # Asumiremos que si es EXCEL, el usuario debe cuidar el formato texto, pero intentaremos LJUST si parece corto?
+    # No, estándar catastral es ceros a la IZQUIERDA. 
+    # Si el usuario sube Excel y el excel le quitó los ceros -> "1000022" (Zona 01?) No se sabe.
+    # Asumiremos zfill(2) para Depto, zfill(3) para Mun, zfill(25) para Predial.
+    
     df['Predial_Nacional'] = (
         df['Departamento'].astype(str).str.replace(r'\.0$', '', regex=True).str.zfill(2) + 
         df['Municipio'].astype(str).str.replace(r'\.0$', '', regex=True).str.zfill(3) + 
@@ -77,30 +84,35 @@ def cargar_snc(stream):
     # Eliminar duplicados
     df = df.drop_duplicates(subset=['Predial_Nacional'], keep='first')
     
+    # Retornar columnas clave y el NoPredial limpio para filtrar
     return df[['Predial_Nacional', 'Avaluo', 'Nombre', 'DestinoEconomico']]
 
 def procesar_incremento_web(file_pre, file_post, pct_urbano, pct_rural, sample_pct=100, zona_filter='TODOS'):
-    # 1. Cargar DataFrames
+    # Leer Dataframes
     df_pre = cargar_snc(file_pre)
-    df_post = cargar_snc(file_post)
+    df_post = cargar_snc(file_post) # Aquí sample_pct y zona_filter se aplican DESPUÉS para simplificar, 
+                                    # o podemos inyectar el filtro antes si cargamos todo.
+                                    # Dado que cargar_snc retorna todo, filtramos en memoria.
     
-    # 1.1 FILTRO ZONAL (Optimización Previa)
-    # Zona está en posiciones 5:7 del Predial Nacional (Depto 2 + Mun 3 + ZONA 2 ...)
+    # 1.1 FILTRO ZONAL
+    # Zona está en posiciones 5:7 del Predial Nacional (30 char).
+    # 0-2 (Depto), 2-5 (Mun), 5-7 (ZONA). 
+    # Ejemplo: 25 204 01... (Urbano) -> 2520401...
     if zona_filter != 'TODOS':
-        # Función auxiliar para filtrar
-        def filtrar_por_zona(df, codigo_zona):
-            # Extraer slice 5:7
-            zonas = df['Predial_Nacional'].astype(str).str.slice(5, 7)
-            if codigo_zona == 'URBANO':
-                return df[zonas == '01']
-            elif codigo_zona == 'RURAL':
-                return df[zonas == '00']
-            elif codigo_zona == 'CORREG':
-                return df[~zonas.isin(['00', '01'])]
-            return df
-
-        df_pre = filtrar_por_zona(df_pre, zona_filter)
-        df_post = filtrar_por_zona(df_post, zona_filter)
+        # Definimos códigos válidos para cada selección
+        target_zones = []
+        if zona_filter == 'URBANO': target_zones = ['01']
+        elif zona_filter == 'RURAL': target_zones = ['00']
+        
+        # Filtramos DF Pre y Post
+        # slice(5,7) toma caracteres 5 y 6.
+        if zona_filter in ['URBANO', 'RURAL']:
+            df_pre = df_pre[df_pre['Predial_Nacional'].str.slice(5, 7).isin(target_zones)]
+            df_post = df_post[df_post['Predial_Nacional'].str.slice(5, 7).isin(target_zones)]
+        elif zona_filter == 'CORREG':
+             # Todo lo que NO sea 00 ni 01
+             df_pre = df_pre[~df_pre['Predial_Nacional'].str.slice(5, 7).isin(['00', '01'])]
+             df_post = df_post[~df_post['Predial_Nacional'].str.slice(5, 7).isin(['00', '01'])]
 
     # 1.2 MUESTREO POR PORCENTAJE
     sample_pct = float(sample_pct)
