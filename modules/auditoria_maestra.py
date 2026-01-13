@@ -3,6 +3,9 @@ import numpy as np
 import io
 from decimal import Decimal, ROUND_HALF_UP
 from fpdf import FPDF
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg') # Modo no interactivo para el servidor
 
 # ==========================================
 # 1. LÓGICA DE NEGOCIO
@@ -57,13 +60,22 @@ def procesar_auditoria(files_dict, pct_incremento):
             if 'Avaluo ($)' in df_prop.columns:
                 df_prop['Valor_Base_R1'] = pd.to_numeric(df_prop['Avaluo ($)'], errors='coerce').fillna(0)
             else:
-                # Buscar columna parecida
                 av_col = [c for c in df_prop.columns if 'avaluo' in c.lower()]
                 if av_col:
                     df_prop['Valor_Base_R1'] = pd.to_numeric(df_prop[av_col[0]], errors='coerce').fillna(0)
             
+            # Detectar nombre del municipio
+            muni_col = [c for c in df_prop.columns if 'nombre' in c.lower() and ('muni' in c.lower() or 'mpio' in c.lower())]
+            if not muni_col:
+                muni_col = [c for c in df_prop.columns if 'municipio' == c.lower()]
+            
+            nombre_municipio = "Desconocido"
+            if muni_col:
+                nombre_municipio = str(df_prop[muni_col[0]].iloc[0]).strip()
+
             df_prop = df_prop.drop_duplicates(subset=['ID_Unico'], keep='first')
             df_prop['Zona'] = df_prop['ID_Unico'].apply(obtener_zona)
+            df_prop['Muni_Name'] = nombre_municipio
 
         # Detección Listado Avalúos
         elif any(k in ' '.join(cols) for k in ['valor avaluo', 'valor_calculado']):
@@ -114,6 +126,11 @@ def procesar_auditoria(files_dict, pct_incremento):
     full['Cierre_Calculado'] = full['Base_Usada'].apply(lambda x: calcular_avaluo_excel(x, pct_incremento))
     full['Diff_Calculo'] = full['Valor_Cierre_Listado'] - full['Cierre_Calculado']
     
+    # % de Variación Real (Cierre Listado vs Precierre)
+    full['Pct_Variacion'] = np.where(full['Base_Usada'] > 0, 
+                                     ((full['Valor_Cierre_Listado'] - full['Base_Usada']) / full['Base_Usada'] * 100), 
+                                     0)
+    
     # Clasificación de errores
     full['Estado'] = 'OK'
     full.loc[full['_merge'] == 'left_only', 'Estado'] = 'Faltante en Listado'
@@ -121,29 +138,35 @@ def procesar_auditoria(files_dict, pct_incremento):
     full.loc[(full['_merge'] == 'both') & (full['Diff_Base'] != 0), 'Estado'] = 'Base Diferente'
     full.loc[(full['_merge'] == 'both') & (full['Diff_Calculo'] != 0), 'Estado'] = 'Error de Cálculo'
 
-    # Preparar resultados para la UI
-    resumen_estados = full['Estado'].value_counts().to_dict()
-    
+    # Outliers (Top 5 y Bottom 5 de variaciones significativas)
+    top_5_var = full[full['_merge'] == 'both'].sort_values(by='Pct_Variacion', ascending=False).head(5).to_dict(orient='records')
+    bottom_5_var = full[full['_merge'] == 'both'].sort_values(by='Pct_Variacion', ascending=True).head(5).to_dict(orient='records')
+
     # Totales Globales
     totales = {
         'conteo': int(len(full)),
         'conteo_r1': int(len(df_prop)),
         'conteo_listado': int(len(df_calc)),
-        'avaluo_base': float(full['Base_Usada'].sum()),
-        'avaluo_cierre': float(full['Valor_Cierre_Listado'].sum()),
-        'avaluo_calculado': float(full['Cierre_Calculado'].sum())
+        'avaluo_precierre': float(full['Base_Usada'].sum()),
+        'avaluo_cierre_listado': float(full['Valor_Cierre_Listado'].sum()),
+        'avaluo_cierre_calculado': float(full['Cierre_Calculado'].sum())
     }
     
+    municipio_detectado = df_prop['Muni_Name'].iloc[0] if df_prop is not None else "Desconocido"
+
     # Renombrar para mayor claridad en el reporte y UI
     full.rename(columns={'ID_Unico': 'Numero_Predial'}, inplace=True)
     inconsistencias = full[full['Estado'] != 'OK'].head(200).to_dict(orient='records')
 
     return {
+        'municipio': municipio_detectado,
         'stats_zonas': tabla_zonas.reset_index().to_dict(orient='records'),
-        'resumen_estados': resumen_estados,
+        'resumen_estados': full['Estado'].value_counts().to_dict(),
         'inconsistencias': inconsistencias,
         'total_predios': len(full),
         'totales': totales,
+        'outliers': {'top': top_5_var, 'bottom': bottom_5_var},
+        'variaciones_all': full[full['_merge'] == 'both']['Pct_Variacion'].tolist(), # Para el BoxPlot
         'full_data': full.head(1000).to_dict(orient='records'),
         'pct_incremento': pct_incremento
     }
@@ -166,7 +189,7 @@ def generar_pdf_auditoria(resultados):
     
     # Resumen General
     pdf.set_font('Helvetica', 'B', 12)
-    pdf.cell(0, 10, 'Resumen de Auditoría', 0, 1)
+    pdf.cell(0, 10, f"Reporte de Auditoría: {resultados.get('municipio', 'Municipio Desconocido')}", 0, 1)
     pdf.set_font('Helvetica', '', 10)
     pdf.cell(0, 7, f"Total Predios Auditados: {resultados['total_predios']}", 0, 1)
     pdf.cell(0, 7, f"Incremento Configurado: {resultados['pct_incremento']}%", 0, 1)
@@ -177,10 +200,38 @@ def generar_pdf_auditoria(resultados):
         pdf.set_font('Helvetica', 'B', 10)
         pdf.cell(0, 7, "Totales Financieros:", 0, 1)
         pdf.set_font('Helvetica', '', 9)
-        pdf.cell(60, 6, f"Base R1 Total: $ {resultados['totales']['avaluo_base']:,.0f}", 0, 1)
-        pdf.cell(60, 6, f"Cierre Listado Total: $ {resultados['totales']['avaluo_cierre']:,.0f}", 0, 1)
-        pdf.cell(60, 6, f"Diferencia Global: $ {resultados['totales']['avaluo_cierre'] - resultados['totales']['avaluo_calculado']:,.0f}", 0, 1)
+        t = resultados['totales']
+        pdf.cell(80, 6, f"Precierre (Avalúo Anterior) Total: $ {t['avaluo_precierre']:,.0f}", 0, 1)
+        pdf.cell(80, 6, f"Cierre en Lista de Avalúo Total: $ {t['avaluo_cierre_listado']:,.0f}", 0, 1)
+        pdf.cell(80, 6, f"Cierre Calculado (Python) Total: $ {t['avaluo_cierre_calculado']:,.0f}", 0, 1)
+        pdf.set_font('Helvetica', 'B', 9)
+        dif_global = t['avaluo_cierre_listado'] - t['avaluo_precierre']
+        pdf.cell(80, 6, f"Diferencia Real (Cierre - Precierre): $ {dif_global:,.0f}", 0, 1)
     
+    # Gráfico de Variación (Box Plot)
+    if 'variaciones_all' in resultados and resultados['variaciones_all']:
+        try:
+            plt.figure(figsize=(6, 3))
+            plt.boxplot(resultados['variaciones_all'], vert=False, patch_artist=True,
+                        boxprops=dict(facecolor='#EEF2FF', color='#4F46E5'),
+                        medianprops=dict(color='#EF4444'))
+            plt.title('Distribución de % Variación (Cierre vs Precierre)', fontsize=10)
+            plt.xlabel('% Variación', fontsize=8)
+            plt.grid(axis='x', linestyle='--', alpha=0.7)
+            plt.tight_layout()
+            
+            img_buf = io.BytesIO()
+            plt.savefig(img_buf, format='png', dpi=150)
+            plt.close()
+            img_buf.seek(0)
+            
+            pdf.ln(5)
+            # Centrar imagen
+            pdf.image(img_buf, x=35, w=140)
+            pdf.ln(5)
+        except Exception as e:
+            print(f"Error generando gráfico: {e}")
+
     pdf.ln(5)
     
     # Tabla de Estados
@@ -194,9 +245,47 @@ def generar_pdf_auditoria(resultados):
         pdf.cell(30, 7, str(cant), 1)
         pdf.ln()
     
-    pdf.ln(10)
-    
-    # Tabla de Zonas
+    # Outliers: Top/Bottom 5 variaciones
+    if 'outliers' in resultados:
+        pdf.add_page()
+        pdf.set_font('Helvetica', 'B', 12)
+        pdf.cell(0, 10, 'Análisis de Outliers (% de Variación)', 0, 1)
+        
+        pdf.set_font('Helvetica', 'B', 10)
+        pdf.cell(0, 7, 'Top 5 Mayores Incrementos %:', 0, 1)
+        pdf.set_font('Helvetica', 'B', 8)
+        pdf.cell(50, 7, 'Número Predial', 1)
+        pdf.cell(30, 7, 'Precierre', 1)
+        pdf.cell(30, 7, 'Cierre Lista', 1)
+        pdf.cell(30, 7, '% Var.', 1)
+        pdf.ln()
+        pdf.set_font('Helvetica', '', 7)
+        for item in resultados['outliers']['top']:
+            pdf.cell(50, 6, str(item['Numero_Predial']), 1)
+            pdf.cell(30, 6, f"{item['Base_Usada']:,.0f}", 1)
+            pdf.cell(30, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
+            pdf.cell(30, 6, f"{item['Pct_Variacion']:.2f}%", 1)
+            pdf.ln()
+
+        pdf.ln(5)
+        pdf.set_font('Helvetica', 'B', 10)
+        pdf.cell(0, 7, 'Top 5 Menores Incrementos %:', 0, 1)
+        pdf.set_font('Helvetica', 'B', 8)
+        pdf.cell(50, 7, 'Número Predial', 1)
+        pdf.cell(30, 7, 'Precierre', 1)
+        pdf.cell(30, 7, 'Cierre Lista', 1)
+        pdf.cell(30, 7, '% Var.', 1)
+        pdf.ln()
+        pdf.set_font('Helvetica', '', 7)
+        for item in resultados['outliers']['bottom']:
+            pdf.cell(50, 6, str(item['Numero_Predial']), 1)
+            pdf.cell(30, 6, f"{item['Base_Usada']:,.0f}", 1)
+            pdf.cell(30, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
+            pdf.cell(30, 6, f"{item['Pct_Variacion']:.2f}%", 1)
+            pdf.ln()
+
+    # Tabla de Zonas (en nueva página si es necesario)
+    pdf.add_page()
     pdf.set_font('Helvetica', 'B', 12)
     pdf.cell(0, 10, 'Distribución por Zona', 0, 1)
     pdf.set_font('Helvetica', 'B', 10)
@@ -219,18 +308,20 @@ def generar_pdf_auditoria(resultados):
         pdf.set_font('Helvetica', 'B', 12)
         pdf.cell(0, 10, 'Detalle de Inconsistencias (Primeras 50)', 0, 1)
         pdf.set_font('Helvetica', 'B', 7)
-        pdf.cell(50, 7, 'Número Predial', 1)
-        pdf.cell(30, 7, 'Base R1', 1)
-        pdf.cell(30, 7, 'Cierre Listado', 1)
-        pdf.cell(30, 7, 'Calculado Py', 1)
+        pdf.cell(40, 7, 'Número Predial', 1)
+        pdf.cell(25, 7, 'Precierre', 1)
+        pdf.cell(25, 7, 'Cierre Lista', 1)
+        pdf.cell(25, 7, 'Cierre Calc.', 1)
+        pdf.cell(25, 7, '% Var.', 1)
         pdf.cell(50, 7, 'Estado', 1)
         pdf.ln()
         pdf.set_font('Helvetica', '', 6)
         for i, item in enumerate(resultados['inconsistencias'][:50]):
-            pdf.cell(50, 6, str(item['Numero_Predial']), 1)
-            pdf.cell(30, 6, f"{item['Valor_Base_R1']:,.0f}", 1)
-            pdf.cell(30, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
-            pdf.cell(30, 6, f"{item['Cierre_Calculado']:,.0f}", 1)
+            pdf.cell(40, 6, str(item['Numero_Predial']), 1)
+            pdf.cell(25, 6, f"{item['Base_Usada']:,.0f}", 1)
+            pdf.cell(25, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
+            pdf.cell(25, 6, f"{item['Cierre_Calculado']:,.0f}", 1)
+            pdf.cell(25, 6, f"{item['Pct_Variacion']:.2f}%", 1)
             pdf.cell(50, 6, str(item['Estado']), 1)
             pdf.ln()
 
