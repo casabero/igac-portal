@@ -8,7 +8,13 @@ ENV PYTHONUNBUFFERED=1
 # Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Instalar dependencias
+# Instalar dependencias de sistema para Matplotlib
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libfreetype6 \
+    libpng16-16 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar dependencias de Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 

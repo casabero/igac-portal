@@ -133,7 +133,7 @@
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
                         <span class="material-symbols-outlined text-indigo-600">location_city</span>
-                        {{ resultados.municipio }}
+                        {{ resultados.municipio if resultados.municipio else 'Municipio Desconocido' }}
                     </h2>
                     <span
                         class="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-1 rounded font-bold uppercase tracking-wider">Auditoría
@@ -146,19 +146,19 @@
                         <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Total Auditado</p>
                         <p class="text-2xl font-semibold">{{ resultados.total_predios }}</p>
                     </div>
+                    {% set t = resultados.totales or {} %}
                     <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
                         <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Precierre (R1)</p>
-                        <p class="text-2xl font-semibold text-blue-600">{{ resultados.totales.get('conteo_r1', 0) }}</p>
+                        <p class="text-2xl font-semibold text-blue-600">{{ t.get('conteo_r1', 0) }}</p>
                     </div>
                     <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
                         <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Cierre (Listado)</p>
-                        <p class="text-2xl font-semibold text-indigo-600">{{ resultados.totales.get('conteo_listado', 0)
-                            }}</p>
+                        <p class="text-2xl font-semibold text-indigo-600">{{ t.get('conteo_listado', 0) }}</p>
                     </div>
                     <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
                         <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Inconsistencias</p>
                         <p class="text-2xl font-semibold text-amber-600">{{ resultados.total_predios -
-                            resultados.resumen_estados.get('OK', 0) }}</p>
+                            resultados.resumen_estados.get('OK', 0) if resultados.resumen_estados else 0 }}</p>
                     </div>
                 </div>
 
@@ -251,12 +251,13 @@
                             <tfoot class="border-t-2 border-gray-200">
                                 <tr class="bg-gray-50 font-bold text-gray-800">
                                     <td class="px-4 py-3" colspan="2">Totales Globales (Auditado)</td>
+                                    {% set t = resultados.totales or {} %}
                                     <td class="px-4 py-3 text-blue-600" id="totalBase">$ {{
-                                        "{:,.0f}".format(resultados.totales.avaluo_precierre) }}</td>
+                                        "{:,.0f}".format(t.get('avaluo_precierre', 0)) }}</td>
                                     <td class="px-4 py-3 text-green-600" id="totalCierre">$ {{
-                                        "{:,.0f}".format(resultados.totales.avaluo_cierre_listado) }}</td>
+                                        "{:,.0f}".format(t.get('avaluo_cierre_listado', 0)) }}</td>
                                     <td class="px-4 py-3 text-indigo-600" id="totalCalc">$ {{
-                                        "{:,.0f}".format(resultados.totales.avaluo_cierre_calculado) }}</td>
+                                        "{:,.0f}".format(t.get('avaluo_cierre_calculado', 0)) }}</td>
                                     <td class="px-4 py-3" id="totalCount">{{ resultados.total_predios }} predios</td>
                                 </tr>
                             </tfoot>

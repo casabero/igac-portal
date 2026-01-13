@@ -208,8 +208,17 @@ def auditoria_tool():
     if audit_id:
         audit_path = os.path.join(UPLOAD_FOLDER, f"audit_{audit_id}.json")
         if os.path.exists(audit_path):
-            with open(audit_path, 'r', encoding='utf-8') as f:
-                resultados = json.load(f)
+            try:
+                with open(audit_path, 'r', encoding='utf-8') as f:
+                    resultados = json.load(f)
+                
+                # Validación mínima: si es una versión vieja, la ignoramos
+                if resultados and 'totales' in resultados and 'avaluo_precierre' not in resultados['totales']:
+                    resultados = None
+                    session.pop('audit_id', None)
+            except:
+                resultados = None
+                session.pop('audit_id', None)
             
     return render_template('auditoria_tool.html', resultados=resultados)
 
