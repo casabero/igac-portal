@@ -1,10 +1,13 @@
-from flask import Flask, render_template, request, send_file, flash, redirect, url_for
+from flask import Flask, render_template, request, send_file, flash, redirect, url_for, session, Response
 from modules.snc_processor import procesar_dataframe
 from modules.db_logger import init_db, registrar_visita  # <--- IMPORTANTE
 from modules.avaluo_analisis import procesar_incremento_web # <-- CAMBIÓ EL NOMBRE
 from modules.auditoria_maestra import procesar_auditoria, generar_pdf_auditoria
 
 import os
+import uuid
+import json
+import traceback
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'casabero_igac_secure_key')
@@ -82,7 +85,6 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 @app.route('/avaluos', methods=['GET', 'POST'])
 def avaluos_tool():
-    from flask import session
     registrar_visita('/avaluos')
     
     if request.method == 'POST':
@@ -138,7 +140,6 @@ def avaluos_tool():
 
 @app.route('/clear_analysis')
 def clear_analysis():
-    from flask import session
     # Borrar archivos físicos
     for key in ['path_pre', 'path_post']:
         path = session.get(key)
@@ -159,7 +160,6 @@ def clear_analysis():
 # --- RUTA 5: AUDITORÍA DE CIERRE Y MASIVOS ---
 @app.route('/auditoria', methods=['GET', 'POST'])
 def auditoria_tool():
-    from flask import session
     registrar_visita('/auditoria')
     
     # Intentar recuperar resultados de la sesión si existen
@@ -189,8 +189,8 @@ def auditoria_tool():
             
             # Guardamos los resultados pesados en un archivo temporal
             audit_path = os.path.join(UPLOAD_FOLDER, f"audit_{audit_id}.json")
-            with open(audit_path, 'w') as f:
-                json.dump(res, f)
+            with open(audit_path, 'w', encoding='utf-8') as f:
+                json.dump(res, f, ensure_ascii=False)
             
             session['audit_id'] = audit_id
             
@@ -208,15 +208,13 @@ def auditoria_tool():
     if audit_id:
         audit_path = os.path.join(UPLOAD_FOLDER, f"audit_{audit_id}.json")
         if os.path.exists(audit_path):
-            import json
-            with open(audit_path, 'r') as f:
+            with open(audit_path, 'r', encoding='utf-8') as f:
                 resultados = json.load(f)
             
     return render_template('auditoria_tool.html', resultados=resultados)
 
 @app.route('/auditoria/pdf')
 def auditoria_pdf():
-    from flask import session, Response
     audit_id = session.get('audit_id')
     if not audit_id:
         flash('No hay resultados para generar PDF. Ejecute la auditoría primero.')
@@ -228,8 +226,7 @@ def auditoria_pdf():
         return redirect(url_for('auditoria_tool'))
         
     try:
-        import json
-        with open(audit_path, 'r') as f:
+        with open(audit_path, 'r', encoding='utf-8') as f:
             resultados = json.load(f)
             
         pdf_bytes = generar_pdf_auditoria(resultados)
@@ -245,8 +242,6 @@ def auditoria_pdf():
 
 @app.route('/clear_auditoria')
 def clear_auditoria():
-    from flask import session
-    import os
     # Limpiar sesión y archivos de auditoría
     audit_id = session.get('audit_id')
     if audit_id:

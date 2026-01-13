@@ -213,8 +213,8 @@
         </div>
     </div>
 
-    <div id="auditData" data-audit='{{ resultados.full_data | tojson | safe }}' class="hidden"></div>
     {% if resultados %}
+    <div id="auditData" data-audit='{{ resultados.full_data | tojson | safe }}' class="hidden"></div>
     <script>
         const rawData = JSON.parse(document.getElementById('auditData').dataset.audit);
         let filteredData = [...rawData];
