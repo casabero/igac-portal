@@ -160,13 +160,23 @@
                         <p class="text-2xl font-semibold text-amber-600">{{ resultados.total_predios -
                             resultados.resumen_estados.get('OK', 0) if resultados.resumen_estados else 0 }}</p>
                     </div>
-                    <div
-                        class="bg-white p-4 rounded-lg border-2 {{ 'border-red-500 bg-red-50' if t.get('conteo_zero', 0) > 0 else 'border-gray-200 shadow-sm' }}">
-                        <p
-                            class="text-[10px] {{ 'text-red-600' if t.get('conteo_zero', 0) > 0 else 'text-gray-500' }} uppercase font-bold tracking-wider">
-                            Avalúos en $0</p>
-                        <p class="text-2xl font-semibold {{ 'text-red-700' if t.get('conteo_zero', 0) > 0 else '' }}">{{
-                            t.get('conteo_zero', 0) }}</p>
+                    <div class="bg-red-50 p-4 rounded-lg border-2 border-red-500 shadow-sm relative overflow-hidden">
+                        <div class="z-10 relative">
+                            <p class="text-[10px] text-red-600 uppercase font-bold tracking-wider">Avalúos $0 - Críticos
+                            </p>
+                            <p class="text-2xl font-semibold text-red-700">{{ t.get('conteo_zero_critico', 0) }}</p>
+                        </div>
+                        <span
+                            class="material-symbols-outlined absolute -right-2 -bottom-2 text-red-200 text-6xl opacity-40 select-none">error</span>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg border-2 border-blue-400 shadow-sm relative overflow-hidden">
+                        <div class="z-10 relative">
+                            <p class="text-[10px] text-blue-600 uppercase font-bold tracking-wider">Avalúos $0 -
+                                Informales</p>
+                            <p class="text-2xl font-semibold text-blue-700">{{ t.get('conteo_zero_informal', 0) }}</p>
+                        </div>
+                        <span
+                            class="material-symbols-outlined absolute -right-2 -bottom-2 text-blue-200 text-6xl opacity-40 select-none">info</span>
                     </div>
                 </div>
 
@@ -309,7 +319,7 @@
             const slice = filteredData.slice(start, end);
 
             tableBody.innerHTML = slice.map(item => `
-                <tr class="hover:bg-blue-50/30 transition-colors ${item.Avaluo_Zero ? 'bg-red-50/80 border-l-4 border-red-500' : ''}">
+                <tr class="hover:bg-blue-50/30 transition-colors ${item.Avaluo_Zero ? (item.Zero_Category === 'Crítico' ? 'bg-red-50 border-l-4 border-red-600' : 'bg-blue-50 border-l-4 border-blue-500') : ''}">
                     <td class="px-4 py-2 font-mono text-[10px] text-gray-600">${item.Numero_Predial}</td>
                     <td class="px-4 py-2 text-gray-500">${item.Zona || '-'}</td>
                     <td class="px-4 py-2 text-gray-500 ${item.Base_Usada == 0 ? 'text-red-600 font-bold' : ''}">$${item.Base_Usada.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
@@ -317,11 +327,12 @@
                     <td class="px-4 py-2 text-indigo-600 font-medium">$${item.Cierre_Calculado.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
                     <td class="px-4 py-2">
                         <span class="px-2 py-0.5 rounded-full text-[9px] font-bold 
-                            ${item.Avaluo_Zero ? 'bg-red-600 text-white' :
-                    (item.Estado === 'OK' ? 'bg-green-100 text-green-700' :
-                        item.Estado.includes('Calculo') ? 'bg-red-100 text-red-700' :
-                            'bg-amber-100 text-amber-700')}">
-                            ${item.Avaluo_Zero ? 'ALERTA: AVALÚO $0' : item.Estado}
+                            ${item.Zero_Category === 'Crítico' ? 'bg-red-600 text-white' :
+                    (item.Zero_Category === 'Informal' ? 'bg-blue-600 text-white' :
+                        (item.Estado === 'OK' ? 'bg-green-100 text-green-700' :
+                            item.Estado.includes('Calculo') ? 'bg-red-100 text-red-700' :
+                                'bg-amber-100 text-amber-700'))}">
+                            ${item.Avaluo_Zero ? (item.Zero_Category === 'Crítico' ? 'CRÍTICO: AVALÚO $0' : 'INFORMAL: AVALÚO $0') : item.Estado}
                         </span>
                         <div class="text-[9px] text-gray-400 mt-0.5 font-medium">${(item.Pct_Variacion || 0).toFixed(2)}% var.</div>
                     </td>

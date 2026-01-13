@@ -98,13 +98,28 @@ def procesar_auditoria(files_dict, pct_incremento):
             df_calc = pd.read_excel(stream, dtype=str)
             df_calc.columns = [c.strip() for c in df_calc.columns]
             
-            mapa = {
-                'Número predial': 'ID_Unico',
-                'Valor avaluo precierre': 'Valor_Base_Listado',
-                'Valor avaluo cierre': 'Valor_Cierre_Listado'
+            # Columnas clave para Listado
+            cols_calc = {
+                'ID_Unico': next((c for c in df_calc.columns if 'identificador' in c.lower() or 'numero predial' in c.lower()), None),
+                'Valor_Base_Listado': next((c for c in df_calc.columns if 'valor avaluo' in c.lower() or 'valor_base' in c.lower()), None),
+                'Valor_Cierre_Listado': next((c for c in df_calc.columns if 'valor_calculado' in c.lower()), None),
+                'Condicion_Propiedad': next((c for c in df_calc.columns if 'condicion propiedad' in c.lower() or 'condicion_propiedad' in c.lower()), None)
             }
-            # Caso especial si las columnas vienen exactas del script
-            df_calc.rename(columns=mapa, inplace=True)
+            
+            if cols_calc['ID_Unico']:
+                rename_dict = {
+                    cols_calc['ID_Unico']: 'ID_Unico',
+                    cols_calc['Valor_Base_Listado']: 'Valor_Base_Listado',
+                    cols_calc['Valor_Cierre_Listado']: 'Valor_Cierre_Listado'
+                }
+                # Remove None values from rename_dict
+                rename_dict = {k: v for k, v in rename_dict.items() if k is not None}
+                df_calc.rename(columns=rename_dict, inplace=True)
+                
+                if cols_calc['Condicion_Propiedad']:
+                    df_calc.rename(columns={cols_calc['Condicion_Propiedad']: 'Condicion_Propiedad'}, inplace=True)
+                else:
+                    df_calc['Condicion_Propiedad'] = -1 # Valor centinela si no existe
             
             # Si no encontró ID_Unico, buscar por No Predial
             if 'ID_Unico' not in df_calc.columns:
@@ -128,7 +143,7 @@ def procesar_auditoria(files_dict, pct_incremento):
     # 2. Cruce y Auditoría
     full = pd.merge(
         df_prop[['ID_Unico', 'Valor_Base_R1', 'Zona']],
-        df_calc[['ID_Unico', 'Valor_Base_Listado', 'Valor_Cierre_Listado']],
+        df_calc[['ID_Unico', 'Valor_Base_Listado', 'Valor_Cierre_Listado', 'Condicion_Propiedad']],
         on='ID_Unico',
         how='outer',
         indicator=True
@@ -156,6 +171,16 @@ def procesar_auditoria(files_dict, pct_incremento):
 
     # Identificar predios con avalúo $0 (no es normal)
     full['Avaluo_Zero'] = (full['Base_Usada'] == 0) | (full['Valor_Cierre_Listado'] == 0)
+    
+    # Categorización de Avalúos en $0
+    full['Zero_Category'] = 'Ninguna'
+    # Crítico: Avaluo 0 y Condicion 0
+    full.loc[full['Avaluo_Zero'] & (full['Condicion_Propiedad'] == 0), 'Zero_Category'] = 'Crítico'
+    # Informal: Avaluo 0 y Condicion 2
+    full.loc[full['Avaluo_Zero'] & (full['Condicion_Propiedad'] == 2), 'Zero_Category'] = 'Informal'
+    # Otros ceros (ej: Condicion 1 o no encontrada)
+    full.loc[full['Avaluo_Zero'] & (full['Zero_Category'] == 'Ninguna'), 'Zero_Category'] = 'Otros $0'
+
     predios_zero = full[full['Avaluo_Zero']].copy()
     
     # Renombrar para mayor claridad en el reporte y UI
@@ -174,7 +199,9 @@ def procesar_auditoria(files_dict, pct_incremento):
         'avaluo_precierre': float(full['Base_Usada'].sum()),
         'avaluo_cierre_listado': float(full['Valor_Cierre_Listado'].sum()),
         'avaluo_cierre_calculado': float(full['Cierre_Calculado'].sum()),
-        'conteo_zero': int(len(predios_zero))
+        'conteo_zero_critico': int(len(full[full['Zero_Category'] == 'Crítico'])),
+        'conteo_zero_informal': int(len(full[full['Zero_Category'] == 'Informal'])),
+        'conteo_zero_total': int(len(predios_zero))
     }
     
     inconsistencias = full[full['Estado'] != 'OK'].head(200).to_dict(orient='records')
@@ -308,16 +335,27 @@ def generar_pdf_auditoria(resultados):
         
         pdf.ln(3)
         pdf.set_font('Helvetica', 'B', 8)
-        pdf.cell(60, 7, 'Número Predial', 1)
-        pdf.cell(40, 7, 'Precierre', 1)
-        pdf.cell(40, 7, 'Cierre Lista', 1)
+        pdf.cell(50, 7, 'Número Predial', 1)
+        pdf.cell(30, 7, 'Precierre', 1)
+        pdf.cell(30, 7, 'Cierre Lista', 1)
+        pdf.cell(30, 7, 'Categoría', 1)
         pdf.cell(40, 7, 'Estado', 1)
         pdf.ln()
         pdf.set_font('Helvetica', '', 7)
         for item in resultados['predios_zero'][:50]: # Limitar a 50 en PDF
-            pdf.cell(60, 6, str(item['Numero_Predial']), 1)
-            pdf.cell(40, 6, f"{item['Base_Usada']:,.0f}", 1)
-            pdf.cell(40, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
+            pdf.cell(50, 6, str(item['Numero_Predial']), 1)
+            pdf.cell(30, 6, f"{item['Base_Usada']:,.0f}", 1)
+            pdf.cell(30, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
+            
+            # Color por categoría
+            cat = item.get('Zero_Category', 'Otros $0')
+            if cat == 'Crítico':
+                pdf.set_text_color(239, 68, 68) 
+            elif cat == 'Informal':
+                pdf.set_text_color(59, 130, 246)
+            
+            pdf.cell(30, 6, str(cat), 1)
+            pdf.set_text_color(0, 0, 0)
             pdf.cell(40, 6, str(item['Estado']), 1)
             pdf.ln()
         pdf.set_text_color(0, 0, 0)
