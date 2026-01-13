@@ -229,6 +229,10 @@ def auditoria_pdf():
         with open(audit_path, 'r', encoding='utf-8') as f:
             resultados = json.load(f)
             
+        # Optimización: No enviar full_data al generador de PDF para ahorrar memoria y tiempo
+        if 'full_data' in resultados:
+            del resultados['full_data']
+            
         pdf_bytes = generar_pdf_auditoria(resultados)
         return Response(
             pdf_bytes,

@@ -131,19 +131,22 @@
                 </div>
                 {% else %}
                 <!-- Stats Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="bg-white p-4 rounded-lg border border-gray-200">
-                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Total Predios</p>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Total Auditado</p>
                         <p class="text-2xl font-semibold">{{ resultados.total_predios }}</p>
                     </div>
                     <div class="bg-white p-4 rounded-lg border border-gray-200">
-                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Errores de Cálculo</p>
-                        <p class="text-2xl font-semibold text-red-600">{{ resultados.resumen_estados.get('Error de
-                            Cálculo', 0) }}</p>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Predios R1</p>
+                        <p class="text-2xl font-semibold text-blue-600">{{ resultados.totales.get('conteo_r1', 0) }}</p>
                     </div>
                     <div class="bg-white p-4 rounded-lg border border-gray-200">
-                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Inconsistencias Totales
-                        </p>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Predios Listado</p>
+                        <p class="text-2xl font-semibold text-indigo-600">{{ resultados.totales.get('conteo_listado', 0)
+                            }}</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-gray-200">
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Inconsistencias</p>
                         <p class="text-2xl font-semibold text-amber-600">{{ resultados.total_predios -
                             resultados.resumen_estados.get('OK', 0) }}</p>
                     </div>
@@ -170,7 +173,7 @@
                             <thead
                                 class="bg-gray-50 text-gray-500 uppercase font-bold sticky top-0 z-10 border-b border-gray-200">
                                 <tr>
-                                    <th class="px-4 py-3 cursor-pointer hover:bg-gray-100">ID Único</th>
+                                    <th class="px-4 py-3 cursor-pointer hover:bg-gray-100">Número predial</th>
                                     <th class="px-4 py-3 cursor-pointer hover:bg-gray-100">Zona</th>
                                     <th class="px-4 py-3 cursor-pointer hover:bg-gray-100">Base R1</th>
                                     <th class="px-4 py-3 cursor-pointer hover:bg-gray-100">Cierre</th>
@@ -234,7 +237,7 @@
 
             tableBody.innerHTML = slice.map(item => `
                 <tr class="hover:bg-blue-50/30 transition-colors">
-                    <td class="px-4 py-2 font-mono text-[10px] text-gray-600">${item.ID_Unico}</td>
+                    <td class="px-4 py-2 font-mono text-[10px] text-gray-600">${item.Numero_Predial}</td>
                     <td class="px-4 py-2 text-gray-500">${item.Zona || '-'}</td>
                     <td class="px-4 py-2 text-gray-500">$${item.Valor_Base_R1.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
                     <td class="px-4 py-2 text-gray-900 font-medium">$${item.Valor_Cierre_Listado.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
@@ -262,7 +265,7 @@
         searchInput.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             filteredData = rawData.filter(item =>
-                item.ID_Unico.includes(term) ||
+                item.Numero_Predial.includes(term) ||
                 item.Estado.toLowerCase().includes(term) ||
                 (item.Zona && item.Zona.toLowerCase().includes(term))
             );

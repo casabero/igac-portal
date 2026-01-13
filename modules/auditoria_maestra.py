@@ -124,24 +124,27 @@ def procesar_auditoria(files_dict, pct_incremento):
     # Preparar resultados para la UI
     resumen_estados = full['Estado'].value_counts().to_dict()
     
-    # Top de inconsistencias para mostrar
-    inconsistencias = full[full['Estado'] != 'OK'].head(200).to_dict(orient='records')
-    
     # Totales Globales
     totales = {
         'conteo': int(len(full)),
+        'conteo_r1': int(len(df_prop)),
+        'conteo_listado': int(len(df_calc)),
         'avaluo_base': float(full['Base_Usada'].sum()),
         'avaluo_cierre': float(full['Valor_Cierre_Listado'].sum()),
         'avaluo_calculado': float(full['Cierre_Calculado'].sum())
     }
     
+    # Renombrar para mayor claridad en el reporte y UI
+    full.rename(columns={'ID_Unico': 'Numero_Predial'}, inplace=True)
+    inconsistencias = full[full['Estado'] != 'OK'].head(200).to_dict(orient='records')
+
     return {
         'stats_zonas': tabla_zonas.reset_index().to_dict(orient='records'),
         'resumen_estados': resumen_estados,
         'inconsistencias': inconsistencias,
         'total_predios': len(full),
         'totales': totales,
-        'full_data': full.head(1000).to_dict(orient='records'), # Mandamos una porción mayor para la tabla
+        'full_data': full.head(1000).to_dict(orient='records'),
         'pct_incremento': pct_incremento
     }
 
@@ -216,7 +219,7 @@ def generar_pdf_auditoria(resultados):
         pdf.set_font('Arial', 'B', 12)
         pdf.cell(0, 10, 'Detalle de Inconsistencias (Primeras 50)', 0, 1)
         pdf.set_font('Arial', 'B', 7)
-        pdf.cell(50, 7, 'ID Único', 1)
+        pdf.cell(50, 7, 'Número Predial', 1)
         pdf.cell(30, 7, 'Base R1', 1)
         pdf.cell(30, 7, 'Cierre Listado', 1)
         pdf.cell(30, 7, 'Calculado Py', 1)
@@ -224,7 +227,7 @@ def generar_pdf_auditoria(resultados):
         pdf.ln()
         pdf.set_font('Arial', '', 6)
         for i, item in enumerate(resultados['inconsistencias'][:50]):
-            pdf.cell(50, 6, str(item['ID_Unico']), 1)
+            pdf.cell(50, 6, str(item['Numero_Predial']), 1)
             pdf.cell(30, 6, f"{item['Valor_Base_R1']:,.0f}", 1)
             pdf.cell(30, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
             pdf.cell(30, 6, f"{item['Cierre_Calculado']:,.0f}", 1)
