@@ -192,6 +192,10 @@ def procesar_auditoria(files_dict, pct_incremento):
 
     # Limpieza final de NaNs para evitar errores de serialización JSON (NaN -> null/0)
     for col in full.columns:
+        # Si es categórico (como _merge), convertir a objeto primero
+        if str(full[col].dtype) == 'category':
+            full[col] = full[col].astype(object)
+            
         if full[col].dtype == object:
             full[col] = full[col].fillna('')
         else:
