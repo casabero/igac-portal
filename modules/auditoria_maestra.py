@@ -98,45 +98,35 @@ def procesar_auditoria(files_dict, pct_incremento):
             df_calc = pd.read_excel(stream, dtype=str)
             df_calc.columns = [c.strip() for c in df_calc.columns]
             
-            # Columnas clave para Listado
-            cols_calc = {
+            # 1. Identificar columnas clave (Listado)
+            cols_map = {
                 'ID_Unico': next((c for c in df_calc.columns if 'identificador' in c.lower() or 'numero predial' in c.lower()), None),
-                'Valor_Base_Listado': next((c for c in df_calc.columns if 'valor avaluo' in c.lower() or 'valor_base' in c.lower()), None),
-                'Valor_Cierre_Listado': next((c for c in df_calc.columns if 'valor_calculado' in c.lower()), None),
+                'Valor_Base_Listado': next((c for c in df_calc.columns if 'valor avaluo precierre' in c.lower() or 'valor_base' in c.lower()), None),
+                'Valor_Cierre_Listado': next((c for c in df_calc.columns if 'valor avaluo cierre' in c.lower() or 'valor_calculado' in c.lower()), None),
                 'Condicion_Propiedad': next((c for c in df_calc.columns if 'condicion propiedad' in c.lower() or 'condicion_propiedad' in c.lower()), None)
             }
+
+            # 2. Renombrar y/o Inicializar Columnas
+            for target, source in cols_map.items():
+                if source and source in df_calc.columns:
+                    df_calc.rename(columns={source: target}, inplace=True)
+                elif target not in df_calc.columns:
+                    # Si no existe, crear con valor por defecto
+                    df_calc[target] = 0 if 'Valor' in target else (-1 if 'Condicion' in target else None)
+
+            # 3. Fallback adicional para ID_Unico si no se detectó arriba
+            if df_calc['ID_Unico'].isnull().all():
+                pred_col = [c for c in df_calc.columns if 'predial' in c.lower() and c != 'ID_Unico']
+                if pred_col:
+                    df_calc['ID_Unico'] = df_calc[pred_col[0]]
+
+            # 4. Limpieza y Normalización
+            df_calc['ID_Unico'] = df_calc['ID_Unico'].astype(str).str.strip().str.replace('.0', '', regex=False).str.zfill(30)
+            df_calc['Valor_Base_Listado'] = pd.to_numeric(df_calc['Valor_Base_Listado'], errors='coerce').fillna(0)
+            df_calc['Valor_Cierre_Listado'] = pd.to_numeric(df_calc['Valor_Cierre_Listado'], errors='coerce').fillna(0)
+            df_calc['Condicion_Propiedad'] = pd.to_numeric(df_calc['Condicion_Propiedad'], errors='coerce').fillna(-1)
             
-            if cols_calc['ID_Unico']:
-                rename_dict = {
-                    cols_calc['ID_Unico']: 'ID_Unico',
-                    cols_calc['Valor_Base_Listado']: 'Valor_Base_Listado',
-                    cols_calc['Valor_Cierre_Listado']: 'Valor_Cierre_Listado'
-                }
-                # Remove None values from rename_dict
-                rename_dict = {k: v for k, v in rename_dict.items() if k is not None}
-                df_calc.rename(columns=rename_dict, inplace=True)
-                
-                if cols_calc['Condicion_Propiedad']:
-                    df_calc.rename(columns={cols_calc['Condicion_Propiedad']: 'Condicion_Propiedad'}, inplace=True)
-                else:
-                    df_calc['Condicion_Propiedad'] = -1 # Valor centinela si no existe
-            
-            # Si no encontró ID_Unico, buscar por No Predial
-            if 'ID_Unico' not in df_calc.columns:
-                pred_col = [c for c in df_calc.columns if 'predial' in c.lower()]
-                if pred_col: df_calc.rename(columns={pred_col[0]: 'ID_Unico'}, inplace=True)
-            
-            if 'ID_Unico' in df_calc.columns:
-                df_calc['ID_Unico'] = df_calc['ID_Unico'].astype(str).str.strip().str.replace('.0', '', regex=False).str.zfill(30)
-            
-            # Conversión numérica segura
-            for col in ['Valor_Base_Listado', 'Valor_Cierre_Listado']:
-                if col in df_calc.columns:
-                    df_calc[col] = pd.to_numeric(df_calc[col], errors='coerce').fillna(0)
-                else:
-                    df_calc[col] = 0
-            
-            df_calc['Zona'] = df_calc['ID_Unico'].apply(obtener_zona) if 'ID_Unico' in df_calc.columns else 'Otras'
+            df_calc['Zona'] = df_calc['ID_Unico'].apply(obtener_zona)
 
     if df_prop is None or df_calc is None:
         raise ValueError("Se requieren ambos archivos (Propietarios y Listado de Avalúos) para la auditoría.")
