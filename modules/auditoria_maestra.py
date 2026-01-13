@@ -150,33 +150,33 @@ def procesar_auditoria(files_dict, pct_incremento):
 
 class AuditoriaPDF(FPDF):
     def header(self):
-        self.set_font('Arial', 'B', 12)
+        self.set_font('Helvetica', 'B', 12)
         self.cell(0, 10, 'REPORTE DE AUDITORÍA CATASTRAL - CASABERO', 0, 1, 'C')
         self.ln(5)
 
     def footer(self):
         self.set_y(-15)
-        self.set_font('Arial', 'I', 8)
+        self.set_font('Helvetica', 'I', 8)
         self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'C')
 
 def generar_pdf_auditoria(resultados):
     pdf = AuditoriaPDF()
     pdf.add_page()
-    pdf.set_font('Arial', '', 10)
+    pdf.set_font('Helvetica', '', 10)
     
     # Resumen General
-    pdf.set_font('Arial', 'B', 12)
+    pdf.set_font('Helvetica', 'B', 12)
     pdf.cell(0, 10, 'Resumen de Auditoría', 0, 1)
-    pdf.set_font('Arial', '', 10)
+    pdf.set_font('Helvetica', '', 10)
     pdf.cell(0, 7, f"Total Predios Auditados: {resultados['total_predios']}", 0, 1)
     pdf.cell(0, 7, f"Incremento Configurado: {resultados['pct_incremento']}%", 0, 1)
     
     # Totales monetarios en el PDF
     if 'totales' in resultados:
         pdf.ln(2)
-        pdf.set_font('Arial', 'B', 10)
+        pdf.set_font('Helvetica', 'B', 10)
         pdf.cell(0, 7, "Totales Financieros:", 0, 1)
-        pdf.set_font('Arial', '', 9)
+        pdf.set_font('Helvetica', '', 9)
         pdf.cell(60, 6, f"Base R1 Total: $ {resultados['totales']['avaluo_base']:,.0f}", 0, 1)
         pdf.cell(60, 6, f"Cierre Listado Total: $ {resultados['totales']['avaluo_cierre']:,.0f}", 0, 1)
         pdf.cell(60, 6, f"Diferencia Global: $ {resultados['totales']['avaluo_cierre'] - resultados['totales']['avaluo_calculado']:,.0f}", 0, 1)
@@ -184,11 +184,11 @@ def generar_pdf_auditoria(resultados):
     pdf.ln(5)
     
     # Tabla de Estados
-    pdf.set_font('Arial', 'B', 10)
+    pdf.set_font('Helvetica', 'B', 10)
     pdf.cell(60, 7, 'Estado', 1)
     pdf.cell(30, 7, 'Cantidad', 1)
     pdf.ln()
-    pdf.set_font('Arial', '', 10)
+    pdf.set_font('Helvetica', '', 10)
     for estado, cant in resultados['resumen_estados'].items():
         pdf.cell(60, 7, str(estado), 1)
         pdf.cell(30, 7, str(cant), 1)
@@ -197,15 +197,15 @@ def generar_pdf_auditoria(resultados):
     pdf.ln(10)
     
     # Tabla de Zonas
-    pdf.set_font('Arial', 'B', 12)
+    pdf.set_font('Helvetica', 'B', 12)
     pdf.cell(0, 10, 'Distribución por Zona', 0, 1)
-    pdf.set_font('Arial', 'B', 10)
+    pdf.set_font('Helvetica', 'B', 10)
     pdf.cell(60, 7, 'Zona', 1)
     pdf.cell(30, 7, 'Cant. R1', 1)
     pdf.cell(30, 7, 'Cant. Listado', 1)
     pdf.cell(30, 7, 'Diferencia', 1)
     pdf.ln()
-    pdf.set_font('Arial', '', 10)
+    pdf.set_font('Helvetica', '', 10)
     for row in resultados['stats_zonas']:
         pdf.cell(60, 7, str(row['Zona']), 1)
         pdf.cell(30, 7, str(row['R1']), 1)
@@ -216,16 +216,16 @@ def generar_pdf_auditoria(resultados):
     # Si hay muchas inconsistencias, listar las primeras
     if resultados['inconsistencias']:
         pdf.add_page()
-        pdf.set_font('Arial', 'B', 12)
+        pdf.set_font('Helvetica', 'B', 12)
         pdf.cell(0, 10, 'Detalle de Inconsistencias (Primeras 50)', 0, 1)
-        pdf.set_font('Arial', 'B', 7)
+        pdf.set_font('Helvetica', 'B', 7)
         pdf.cell(50, 7, 'Número Predial', 1)
         pdf.cell(30, 7, 'Base R1', 1)
         pdf.cell(30, 7, 'Cierre Listado', 1)
         pdf.cell(30, 7, 'Calculado Py', 1)
         pdf.cell(50, 7, 'Estado', 1)
         pdf.ln()
-        pdf.set_font('Arial', '', 6)
+        pdf.set_font('Helvetica', '', 6)
         for i, item in enumerate(resultados['inconsistencias'][:50]):
             pdf.cell(50, 6, str(item['Numero_Predial']), 1)
             pdf.cell(30, 6, f"{item['Valor_Base_R1']:,.0f}", 1)
@@ -234,4 +234,4 @@ def generar_pdf_auditoria(resultados):
             pdf.cell(50, 6, str(item['Estado']), 1)
             pdf.ln()
 
-    return pdf.output()
+    return bytes(pdf.output())
