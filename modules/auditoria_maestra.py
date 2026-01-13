@@ -181,6 +181,8 @@ def procesar_auditoria(files_dict, pct_incremento):
     full.loc[full['Avaluo_Zero'] & (full['Condicion_Propiedad'] == 0), 'Zero_Category'] = 'Crítico'
     # Informal: Avaluo 0 y Condicion 2
     full.loc[full['Avaluo_Zero'] & (full['Condicion_Propiedad'] == 2), 'Zero_Category'] = 'Informal'
+    # PH: Avaluo 0 y Condicion 9
+    full.loc[full['Avaluo_Zero'] & (full['Condicion_Propiedad'] == 9), 'Zero_Category'] = 'PH'
     # Otros ceros (ej: Condicion 1 o no encontrada)
     full.loc[full['Avaluo_Zero'] & (full['Zero_Category'] == 'Ninguna'), 'Zero_Category'] = 'Otros $0'
 
@@ -219,6 +221,7 @@ def procesar_auditoria(files_dict, pct_incremento):
         'avaluo_cierre_calculado': float(full['Cierre_Calculado'].sum()),
         'conteo_zero_critico': int(len(full[full['Zero_Category'] == 'Crítico'])),
         'conteo_zero_informal': int(len(full[full['Zero_Category'] == 'Informal'])),
+        'conteo_zero_ph': int(len(full[full['Zero_Category'] == 'PH'])),
         'conteo_zero_total': int(len(predios_zero))
     }
     
@@ -342,16 +345,25 @@ def generar_pdf_auditoria(resultados):
             pdf.ln()
 
     # Sección de Avalúos en $0 (Alerta)
-    if 'predios_zero' in resultados and resultados['predios_zero']:
-        pdf.add_page()
-        pdf.set_font('Helvetica', 'B', 12)
-        pdf.set_text_color(239, 68, 68) # Rojo
-        pdf.cell(0, 10, 'ALERTA: Predios con Avalúo en $0', 0, 1)
-        pdf.set_text_color(0, 0, 0) # Negro
-        pdf.set_font('Helvetica', '', 9)
-        pdf.cell(0, 7, f"Se detectaron {len(resultados['predios_zero'])} predios con valor base o cierre en $0.", 0, 1)
-        
-        pdf.ln(3)
+    # ---------------------------------------------------------
+    # SECCIÓN DE ALERTAS: PREDIO EN $0 (Siempre presente)
+    # ---------------------------------------------------------
+    pdf.add_page()
+    pdf.set_font('Helvetica', 'B', 11)
+    pdf.set_text_color(220, 38, 38) # Rojo
+    pdf.cell(0, 10, 'ALERTA: PREDIOS CON AVALÚO EN $0 (Base o Cierre)', 0, 1)
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_font('Helvetica', '', 9)
+    pdf.multi_cell(0, 5, 'Esta sección identifica los predios que presentan un valor de $0 pesos en el precierre (R1) o en el cierre del listado de avalúos. Es una inconsistencia que debe ser revisada.')
+    pdf.ln(2)
+
+    if not resultados['predios_zero']:
+        pdf.set_font('Helvetica', 'I', 10)
+        pdf.set_text_color(107, 114, 128)
+        pdf.cell(0, 10, 'Sin hallazgos de avalúos en $0 para este municipio.', 0, 1, 'C')
+        pdf.set_text_color(0, 0, 0)
+    else:
+        # Tabla de predios en cero
         pdf.set_font('Helvetica', 'B', 8)
         pdf.cell(50, 7, 'Número Predial', 1)
         pdf.cell(30, 7, 'Precierre', 1)
@@ -371,12 +383,14 @@ def generar_pdf_auditoria(resultados):
                 pdf.set_text_color(239, 68, 68) 
             elif cat == 'Informal':
                 pdf.set_text_color(59, 130, 246)
+            elif cat == 'PH':
+                pdf.set_text_color(147, 51, 234) # Púrpura para PH
             
             pdf.cell(30, 6, str(cat), 1)
             pdf.set_text_color(0, 0, 0)
             pdf.cell(40, 6, str(item['Estado']), 1)
             pdf.ln()
-        pdf.set_text_color(0, 0, 0)
+    pdf.set_text_color(0, 0, 0)
 
     # Tabla de Zonas (en nueva página si es necesario)
     pdf.add_page()
