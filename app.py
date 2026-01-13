@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, send_file, flash, redirect, u
 from modules.snc_processor import procesar_dataframe
 from modules.db_logger import init_db, registrar_visita  # <--- IMPORTANTE
 from modules.avaluo_analisis import procesar_incremento_web # <-- CAMBIÓ EL NOMBRE
+from modules.auditoria_maestra import procesar_auditoria, generar_pdf_auditoria
 
 import os
 
@@ -153,6 +154,74 @@ def clear_analysis():
     
     flash('Sesión y archivos temporales eliminados.')
     return redirect(url_for('avaluos_tool'))
+
+
+# --- RUTA 5: AUDITORÍA DE CIERRE Y MASIVOS ---
+@app.route('/auditoria', methods=['GET', 'POST'])
+def auditoria_tool():
+    from flask import session
+    registrar_visita('/auditoria')
+    
+    # Intentar recuperar resultados de la sesión si existen
+    resultados = session.get('last_auditoria')
+    
+    if request.method == 'POST':
+        f_prop = request.files.get('file_prop')
+        f_calc = request.files.get('file_calc')
+        incremento = request.form.get('incremento', 3)
+        
+        if not f_prop or not f_calc:
+            flash('Se requieren ambos archivos para la auditoría.')
+            return redirect(request.url)
+            
+        try:
+            # Procesar (Usamos streams directamente)
+            # Nota: procesar_auditoria espera un dict de filename: stream
+            files_dict = {
+                f_prop.filename: f_prop,
+                f_calc.filename: f_calc
+            }
+            
+            res = procesar_auditoria(files_dict, incremento)
+            
+            # Guardamos en sesión (sin el df de pandas ni el pdf, solo lo serializable)
+            session['last_auditoria'] = {
+                'stats_zonas': res['stats_zonas'],
+                'resumen_estados': res['resumen_estados'],
+                'inconsistencias': res['inconsistencias'],
+                'total_predios': res['total_predios'],
+                'pct_incremento': res['pct_incremento']
+            }
+            # Guardamos el DF original en un objeto temporal para el PDF (opcional, o re-procesamos)
+            # Para simplificar y no llenar la RAM/Sesión, el PDF lo generaremos re-procesando si es necesario, 
+            # pero por ahora pasamos los datos serializados.
+            
+            return render_template('auditoria_tool.html', resultados=session['last_auditoria'])
+            
+        except Exception as e:
+            flash(f"Error procesando auditoría: {str(e)}")
+            return redirect(request.url)
+            
+    return render_template('auditoria_tool.html', resultados=resultados)
+
+@app.route('/auditoria/pdf')
+def auditoria_pdf():
+    from flask import session, Response
+    resultados = session.get('last_auditoria')
+    if not resultados:
+        flash('No hay resultados para generar PDF. Ejecute la auditoría primero.')
+        return redirect(url_for('auditoria_tool'))
+    
+    try:
+        pdf_bytes = generar_pdf_auditoria(resultados)
+        return Response(
+            pdf_bytes,
+            mimetype="application/pdf",
+            headers={"Content-disposition": "attachment; filename=Reporte_Auditoria.pdf"}
+        )
+    except Exception as e:
+        flash(f"Error generando PDF: {str(e)}")
+        return redirect(url_for('auditoria_tool'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)

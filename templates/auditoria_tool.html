@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Auditoría de Cierre - IGAC Apps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"],
+                    },
+                    colors: { gray: { 900: "#111827", 700: "#374151", 500: "#6B7280", 200: "#E5E7EB", 50: "#F9FAFB" } }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans antialiased min-h-screen">
+    <div class="max-w-[1000px] mx-auto px-6 py-12">
+        <div class="mb-8 border-b border-gray-200 pb-4 flex items-center justify-between">
+            <h1 class="text-xl font-semibold tracking-tight text-gray-900 flex items-center gap-2">
+                <span class="material-symbols-outlined text-gray-500">verified_user</span>
+                Auditoría de Cierre y Masivos
+            </h1>
+            <a href="/" class="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span> Volver al Panel
+            </a>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Sidebar: Configuración -->
+            <div class="md:col-span-1 space-y-6">
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h2 class="text-sm font-semibold mb-4 text-gray-700 uppercase tracking-wider">Carga de Datos</h2>
+                    <form action="/auditoria" method="POST" enctype="multipart/form-data" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Archivo Propietarios (R1)</label>
+                            <input type="file" name="file_prop" accept=".xlsx" class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Listado de Avalúos</label>
+                            <input type="file" name="file_calc" accept=".xlsx" class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200" required>
+                        </div>
+                        <div class="pt-2 border-t border-gray-100">
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Incremento a Validar (%)</label>
+                            <input type="number" name="incremento" value="3" step="0.1" class="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:ring-1 focus:ring-black outline-none">
+                            <p class="text-[10px] text-gray-400 mt-1">Cálculo exacto con redondeo a miles (-3).</p>
+                        </div>
+                        <button type="submit" class="w-full bg-gray-900 text-white text-sm font-medium py-2.5 rounded hover:bg-black transition-colors flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]">analytics</span> Ejecutar Auditoría
+                        </button>
+                    </form>
+                </div>
+
+                {% if resultados %}
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h2 class="text-sm font-semibold mb-4 text-gray-700 uppercase tracking-wider">Exportar Informe</h2>
+                    <a href="/auditoria/pdf" target="_blank" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        <span class="material-symbols-outlined text-[18px] text-red-500">picture_as_pdf</span> Descargar PDF
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Main Content: Resultados -->
+            <div class="md:col-span-2 space-y-8">
+                {% if not resultados %}
+                <div class="flex flex-col items-center justify-center py-24 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+                    <span class="material-symbols-outlined text-[48px] mb-4">upload_file</span>
+                    <p class="text-sm">Sube los archivos necesarios para comenzar la auditoría.</p>
+                </div>
+                {% else %}
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-lg border border-gray-200">
+                        <p class="text-xs text-gray-500 uppercase">Total Predios</p>
+                        <p class="text-2xl font-semibold">{{ resultados.total_predios }}</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-gray-200">
+                        <p class="text-xs text-gray-500 uppercase">Errores Encontrados</p>
+                        <p class="text-2xl font-semibold text-red-600">{{ resultados.resumen_estados.get('Error de Cálculo', 0) + resultados.resumen_estados.get('Base Diferente', 0) }}</p>
+                    </div>
+                </div>
+
+                <!-- Tabla Zonas -->
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 bg-gray-50">
+                        <h3 class="text-sm font-semibold text-gray-700">Consistencia por Zona</h3>
+                    </div>
+                    <table class="w-full text-xs text-left">
+                        <thead class="bg-gray-50 text-gray-500 uppercase font-medium">
+                            <tr>
+                                <th class="px-4 py-2">Zona</th>
+                                <th class="px-4 py-2">Cant. R1</th>
+                                <th class="px-4 py-2">Cant. Listado</th>
+                                <th class="px-4 py-2">Diferencia</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for row in resultados.stats_zonas %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-2 font-medium">{{ row.Zona }}</td>
+                                <td class="px-4 py-2">{{ row.R1 }}</td>
+                                <td class="px-4 py-2">{{ row.Listado }}</td>
+                                <td class="px-4 py-2 {% if row.Dif != 0 %}text-red-500 font-bold{% endif %}">{{ row.Dif }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tabla Inconsistencias -->
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                        <h3 class="text-sm font-semibold text-gray-700">Inconsistencias Detectadas (Top 100)</h3>
+                        <span class="text-[10px] px-2 py-0.5 bg-gray-200 rounded text-gray-600 font-medium">Vista Rápida</span>
+                    </div>
+                    {% if resultados.inconsistencias %}
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-[11px] text-left">
+                            <thead class="bg-gray-50 text-gray-500 uppercase font-medium">
+                                <tr>
+                                    <th class="px-4 py-3">ID Único</th>
+                                    <th class="px-4 py-3">Base R1</th>
+                                    <th class="px-4 py-3">Sistema</th>
+                                    <th class="px-4 py-3">Calculado Py</th>
+                                    <th class="px-4 py-3">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                {% for item in resultados.inconsistencias %}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-mono text-[10px] text-gray-600">{{ item.ID_Unico }}</td>
+                                    <td class="px-4 py-3 text-gray-500">{{ "{:,.0f}".format(item.Valor_Base_R1) }}</td>
+                                    <td class="px-4 py-3 text-gray-500">{{ "{:,.0f}".format(item.Valor_Cierre_Listado) }}</td>
+                                    <td class="px-4 py-3 font-medium text-gray-900">{{ "{:,.0f}".format(item.Cierre_Calculado) }}</td>
+                                    <td class="px-4 py-3">
+                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-bold 
+                                            {% if 'Calculo' in item.Estado %}bg-red-100 text-red-700
+                                            {% elif 'Base' in item.Estado %}bg-amber-100 text-amber-700
+                                            {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                            {{ item.Estado }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-12 text-center text-gray-400">
+                        <span class="material-symbols-outlined text-[32px] mb-2">done_all</span>
+                        <p class="text-xs">No se encontraron inconsistencias en la muestra analizada.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-12 py-8 border-t border-gray-100 text-center">
+        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-medium">Casabero IGAC Portal &copy; 2026</p>
+    </footer>
+</body>
+</html>
