@@ -64,14 +64,30 @@ def procesar_auditoria(files_dict, pct_incremento):
                 if av_col:
                     df_prop['Valor_Base_R1'] = pd.to_numeric(df_prop[av_col[0]], errors='coerce').fillna(0)
             
-            # Detectar nombre del municipio
-            muni_col = [c for c in df_prop.columns if 'nombre' in c.lower() and ('muni' in c.lower() or 'mpio' in c.lower())]
-            if not muni_col:
-                muni_col = [c for c in df_prop.columns if 'municipio' == c.lower()]
+            # Detectar nombre/código del municipio y departamento
+            cols_lower = [c.lower() for c in df_prop.columns]
             
+            # Buscar códigos específicos (estándar IGAC)
+            cod_depto = ""
+            cod_muni = ""
+            
+            for c in df_prop.columns:
+                cl = c.lower()
+                if 'depto' in cl or 'departamento' in cl or 'cod_dep' in cl:
+                    cod_depto = str(df_prop[c].iloc[0]).strip().zfill(2)
+                if 'muni' in cl or 'municipio' in cl or 'cod_mun' in cl:
+                    # Evitar nombres, buscar códigos numéricos de 3 dígitos
+                    val = str(df_prop[c].iloc[0]).strip()
+                    if val.isdigit():
+                        cod_muni = val.zfill(3)
+
             nombre_municipio = "Desconocido"
-            if muni_col:
-                nombre_municipio = str(df_prop[muni_col[0]].iloc[0]).strip()
+            if cod_depto and cod_muni:
+                nombre_municipio = f"{cod_depto}{cod_muni}"
+            else:
+                muni_col = [c for c in df_prop.columns if 'nombre' in c.lower() and ('muni' in c.lower() or 'mpio' in c.lower())]
+                if muni_col:
+                    nombre_municipio = str(df_prop[muni_col[0]].iloc[0]).strip()
 
             df_prop = df_prop.drop_duplicates(subset=['ID_Unico'], keep='first')
             df_prop['Zona'] = df_prop['ID_Unico'].apply(obtener_zona)
@@ -167,7 +183,7 @@ def procesar_auditoria(files_dict, pct_incremento):
         'totales': totales,
         'outliers': {'top': top_5_var, 'bottom': bottom_5_var},
         'variaciones_all': full[full['_merge'] == 'both']['Pct_Variacion'].tolist(), # Para el BoxPlot
-        'full_data': full.head(1000).to_dict(orient='records'),
+        'full_data': full.to_dict(orient='records'),
         'pct_incremento': pct_incremento
     }
 
@@ -233,17 +249,6 @@ def generar_pdf_auditoria(resultados):
             print(f"Error generando gráfico: {e}")
 
     pdf.ln(5)
-    
-    # Tabla de Estados
-    pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(60, 7, 'Estado', 1)
-    pdf.cell(30, 7, 'Cantidad', 1)
-    pdf.ln()
-    pdf.set_font('Helvetica', '', 10)
-    for estado, cant in resultados['resumen_estados'].items():
-        pdf.cell(60, 7, str(estado), 1)
-        pdf.cell(30, 7, str(cant), 1)
-        pdf.ln()
     
     # Outliers: Top/Bottom 5 variaciones
     if 'outliers' in resultados:
