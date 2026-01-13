@@ -154,8 +154,13 @@ def procesar_auditoria(files_dict, pct_incremento):
     full.loc[(full['_merge'] == 'both') & (full['Diff_Base'] != 0), 'Estado'] = 'Base Diferente'
     full.loc[(full['_merge'] == 'both') & (full['Diff_Calculo'] != 0), 'Estado'] = 'Error de Cálculo'
 
+    # Identificar predios con avalúo $0 (no es normal)
+    full['Avaluo_Zero'] = (full['Base_Usada'] == 0) | (full['Valor_Cierre_Listado'] == 0)
+    predios_zero = full[full['Avaluo_Zero']].copy()
+    
     # Renombrar para mayor claridad en el reporte y UI
     full.rename(columns={'ID_Unico': 'Numero_Predial'}, inplace=True)
+    predios_zero.rename(columns={'ID_Unico': 'Numero_Predial'}, inplace=True)
 
     # Outliers (Top 5 y Bottom 5 de variaciones significativas)
     top_5_var = full[full['_merge'] == 'both'].sort_values(by='Pct_Variacion', ascending=False).head(5).to_dict(orient='records')
@@ -168,7 +173,8 @@ def procesar_auditoria(files_dict, pct_incremento):
         'conteo_listado': int(len(df_calc)),
         'avaluo_precierre': float(full['Base_Usada'].sum()),
         'avaluo_cierre_listado': float(full['Valor_Cierre_Listado'].sum()),
-        'avaluo_cierre_calculado': float(full['Cierre_Calculado'].sum())
+        'avaluo_cierre_calculado': float(full['Cierre_Calculado'].sum()),
+        'conteo_zero': int(len(predios_zero))
     }
     
     inconsistencias = full[full['Estado'] != 'OK'].head(200).to_dict(orient='records')
@@ -182,6 +188,7 @@ def procesar_auditoria(files_dict, pct_incremento):
         'total_predios': len(full),
         'totales': totales,
         'outliers': {'top': top_5_var, 'bottom': bottom_5_var},
+        'predios_zero': predios_zero.head(100).to_dict(orient='records'),
         'variaciones_all': full[full['_merge'] == 'both']['Pct_Variacion'].tolist(), # Para el BoxPlot
         'full_data': full.to_dict(orient='records'),
         'pct_incremento': pct_incremento
@@ -288,6 +295,32 @@ def generar_pdf_auditoria(resultados):
             pdf.cell(30, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
             pdf.cell(30, 6, f"{item['Pct_Variacion']:.2f}%", 1)
             pdf.ln()
+
+    # Sección de Avalúos en $0 (Alerta)
+    if 'predios_zero' in resultados and resultados['predios_zero']:
+        pdf.add_page()
+        pdf.set_font('Helvetica', 'B', 12)
+        pdf.set_text_color(239, 68, 68) # Rojo
+        pdf.cell(0, 10, 'ALERTA: Predios con Avalúo en $0', 0, 1)
+        pdf.set_text_color(0, 0, 0) # Negro
+        pdf.set_font('Helvetica', '', 9)
+        pdf.cell(0, 7, f"Se detectaron {len(resultados['predios_zero'])} predios con valor base o cierre en $0.", 0, 1)
+        
+        pdf.ln(3)
+        pdf.set_font('Helvetica', 'B', 8)
+        pdf.cell(60, 7, 'Número Predial', 1)
+        pdf.cell(40, 7, 'Precierre', 1)
+        pdf.cell(40, 7, 'Cierre Lista', 1)
+        pdf.cell(40, 7, 'Estado', 1)
+        pdf.ln()
+        pdf.set_font('Helvetica', '', 7)
+        for item in resultados['predios_zero'][:50]: # Limitar a 50 en PDF
+            pdf.cell(60, 6, str(item['Numero_Predial']), 1)
+            pdf.cell(40, 6, f"{item['Base_Usada']:,.0f}", 1)
+            pdf.cell(40, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
+            pdf.cell(40, 6, str(item['Estado']), 1)
+            pdf.ln()
+        pdf.set_text_color(0, 0, 0)
 
     # Tabla de Zonas (en nueva página si es necesario)
     pdf.add_page()
