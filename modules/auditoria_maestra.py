@@ -126,10 +126,17 @@ def procesar_auditoria(files_dict, pct_incremento):
                 pred_col = [c for c in df_calc.columns if 'predial' in c.lower()]
                 if pred_col: df_calc.rename(columns={pred_col[0]: 'ID_Unico'}, inplace=True)
             
-            df_calc['ID_Unico'] = df_calc['ID_Unico'].str.strip().str.replace('.0', '', regex=False).str.zfill(30)
-            df_calc['Valor_Base_Listado'] = pd.to_numeric(df_calc.get('Valor_Base_Listado', 0), errors='coerce').fillna(0)
-            df_calc['Valor_Cierre_Listado'] = pd.to_numeric(df_calc.get('Valor_Cierre_Listado', 0), errors='coerce').fillna(0)
-            df_calc['Zona'] = df_calc['ID_Unico'].apply(obtener_zona)
+            if 'ID_Unico' in df_calc.columns:
+                df_calc['ID_Unico'] = df_calc['ID_Unico'].astype(str).str.strip().str.replace('.0', '', regex=False).str.zfill(30)
+            
+            # Conversión numérica segura
+            for col in ['Valor_Base_Listado', 'Valor_Cierre_Listado']:
+                if col in df_calc.columns:
+                    df_calc[col] = pd.to_numeric(df_calc[col], errors='coerce').fillna(0)
+                else:
+                    df_calc[col] = 0
+            
+            df_calc['Zona'] = df_calc['ID_Unico'].apply(obtener_zona) if 'ID_Unico' in df_calc.columns else 'Otras'
 
     if df_prop is None or df_calc is None:
         raise ValueError("Se requieren ambos archivos (Propietarios y Listado de Avalúos) para la auditoría.")
