@@ -178,6 +178,10 @@
                         <span
                             class="material-symbols-outlined absolute -right-2 -bottom-2 text-blue-200 text-6xl opacity-40 select-none">info</span>
                     </div>
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-300 shadow-sm relative overflow-hidden">
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Total Avalúos $0</p>
+                        <p class="text-2xl font-semibold text-gray-700">{{ t.get('conteo_zero_total', 0) }}</p>
+                    </div>
                 </div>
 
                 <!-- Outliers Analysis Section -->
@@ -302,68 +306,82 @@
     {% if resultados %}
     <div id="auditData" data-audit='{{ resultados.full_data | tojson | safe }}' class="hidden"></div>
     <script>
-        const rawData = JSON.parse(document.getElementById('auditData').dataset.audit);
-        let filteredData = [...rawData];
-        let currentPage = 1;
-        const rowsPerPage = 100;
+        try {
+            const dataElem = document.getElementById('auditData');
+            if (!dataElem) throw new Error("No audit data found in DOM");
 
-        const tableBody = document.getElementById('tableBody');
-        const searchInput = document.getElementById('tableSearch');
-        const prevBtn = document.getElementById('prevPage');
-        const nextBtn = document.getElementById('nextPage');
-        const info = document.getElementById('paginationInfo');
+            const rawData = JSON.parse(dataElem.dataset.audit);
+            let filteredData = [...rawData];
+            let currentPage = 1;
+            const rowsPerPage = 100;
 
-        function renderTable() {
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            const slice = filteredData.slice(start, end);
+            const tableBody = document.getElementById('tableBody');
+            const searchInput = document.getElementById('tableSearch');
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            const info = document.getElementById('paginationInfo');
 
-            tableBody.innerHTML = slice.map(item => `
-                <tr class="hover:bg-blue-50/30 transition-colors ${item.Avaluo_Zero ? (item.Zero_Category === 'Crítico' ? 'bg-red-50 border-l-4 border-red-600' : 'bg-blue-50 border-l-4 border-blue-500') : ''}">
-                    <td class="px-4 py-2 font-mono text-[10px] text-gray-600">${item.Numero_Predial}</td>
-                    <td class="px-4 py-2 text-gray-500">${item.Zona || '-'}</td>
-                    <td class="px-4 py-2 text-gray-500 ${item.Base_Usada == 0 ? 'text-red-600 font-bold' : ''}">$${item.Base_Usada.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
-                    <td class="px-4 py-2 font-medium ${item.Valor_Cierre_Listado == 0 ? 'text-red-600 font-bold' : 'text-gray-900'}">$${item.Valor_Cierre_Listado.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
-                    <td class="px-4 py-2 text-indigo-600 font-medium">$${item.Cierre_Calculado.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
-                    <td class="px-4 py-2">
-                        <span class="px-2 py-0.5 rounded-full text-[9px] font-bold 
-                            ${item.Zero_Category === 'Crítico' ? 'bg-red-600 text-white' :
-                    (item.Zero_Category === 'Informal' ? 'bg-blue-600 text-white' :
-                        (item.Estado === 'OK' ? 'bg-green-100 text-green-700' :
-                            item.Estado.includes('Calculo') ? 'bg-red-100 text-red-700' :
-                                'bg-amber-100 text-amber-700'))}">
-                            ${item.Avaluo_Zero ? (item.Zero_Category === 'Crítico' ? 'CRÍTICO: AVALÚO $0' : 'INFORMAL: AVALÚO $0') : item.Estado}
-                        </span>
-                        <div class="text-[9px] text-gray-400 mt-0.5 font-medium">${(item.Pct_Variacion || 0).toFixed(2)}% var.</div>
-                    </td>
-                </tr>
-            `).join('');
+            function renderTable() {
+                const start = (currentPage - 1) * rowsPerPage;
+                const end = start + rowsPerPage;
+                const slice = filteredData.slice(start, end);
 
-            // Update Pagination Info
-            const total = filteredData.length;
-            const showingEnd = Math.min(end, total);
-            info.textContent = `Mostrando ${total > 0 ? start + 1 : 0}-${showingEnd} de ${total} registros`;
+                tableBody.innerHTML = slice.map(item => {
+                    const predial = String(item.Numero_Predial || '');
+                    const estado = String(item.Estado || '');
+                    const zona = String(item.Zona || '');
+                    const zeroCat = item.Zero_Category || '';
 
-            prevBtn.disabled = currentPage === 1;
-            nextBtn.disabled = end >= total;
-        }
+                    return `
+                    <tr class="hover:bg-blue-50/30 transition-colors ${item.Avaluo_Zero ? (zeroCat === 'Crítico' ? 'bg-red-50 border-l-4 border-red-600' : 'bg-blue-50 border-l-4 border-blue-500') : ''}">
+                        <td class="px-4 py-2 font-mono text-[10px] text-gray-600">${predial}</td>
+                        <td class="px-4 py-2 text-gray-500">${zona || '-'}</td>
+                        <td class="px-4 py-2 text-gray-500 ${item.Base_Usada == 0 ? 'text-red-600 font-bold' : ''}">$${(item.Base_Usada || 0).toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
+                        <td class="px-4 py-2 font-medium ${item.Valor_Cierre_Listado == 0 ? 'text-red-600 font-bold' : 'text-gray-900'}">$${(item.Valor_Cierre_Listado || 0).toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
+                        <td class="px-4 py-2 text-indigo-600 font-medium">$${(item.Cierre_Calculado || 0).toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
+                        <td class="px-4 py-2">
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold 
+                                ${zeroCat === 'Crítico' ? 'bg-red-600 text-white' :
+                            (zeroCat === 'Informal' ? 'bg-blue-600 text-white' :
+                                (estado === 'OK' ? 'bg-green-100 text-green-700' :
+                                    estado.includes('Calculo') ? 'bg-red-100 text-red-700' :
+                                        'bg-amber-100 text-amber-700'))}">
+                                ${item.Avaluo_Zero ? (zeroCat === 'Crítico' ? 'CRÍTICO: AVALÚO $0' : 'INFORMAL: AVALÚO $0') : estado}
+                            </span>
+                            <div class="text-[9px] text-gray-400 mt-0.5 font-medium">${(item.Pct_Variacion || 0).toFixed(2)}% var.</div>
+                        </td>
+                    </tr>
+                `}).join('');
 
-        searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            filteredData = rawData.filter(item =>
-                item.Numero_Predial.includes(term) ||
-                item.Estado.toLowerCase().includes(term) ||
-                (item.Zona && item.Zona.toLowerCase().includes(term))
-            );
-            currentPage = 1;
+                const total = filteredData.length;
+                const showingEnd = Math.min(end, total);
+                info.textContent = `Mostrando ${total > 0 ? start + 1 : 0}-${showingEnd} de ${total} registros`;
+
+                prevBtn.disabled = currentPage === 1;
+                nextBtn.disabled = end >= total;
+            }
+
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                filteredData = rawData.filter(item => {
+                    const p = String(item.Numero_Predial || '').toLowerCase();
+                    const s = String(item.Estado || '').toLowerCase();
+                    const z = String(item.Zona || '').toLowerCase();
+                    return p.includes(term) || s.includes(term) || z.includes(term);
+                });
+                currentPage = 1;
+                renderTable();
+            });
+
+            prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
+            nextBtn.addEventListener('click', () => { if (currentPage * rowsPerPage < filteredData.length) { currentPage++; renderTable(); } });
+
+            // Initial render
             renderTable();
-        });
-
-        prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
-        nextBtn.addEventListener('click', () => { if (currentPage * rowsPerPage < filteredData.length) { currentPage++; renderTable(); } });
-
-        // Initial render
-        renderTable();
+        } catch (err) {
+            console.error("Error rendering audit table:", err);
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Error cargando datos: ${err.message}. Por favor intente de nuevo.</td></tr>`;
+        }
     </script>
     {% endif %}
 

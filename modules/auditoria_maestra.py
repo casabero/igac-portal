@@ -98,12 +98,18 @@ def procesar_auditoria(files_dict, pct_incremento):
             df_calc = pd.read_excel(stream, dtype=str)
             df_calc.columns = [c.strip() for c in df_calc.columns]
             
+            # Helper local para normalizar nombres de columnas (quitar acentos)
+            def normalize_col(c):
+                c = str(c).lower().strip()
+                import unicodedata
+                return "".join(c for c in unicodedata.normalize('NFD', c) if unicodedata.category(c) != 'Mn')
+
             # 1. Identificar columnas clave (Listado)
             cols_map = {
-                'ID_Unico': next((c for c in df_calc.columns if 'identificador' in c.lower() or 'numero predial' in c.lower()), None),
-                'Valor_Base_Listado': next((c for c in df_calc.columns if 'valor avaluo precierre' in c.lower() or 'valor_base' in c.lower()), None),
-                'Valor_Cierre_Listado': next((c for c in df_calc.columns if 'valor avaluo cierre' in c.lower() or 'valor_calculado' in c.lower()), None),
-                'Condicion_Propiedad': next((c for c in df_calc.columns if 'condicion propiedad' in c.lower() or 'condicion_propiedad' in c.lower()), None)
+                'ID_Unico': next((c for c in df_calc.columns if 'identificador' in normalize_col(c) or 'numero predial' in normalize_col(c)), None),
+                'Valor_Base_Listado': next((c for c in df_calc.columns if 'valor avaluo precierre' in normalize_col(c) or 'valor_base' in normalize_col(c)), None),
+                'Valor_Cierre_Listado': next((c for c in df_calc.columns if 'valor avaluo cierre' in normalize_col(c) or 'valor_calculado' in normalize_col(c)), None),
+                'Condicion_Propiedad': next((c for c in df_calc.columns if 'condicion propiedad' in normalize_col(c) or 'condicion_propiedad' in normalize_col(c)), None)
             }
 
             # 2. Renombrar y/o Inicializar Columnas
@@ -114,9 +120,9 @@ def procesar_auditoria(files_dict, pct_incremento):
                     # Si no existe, crear con valor por defecto
                     df_calc[target] = 0 if 'Valor' in target else (-1 if 'Condicion' in target else None)
 
-            # 3. Fallback adicional para ID_Unico si no se detectó arriba
+            # 3. Fallback adicional para ID_Unico si no se detectó arriba (buscando solo "predial")
             if df_calc['ID_Unico'].isnull().all():
-                pred_col = [c for c in df_calc.columns if 'predial' in c.lower() and c != 'ID_Unico']
+                pred_col = [c for c in df_calc.columns if 'predial' in normalize_col(c) and c != 'ID_Unico']
                 if pred_col:
                     df_calc['ID_Unico'] = df_calc[pred_col[0]]
 
@@ -183,6 +189,17 @@ def procesar_auditoria(files_dict, pct_incremento):
     # Renombrar para mayor claridad en el reporte y UI
     full.rename(columns={'ID_Unico': 'Numero_Predial'}, inplace=True)
     predios_zero.rename(columns={'ID_Unico': 'Numero_Predial'}, inplace=True)
+
+    # Limpieza final de NaNs para evitar errores de serialización JSON (NaN -> null/0)
+    for col in full.columns:
+        if full[col].dtype == object:
+            full[col] = full[col].fillna('')
+        else:
+            full[col] = full[col].fillna(0)
+    
+    # Asegurar que Numero_Predial sea siempre string para evitar fallos en JS (.includes)
+    full['Numero_Predial'] = full['Numero_Predial'].astype(str)
+    predios_zero['Numero_Predial'] = predios_zero['Numero_Predial'].astype(str).fillna('N/A')
 
     # Outliers (Top 5 y Bottom 5 de variaciones significativas)
     top_5_var = full[full['_merge'] == 'both'].sort_values(by='Pct_Variacion', ascending=False).head(5).to_dict(orient='records')
