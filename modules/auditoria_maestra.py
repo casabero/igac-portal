@@ -125,14 +125,23 @@ def procesar_auditoria(files_dict, pct_incremento):
     resumen_estados = full['Estado'].value_counts().to_dict()
     
     # Top de inconsistencias para mostrar
-    inconsistencias = full[full['Estado'] != 'OK'].head(100).to_dict(orient='records')
+    inconsistencias = full[full['Estado'] != 'OK'].head(200).to_dict(orient='records')
+    
+    # Totales Globales
+    totales = {
+        'conteo': int(len(full)),
+        'avaluo_base': float(full['Base_Usada'].sum()),
+        'avaluo_cierre': float(full['Valor_Cierre_Listado'].sum()),
+        'avaluo_calculado': float(full['Cierre_Calculado'].sum())
+    }
     
     return {
         'stats_zonas': tabla_zonas.reset_index().to_dict(orient='records'),
         'resumen_estados': resumen_estados,
         'inconsistencias': inconsistencias,
         'total_predios': len(full),
-        'full_df': full, # Para el PDF
+        'totales': totales,
+        'full_data': full.head(1000).to_dict(orient='records'), # Mandamos una porción mayor para la tabla
         'pct_incremento': pct_incremento
     }
 
@@ -158,6 +167,17 @@ def generar_pdf_auditoria(resultados):
     pdf.set_font('Arial', '', 10)
     pdf.cell(0, 7, f"Total Predios Auditados: {resultados['total_predios']}", 0, 1)
     pdf.cell(0, 7, f"Incremento Configurado: {resultados['pct_incremento']}%", 0, 1)
+    
+    # Totales monetarios en el PDF
+    if 'totales' in resultados:
+        pdf.ln(2)
+        pdf.set_font('Arial', 'B', 10)
+        pdf.cell(0, 7, "Totales Financieros:", 0, 1)
+        pdf.set_font('Arial', '', 9)
+        pdf.cell(60, 6, f"Base R1 Total: $ {resultados['totales']['avaluo_base']:,.0f}", 0, 1)
+        pdf.cell(60, 6, f"Cierre Listado Total: $ {resultados['totales']['avaluo_cierre']:,.0f}", 0, 1)
+        pdf.cell(60, 6, f"Diferencia Global: $ {resultados['totales']['avaluo_cierre'] - resultados['totales']['avaluo_calculado']:,.0f}", 0, 1)
+    
     pdf.ln(5)
     
     # Tabla de Estados

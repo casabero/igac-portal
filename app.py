@@ -175,8 +175,6 @@ def auditoria_tool():
             return redirect(request.url)
             
         try:
-            # Procesar (Usamos streams directamente)
-            # Nota: procesar_auditoria espera un dict de filename: stream
             files_dict = {
                 f_prop.filename: f_prop,
                 f_calc.filename: f_calc
@@ -184,35 +182,56 @@ def auditoria_tool():
             
             res = procesar_auditoria(files_dict, incremento)
             
-            # Guardamos en sesión (sin el df de pandas ni el pdf, solo lo serializable)
-            session['last_auditoria'] = {
-                'stats_zonas': res['stats_zonas'],
-                'resumen_estados': res['resumen_estados'],
-                'inconsistencias': res['inconsistencias'],
-                'total_predios': res['total_predios'],
-                'pct_incremento': res['pct_incremento']
-            }
-            # Guardamos el DF original en un objeto temporal para el PDF (opcional, o re-procesamos)
-            # Para simplificar y no llenar la RAM/Sesión, el PDF lo generaremos re-procesando si es necesario, 
-            # pero por ahora pasamos los datos serializados.
+            # Guardamos un identificador único para esta auditoría
+            import uuid
+            audit_id = str(uuid.uuid4())
+            import json
             
-            return render_template('auditoria_tool.html', resultados=session['last_auditoria'])
+            # Guardamos los resultados pesados en un archivo temporal
+            audit_path = os.path.join(UPLOAD_FOLDER, f"audit_{audit_id}.json")
+            with open(audit_path, 'w') as f:
+                json.dump(res, f)
+            
+            session['audit_id'] = audit_id
+            
+            return render_template('auditoria_tool.html', resultados=res)
             
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             flash(f"Error procesando auditoría: {str(e)}")
             return redirect(request.url)
+            
+    # Intentar recuperar resultados del archivo temporal si existe
+    audit_id = session.get('audit_id')
+    resultados = None
+    if audit_id:
+        audit_path = os.path.join(UPLOAD_FOLDER, f"audit_{audit_id}.json")
+        if os.path.exists(audit_path):
+            import json
+            with open(audit_path, 'r') as f:
+                resultados = json.load(f)
             
     return render_template('auditoria_tool.html', resultados=resultados)
 
 @app.route('/auditoria/pdf')
 def auditoria_pdf():
     from flask import session, Response
-    resultados = session.get('last_auditoria')
-    if not resultados:
+    audit_id = session.get('audit_id')
+    if not audit_id:
         flash('No hay resultados para generar PDF. Ejecute la auditoría primero.')
         return redirect(url_for('auditoria_tool'))
     
+    audit_path = os.path.join(UPLOAD_FOLDER, f"audit_{audit_id}.json")
+    if not os.path.exists(audit_path):
+        flash('La sesión de auditoría ha expirado o el archivo fue borrado.')
+        return redirect(url_for('auditoria_tool'))
+        
     try:
+        import json
+        with open(audit_path, 'r') as f:
+            resultados = json.load(f)
+            
         pdf_bytes = generar_pdf_auditoria(resultados)
         return Response(
             pdf_bytes,
@@ -220,8 +239,39 @@ def auditoria_pdf():
             headers={"Content-disposition": "attachment; filename=Reporte_Auditoria.pdf"}
         )
     except Exception as e:
-        flash(f"Error generando PDF: {str(e)}")
+        print(f"Error PDF: {e}")
+        flash(f"Error generando PDF. Es posible que los datos sean muy pesados.")
         return redirect(url_for('auditoria_tool'))
+
+@app.route('/clear_auditoria')
+def clear_auditoria():
+    from flask import session
+    import os
+    # Limpiar sesión y archivos de auditoría
+    audit_id = session.get('audit_id')
+    if audit_id:
+        audit_path = os.path.join(UPLOAD_FOLDER, f"audit_{audit_id}.json")
+        if os.path.exists(audit_path):
+            try: os.remove(audit_path)
+            except: pass
+    
+    session.pop('audit_id', None)
+    session.pop('last_auditoria', None) # Limpiar el viejo por si acaso
+    
+    # Limpiar archivos temporales de ESTE usuario si los hubiera (en el futuro se pueden rastrear por session_id)
+    # Por ahora limpiamos la carpeta general si es seguro, o solo las de la sesión actual.
+    # Como la auditoría no guarda archivos permanentemente (usa streams), solo limpiamos sesión.
+    
+    # Adicionalmente limpiamos los de /avaluos por si acaso el usuario vino de allá
+    for key in ['path_pre', 'path_post']:
+        path = session.get(key)
+        if path and os.path.exists(path):
+            try: os.remove(path)
+            except: pass
+        session.pop(key, None)
+    
+    flash('Sesión y temporales limpiados correctamente.')
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)

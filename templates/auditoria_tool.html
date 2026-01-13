@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html class="light" lang="es">
+
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Auditoría de Cierre - IGAC Apps</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -19,49 +21,89 @@
             }
         }
     </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+
+        /* Sticky totals footer */
+        tfoot {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+    </style>
 </head>
+
 <body class="bg-gray-50 text-gray-900 font-sans antialiased min-h-screen">
-    <div class="max-w-[1000px] mx-auto px-6 py-12">
+    <div class="max-w-[1200px] mx-auto px-6 py-12">
         <div class="mb-8 border-b border-gray-200 pb-4 flex items-center justify-between">
             <h1 class="text-xl font-semibold tracking-tight text-gray-900 flex items-center gap-2">
                 <span class="material-symbols-outlined text-gray-500">verified_user</span>
                 Auditoría de Cierre y Masivos
             </h1>
-            <a href="/" class="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1">
-                <span class="material-symbols-outlined text-[18px]">arrow_back</span> Volver al Panel
+            <a href="/clear_auditoria" class="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1 group">
+                <span
+                    class="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-x-1">arrow_back</span>
+                Volver al Panel
             </a>
         </div>
 
         {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
+        {% if messages %}
+        {% for message in messages %}
+        <div
+            class="mb-4 p-4 {% if 'Error' in message %}bg-red-50 border-red-200 text-red-700{% else %}bg-green-50 border-green-200 text-green-700{% endif %} border rounded-md text-sm flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">info</span>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
             <!-- Sidebar: Configuración -->
-            <div class="md:col-span-1 space-y-6">
+            <div class="lg:col-span-1 space-y-6">
                 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                    <h2 class="text-sm font-semibold mb-4 text-gray-700 uppercase tracking-wider">Carga de Datos</h2>
+                    <h2 class="text-xs font-semibold mb-4 text-gray-700 uppercase tracking-wider">Carga de Datos</h2>
                     <form action="/auditoria" method="POST" enctype="multipart/form-data" class="space-y-4">
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Archivo Propietarios (R1)</label>
-                            <input type="file" name="file_prop" accept=".xlsx" class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200" required>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Archivo Propietarios
+                                (R1)</label>
+                            <input type="file" name="file_prop" accept=".xlsx"
+                                class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+                                required>
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Listado de Avalúos</label>
-                            <input type="file" name="file_calc" accept=".xlsx" class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200" required>
+                            <input type="file" name="file_calc" accept=".xlsx"
+                                class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+                                required>
                         </div>
                         <div class="pt-2 border-t border-gray-100">
                             <label class="block text-xs font-medium text-gray-500 mb-1">Incremento a Validar (%)</label>
-                            <input type="number" name="incremento" value="3" step="0.1" class="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:ring-1 focus:ring-black outline-none">
+                            <input type="number" name="incremento"
+                                value="{{ resultados.pct_incremento if resultados else 3 }}" step="0.1"
+                                class="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:ring-1 focus:ring-black outline-none">
                             <p class="text-[10px] text-gray-400 mt-1">Cálculo exacto con redondeo a miles (-3).</p>
                         </div>
-                        <button type="submit" class="w-full bg-gray-900 text-white text-sm font-medium py-2.5 rounded hover:bg-black transition-colors flex items-center justify-center gap-2">
+                        <button type="submit"
+                            class="w-full bg-gray-900 text-white text-sm font-medium py-2.5 rounded hover:bg-black transition-colors flex items-center justify-center gap-2">
                             <span class="material-symbols-outlined text-[18px]">analytics</span> Ejecutar Auditoría
                         </button>
                     </form>
@@ -69,114 +111,177 @@
 
                 {% if resultados %}
                 <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                    <h2 class="text-sm font-semibold mb-4 text-gray-700 uppercase tracking-wider">Exportar Informe</h2>
-                    <a href="/auditoria/pdf" target="_blank" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        <span class="material-symbols-outlined text-[18px] text-red-500">picture_as_pdf</span> Descargar PDF
+                    <h2 class="text-xs font-semibold mb-4 text-gray-700 uppercase tracking-wider">Reporte</h2>
+                    <a href="/auditoria/pdf" target="_blank"
+                        class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        <span class="material-symbols-outlined text-[18px] text-red-500">picture_as_pdf</span> Descargar
+                        Resumen PDF
                     </a>
                 </div>
                 {% endif %}
             </div>
 
             <!-- Main Content: Resultados -->
-            <div class="md:col-span-2 space-y-8">
+            <div class="lg:col-span-3 space-y-8">
                 {% if not resultados %}
-                <div class="flex flex-col items-center justify-center py-24 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+                <div
+                    class="flex flex-col items-center justify-center py-24 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
                     <span class="material-symbols-outlined text-[48px] mb-4">upload_file</span>
                     <p class="text-sm">Sube los archivos necesarios para comenzar la auditoría.</p>
                 </div>
                 {% else %}
                 <!-- Stats Grid -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-white p-4 rounded-lg border border-gray-200">
-                        <p class="text-xs text-gray-500 uppercase">Total Predios</p>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Total Predios</p>
                         <p class="text-2xl font-semibold">{{ resultados.total_predios }}</p>
                     </div>
                     <div class="bg-white p-4 rounded-lg border border-gray-200">
-                        <p class="text-xs text-gray-500 uppercase">Errores Encontrados</p>
-                        <p class="text-2xl font-semibold text-red-600">{{ resultados.resumen_estados.get('Error de Cálculo', 0) + resultados.resumen_estados.get('Base Diferente', 0) }}</p>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Errores de Cálculo</p>
+                        <p class="text-2xl font-semibold text-red-600">{{ resultados.resumen_estados.get('Error de
+                            Cálculo', 0) }}</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-gray-200">
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Inconsistencias Totales
+                        </p>
+                        <p class="text-2xl font-semibold text-amber-600">{{ resultados.total_predios -
+                            resultados.resumen_estados.get('OK', 0) }}</p>
                     </div>
                 </div>
 
-                <!-- Tabla Zonas -->
-                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                    <div class="p-4 border-b border-gray-100 bg-gray-50">
-                        <h3 class="text-sm font-semibold text-gray-700">Consistencia por Zona</h3>
-                    </div>
-                    <table class="w-full text-xs text-left">
-                        <thead class="bg-gray-50 text-gray-500 uppercase font-medium">
-                            <tr>
-                                <th class="px-4 py-2">Zona</th>
-                                <th class="px-4 py-2">Cant. R1</th>
-                                <th class="px-4 py-2">Cant. Listado</th>
-                                <th class="px-4 py-2">Diferencia</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            {% for row in resultados.stats_zonas %}
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 font-medium">{{ row.Zona }}</td>
-                                <td class="px-4 py-2">{{ row.R1 }}</td>
-                                <td class="px-4 py-2">{{ row.Listado }}</td>
-                                <td class="px-4 py-2 {% if row.Dif != 0 %}text-red-500 font-bold{% endif %}">{{ row.Dif }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                <!-- Tabla de Resultados Avanzada -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+                    <div
+                        class="p-4 border-b border-gray-100 bg-gray-50 flex flex-wrap justify-between items-center gap-4">
+                        <h3 class="text-sm font-semibold text-gray-700">Detalle Completo de Auditoría</h3>
 
-                <!-- Tabla Inconsistencias -->
-                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                    <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                        <h3 class="text-sm font-semibold text-gray-700">Inconsistencias Detectadas (Top 100)</h3>
-                        <span class="text-[10px] px-2 py-0.5 bg-gray-200 rounded text-gray-600 font-medium">Vista Rápida</span>
+                        <!-- Search Box -->
+                        <div class="relative w-full sm:w-64">
+                            <span
+                                class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-[18px] text-gray-400">search</span>
+                            <input type="text" id="tableSearch" placeholder="Buscar ID o Estado..."
+                                class="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-black outline-none">
+                        </div>
                     </div>
-                    {% if resultados.inconsistencias %}
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-[11px] text-left">
-                            <thead class="bg-gray-50 text-gray-500 uppercase font-medium">
+
+                    <!-- Table Container -->
+                    <div class="overflow-x-auto min-h-[400px] max-h-[600px] custom-scrollbar relative">
+                        <table class="w-full text-[11px] text-left border-collapse" id="resultsTable">
+                            <thead
+                                class="bg-gray-50 text-gray-500 uppercase font-bold sticky top-0 z-10 border-b border-gray-200">
                                 <tr>
-                                    <th class="px-4 py-3">ID Único</th>
-                                    <th class="px-4 py-3">Base R1</th>
-                                    <th class="px-4 py-3">Sistema</th>
-                                    <th class="px-4 py-3">Calculado Py</th>
-                                    <th class="px-4 py-3">Estado</th>
+                                    <th class="px-4 py-3 cursor-pointer hover:bg-gray-100">ID Único</th>
+                                    <th class="px-4 py-3 cursor-pointer hover:bg-gray-100">Zona</th>
+                                    <th class="px-4 py-3 cursor-pointer hover:bg-gray-100">Base R1</th>
+                                    <th class="px-4 py-3 cursor-pointer hover:bg-gray-100">Cierre</th>
+                                    <th class="px-4 py-3 cursor-pointer hover:bg-gray-100">Calc Py</th>
+                                    <th class="px-4 py-3 cursor-pointer hover:bg-gray-100">Estado</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                {% for item in resultados.inconsistencias %}
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-mono text-[10px] text-gray-600">{{ item.ID_Unico }}</td>
-                                    <td class="px-4 py-3 text-gray-500">{{ "{:,.0f}".format(item.Valor_Base_R1) }}</td>
-                                    <td class="px-4 py-3 text-gray-500">{{ "{:,.0f}".format(item.Valor_Cierre_Listado) }}</td>
-                                    <td class="px-4 py-3 font-medium text-gray-900">{{ "{:,.0f}".format(item.Cierre_Calculado) }}</td>
-                                    <td class="px-4 py-3">
-                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-bold 
-                                            {% if 'Calculo' in item.Estado %}bg-red-100 text-red-700
-                                            {% elif 'Base' in item.Estado %}bg-amber-100 text-amber-700
-                                            {% else %}bg-gray-100 text-gray-700{% endif %}">
-                                            {{ item.Estado }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                {% endfor %}
+                            <tbody class="divide-y divide-gray-100" id="tableBody">
+                                <!-- Data will be injected by JS -->
                             </tbody>
+                            <tfoot class="border-t-2 border-gray-200">
+                                <tr class="bg-gray-50 font-bold text-gray-800">
+                                    <td class="px-4 py-3" colspan="2">Totales Globales (Auditado)</td>
+                                    <td class="px-4 py-3 text-blue-600" id="totalBase">$ {{
+                                        "{:,.0f}".format(resultados.totales.avaluo_base) }}</td>
+                                    <td class="px-4 py-3 text-green-600" id="totalCierre">$ {{
+                                        "{:,.0f}".format(resultados.totales.avaluo_cierre) }}</td>
+                                    <td class="px-4 py-3 text-gray-600" id="totalCalc">$ {{
+                                        "{:,.0f}".format(resultados.totales.avaluo_calculado) }}</td>
+                                    <td class="px-4 py-3" id="totalCount">{{ resultados.total_predios }} predios</td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
-                    {% else %}
-                    <div class="p-12 text-center text-gray-400">
-                        <span class="material-symbols-outlined text-[32px] mb-2">done_all</span>
-                        <p class="text-xs">No se encontraron inconsistencias en la muestra analizada.</p>
+
+                    <!-- Pagination Controls -->
+                    <div
+                        class="px-4 py-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 bg-gray-50">
+                        <div id="paginationInfo">Mostrando 1-100 de ...</div>
+                        <div class="flex gap-2">
+                            <button id="prevPage"
+                                class="px-3 py-1 border border-gray-200 rounded hover:bg-gray-100 disabled:opacity-30">Anterior</button>
+                            <button id="nextPage"
+                                class="px-3 py-1 border border-gray-200 rounded hover:bg-gray-100 disabled:opacity-30">Siguiente</button>
+                        </div>
                     </div>
-                    {% endif %}
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
 
+    <div id="auditData" data-audit='{{ resultados.full_data | tojson | safe }}' class="hidden"></div>
+    {% if resultados %}
+    <script>
+        const rawData = JSON.parse(document.getElementById('auditData').dataset.audit);
+        let filteredData = [...rawData];
+        let currentPage = 1;
+        const rowsPerPage = 100;
+
+        const tableBody = document.getElementById('tableBody');
+        const searchInput = document.getElementById('tableSearch');
+        const prevBtn = document.getElementById('prevPage');
+        const nextBtn = document.getElementById('nextPage');
+        const info = document.getElementById('paginationInfo');
+
+        function renderTable() {
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const slice = filteredData.slice(start, end);
+
+            tableBody.innerHTML = slice.map(item => `
+                <tr class="hover:bg-blue-50/30 transition-colors">
+                    <td class="px-4 py-2 font-mono text-[10px] text-gray-600">${item.ID_Unico}</td>
+                    <td class="px-4 py-2 text-gray-500">${item.Zona || '-'}</td>
+                    <td class="px-4 py-2 text-gray-500">$${item.Valor_Base_R1.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
+                    <td class="px-4 py-2 text-gray-900 font-medium">$${item.Valor_Cierre_Listado.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
+                    <td class="px-4 py-2 text-gray-500">$${item.Cierre_Calculado.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>
+                    <td class="px-4 py-2">
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-bold 
+                            ${item.Estado === 'OK' ? 'bg-green-100 text-green-700' :
+                    item.Estado.includes('Calculo') ? 'bg-red-100 text-red-700' :
+                        'bg-amber-100 text-amber-700'}">
+                            ${item.Estado}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Update Pagination Info
+            const total = filteredData.length;
+            const showingEnd = Math.min(end, total);
+            info.textContent = `Mostrando ${total > 0 ? start + 1 : 0}-${showingEnd} de ${total} registros`;
+
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = end >= total;
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            filteredData = rawData.filter(item =>
+                item.ID_Unico.includes(term) ||
+                item.Estado.toLowerCase().includes(term) ||
+                (item.Zona && item.Zona.toLowerCase().includes(term))
+            );
+            currentPage = 1;
+            renderTable();
+        });
+
+        prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
+        nextBtn.addEventListener('click', () => { if (currentPage * rowsPerPage < filteredData.length) { currentPage++; renderTable(); } });
+
+        // Initial render
+        renderTable();
+    </script>
+    {% endif %}
+
     <!-- Footer -->
     <footer class="mt-12 py-8 border-t border-gray-100 text-center">
         <p class="text-[10px] text-gray-400 uppercase tracking-widest font-medium">Casabero IGAC Portal &copy; 2026</p>
     </footer>
 </body>
+
 </html>
