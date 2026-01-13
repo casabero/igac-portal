@@ -138,6 +138,9 @@ def procesar_auditoria(files_dict, pct_incremento):
     full.loc[(full['_merge'] == 'both') & (full['Diff_Base'] != 0), 'Estado'] = 'Base Diferente'
     full.loc[(full['_merge'] == 'both') & (full['Diff_Calculo'] != 0), 'Estado'] = 'Error de Cálculo'
 
+    # Renombrar para mayor claridad en el reporte y UI
+    full.rename(columns={'ID_Unico': 'Numero_Predial'}, inplace=True)
+
     # Outliers (Top 5 y Bottom 5 de variaciones significativas)
     top_5_var = full[full['_merge'] == 'both'].sort_values(by='Pct_Variacion', ascending=False).head(5).to_dict(orient='records')
     bottom_5_var = full[full['_merge'] == 'both'].sort_values(by='Pct_Variacion', ascending=True).head(5).to_dict(orient='records')
@@ -152,11 +155,8 @@ def procesar_auditoria(files_dict, pct_incremento):
         'avaluo_cierre_calculado': float(full['Cierre_Calculado'].sum())
     }
     
-    municipio_detectado = df_prop['Muni_Name'].iloc[0] if df_prop is not None else "Desconocido"
-
-    # Renombrar para mayor claridad en el reporte y UI
-    full.rename(columns={'ID_Unico': 'Numero_Predial'}, inplace=True)
     inconsistencias = full[full['Estado'] != 'OK'].head(200).to_dict(orient='records')
+    municipio_detectado = df_prop['Muni_Name'].iloc[0] if df_prop is not None and not df_prop.empty else "Desconocido"
 
     return {
         'municipio': municipio_detectado,
