@@ -174,7 +174,7 @@ def procesar_auditoria(files_dict, pct_incremento, zona_filtro='General'):
     full['Estado'] = 'OK'
     full.loc[full['_merge'] == 'left_only', 'Estado'] = 'Faltante en Listado'
     full.loc[full['_merge'] == 'right_only', 'Estado'] = 'Sobran en Listado'
-    full.loc[(full['_merge'] == 'both') & (full['Diff_Base'] != 0), 'Estado'] = 'Base Diferente'
+    full.loc[(full['_merge'] == 'both') & (full['Diff_Base'] != 0), 'Estado'] = 'Avaluo Precierre Diferente'
     full.loc[(full['_merge'] == 'both') & (full['Diff_Calculo'] != 0), 'Estado'] = 'Error de Cálculo'
 
     # Identificar predios con avalúo $0 (no es normal)
@@ -264,22 +264,22 @@ def generar_pdf_auditoria(resultados):
     pdf = AuditoriaPDF()
     pdf.add_page()
     pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(40, 7, 'Municipio:', 0)
+    pdf.cell(50, 7, 'Municipio:', 0)
     pdf.set_font('Helvetica', '', 10)
     pdf.cell(0, 7, resultados.get('municipio', 'Desconocido'), 0, 1)
     
     pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(40, 7, 'Zona Analizada:', 0)
+    pdf.cell(50, 7, 'Zona Analizada:', 0)
     pdf.set_font('Helvetica', '', 10)
     pdf.cell(0, 7, resultados.get('zona_filtro', 'General'), 0, 1)
     
     pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(40, 7, 'Incremento:', 0)
+    pdf.cell(50, 7, 'Incremento:', 0)
     pdf.set_font('Helvetica', '', 10)
     pdf.cell(0, 7, f"{resultados['pct_incremento']}%", 0, 1)
 
     pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(40, 7, 'Total Predios Auditados:', 0)
+    pdf.cell(50, 7, 'Total Predios Auditados:', 0)
     pdf.set_font('Helvetica', '', 10)
     pdf.cell(0, 7, f"{resultados['total_predios']}", 0, 1)
     
@@ -290,9 +290,9 @@ def generar_pdf_auditoria(resultados):
         pdf.cell(0, 7, "Totales Financieros:", 0, 1)
         pdf.set_font('Helvetica', '', 9)
         t = resultados['totales']
-        pdf.cell(80, 6, f"Precierre (Avalúo Anterior) Total: $ {t['avaluo_precierre']:,.0f}", 0, 1)
-        pdf.cell(80, 6, f"Cierre en Lista de Avalúo Total: $ {t['avaluo_cierre_listado']:,.0f}", 0, 1)
-        pdf.cell(80, 6, f"Cierre Calculado (Python) Total: $ {t['avaluo_cierre_calculado']:,.0f}", 0, 1)
+        pdf.cell(100, 6, f"Avaluo Precierre Total: $ {t['avaluo_precierre']:,.0f}", 0, 1)
+        pdf.cell(100, 6, f"Avaluo Cierre Total: $ {t['avaluo_cierre_listado']:,.0f}", 0, 1)
+        pdf.cell(100, 6, f"Avaluo Cierre Calc. Total: $ {t['avaluo_cierre_calculado']:,.0f}", 0, 1)
         pdf.set_font('Helvetica', 'B', 9)
         dif_global = t['avaluo_cierre_listado'] - t['avaluo_precierre']
         pdf.cell(80, 6, f"Diferencia Real (Cierre - Precierre): $ {dif_global:,.0f}", 0, 1)
@@ -333,15 +333,15 @@ def generar_pdf_auditoria(resultados):
         pdf.cell(0, 7, 'Top 5 Mayores Incrementos %:', 0, 1)
         pdf.set_font('Helvetica', 'B', 8)
         pdf.cell(50, 7, 'Número Predial', 1)
-        pdf.cell(30, 7, 'Precierre', 1)
-        pdf.cell(30, 7, 'Cierre Lista', 1)
+        pdf.cell(35, 7, 'Avaluo Precierre', 1)
+        pdf.cell(35, 7, 'Avaluo Cierre', 1)
         pdf.cell(30, 7, '% Var.', 1)
         pdf.ln()
         pdf.set_font('Helvetica', '', 7)
         for item in resultados['outliers']['top']:
             pdf.cell(50, 6, str(item['Numero_Predial']), 1)
-            pdf.cell(30, 6, f"{item['Base_Usada']:,.0f}", 1)
-            pdf.cell(30, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
+            pdf.cell(35, 6, f"{item['Base_Usada']:,.0f}", 1)
+            pdf.cell(35, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
             pdf.cell(30, 6, f"{item['Pct_Variacion']:.2f}%", 1)
             pdf.ln()
 
@@ -350,15 +350,15 @@ def generar_pdf_auditoria(resultados):
         pdf.cell(0, 7, 'Top 5 Menores Incrementos %:', 0, 1)
         pdf.set_font('Helvetica', 'B', 8)
         pdf.cell(50, 7, 'Número Predial', 1)
-        pdf.cell(30, 7, 'Precierre', 1)
-        pdf.cell(30, 7, 'Cierre Lista', 1)
+        pdf.cell(35, 7, 'Avaluo Precierre', 1)
+        pdf.cell(35, 7, 'Avaluo Cierre', 1)
         pdf.cell(30, 7, '% Var.', 1)
         pdf.ln()
         pdf.set_font('Helvetica', '', 7)
         for item in resultados['outliers']['bottom']:
             pdf.cell(50, 6, str(item['Numero_Predial']), 1)
-            pdf.cell(30, 6, f"{item['Base_Usada']:,.0f}", 1)
-            pdf.cell(30, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
+            pdf.cell(35, 6, f"{item['Base_Usada']:,.0f}", 1)
+            pdf.cell(35, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
             pdf.cell(30, 6, f"{item['Pct_Variacion']:.2f}%", 1)
             pdf.ln()
 
@@ -384,13 +384,25 @@ def generar_pdf_auditoria(resultados):
         # Tabla de predios en cero
         pdf.set_font('Helvetica', 'B', 8)
         pdf.cell(50, 7, 'Número Predial', 1)
-        pdf.cell(30, 7, 'Precierre', 1)
-        pdf.cell(30, 7, 'Cierre Lista', 1)
+        pdf.cell(30, 7, 'Avaluo Precierre', 1)
+        pdf.cell(30, 7, 'Avaluo Cierre', 1)
         pdf.cell(30, 7, 'Categoría', 1)
         pdf.cell(40, 7, 'Estado', 1)
         pdf.ln()
         pdf.set_font('Helvetica', '', 7)
-        for item in resultados['predios_zero'][:50]: # Limitar a 50 en PDF
+        for item in resultados['predios_zero']:
+            # Salto de página si es necesario
+            if pdf.get_y() > 260:
+                pdf.add_page()
+                pdf.set_font('Helvetica', 'B', 8)
+                pdf.cell(50, 7, 'Número Predial', 1)
+                pdf.cell(30, 7, 'Avaluo Precierre', 1)
+                pdf.cell(30, 7, 'Avaluo Cierre', 1)
+                pdf.cell(30, 7, 'Categoría', 1)
+                pdf.cell(40, 7, 'Estado', 1)
+                pdf.ln()
+                pdf.set_font('Helvetica', '', 7)
+
             pdf.cell(50, 6, str(item['Numero_Predial']), 1)
             pdf.cell(30, 6, f"{item['Base_Usada']:,.0f}", 1)
             pdf.cell(30, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
@@ -428,27 +440,39 @@ def generar_pdf_auditoria(resultados):
         pdf.cell(30, 7, str(row['Dif']), 1)
         pdf.ln()
 
-    # Si hay muchas inconsistencias, listar las primeras
+    # DETALLE DE INCONSISTENCIAS (TODAS)
     if resultados['inconsistencias']:
         pdf.add_page()
         pdf.set_font('Helvetica', 'B', 12)
-        pdf.cell(0, 10, 'Detalle de Inconsistencias (Primeras 50)', 0, 1)
-        pdf.set_font('Helvetica', 'B', 7)
-        pdf.cell(40, 7, 'Número Predial', 1)
-        pdf.cell(25, 7, 'Precierre', 1)
-        pdf.cell(25, 7, 'Cierre Lista', 1)
-        pdf.cell(25, 7, 'Cierre Calc.', 1)
-        pdf.cell(25, 7, '% Var.', 1)
-        pdf.cell(50, 7, 'Estado', 1)
-        pdf.ln()
+        pdf.cell(0, 10, 'Detalle de Inconsistencias (Total)', 0, 1)
+        
+        # Función para imprimir cabecera de tabla de inconsistencias
+        def print_table_header():
+            pdf.set_font('Helvetica', 'B', 7)
+            pdf.cell(45, 7, 'Número Predial', 1)
+            pdf.cell(27, 7, 'Avaluo Precierre', 1)
+            pdf.cell(27, 7, 'Avaluo Cierre', 1)
+            pdf.cell(27, 7, 'Avaluo Cierre Calc.', 1)
+            pdf.cell(18, 7, '% Var.', 1)
+            pdf.cell(45, 7, 'Estado', 1)
+            pdf.ln()
+
+        print_table_header()
         pdf.set_font('Helvetica', '', 6)
-        for i, item in enumerate(resultados['inconsistencias'][:50]):
-            pdf.cell(40, 6, str(item['Numero_Predial']), 1)
-            pdf.cell(25, 6, f"{item['Base_Usada']:,.0f}", 1)
-            pdf.cell(25, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
-            pdf.cell(25, 6, f"{item['Cierre_Calculado']:,.0f}", 1)
-            pdf.cell(25, 6, f"{item['Pct_Variacion']:.2f}%", 1)
-            pdf.cell(50, 6, str(item['Estado']), 1)
+        
+        for item in resultados['inconsistencias']:
+            # Control de salto de página manual para tablas largas
+            if pdf.get_y() > 250:
+                pdf.add_page()
+                print_table_header()
+                pdf.set_font('Helvetica', '', 6)
+
+            pdf.cell(45, 6, str(item['Numero_Predial']), 1)
+            pdf.cell(27, 6, f"{item['Base_Usada']:,.0f}", 1)
+            pdf.cell(27, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
+            pdf.cell(27, 6, f"{item['Cierre_Calculado']:,.0f}", 1)
+            pdf.cell(18, 6, f"{item['Pct_Variacion']:.2f}%", 1)
+            pdf.cell(45, 6, str(item['Estado']), 1)
             pdf.ln()
 
     return bytes(pdf.output())
