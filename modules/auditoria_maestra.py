@@ -84,10 +84,15 @@ def procesar_auditoria(files_dict, pct_incremento, zona_filtro='General'):
             nombre_municipio = "Desconocido"
             if cod_depto and cod_muni:
                 nombre_municipio = f"{cod_depto}{cod_muni}"
-            else:
-                muni_col = [c for c in df_prop.columns if 'nombre' in c.lower() and ('muni' in c.lower() or 'mpio' in c.lower())]
-                if muni_col:
-                    nombre_municipio = str(df_prop[muni_col[0]].iloc[0]).strip()
+            
+            # Fallback a buscar columna con nombre
+            muni_col = [c for c in df_prop.columns if 'nombre' in c.lower() and ('muni' in c.lower() or 'mpio' in c.lower())]
+            if muni_col:
+                nombre_municipio = str(df_prop[muni_col[0]].iloc[0]).strip()
+            
+            # Si sigue siendo Desconocido, intentar extraer de ID_Unico (primeros 5)
+            if nombre_municipio == "Desconocido" and not df_prop.empty:
+                nombre_municipio = str(df_prop['ID_Unico'].iloc[0])[:5]
 
             df_prop = df_prop.drop_duplicates(subset=['ID_Unico'], keep='first')
             df_prop['Zona'] = df_prop['ID_Unico'].apply(obtener_zona)
@@ -139,8 +144,12 @@ def procesar_auditoria(files_dict, pct_incremento, zona_filtro='General'):
 
     # APLICAR FILTRO DE ZONA SI NO ES GENERAL
     if zona_filtro != 'General':
-        df_prop = df_prop[df_prop['Zona'] == zona_filtro].copy()
-        df_calc = df_calc[df_calc['Zona'] == zona_filtro].copy()
+        if zona_filtro == 'Corregimientos':
+            df_prop = df_prop[df_prop['Zona'].str.startswith('Corregimiento', na=False)].copy()
+            df_calc = df_calc[df_calc['Zona'].str.startswith('Corregimiento', na=False)].copy()
+        else:
+            df_prop = df_prop[df_prop['Zona'] == zona_filtro].copy()
+            df_calc = df_calc[df_calc['Zona'] == zona_filtro].copy()
 
     # 1. Estadísticas de Zona
     stats_r1 = df_prop['Zona'].value_counts().rename('R1')
