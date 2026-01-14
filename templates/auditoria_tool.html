@@ -95,23 +95,25 @@
                                 class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
                                 required>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="space-y-4 pt-2 border-t border-gray-100">
                             <!-- Incremento Config -->
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Incremento
-                                    (%)</label>
+                                <label
+                                    class="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">Incremento
+                                    Validar (%)</label>
                                 <input type="number" step="0.01" name="incremento"
                                     value="{{ resultados.pct_incremento|default(0) }}"
-                                    class="w-full bg-gray-50 border-gray-200 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+                                    class="w-full bg-gray-50 border-gray-200 rounded-lg text-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                                     required>
                             </div>
 
                             <!-- Filtro de Zona -->
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Zona de
-                                    Análisis</label>
+                                <label
+                                    class="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-wider">Zona
+                                    de Análisis</label>
                                 <select name="zona"
-                                    class="w-full bg-gray-50 border-gray-200 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
+                                    class="w-full bg-gray-50 border-gray-200 rounded-lg text-sm px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
                                     <option value="General" {% if resultados.zona_filtro=='General' %}selected{% endif
                                         %}>General (Gualmatan)</option>
                                     <option value="Urbana" {% if resultados.zona_filtro=='Urbana' %}selected{% endif %}>
@@ -124,10 +126,10 @@
                             </div>
 
                             <!-- Botones -->
-                            <div class="md:col-span-2 flex items-end">
+                            <div>
                                 <button type="submit"
-                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-200">
-                                    <span class="material-symbols-outlined">restart_alt</span>
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-100">
+                                    <span class="material-symbols-outlined text-[20px]">analytics</span>
                                     Actualizar Auditoría
                                 </button>
                             </div>
