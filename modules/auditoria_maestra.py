@@ -8,6 +8,38 @@ import matplotlib
 matplotlib.use('Agg') # Modo no interactivo para el servidor
 
 # ==========================================
+# 0. MAPEO DE MUNICIPIOS (SUCRE)
+# ==========================================
+MUNICIPIOS_SUCRE = {
+    "70001": "Sincelejo (Capital)",
+    "70110": "Buenavista",
+    "70124": "Caimito",
+    "70204": "Colosó",
+    "70215": "Corozal",
+    "70221": "Coveñas",
+    "70230": "Chalán",
+    "70233": "El Roble",
+    "70235": "Galeras",
+    "70265": "Guaranda",
+    "70400": "La Unión",
+    "70418": "Los Palmitos",
+    "70429": "Majagual",
+    "70473": "Morroa",
+    "70508": "Ovejas",
+    "70523": "Palmito (S. Antonio)",
+    "70670": "Sampués",
+    "70678": "San Benito Abad",
+    "70702": "San Juan de Betulia",
+    "70708": "San Marcos",
+    "70713": "San Onofre",
+    "70717": "San Pedro",
+    "70742": "Sincé (San Luis de)",
+    "70771": "Sucre",
+    "70820": "Santiago de Tolú",
+    "70823": "Tolúviejo"
+}
+
+# ==========================================
 # 1. LÓGICA DE NEGOCIO
 # ==========================================
 
@@ -32,10 +64,14 @@ def obtener_zona(id_obj):
             return 'Desconocida'
         
         # Posición 5 y 6 (índices 5:7)
-        cod = s[5:7] 
-        if cod == '00': return 'Rural'
-        if cod == '01': return 'Urbana'
-        if cod.isdigit(): return f'Corregimiento {cod}'
+        cod_str = s[5:7] 
+        if not cod_str.isdigit():
+            return 'Desc.'
+            
+        cod = int(cod_str)
+        if cod == 0: return 'Rural'            # 00
+        if cod == 1: return 'Urbana'           # 01
+        if 2 <= cod <= 99: return f'Corregimiento {cod_str}'
         return 'Desc.'
     except: return 'Error'
 
@@ -93,6 +129,10 @@ def procesar_auditoria(files_dict, pct_incremento, zona_filtro='General'):
             # Si sigue siendo Desconocido, intentar extraer de ID_Unico (primeros 5)
             if nombre_municipio == "Desconocido" and not df_prop.empty:
                 nombre_municipio = str(df_prop['ID_Unico'].iloc[0])[:5]
+            
+            # Buscar el nombre en el diccionario de Sucre si es un código DANE
+            if nombre_municipio in MUNICIPIOS_SUCRE:
+                nombre_municipio = f"{nombre_municipio} - {MUNICIPIOS_SUCRE[nombre_municipio]}"
 
             df_prop = df_prop.drop_duplicates(subset=['ID_Unico'], keep='first')
             df_prop['Zona'] = df_prop['ID_Unico'].apply(obtener_zona)
