@@ -57,11 +57,19 @@
                 <span class="material-symbols-outlined text-gray-500">verified_user</span>
                 Auditoría de Cierre y Masivos
             </h1>
-            <a href="/clear_auditoria" class="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1 group">
-                <span
-                    class="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-x-1">arrow_back</span>
-                Volver al Panel
-            </a>
+            <div class="flex items-center gap-4">
+                <button onclick="toggleHelpModal()"
+                    class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition-colors shadow-sm border border-blue-100"
+                    title="Guía de Ayuda">
+                    <span class="material-symbols-outlined text-[20px]">help</span>
+                </button>
+                <a href="/clear_auditoria"
+                    class="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1 group">
+                    <span
+                        class="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-x-1">arrow_back</span>
+                    Volver al Panel
+                </a>
+            </div>
         </div>
 
         {% with messages = get_flashed_messages() %}
@@ -447,6 +455,133 @@
         }
     </script>
     {% endif %}
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"
+                onclick="toggleHelpModal()"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full border border-gray-100">
+                <div class="bg-blue-600 px-6 py-4 flex justify-between items-center text-white">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined">menu_book</span>
+                        Manual de Ayuda - Auditoría de Cierre
+                    </h3>
+                    <button onclick="toggleHelpModal()" class="hover:bg-blue-700 p-1 rounded-full transition-colors">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="px-8 py-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                    <div class="space-y-8">
+                        <section>
+                            <h4
+                                class="text-blue-700 font-bold text-sm uppercase tracking-wider border-b border-blue-100 pb-2 mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px]">upload_file</span>
+                                1. Carga de Datos
+                            </h4>
+                            <p class="text-gray-600 text-sm mb-3">Para iniciar la auditoría, se requieren dos archivos
+                                Excel específicos:</p>
+                            <ul class="list-disc list-inside text-gray-600 text-sm space-y-2 pl-2">
+                                <li><strong class="text-gray-900">Archivo Propietarios (R1):</strong> Debe contener la
+                                    base de datos de precierre con las columnas oficiales de Departamento, Municipio,
+                                    NoPredial y Avalúo.</li>
+                                <li><strong class="text-gray-900">Listado de Avalúos:</strong> Contiene los nuevos
+                                    avalúos a validar. El sistema mapeará automáticamente las columnas de Predial,
+                                    Valores y Condición.</li>
+                            </ul>
+                        </section>
+
+                        <section>
+                            <h4
+                                class="text-blue-700 font-bold text-sm uppercase tracking-wider border-b border-blue-100 pb-2 mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px]">settings_accessibility</span>
+                                2. Configuración del Proceso
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <p class="font-bold text-gray-900 text-xs mb-2 italic">Incremento Validar (%)</p>
+                                    <p class="text-[12px] text-gray-600">Es el porcentaje esperado de aumento. El
+                                        sistema lo usará para calcular un "Avaluo Cierre Calc" teórico y comparar si el
+                                        listado coincide con el cálculo matemático oficial.</p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <p class="font-bold text-gray-900 text-xs mb-2 italic">Zona de Análisis</p>
+                                    <p class="text-[12px] text-gray-600">Permite auditar el municipio completo (General)
+                                        o segmentar por sector. Para <strong
+                                            class="text-gray-900">Corregimientos</strong>, el sistema agrupa
+                                        automáticamente los códigos catastrales entre 02 y 99.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section>
+                            <h4
+                                class="text-blue-700 font-bold text-sm uppercase tracking-wider border-b border-blue-100 pb-2 mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px]">report_problem</span>
+                                3. Interpretación de Alertas
+                            </h4>
+                            <div class="space-y-4">
+                                <div class="border-l-4 border-amber-400 pl-4 py-2 bg-amber-50/30">
+                                    <strong class="text-xs text-amber-800">Avaluo Precierre Diferente:</strong>
+                                    <p class="text-[12px] text-gray-600">Indica que el valor base en el listado no
+                                        coincide con el valor reportado en el R1 de precierre.</p>
+                                </div>
+                                <div class="border-l-4 border-red-500 pl-4 py-2 bg-red-50/30">
+                                    <strong class="text-xs text-red-800">Error en Cálculo:</strong>
+                                    <p class="text-[12px] text-gray-600">El valor de cierre en el listado no concuerda
+                                        con la aplicación exacta del incremento configurado sobre el valor base.</p>
+                                </div>
+                                <div class="border-l-4 border-purple-500 pl-4 py-2 bg-purple-50/30">
+                                    <strong class="text-xs text-purple-800 text-indigo-700">Categoría PH:</strong>
+                                    <p class="text-[12px] text-gray-600">Propiedades Horizontales (Condición 9) con
+                                        avalúo en $0. Se resaltan por ser casos especiales de revisión.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section>
+                            <h4
+                                class="text-blue-700 font-bold text-sm uppercase tracking-wider border-b border-blue-100 pb-2 mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                                4. Generación de Informes
+                            </h4>
+                            <p class="text-gray-600 text-sm">El botón de <strong class="text-gray-900">Descargar Reporte
+                                    PDF</strong> genera un documento oficial que incluye:</p>
+                            <ul class="list-disc list-inside text-gray-600 text-sm space-y-1 mt-2 pl-2">
+                                <li>Resumen estadístico por zona.</li>
+                                <li>Análisis de variaciones extremas (Outliers).</li>
+                                <li>Listado <strong class="text-blue-600">TOTAL</strong> de inconsistencias encontradas.
+                                </li>
+                                <li>Alerta detallada de todos los predios en $0 pesos.</li>
+                            </ul>
+                        </section>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 flex justify-end">
+                    <button onclick="toggleHelpModal()"
+                        class="bg-gray-800 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-black transition-colors">
+                        Entendido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleHelpModal() {
+            const modal = document.getElementById('helpModal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+    </script>
 
     <!-- Footer -->
     <footer class="mt-12 py-8 border-t border-gray-100 text-center">
