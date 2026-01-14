@@ -19,6 +19,14 @@ try:
 except Exception as e:
     print(f"Advertencia: No se pudo iniciar la DB de logs: {e}")
 
+@app.template_filter('format_number')
+def format_number(value):
+    try:
+        if value is None: return "0"
+        return f"{value:,.0f}".replace(",", ".")
+    except:
+        return value
+
 # --- RUTA 1: HOME (PORTAL) ---
 @app.route('/')
 def index():
@@ -180,7 +188,8 @@ def auditoria_tool():
                 f_calc.filename: f_calc
             }
             
-            res = procesar_auditoria(files_dict, incremento)
+            zona = request.form.get('zona', 'General')
+            res = procesar_auditoria(files_dict, incremento, zona_filtro=zona)
             
             # Guardamos un identificador único para esta auditoría
             import uuid

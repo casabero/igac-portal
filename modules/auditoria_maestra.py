@@ -39,7 +39,7 @@ def obtener_zona(id_obj):
         return 'Desc.'
     except: return 'Error'
 
-def procesar_auditoria(files_dict, pct_incremento):
+def procesar_auditoria(files_dict, pct_incremento, zona_filtro='General'):
     """Procesa los archivos subidos y genera la auditoría"""
     df_prop = None
     df_calc = None
@@ -137,6 +137,11 @@ def procesar_auditoria(files_dict, pct_incremento):
     if df_prop is None or df_calc is None:
         raise ValueError("Se requieren ambos archivos (Propietarios y Listado de Avalúos) para la auditoría.")
 
+    # APLICAR FILTRO DE ZONA SI NO ES GENERAL
+    if zona_filtro != 'General':
+        df_prop = df_prop[df_prop['Zona'] == zona_filtro].copy()
+        df_calc = df_calc[df_calc['Zona'] == zona_filtro].copy()
+
     # 1. Estadísticas de Zona
     stats_r1 = df_prop['Zona'].value_counts().rename('R1')
     stats_calc = df_calc['Zona'].value_counts().rename('Listado')
@@ -208,8 +213,9 @@ def procesar_auditoria(files_dict, pct_incremento):
     predios_zero['Numero_Predial'] = predios_zero['Numero_Predial'].astype(str).fillna('N/A')
 
     # Outliers (Top 5 y Bottom 5 de variaciones significativas)
-    top_5_var = full[full['_merge'] == 'both'].sort_values(by='Pct_Variacion', ascending=False).head(5).to_dict(orient='records')
-    bottom_5_var = full[full['_merge'] == 'both'].sort_values(by='Pct_Variacion', ascending=True).head(5).to_dict(orient='records')
+    # Mostramos Numero_Predial, Pct_Variacion y Valor_Cierre_Listado
+    top_5_var = full[full['_merge'] == 'both'].sort_values(by='Pct_Variacion', ascending=False).head(5)[['Numero_Predial', 'Pct_Variacion', 'Valor_Cierre_Listado', 'Base_Usada']].to_dict(orient='records')
+    bottom_5_var = full[full['_merge'] == 'both'].sort_values(by='Pct_Variacion', ascending=True).head(5)[['Numero_Predial', 'Pct_Variacion', 'Valor_Cierre_Listado', 'Base_Usada']].to_dict(orient='records')
 
     # Totales Globales
     totales = {
@@ -239,7 +245,8 @@ def procesar_auditoria(files_dict, pct_incremento):
         'predios_zero': predios_zero.head(100).to_dict(orient='records'),
         'variaciones_all': full[full['_merge'] == 'both']['Pct_Variacion'].tolist(), # Para el BoxPlot
         'full_data': full.to_dict(orient='records'),
-        'pct_incremento': pct_incremento
+        'pct_incremento': pct_incremento,
+        'zona_filtro': zona_filtro
     }
 
 class AuditoriaPDF(FPDF):
@@ -256,14 +263,25 @@ class AuditoriaPDF(FPDF):
 def generar_pdf_auditoria(resultados):
     pdf = AuditoriaPDF()
     pdf.add_page()
+    pdf.set_font('Helvetica', 'B', 10)
+    pdf.cell(40, 7, 'Municipio:', 0)
     pdf.set_font('Helvetica', '', 10)
+    pdf.cell(0, 7, resultados.get('municipio', 'Desconocido'), 0, 1)
     
-    # Resumen General
-    pdf.set_font('Helvetica', 'B', 12)
-    pdf.cell(0, 10, f"Reporte de Auditoría: {resultados.get('municipio', 'Municipio Desconocido')}", 0, 1)
+    pdf.set_font('Helvetica', 'B', 10)
+    pdf.cell(40, 7, 'Zona Analizada:', 0)
     pdf.set_font('Helvetica', '', 10)
-    pdf.cell(0, 7, f"Total Predios Auditados: {resultados['total_predios']}", 0, 1)
-    pdf.cell(0, 7, f"Incremento Configurado: {resultados['pct_incremento']}%", 0, 1)
+    pdf.cell(0, 7, resultados.get('zona_filtro', 'General'), 0, 1)
+    
+    pdf.set_font('Helvetica', 'B', 10)
+    pdf.cell(40, 7, 'Incremento:', 0)
+    pdf.set_font('Helvetica', '', 10)
+    pdf.cell(0, 7, f"{resultados['pct_incremento']}%", 0, 1)
+
+    pdf.set_font('Helvetica', 'B', 10)
+    pdf.cell(40, 7, 'Total Predios Auditados:', 0)
+    pdf.set_font('Helvetica', '', 10)
+    pdf.cell(0, 7, f"{resultados['total_predios']}", 0, 1)
     
     # Totales monetarios en el PDF
     if 'totales' in resultados:
