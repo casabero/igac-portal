@@ -22,7 +22,7 @@ def es_provisional(serie):
 def procesar_renumeracion(file_stream, tipo_config):
     """
     Refactorización del script original para el backend del portal.
-    tipo_config: '1' para CICA, '2' para LC_PREDIO
+    tipo_config: '1' para CICA (IGAC), '2' para Operadores (Terceros/ANT)
     """
     # 1. Configuración de columnas
     if tipo_config == '1':

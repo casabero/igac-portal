@@ -16,7 +16,7 @@
         <form method="POST" enctype="multipart/form-data" class="space-y-6">
             <div class="space-y-4">
                 <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Paso 1: Configuración
-                    de Predio Anterior</label>
+                    de Tipo de Actualización</label>
                 <div class="grid grid-cols-2 gap-4">
                     <label
                         class="relative flex flex-col p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-all border-gray-200"
@@ -25,7 +25,7 @@
                             class="absolute top-4 right-4 text-accent focus:ring-accent" checked
                             onchange="updateRadioSelection()">
                         <span class="text-xs font-bold text-gray-900">CICA</span>
-                        <span class="text-[10px] text-gray-400 mt-1">Codes 9xxx</span>
+                        <span class="text-[10px] text-gray-400 mt-1">Actualización por IGAC</span>
                     </label>
                     <label
                         class="relative flex flex-col p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-all border-gray-200"
@@ -33,8 +33,8 @@
                         <input type="radio" name="tipo" value="2"
                             class="absolute top-4 right-4 text-accent focus:ring-accent"
                             onchange="updateRadioSelection()">
-                        <span class="text-xs font-bold text-gray-900">LC_PREDIO</span>
-                        <span class="text-[10px] text-gray-400 mt-1">Alfanuméricos / ANT</span>
+                        <span class="text-xs font-bold text-gray-900">Operadores</span>
+                        <span class="text-[10px] text-gray-400 mt-1">Terceros / ANT</span>
                     </label>
                 </div>
             </div>
@@ -202,7 +202,7 @@
         <p class="text-[12px] text-blue-700">El Excel debe contener las columnas: <br>
             <b>- Número predial SNC</b><br>
             <b>- Estado</b> (Solo se auditan los 'ACTIVO')<br>
-            <b>- Número predial CICA</b> (O LC_PREDIO según configuración)
+            <b>- Número predial CICA</b> (O LC_PREDIO para Operadores)
         </p>
     </section>
 </div>
