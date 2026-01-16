@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, send_file, flash, redirect, url_for, session, Response
 from modules.snc_processor import procesar_dataframe
 from modules.db_logger import init_db, registrar_visita  # <--- IMPORTANTE
-from modules.avaluo_analisis import procesar_incremento_web # <-- CAMBIÓ EL NOMBRE
+from modules.avaluo_analisis import procesar_incremento_web 
 from modules.auditoria_maestra import procesar_auditoria, generar_pdf_auditoria
+from modules.renumeracion_auditor import procesar_renumeracion, generar_excel_renumeracion
 
 import os
 import uuid
@@ -289,6 +290,90 @@ def clear_auditoria():
     
     flash('Sesión y temporales limpiados correctamente.')
     return redirect(url_for('index'))
+
+# --- RUTA 6: AUDITORÍA DE RENUMERACIÓN ---
+@app.route('/renumeracion', methods=['GET', 'POST'])
+def renumeracion_tool():
+    registrar_visita('/renumeracion')
+    
+    # Intentar recuperar resultados de la sesión (id del archivo json)
+    audit_id = session.get('renum_audit_id')
+    resultados = None
+    
+    if audit_id:
+        path = os.path.join(UPLOAD_FOLDER, f"renum_{audit_id}.json")
+        if os.path.exists(path):
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    resultados = json.load(f)
+            except:
+                session.pop('renum_audit_id', None)
+
+    if request.method == 'POST':
+        file = request.files.get('archivo_excel')
+        tipo = request.form.get('tipo', '1') # 1: CICA, 2: LC
+        
+        if not file or file.filename == '':
+            flash('Seleccione un archivo Excel válido.')
+            return redirect(request.url)
+            
+        try:
+            res = procesar_renumeracion(file, tipo)
+            
+            # Guardar resultados pesados en disco
+            new_id = str(uuid.uuid4())
+            path = os.path.join(UPLOAD_FOLDER, f"renum_{new_id}.json")
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(res, f, ensure_ascii=False)
+            
+            session['renum_audit_id'] = new_id
+            return render_template('renumeracion_tool.html', resultados=res, tipo_config=tipo)
+            
+        except Exception as e:
+            traceback.print_exc()
+            flash(f"Error: {str(e)}")
+            return redirect(request.url)
+            
+    return render_template('renumeracion_tool.html', resultados=resultados)
+
+@app.route('/renumeracion/excel')
+def renumeracion_excel():
+    audit_id = session.get('renum_audit_id')
+    if not audit_id:
+        flash('No hay auditoría activa.')
+        return redirect(url_for('renumeracion_tool'))
+    
+    path = os.path.join(UPLOAD_FOLDER, f"renum_{audit_id}.json")
+    if not os.path.exists(path):
+        flash('La sesión ha expirado.')
+        return redirect(url_for('renumeracion_tool'))
+        
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            res = json.load(f)
+            
+        output = generar_excel_renumeracion(res['errores'])
+        return send_file(
+            output,
+            as_attachment=True,
+            download_name="REPORTE_RENUMERACION.xlsx",
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+    except Exception as e:
+        flash(f"Error al generar Excel: {str(e)}")
+        return redirect(url_for('renumeracion_tool'))
+
+@app.route('/clear_renumeracion')
+def clear_renumeracion():
+    audit_id = session.get('renum_audit_id')
+    if audit_id:
+        path = os.path.join(UPLOAD_FOLDER, f"renum_{audit_id}.json")
+        if os.path.exists(path):
+            try: os.remove(path)
+            except: pass
+    session.pop('renum_audit_id', None)
+    flash('Sesión de renumeración limpiada.')
+    return redirect(url_for('renumeracion_tool'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
