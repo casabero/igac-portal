@@ -1,164 +1,153 @@
-<!DOCTYPE html>
-<html class="light" lang="es">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Convertidor SNC</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        "sans": ["Inter", "sans-serif"],
-                        "display": ["Outfit", "sans-serif"],
-                        "mono": ["Fira Code", "monospace"],
-                    },
-                    colors: {
-                        primary: "#2563eb",
-                        primary_hover: "#1d4ed8",
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        /* --- LOGO ANIMATION (Nodes Pulse) --- */
-        .logo-node {
-            transition: opacity 0.2s;
-        }
+{% block title %}Convertidor SNC - IGAC Apps{% endblock %}
 
-        .logo-group:hover .logo-node:nth-child(1) {
-            animation: nodePulse 0.6s infinite 0s;
-        }
+{% block page_title %}Convertidor Registros Catastrales{% endblock %}
 
-        .logo-group:hover .logo-node:nth-child(2) {
-            animation: nodePulse 0.6s infinite 0.15s;
-        }
-
-        .logo-group:hover .logo-node:nth-child(3) {
-            animation: nodePulse 0.6s infinite 0.3s;
-        }
-
-        .logo-group:hover .logo-node:nth-child(4) {
-            animation: nodePulse 0.6s infinite 0.45s;
-        }
-
-        @keyframes nodePulse {
-
-            0%,
-            100% {
-                opacity: 1;
-                fill: #111;
-            }
-
-            50% {
-                opacity: 0.3;
-                fill: #666;
-            }
-        }
-    </style>
-</head>
-
-<body class="bg-white text-slate-800 font-sans antialiased min-h-screen flex flex-col">
-
-    <!-- Navegación Simple -->
-    <nav class="w-full border-b border-gray-100 py-4 px-6">
-        <div class="max-w-[800px] mx-auto flex items-center gap-3">
-            <a href="/" class="text-slate-400 hover:text-slate-800 transition-colors">
-                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
-            </a>
-            <span class="h-4 w-px bg-gray-200"></span>
-            <h1 class="text-sm font-semibold text-slate-700 tracking-tight">Convertidor Registros Catastrales</h1>
+{% block content %}
+<div class="max-w-2xl mx-auto py-4">
+    <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+        <div class="mb-8">
+            <h2 class="text-xl font-bold text-gray-900 font-display">Carga de Archivos SNC</h2>
+            <p class="text-sm text-gray-500 mt-1">Procesa archivos planos del Sistema Nacional Catastral directamente a
+                Excel.</p>
         </div>
-    </nav>
 
-    <!-- Contenido -->
-    <main class="flex-1 flex justify-center pt-12 px-6">
-        <div class="w-full max-w-[600px]">
-
-            <div class="mb-8">
-                <h2 class="text-xl font-semibold text-slate-900">Carga de Archivos</h2>
-                <p class="text-sm text-slate-500 mt-1">Procesa archivos planos SNC y descárgalos en Excel.</p>
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            <!-- 1. Selección de Registro -->
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Paso 1: Tipo de
+                    Registro</label>
+                <select name="opcion"
+                    class="block w-full rounded-xl border-gray-200 text-sm focus:border-accent focus:ring-accent shadow-sm py-3 px-4"
+                    required>
+                    <option value="" selected disabled>Seleccione una opción...</option>
+                    <option value="1">Registro 1 SNC (Datos Básicos)</option>
+                    <option value="2">Registro 2 SNC (Detalles Constructivos)</option>
+                    <option value="3">Resoluciones Tipo 1 (Trámites Generales)</option>
+                    <option value="4">Resoluciones Tipo 2 (Detalles Físicos)</option>
+                    <option value="5">Resoluciones Tipo 3 (Decretos)</option>
+                </select>
             </div>
 
-            <!-- Mensajes de Error/Flash -->
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            <div class="mb-6 p-3 rounded border border-red-200 bg-red-50 text-red-700 text-sm flex items-center gap-2">
-                <span class="material-symbols-outlined text-[18px]">error</span>
-                {{ messages[0] }}
+            <!-- 2. Archivo -->
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Paso 2: Archivo
+                    Plano (.txt o .prn)</label>
+                <div class="relative group">
+                    <input type="file" name="archivo" id="archivo" class="hidden" required>
+                    <label for="archivo"
+                        class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 hover:bg-white hover:border-accent transition-all cursor-pointer">
+                        <span
+                            class="material-symbols-outlined text-4xl text-gray-300 mb-2 group-hover:text-accent group-hover:scale-110 transition-transform">upload_file</span>
+                        <span class="text-sm font-medium text-gray-500" id="file_label">Seleccionar o arrastrar
+                            archivo</span>
+                        <span class="mt-1 text-[10px] text-gray-400">Formatos: .txt, .prn (Codificación Latin-1)</span>
+                    </label>
+                </div>
             </div>
-            {% endif %}
-            {% endwith %}
 
-            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            <!-- 3. Acción -->
+            <div class="pt-4">
+                <button type="submit"
+                    class="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl text-sm font-bold text-white bg-gray-900 hover:bg-accent shadow-lg transition-all active:scale-95">
+                    <span class="material-symbols-outlined text-[20px]">download</span>
+                    Convertir y Descargar Excel
+                </button>
+            </div>
+        </form>
+    </div>
 
-                <!-- 1. Selección -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-700 mb-2 uppercase tracking-wide">Tipo de
-                        Registro</label>
-                    <select name="opcion"
-                        class="block w-full rounded border-gray-300 text-sm focus:border-primary focus:ring-primary shadow-sm py-2.5"
-                        required>
-                        <option value="" selected disabled>Seleccione una opción...</option>
-                        <option value="1">Registro 1 SNC (Datos Básicos)</option>
-                        <option value="2">Registro 2 SNC (Detalles Constructivos)</option>
-                        <option value="3">Resoluciones Tipo 1 (Trámites Generales)</option>
-                        <option value="4">Resoluciones Tipo 2 (Detalles Físicos)</option>
-                        <option value="5">Resoluciones Tipo 3 (Decretos)</option>
-                    </select>
-                </div>
-
-                <!-- 2. Archivo -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-700 mb-2 uppercase tracking-wide">Archivo
-                        Plano</label>
-                    <div class="relative border border-gray-300 rounded bg-white hover:bg-slate-50 transition-colors">
-                        <input type="file" name="archivo"
-                            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-l-sm file:border-0 file:text-sm file:font-medium file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"
-                            required>
-                    </div>
-                    <p class="mt-1 text-[11px] text-slate-400 text-right">Formatos soportados: .txt, .prn</p>
-                </div>
-
-                <!-- 3. Acción -->
-                <div class="pt-2">
-                    <button type="submit"
-                        class="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded text-sm font-medium text-white bg-primary hover:bg-primary_hover shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                        <span class="material-symbols-outlined text-[18px]">download</span>
-                        Convertir y Descargar
-                    </button>
-                </div>
-            </form>
-
+    <!-- Info Card -->
+    <div class="mt-8 bg-blue-50/50 border border-blue-100 rounded-xl p-6 flex gap-4">
+        <div class="text-blue-500">
+            <span class="material-symbols-outlined">info</span>
         </div>
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="border-t border-gray-100 py-6 px-6 mt-8">
-        <div class="max-w-[600px] mx-auto flex items-center justify-center gap-3">
-            <a href="https://casabero.com" target="_blank" rel="noopener noreferrer"
-                class="logo-group flex items-center gap-2 text-slate-400 hover:text-slate-700 transition-colors">
-                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
-                    <path d="M 76 20 L 32 20 Q 20 20 20 32 L 20 68 Q 20 80 32 80 L 70 80" stroke="currentColor"
-                        stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
-                    <rect x="70" y="76" width="8" height="8" rx="1" fill="currentColor" />
-                    <g class="logo-group">
-                        <rect class="logo-node" x="26" y="26" width="8" height="8" fill="currentColor" />
-                        <rect class="logo-node" x="66" y="26" width="8" height="8" fill="currentColor" />
-                        <rect class="logo-node" x="26" y="66" width="8" height="8" fill="currentColor" />
-                        <rect class="logo-node" x="66" y="66" width="8" height="8" fill="currentColor" />
-                    </g>
-                </svg>
-                <span class="text-xs font-medium">by casabero.com</span>
-            </a>
+        <div>
+            <h4 class="text-xs font-bold text-blue-700 uppercase tracking-wider mb-1">Nota Técnica</h4>
+            <p class="text-xs text-blue-600 leading-relaxed">
+                El convertidor mantiene la estructura original del IGAC (FWF). No se eliminan datos, solo se mapean a
+                columnas legibles para auditoría.
+            </p>
         </div>
-    </footer>
-</body>
+    </div>
+</div>
+{% endblock %}
 
-</html>
+{% block help_content %}
+<div class="space-y-8 text-gray-600">
+    <section>
+        <h4 class="text-primary font-bold text-sm uppercase tracking-wider border-b pb-2 mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-accent">description</span>
+            1. Propósito de la Herramienta
+        </h4>
+        <p class="text-sm">Esta aplicación procesa archivos planos de ancho fijo (Fixed-Width format) exportados
+            directamente desde el Sistema Nacional Catastral del IGAC.</p>
+    </section>
+
+    <section>
+        <h4 class="text-primary font-bold text-sm uppercase tracking-wider border-b pb-2 mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-accent">layers</span>
+            2. Tipos de Registros Soportados
+        </h4>
+        <div class="grid grid-cols-1 gap-4">
+            <div class="bg-gray-50 p-4 rounded-xl">
+                <p class="font-bold text-gray-900 text-xs mb-1">Registro 1 (R1)</p>
+                <p class="text-[12px]">Contiene la información básica: Propietario, Cédula, Dirección, Destino y
+                    <b>Avalúo Actual</b>. Es el archivo base para cualquier análisis.</p>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-xl">
+                <p class="font-bold text-gray-900 text-xs mb-1">Registro 2 (R2)</p>
+                <p class="text-[12px]">Información física: Áreas de terreno por zonas, detalles de construcción, número
+                    de pisos, baños y estrato.</p>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-xl">
+                <p class="font-bold text-gray-900 text-xs mb-1">Resoluciones</p>
+                <p class="text-[12px]">Registros de trámites internos. El sistema filtra automáticamente por el tipo de
+                    registro (Resolución 1, 2 o 3) según la selección en el formulario.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h4 class="text-primary font-bold text-sm uppercase tracking-wider border-b pb-2 mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-accent">tips_and_updates</span>
+            3. Recomendaciones
+        </h4>
+        <ul class="list-disc list-inside text-sm space-y-2">
+            <li>Asegúrese de que el archivo no haya sido modificado manualmente en un editor de texto que pueda
+                corromper el ancho fijo de las columnas.</li>
+            <li>El encoding se detecta automáticamente (usualmente Latin-1), permitiendo procesar tildes y eñes
+                correctamente.</li>
+            <li>El archivo resultante se descarga instantáneamente tras el procesamiento.</li>
+        </ul>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const fileInput = document.getElementById('archivo');
+    const fileLabel = document.getElementById('file_label');
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            fileLabel.innerHTML = `<b class="text-accent">✓ ${e.target.files[0].name}</b>`;
+        }
+    });
+
+    // Drag and drop Visuals
+    const dropzone = fileInput.parentElement;
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, () => {
+            dropzone.classList.add('border-accent', 'bg-blue-50/20');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, () => {
+            dropzone.classList.remove('border-accent', 'bg-blue-50/20');
+        }, false);
+    });
+</script>
+{% endblock %}
