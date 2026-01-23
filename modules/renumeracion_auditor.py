@@ -2,6 +2,15 @@ import pandas as pd
 import numpy as np
 import io
 import os
+import zipfile
+import shutil
+import tempfile
+try:
+    import geopandas as gpd
+    import fiona
+    HAS_GEO = True
+except ImportError:
+    HAS_GEO = False
 
 def parse_code(serie):
     """Extrae las partes del código predial de 30 dígitos"""
@@ -21,10 +30,9 @@ def es_provisional(serie):
 
 def procesar_renumeracion(file_stream, tipo_config):
     """
-    Refactorización del script original para el backend del portal.
-    tipo_config: '1' para CICA (IGAC), '2' para Operadores (Terceros/ANT)
+    Fase 1: Auditoría Alfanumérica.
+    Retorna errores y un diccionario de referencia de estados.
     """
-    # 1. Configuración de columnas
     if tipo_config == '1':
         col_anterior = 'Número predial CICA'
     else:
@@ -33,25 +41,27 @@ def procesar_renumeracion(file_stream, tipo_config):
     col_nuevo = 'Número predial SNC'
     col_estado = 'Estado'
 
-    # 2. Carga y Limpieza
     try:
-        df = pd.read_excel(file_stream, dtype=str)
+        df_full = pd.read_excel(file_stream, dtype=str)
     except Exception as e:
         raise ValueError(f"Error al leer el archivo Excel: {str(e)}")
 
-    # Validar columnas
     columnas_requeridas = [col_nuevo, col_anterior, col_estado]
-    faltantes = [c for c in columnas_requeridas if c not in df.columns]
+    faltantes = [c for c in columnas_requeridas if c not in df_full.columns]
     if faltantes:
         raise ValueError(f"Faltan las columnas requeridas: {', '.join(faltantes)}")
 
-    # Limpieza básica
-    df[col_anterior] = df[col_anterior].str.strip()
-    df[col_nuevo] = df[col_nuevo].str.strip()
-    df[col_estado] = df[col_estado].str.strip()
+    # Limpieza
+    df_full[col_anterior] = df_full[col_anterior].str.strip()
+    df_full[col_nuevo] = df_full[col_nuevo].str.strip()
+    df_full[col_estado] = df_full[col_estado].str.strip().str.upper()
 
-    # Filtro de ACTIVOS y Ordenamiento
-    df_audit = df[df[col_estado].str.upper() == 'ACTIVO'].copy()
+    # Diccionario de referencia para Fase 2 (TODOS los estados)
+    # {CODIGO_SNC: ESTADO}
+    diccionario_estados = pd.Series(df_full[col_estado].values, index=df_full[col_nuevo]).to_dict()
+
+    # Filtrar ACTIVOS para auditoría Alfanumérica
+    df_audit = df_full[df_full[col_estado] == 'ACTIVO'].copy()
     df_audit = df_audit.sort_values(by=[col_nuevo])
 
     if len(df_audit) == 0:
@@ -59,6 +69,7 @@ def procesar_renumeracion(file_stream, tipo_config):
             'total_auditado': 0,
             'errores': [],
             'stats': {},
+            'diccionario_estados': diccionario_estados,
             'success': True
         }
 
@@ -72,7 +83,7 @@ def procesar_renumeracion(file_stream, tipo_config):
     for _, row in duplicados.iterrows():
         todos_errores.append({
             'REGLA': '1. UNICIDAD',
-            'DETALLE': 'Número duplicado',
+            'DETALLE': 'Número duplicado en activos',
             'ANTERIOR': row[col_anterior],
             'NUEVO': row[col_nuevo]
         })
@@ -95,94 +106,208 @@ def procesar_renumeracion(file_stream, tipo_config):
     for _, row in errores_limpieza.iterrows():
         todos_errores.append({
             'REGLA': '3. LIMPIEZA',
-            'DETALLE': 'Códigos temporales/letras en definitivo',
+            'DETALLE': 'Códigos temporales/letras en definitivo (SNC)',
             'ANTERIOR': row[col_anterior],
             'NUEVO': row[col_nuevo]
         })
 
     # --- [4] CONSECUTIVOS ---
-    # Terrenos nuevos en manzanas viejas
     mask_t_nuevo = es_provisional(df_ant['TERRENO']) & ~es_provisional(df_ant['MANZANA'])
     if mask_t_nuevo.any():
         df_revisar = df_audit[mask_t_nuevo].copy()
         df_revisar['GRUPO'] = df_nue.loc[mask_t_nuevo, 'GRUPO_GEO']
         
-        # Necesitamos saber cuáles son los máximos del UNIVERSO original (df_nue completo)
-        # pero excluyendo los que estamos Auditando como nuevos
         for grupo_mza, datos_nuevos in df_revisar.groupby('GRUPO'):
-            # Los que ya existían según la lógica del script: los que NO son provisionales
             mask_existentes = (df_nue['GRUPO_GEO'] == grupo_mza) & (~es_nuevo_ant)
             predios_viejos = df_audit[mask_existentes]
 
             if not predios_viejos.empty:
                 max_viejo = int(parse_code(predios_viejos[col_nuevo])['TERRENO'].max())
                 for _, row in datos_nuevos.iterrows():
-                    terr_asignado = int(row[col_nuevo][17:21])
-                    if terr_asignado <= max_viejo:
-                        todos_errores.append({
-                            'REGLA': '4. CONSECUTIVO TERRENO',
-                            'DETALLE': f'Asignado {terr_asignado} <= Máx existente {max_viejo}',
-                            'ANTERIOR': row[col_anterior],
-                            'NUEVO': row[col_nuevo]
-                        })
+                    try:
+                        terr_asignado = int(row[col_nuevo][17:21])
+                        if terr_asignado <= max_viejo:
+                            todos_errores.append({
+                                'REGLA': '4. CONSECUTIVO TERRENO',
+                                'DETALLE': f'Asignado {terr_asignado} <= Máx existente {max_viejo}',
+                                'ANTERIOR': row[col_anterior],
+                                'NUEVO': row[col_nuevo]
+                            })
+                    except: pass
 
     # --- [5] REINICIO EN MANZANAS NUEVAS ---
     mask_mza_nueva = es_provisional(df_ant['MANZANA']) & ~es_provisional(df_ant['SECTOR'])
-    errores_mza = df_audit[mask_mza_nueva & (df_nue['TERRENO'].astype(int) > 50)]
-    for _, row in errores_mza.iterrows():
-        todos_errores.append({
-            'REGLA': '5. MANZANA NUEVA',
-            'DETALLE': 'Terreno > 50 en manzana nueva. ¿Faltó reiniciar?',
-            'ANTERIOR': row[col_anterior],
-            'NUEVO': row[col_nuevo]
-        })
+    try:
+        errores_mza = df_audit[mask_mza_nueva & (df_nue['TERRENO'].astype(int) > 50)]
+        for _, row in errores_mza.iterrows():
+            todos_errores.append({
+                'REGLA': '5. MANZANA NUEVA',
+                'DETALLE': 'Terreno > 50 en manzana nueva. ¿Faltó reiniciar?',
+                'ANTERIOR': row[col_anterior],
+                'NUEVO': row[col_nuevo]
+            })
+    except: pass
 
     # --- [6] REINICIO EN SECTORES NUEVOS ---
     mask_sec_nuevo = es_provisional(df_ant['SECTOR'])
-    errores_sec = df_audit[mask_sec_nuevo & (df_nue['MANZANA'].astype(int) > 20)]
-    for _, row in errores_sec.iterrows():
-        todos_errores.append({
-            'REGLA': '6. SECTOR NUEVO',
-            'DETALLE': 'Manzana > 20 en sector nuevo.',
-            'ANTERIOR': row[col_anterior],
-            'NUEVO': row[col_nuevo]
-        })
+    try:
+        errores_sec = df_audit[mask_sec_nuevo & (df_nue['MANZANA'].astype(int) > 20)]
+        for _, row in errores_sec.iterrows():
+            todos_errores.append({
+                'REGLA': '6. SECTOR NUEVO',
+                'DETALLE': 'Manzana > 20 en sector nuevo.',
+                'ANTERIOR': row[col_anterior],
+                'NUEVO': row[col_nuevo]
+            })
+    except: pass
 
     # Estadísticas por regla
     df_err = pd.DataFrame(todos_errores) if todos_errores else pd.DataFrame(columns=['REGLA'])
-    reconté = df_err['REGLA'].value_counts().to_dict() if not df_err.empty else {}
+    stats = df_err['REGLA'].value_counts().to_dict() if not df_err.empty else {}
 
     return {
         'total_auditado': len(df_audit),
         'errores': todos_errores,
-        'stats': reconté,
+        'stats': stats,
+        'diccionario_estados': diccionario_estados,
+        'df_referencia': df_audit[[col_nuevo, col_anterior]].rename(columns={col_nuevo: 'CODIGO_SNC', col_anterior: 'CODIGO_ANTERIOR'}),
         'success': True
     }
 
-def generar_excel_renumeracion(errores):
-    """Genera el buffer de Excel con el reporte de errores"""
+def extraer_datos_gdb(zip_stream, capas_objetivo):
+    """Extrae predios de un ZIP que contiene una GDB"""
+    if not HAS_GEO:
+        return pd.DataFrame(), ["Librerías geoespaciales no instaladas."]
+    
+    predios = []
+    errores = []
+    
+    with tempfile.TemporaryDirectory() as tmpdir:
+        zip_path = os.path.join(tmpdir, "upload.zip")
+        with open(zip_path, "wb") as f:
+            f.write(zip_stream.read())
+        
+        extract_path = os.path.join(tmpdir, "extract")
+        os.makedirs(extract_path)
+        
+        try:
+            with zipfile.ZipFile(zip_path, 'r') as z:
+                z.extractall(extract_path)
+        except Exception as e:
+            return pd.DataFrame(), [f"Error al descomprimir ZIP: {str(e)}"]
+
+        gdb_path = None
+        for root, dirs, files in os.walk(extract_path):
+            for d in dirs:
+                if d.endswith(".gdb"):
+                    gdb_path = os.path.join(root, d)
+                    break
+            if gdb_path: break
+        
+        if not gdb_path:
+            return pd.DataFrame(), ["No se encontró ninguna .gdb dentro del ZIP."]
+
+        try:
+            layers = fiona.listlayers(gdb_path)
+            for capa in capas_objetivo:
+                if capa in layers:
+                    try:
+                        gdf = gpd.read_file(gdb_path, layer=capa)
+                        if 'CODIGO' in gdf.columns:
+                            predios.extend(gdf['CODIGO'].astype(str).str.strip().tolist())
+                    except Exception as e:
+                        errores.append(f"Error leyendo capa {capa}: {str(e)}")
+        except Exception as e:
+            errores.append(f"Error al listar capas de la GDB: {str(e)}")
+
+    return pd.DataFrame({'CODIGO': predios}), errores
+
+def procesar_geografica(zip_formal, zip_informal, set_alfa_activos, diccionario_estados, df_alfa_ref):
+    """
+    Fase 2: Cruce Geográfico.
+    """
+    capas_formal = ['U_TERRENO', 'R_TERRENO', 'TERRENO']
+    capas_informal = ['U_TERRENO_INFORMAL', 'R_TERRENO_INFORMAL', 'TERRENO_INFORMAL']
+    
+    list_geo = []
+    errores_internos = []
+    
+    if zip_formal:
+        df_f, err_f = extraer_datos_gdb(zip_formal, capas_formal)
+        list_geo.append(df_f)
+        for e in err_f: errores_internos.append({'TIPO': 'ERROR GDB FORMAL', 'DETALLE': e, 'CODIGO': 'N/A', 'ESTADO_BD': 'N/A', 'ACCION_SUGERIDA': 'Revisar ZIP/GDB'})
+    
+    if zip_informal:
+        df_i, err_i = extraer_datos_gdb(zip_informal, capas_informal)
+        list_geo.append(df_i)
+        for e in err_i: errores_internos.append({'TIPO': 'ERROR GDB INFORMAL', 'DETALLE': e, 'CODIGO': 'N/A', 'ESTADO_BD': 'N/A', 'ACCION_SUGERIDA': 'Revisar ZIP/GDB'})
+
+    if not list_geo or all(df.empty for df in list_geo):
+        return [], errores_internos
+
+    df_geo_total = pd.concat(list_geo).drop_duplicates()
+    set_geo = set(df_geo_total['CODIGO'])
+    set_alfa = set_alfa_activos
+    
+    reporte = []
+    
+    # 1. Faltan en GDB (Están en Excel Activos, no en GDB)
+    sin_mapa = set_alfa - set_geo
+    for cod in sin_mapa:
+        reporte.append({
+            'TIPO': 'FALTA EN GDB',
+            'DETALLE': 'Predio Activo en Excel no encontrado en Geometría',
+            'CODIGO': cod,
+            'ESTADO_BD': 'ACTIVO',
+            'ACCION_SUGERIDA': 'Dibujar predio o revisar vigencia'
+        })
+        
+    # 2. Sobran en GDB (Están en GDB, no están en Excel Activos)
+    sin_alfa = set_geo - set_alfa
+    for cod in sin_alfa:
+        estado_real = diccionario_estados.get(cod, "NO EXISTE EN BD")
+        
+        if estado_real in ['CANCELADO', 'HISTORICO', 'INACTIVO']:
+            detalle = f"Predio {estado_real} aún dibujado en GDB"
+            accion = "BORRAR polígono de la GDB"
+        elif estado_real == "NO EXISTE EN BD":
+            detalle = "Código en GDB no existe en el reporte Excel"
+            accion = "Investigar procedencia / Error digitación"
+        else:
+            detalle = f"Estado en BD: {estado_real} (Pero no marcado como ACTIVO)"
+            accion = "Revisar consistencia de estados"
+            
+        reporte.append({
+            'TIPO': 'SOBRA EN GDB',
+            'DETALLE': detalle,
+            'CODIGO': cod,
+            'ESTADO_BD': estado_real,
+            'ACCION_SUGERIDA': accion
+        })
+
+    return reporte + errores_internos, []
+
+def generar_excel_renumeracion(errores_alfa, errores_geo=None):
+    """Genera el reporte de Excel consolidado"""
     output = io.BytesIO()
-    df_fin = pd.DataFrame(errores)
+    df_alfa = pd.DataFrame(errores_alfa)
+    df_geo = pd.DataFrame(errores_geo) if errores_geo else pd.DataFrame()
     
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        if not df_fin.empty:
-            # Resumen
-            resumen = df_fin.groupby(['REGLA', 'DETALLE']).size().reset_index(name='CANTIDAD')
-            resumen.to_excel(writer, sheet_name='RESUMEN', index=False)
-            # Detalle
-            df_fin.to_excel(writer, sheet_name='DETALLE_ERRORES', index=False)
-            
-            # Formato headers
-            workbook = writer.book
-            header_fmt = workbook.add_format({'bold': True, 'bg_color': '#D7E4BC', 'border': 1})
-            
-            for sheetname in ['RESUMEN', 'DETALLE_ERRORES']:
-                worksheet = writer.sheets[sheetname]
-                # Ajustar anchos (simple)
-                worksheet.set_column(0, 5, 30)
+        # Pestaña Resumen Alfanumérico
+        if not df_alfa.empty:
+            resumen = df_alfa.groupby(['REGLA', 'DETALLE']).size().reset_index(name='CANTIDAD')
+            resumen.to_excel(writer, sheet_name='RESUMEN_ALFA', index=False)
+            df_alfa.to_excel(writer, sheet_name='DETALLE_ALFA', index=False)
         else:
-            # Hoja vacía si no hay errores
-            pd.DataFrame([{'RESULTADO': 'TODO PERFECTO'}]).to_excel(writer, sheet_name='RESULTADO', index=False)
+            pd.DataFrame([{'RESULTADO': 'TODO PERFECTO'}]).to_excel(writer, sheet_name='ALFA_OK', index=False)
+            
+        # Pestaña Geográfica
+        if not df_geo.empty:
+            df_geo.to_excel(writer, sheet_name='DETALLE_GEO', index=False)
+        elif errores_geo is not None:
+            pd.DataFrame([{'RESULTADO': 'CONSISTENCIA PERFECTA'}]).to_excel(writer, sheet_name='GEO_OK', index=False)
 
     output.seek(0)
     return output
+

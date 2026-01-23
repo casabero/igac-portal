@@ -3,7 +3,7 @@ from modules.snc_processor import procesar_dataframe
 from modules.db_logger import init_db, registrar_visita  # <--- IMPORTANTE
 from modules.avaluo_analisis import procesar_incremento_web 
 from modules.auditoria_maestra import procesar_auditoria, generar_pdf_auditoria
-from modules.renumeracion_auditor import procesar_renumeracion, generar_excel_renumeracion
+from modules.renumeracion_auditor import procesar_renumeracion, generar_excel_renumeracion, procesar_geografica
 
 import os
 import uuid
@@ -320,11 +320,31 @@ def renumeracion_tool():
         try:
             res = procesar_renumeracion(file, tipo)
             
+            # --- FASE 2: GEOGRÁFICA (Opcional) ---
+            gdb_f = request.files.get('archivo_gdb_formal')
+            gdb_i = request.files.get('archivo_gdb_informal')
+            
+            if gdb_f or gdb_i:
+                # set_alfa_activos es un set de CODIGO_SNC del diccionario de estados que son 'ACTIVO'
+                set_activos = {k for k, v in res['diccionario_estados'].items() if v == 'ACTIVO'}
+                errores_geo, logs_geo = procesar_geografica(gdb_f, gdb_i, set_activos, res['diccionario_estados'], res['df_referencia'])
+                res['errores_geo'] = errores_geo
+                res['logs_geo'] = logs_geo
+            else:
+                res['errores_geo'] = []
+                res['logs_geo'] = []
+
+            # Limpiar dataframe de referencia para no saturar JSON si es muy grande (opcional)
+            # res.pop('df_referencia', None)
+            # res.pop('diccionario_estados', None)
+            
             # Guardar resultados pesados en disco
             new_id = str(uuid.uuid4())
             path = os.path.join(UPLOAD_FOLDER, f"renum_{new_id}.json")
             with open(path, 'w', encoding='utf-8') as f:
-                json.dump(res, f, ensure_ascii=False)
+                # Convertimos a serie si es necesario o manejamos el error de serialización
+                # En este caso errores_geo es una lista de dicts, es serializable.
+                json.dump(res, f, ensure_ascii=False, default=str)
             
             session['renum_audit_id'] = new_id
             return render_template('renumeracion_tool.html', resultados=res, tipo_config=tipo)
@@ -352,11 +372,11 @@ def renumeracion_excel():
         with open(path, 'r', encoding='utf-8') as f:
             res = json.load(f)
             
-        output = generar_excel_renumeracion(res['errores'])
+        output = generar_excel_renumeracion(res['errores'], res.get('errores_geo'))
         return send_file(
             output,
             as_attachment=True,
-            download_name="REPORTE_RENUMERACION.xlsx",
+            download_name="REPORTE_RENUMERACION_CONSOLIDADO.xlsx",
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
     except Exception as e:
