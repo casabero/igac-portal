@@ -342,13 +342,13 @@ def generar_pdf_renumeracion(resultados):
     pdf.cell(0, 8, str(resultados.get('total_auditado', 0)), 0, 1)
     
     pdf.set_font('Helvetica', '', 10)
-    pdf.cell(60, 8, 'Total Inconsistencias Alfanuméricas:', 0)
+    pdf.cell(60, 8, 'Total Alertas Alfanuméricas:', 0)
     pdf.set_font('Helvetica', 'B', 10)
     pdf.cell(0, 8, str(len(resultados.get('errores', []))), 0, 1)
     
     if 'errores_geo' in resultados:
         pdf.set_font('Helvetica', '', 10)
-        pdf.cell(60, 8, 'Total Inconsistencias Geográficas:', 0)
+        pdf.cell(60, 8, 'Total Alertas Geográficas:', 0)
         pdf.set_font('Helvetica', 'B', 10)
         pdf.cell(0, 8, str(len(resultados.get('errores_geo', []))), 0, 1)
     
@@ -364,8 +364,8 @@ def generar_pdf_renumeracion(resultados):
             # Limpiar nombres de reglas para el gráfico
             short_rules = [r.split('.')[0] for r in rules]
             
-            plt.bar(short_rules, counts, color='#4F46E5')
-            plt.title('Inconsistencias por Regla (Fase 1)', fontsize=12)
+            plt.bar(short_rules, counts, color='#FB923C') # Color naranja alerta
+            plt.title('Alertas por Regla (Fase 1)', fontsize=12)
             plt.xlabel('Número de Regla', fontsize=10)
             plt.ylabel('Cantidad', fontsize=10)
             plt.grid(axis='y', linestyle='--', alpha=0.7)
@@ -380,17 +380,17 @@ def generar_pdf_renumeracion(resultados):
         except Exception as e:
             print(f"Error generando gráfico PDF: {e}")
 
-    # 3. Detalle de Reglas Alfanuméricas
+    # 3. Resumen de Reglas Alfanuméricas
     pdf.set_font('Helvetica', 'B', 12)
-    pdf.cell(0, 10, 'Desglose de Reglas Alfanuméricas', 0, 1)
+    pdf.cell(0, 10, 'Resumen de Reglas Alfanuméricas', 0, 1)
     
     pdf.set_font('Helvetica', 'B', 9)
     pdf.cell(80, 8, 'Regla / Validación', 1)
-    pdf.cell(110, 8, 'Descripción del Error', 1)
+    pdf.cell(110, 8, 'Descripción', 1)
     pdf.ln()
     
     pdf.set_font('Helvetica', '', 8)
-    # Definiciones de reglas (estáticas para el informe)
+    # Definiciones de reglas
     reglas_def = {
         '1. UNICIDAD': 'No se permiten duplicados en el número SNC.',
         '2. PERMANENCIA': 'Predios antiguos deben conservar su número.',
@@ -406,16 +406,59 @@ def generar_pdf_renumeracion(resultados):
             if r_name in k: count = v
         
         if count > 0:
-            pdf.set_text_color(220, 38, 38) # Rojo si hay errores
+            pdf.set_text_color(220, 38, 38) # Rojo
         else:
-            pdf.set_text_color(22, 163, 74) # Verde si está OK
+            pdf.set_text_color(22, 163, 74) # Verde
             
-        pdf.cell(80, 7, f"{r_name} ({count} errores)", 1)
+        pdf.cell(80, 7, f"{r_name} ({count} alertas)", 1)
         pdf.set_text_color(0, 0, 0)
         pdf.cell(110, 7, r_desc, 1)
         pdf.ln()
 
-    # 4. Resultados Geográficos (si existen)
+    # 4. Detalle de Alertas Alfanuméricas (Tabla Nueva)
+    errores_f1 = resultados.get('errores', [])
+    if errores_f1:
+        pdf.add_page()
+        pdf.set_font('Helvetica', 'B', 12)
+        pdf.cell(0, 10, 'Detalle de Alertas Alfanuméricas (Fase 1)', 0, 1)
+        pdf.ln(2)
+        
+        pdf.set_font('Helvetica', '', 9)
+        pdf.multi_cell(0, 5, 'A continuación se listan las primeras 200 alertas detectadas en la validación alfanumérica.')
+        pdf.ln(4)
+        
+        # Cabecera tabla
+        pdf.set_font('Helvetica', 'B', 8)
+        pdf.cell(50, 8, 'Regla', 1)
+        pdf.cell(60, 8, 'Detalle', 1)
+        pdf.cell(40, 8, 'Anterior', 1)
+        pdf.cell(40, 8, 'Nuevo (SNC)', 1)
+        pdf.ln()
+        
+        pdf.set_font('Helvetica', '', 7)
+        # Limitar a 200 para no explotar el PDF
+        for err in errores_f1[:200]:
+            if pdf.get_y() > 260: 
+                pdf.add_page()
+                pdf.set_font('Helvetica', 'B', 8)
+                pdf.cell(50, 8, 'Regla', 1)
+                pdf.cell(60, 8, 'Detalle', 1)
+                pdf.cell(40, 8, 'Anterior', 1)
+                pdf.cell(40, 8, 'Nuevo (SNC)', 1)
+                pdf.ln()
+                pdf.set_font('Helvetica', '', 7)
+            
+            # Truncar textos largos
+            detalle = str(err['DETALLE'])[:40]
+            if len(str(err['DETALLE'])) > 40: detalle += '...'
+            
+            pdf.cell(50, 6, str(err['REGLA']), 1)
+            pdf.cell(60, 6, detalle, 1)
+            pdf.cell(40, 6, str(err['ANTERIOR']), 1)
+            pdf.cell(40, 6, str(err['NUEVO']), 1)
+            pdf.ln()
+
+    # 5. Resultados Geográficos (si existen)
     if resultados.get('errores_geo'):
         pdf.add_page()
         pdf.set_font('Helvetica', 'B', 12)
@@ -423,20 +466,28 @@ def generar_pdf_renumeracion(resultados):
         pdf.ln(2)
         
         pdf.set_font('Helvetica', '', 9)
-        pdf.multi_cell(0, 5, 'Esta sección identifica discrepancias entre los predios dibujados en la Geodatabase y el reporte oficial de renumeración.')
+        pdf.multi_cell(0, 5, 'Discrepancias entre los predios dibujados en la Geodatabase y el reporte oficial.')
         pdf.ln(4)
         
         # Tabla resumen geo
         pdf.set_font('Helvetica', 'B', 8)
-        pdf.cell(60, 8, 'Tipo de Incidencia', 1)
+        pdf.cell(60, 8, 'Tipo de Alerta', 1)
         pdf.cell(50, 8, 'Código Predial', 1)
         pdf.cell(30, 8, 'Estado en BD', 1)
         pdf.cell(50, 8, 'Acción sugerida', 1)
         pdf.ln()
         
         pdf.set_font('Helvetica', '', 7)
-        for err in resultados['errores_geo'][:100]: # Limitar a 100 para el PDF
-            if pdf.get_y() > 260: pdf.add_page()
+        for err in resultados['errores_geo'][:200]: 
+            if pdf.get_y() > 260: 
+                pdf.add_page()
+                pdf.set_font('Helvetica', 'B', 8)
+                pdf.cell(60, 8, 'Tipo de Alerta', 1)
+                pdf.cell(50, 8, 'Código Predial', 1)
+                pdf.cell(30, 8, 'Estado en BD', 1)
+                pdf.cell(50, 8, 'Acción sugerida', 1)
+                pdf.ln()
+                pdf.set_font('Helvetica', '', 7)
             
             pdf.cell(60, 6, str(err['TIPO']), 1)
             pdf.cell(50, 6, str(err['CODIGO']), 1)
