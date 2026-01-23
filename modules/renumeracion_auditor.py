@@ -311,3 +311,138 @@ def generar_excel_renumeracion(errores_alfa, errores_geo=None):
     output.seek(0)
     return output
 
+from fpdf import FPDF
+import matplotlib.pyplot as plt
+import io
+
+class AuditoriaRenumeracionPDF(FPDF):
+    def header(self):
+        self.set_font('Helvetica', 'B', 12)
+        self.cell(0, 10, 'REPORTE DE AUDITORÍA DE RENUMERACIÓN - IGAC PORTAL', 0, 1, 'C')
+        self.ln(5)
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Helvetica', 'I', 8)
+        self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'C')
+
+def generar_pdf_renumeracion(resultados):
+    """Genera un reporte PDF detallado con los resultados de la auditoría"""
+    pdf = AuditoriaRenumeracionPDF()
+    pdf.add_page()
+    
+    # 1. Resumen General
+    pdf.set_font('Helvetica', 'B', 14)
+    pdf.cell(0, 10, 'Resumen Ejecutivo', 0, 1)
+    pdf.ln(2)
+    
+    pdf.set_font('Helvetica', '', 10)
+    pdf.cell(60, 8, 'Total Predios Auditados:', 0)
+    pdf.set_font('Helvetica', 'B', 10)
+    pdf.cell(0, 8, str(resultados.get('total_auditado', 0)), 0, 1)
+    
+    pdf.set_font('Helvetica', '', 10)
+    pdf.cell(60, 8, 'Total Inconsistencias Alfanuméricas:', 0)
+    pdf.set_font('Helvetica', 'B', 10)
+    pdf.cell(0, 8, str(len(resultados.get('errores', []))), 0, 1)
+    
+    if 'errores_geo' in resultados:
+        pdf.set_font('Helvetica', '', 10)
+        pdf.cell(60, 8, 'Total Inconsistencias Geográficas:', 0)
+        pdf.set_font('Helvetica', 'B', 10)
+        pdf.cell(0, 8, str(len(resultados.get('errores_geo', []))), 0, 1)
+    
+    pdf.ln(5)
+    
+    # 2. Gráfico de Errores por Regla (Fase 1)
+    stats = resultados.get('stats', {})
+    if stats:
+        try:
+            plt.figure(figsize=(6, 4))
+            rules = list(stats.keys())
+            counts = list(stats.values())
+            # Limpiar nombres de reglas para el gráfico
+            short_rules = [r.split('.')[0] for r in rules]
+            
+            plt.bar(short_rules, counts, color='#4F46E5')
+            plt.title('Inconsistencias por Regla (Fase 1)', fontsize=12)
+            plt.xlabel('Número de Regla', fontsize=10)
+            plt.ylabel('Cantidad', fontsize=10)
+            plt.grid(axis='y', linestyle='--', alpha=0.7)
+            
+            img_buf = io.BytesIO()
+            plt.savefig(img_buf, format='png', dpi=150)
+            plt.close()
+            img_buf.seek(0)
+            
+            pdf.image(img_buf, x=45, w=120)
+            pdf.ln(5)
+        except Exception as e:
+            print(f"Error generando gráfico PDF: {e}")
+
+    # 3. Detalle de Reglas Alfanuméricas
+    pdf.set_font('Helvetica', 'B', 12)
+    pdf.cell(0, 10, 'Desglose de Reglas Alfanuméricas', 0, 1)
+    
+    pdf.set_font('Helvetica', 'B', 9)
+    pdf.cell(80, 8, 'Regla / Validación', 1)
+    pdf.cell(110, 8, 'Descripción del Error', 1)
+    pdf.ln()
+    
+    pdf.set_font('Helvetica', '', 8)
+    # Definiciones de reglas (estáticas para el informe)
+    reglas_def = {
+        '1. UNICIDAD': 'No se permiten duplicados en el número SNC.',
+        '2. PERMANENCIA': 'Predios antiguos deben conservar su número.',
+        '3. LIMPIEZA': 'No se permiten letras o códigos "9" en definitivo.',
+        '4. CONSECUTIVO': 'Nuevos terrenos deben seguir la secuencia existente.',
+        '5. MANZANA NUEVA': 'Terrenos en manzanas nuevas deben iniciar en 1.',
+        '6. SECTOR NUEVO': 'Manzanas en sectores nuevos deben iniciar en 1.'
+    }
+    
+    for r_name, r_desc in reglas_def.items():
+        count = 0
+        for k, v in stats.items():
+            if r_name in k: count = v
+        
+        if count > 0:
+            pdf.set_text_color(220, 38, 38) # Rojo si hay errores
+        else:
+            pdf.set_text_color(22, 163, 74) # Verde si está OK
+            
+        pdf.cell(80, 7, f"{r_name} ({count} errores)", 1)
+        pdf.set_text_color(0, 0, 0)
+        pdf.cell(110, 7, r_desc, 1)
+        pdf.ln()
+
+    # 4. Resultados Geográficos (si existen)
+    if resultados.get('errores_geo'):
+        pdf.add_page()
+        pdf.set_font('Helvetica', 'B', 12)
+        pdf.cell(0, 10, 'Fase 2: Cruce Geográfico (GDB vs SNC)', 0, 1)
+        pdf.ln(2)
+        
+        pdf.set_font('Helvetica', '', 9)
+        pdf.multi_cell(0, 5, 'Esta sección identifica discrepancias entre los predios dibujados en la Geodatabase y el reporte oficial de renumeración.')
+        pdf.ln(4)
+        
+        # Tabla resumen geo
+        pdf.set_font('Helvetica', 'B', 8)
+        pdf.cell(60, 8, 'Tipo de Incidencia', 1)
+        pdf.cell(50, 8, 'Código Predial', 1)
+        pdf.cell(30, 8, 'Estado en BD', 1)
+        pdf.cell(50, 8, 'Acción sugerida', 1)
+        pdf.ln()
+        
+        pdf.set_font('Helvetica', '', 7)
+        for err in resultados['errores_geo'][:100]: # Limitar a 100 para el PDF
+            if pdf.get_y() > 260: pdf.add_page()
+            
+            pdf.cell(60, 6, str(err['TIPO']), 1)
+            pdf.cell(50, 6, str(err['CODIGO']), 1)
+            pdf.cell(30, 6, str(err['ESTADO_BD']), 1)
+            pdf.cell(50, 6, str(err['ACCION_SUGERIDA']), 1)
+            pdf.ln()
+
+    return bytes(pdf.output())
+

@@ -40,7 +40,8 @@
             </div>
 
             <div class="space-y-3">
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Paso 2: Reporte Alfanumérico (.xlsx)</label>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Paso 2: Reporte
+                    Alfanumérico (.xlsx)</label>
                 <input type="file" name="archivo_excel" id="archivo_excel" class="hidden" accept=".xlsx" required>
                 <label for="archivo_excel"
                     class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 hover:bg-white hover:border-accent transition-all cursor-pointer group">
@@ -53,17 +54,21 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-2">
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">GDB Formal (Opcional)</label>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">GDB Formal
+                        (Opcional)</label>
                     <input type="file" name="archivo_gdb_formal" id="gdb_f" class="hidden" accept=".zip">
-                    <label for="gdb_f" class="flex flex-col items-center justify-center h-24 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 hover:bg-white hover:border-accent transition-all cursor-pointer">
+                    <label for="gdb_f"
+                        class="flex flex-col items-center justify-center h-24 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 hover:bg-white hover:border-accent transition-all cursor-pointer">
                         <span class="material-symbols-outlined text-gray-300">map</span>
                         <span class="text-[10px] text-gray-400 mt-1" id="label_gdb_f">Subir ZIP (Normal)</span>
                     </label>
                 </div>
                 <div class="space-y-2">
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">GDB Informal (Opcional)</label>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">GDB Informal
+                        (Opcional)</label>
                     <input type="file" name="archivo_gdb_informal" id="gdb_i" class="hidden" accept=".zip">
-                    <label for="gdb_i" class="flex flex-col items-center justify-center h-24 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 hover:bg-white hover:border-accent transition-all cursor-pointer">
+                    <label for="gdb_i"
+                        class="flex flex-col items-center justify-center h-24 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 hover:bg-white hover:border-accent transition-all cursor-pointer">
                         <span class="material-symbols-outlined text-gray-300">location_on</span>
                         <span class="text-[10px] text-gray-400 mt-1" id="label_gdb_i">Subir ZIP (Informal)</span>
                     </label>
@@ -88,13 +93,18 @@
                 </div>
                 <div>
                     <h3 class="text-xl font-bold text-gray-900">Resultados de Auditoría Integrada</h3>
-                    <p class="text-xs text-gray-400">Total predios activos auditados: <b>{{ resultados.total_auditado }}</b></p>
+                    <p class="text-xs text-gray-400">Total predios activos auditados: <b>{{ resultados.total_auditado
+                            }}</b></p>
                 </div>
             </div>
             <div class="flex gap-3">
                 <a href="/renumeracion/excel"
-                    class="bg-gray-900 text-white px-6 py-3 rounded-xl text-xs font-bold hover:bg-accent transition-all flex items-center gap-2 shadow-lg shadow-gray-900/10">
-                    <span class="material-symbols-outlined text-[18px]">download</span> Descargar Reporte Consolidado
+                    class="bg-gray-900 text-white px-5 py-3 rounded-xl text-xs font-bold hover:bg-accent transition-all flex items-center gap-2 shadow-lg shadow-gray-900/10">
+                    <span class="material-symbols-outlined text-[18px]">table_view</span> Excel Detallado
+                </a>
+                <a href="/renumeracion/pdf"
+                    class="bg-red-600 text-white px-5 py-3 rounded-xl text-xs font-bold hover:bg-red-700 transition-all flex items-center gap-2 shadow-lg shadow-red-600/10">
+                    <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span> Informe PDF
                 </a>
                 <a href="/clear_renumeracion"
                     class="bg-white border border-red-100 text-red-600 px-4 py-3 rounded-xl text-xs font-bold hover:bg-red-50 transition-all flex items-center gap-2">
@@ -115,16 +125,22 @@
                 {% for k, v in resultados.stats.items() %}
                 {% if rule_key in k %}{% set count = v %}{% endif %}
                 {% endfor %}
-                <div class="bg-white p-4 rounded-2xl border {% if count > 0 %}border-red-100 bg-red-50/30{% else %}border-gray-100{% endif %} shadow-sm flex flex-col gap-1 transition-all hover:scale-[1.02]">
-                    <p class="text-[9px] {% if count > 0 %}text-red-400{% else %}text-gray-400{% endif %} font-bold uppercase">Regla {{ i }}</p>
-                    <p class="text-2xl font-display font-bold {% if count > 0 %}text-red-600{% else %}text-gray-900{% endif %}">{{ count }}</p>
+                <div
+                    class="bg-white p-4 rounded-2xl border {% if count > 0 %}border-red-100 bg-red-50/30{% else %}border-gray-100{% endif %} shadow-sm flex flex-col gap-1 transition-all hover:scale-[1.02]">
+                    <p
+                        class="text-[9px] {% if count > 0 %}text-red-400{% else %}text-gray-400{% endif %} font-bold uppercase">
+                        Regla {{ i }}</p>
+                    <p
+                        class="text-2xl font-display font-bold {% if count > 0 %}text-red-600{% else %}text-gray-900{% endif %}">
+                        {{ count }}</p>
                 </div>
                 {% endfor %}
             </div>
 
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mt-4">
                 <div class="px-6 py-4 border-b border-gray-50 bg-gray-50/30">
-                    <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Inconsistencias Alfanuméricas ({{ resultados.errores|length }})</h4>
+                    <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Inconsistencias
+                        Alfanuméricas ({{ resultados.errores|length }})</h4>
                 </div>
                 <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
                     {% if resultados.errores %}
@@ -152,7 +168,8 @@
                     <div class="p-12 text-center">
                         <span class="material-symbols-outlined text-5xl text-green-200 mb-2">verified</span>
                         <h5 class="text-sm font-bold text-gray-900">Alfanumérico impecable</h5>
-                        <p class="text-[11px] text-gray-400">No se detectaron errores de secuencia o lógica en los códigos.</p>
+                        <p class="text-[11px] text-gray-400">No se detectaron errores de secuencia o lógica en los
+                            códigos.</p>
                     </div>
                     {% endif %}
                 </div>
@@ -165,10 +182,11 @@
             <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                 <span class="material-symbols-outlined text-sm">map</span> Fase 2: Auditoría Geográfica (GDB vs Excel)
             </h4>
-            
+
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-50 bg-gray-50/30 flex justify-between items-center">
-                    <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Inconsistencias Geográficas ({{ resultados.errores_geo|length }})</h4>
+                    <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Inconsistencias
+                        Geográficas ({{ resultados.errores_geo|length }})</h4>
                 </div>
                 <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
                     {% if resultados.errores_geo %}
@@ -192,7 +210,8 @@
                                 </td>
                                 <td class="px-6 py-4 font-mono font-bold text-gray-900">{{ err.CODIGO }}</td>
                                 <td class="px-6 py-4">
-                                    <span class="px-2 py-0.5 rounded-full {% if err.ESTADO_BD == 'ACTIVO' %}bg-green-100 text-green-700{% elif err.ESTADO_BD == 'NO EXISTE EN BD' %}bg-red-100 text-red-700{% else %}bg-gray-100 text-gray-600{% endif %} font-bold text-[9px]">
+                                    <span
+                                        class="px-2 py-0.5 rounded-full {% if err.ESTADO_BD == 'ACTIVO' %}bg-green-100 text-green-700{% elif err.ESTADO_BD == 'NO EXISTE EN BD' %}bg-red-100 text-red-700{% else %}bg-gray-100 text-gray-600{% endif %} font-bold text-[9px]">
                                         {{ err.ESTADO_BD }}
                                     </span>
                                 </td>
@@ -205,7 +224,8 @@
                     <div class="p-12 text-center">
                         <span class="material-symbols-outlined text-5xl text-green-200 mb-2">public</span>
                         <h5 class="text-sm font-bold text-gray-900">Consistencia Geográfica PerfectA</h5>
-                        <p class="text-[11px] text-gray-400">Todos los predios de la GDB coinciden con el reporte de renumeración.</p>
+                        <p class="text-[11px] text-gray-400">Todos los predios de la GDB coinciden con el reporte de
+                            renumeración.</p>
                     </div>
                     {% endif %}
                 </div>
@@ -224,20 +244,25 @@
             <span class="material-symbols-outlined text-accent">rule</span>
             Auditoría de Renumeración Integral
         </h4>
-        <p class="text-sm">Esta herramienta valida de forma unificada el proceso de cambio de códigos prediales (SNC). El proceso se divide en dos fases fundamentales:</p>
+        <p class="text-sm">Esta herramienta valida de forma unificada el proceso de cambio de códigos prediales (SNC).
+            El proceso se divide en dos fases fundamentales:</p>
         <div class="mt-4 space-y-3">
             <div class="flex gap-3">
-                <span class="w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-[10px] font-bold shrink-0">1</span>
+                <span
+                    class="w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-[10px] font-bold shrink-0">1</span>
                 <div>
                     <p class="text-xs font-bold text-gray-900">Fase Alfanumérica (Obligatoria)</p>
-                    <p class="text-[11px]">Valida las 6 reglas técnicas del IGAC (Unicidad, Permanencia, Limpieza, Consecutivos y Reinicios). Requiere el Excel del SNC con columna de "Estado".</p>
+                    <p class="text-[11px]">Valida las 6 reglas técnicas del IGAC (Unicidad, Permanencia, Limpieza,
+                        Consecutivos y Reinicios). Requiere el Excel del SNC con columna de "Estado".</p>
                 </div>
             </div>
             <div class="flex gap-3">
-                <span class="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-[10px] font-bold shrink-0">2</span>
+                <span
+                    class="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-[10px] font-bold shrink-0">2</span>
                 <div>
                     <p class="text-xs font-bold text-gray-900">Fase Geográfica (Opcional)</p>
-                    <p class="text-[11px]">Cruza el Excel con las capas de la GDB (.zip). Identifica predios activos dibujados que no están en el reporte y viceversa.</p>
+                    <p class="text-[11px]">Cruza el Excel con las capas de la GDB (.zip). Identifica predios activos
+                        dibujados que no están en el reporte y viceversa.</p>
                 </div>
             </div>
         </div>
@@ -249,7 +274,9 @@
             IMPORTANTE: Cargue Alfanumérico
         </h4>
         <p class="text-[11px] text-amber-700 leading-relaxed">
-            Es <b>indispensable</b> que el archivo Excel contenga todos los registros (Activos y Cancelados) para que la fase geográfica pueda realizar el cruce correctamente e identificar si un polígono "sobrante" corresponde a un predio ya cancelado en sistema.
+            Es <b>indispensable</b> que el archivo Excel contenga todos los registros (Activos y Cancelados) para que la
+            fase geográfica pueda realizar el cruce correctamente e identificar si un polígono "sobrante" corresponde a
+            un predio ya cancelado en sistema.
         </p>
     </section>
 

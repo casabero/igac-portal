@@ -3,7 +3,7 @@ from modules.snc_processor import procesar_dataframe
 from modules.db_logger import init_db, registrar_visita  # <--- IMPORTANTE
 from modules.avaluo_analisis import procesar_incremento_web 
 from modules.auditoria_maestra import procesar_auditoria, generar_pdf_auditoria
-from modules.renumeracion_auditor import procesar_renumeracion, generar_excel_renumeracion, procesar_geografica
+from modules.renumeracion_auditor import procesar_renumeracion, generar_excel_renumeracion, procesar_geografica, generar_pdf_renumeracion
 
 import os
 import uuid
@@ -381,6 +381,32 @@ def renumeracion_excel():
         )
     except Exception as e:
         flash(f"Error al generar Excel: {str(e)}")
+        return redirect(url_for('renumeracion_tool'))
+
+@app.route('/renumeracion/pdf')
+def renumeracion_pdf():
+    audit_id = session.get('renum_audit_id')
+    if not audit_id:
+        flash('No hay auditoría activa.')
+        return redirect(url_for('renumeracion_tool'))
+    
+    path = os.path.join(UPLOAD_FOLDER, f"renum_{audit_id}.json")
+    if not os.path.exists(path):
+        flash('La sesión ha expirado.')
+        return redirect(url_for('renumeracion_tool'))
+        
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            res = json.load(f)
+            
+        pdf_bytes = generar_pdf_renumeracion(res)
+        return Response(
+            pdf_bytes,
+            mimetype="application/pdf",
+            headers={"Content-disposition": "attachment; filename=Reporte_Ejecutivo_Renumeracion.pdf"}
+        )
+    except Exception as e:
+        flash(f"Error al generar PDF: {str(e)}")
         return redirect(url_for('renumeracion_tool'))
 
 @app.route('/clear_renumeracion')
