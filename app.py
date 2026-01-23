@@ -4,6 +4,7 @@ from modules.db_logger import init_db, registrar_visita  # <--- IMPORTANTE
 from modules.avaluo_analisis import procesar_incremento_web 
 from modules.auditoria_maestra import procesar_auditoria, generar_pdf_auditoria
 from modules.renumeracion_auditor import procesar_renumeracion, generar_excel_renumeracion, procesar_geografica, generar_pdf_renumeracion
+from modules.renumeracion_informales import procesar_informales
 
 import os
 import uuid
@@ -420,6 +421,70 @@ def clear_renumeracion():
     session.pop('renum_audit_id', None)
     flash('Sesión de renumeración limpiada.')
     return redirect(url_for('renumeracion_tool'))
+
+# --- RUTA 7: RENUMERACION INFORMALES ---
+@app.route('/renumeracion-informales', methods=['GET', 'POST'])
+def informales_tool():
+    registrar_visita('/renumeracion-informales')
+    
+    # Intentar recuperar resultados sesión
+    res = session.get('res_informales')
+    
+    if request.method == 'POST':
+        try:
+            # Obtener archivos
+            files_map = {}
+            for key in ['r_inf', 'u_inf', 'r_ctm', 'u_ctm']:
+                f = request.files.get(key)
+                if f and f.filename:
+                    # Guardar temporalmente
+                    path = os.path.join(UPLOAD_FOLDER, f"{uuid.uuid4().hex}_{f.filename}")
+                    f.save(path)
+                    files_map[key] = path
+                else:
+                    files_map[key] = None
+            
+            prefijo = request.form.get('prefijo', '200000')
+            
+            # Ejecutar proceso
+            if not any(files_map.values()):
+                flash('Debe subir al menos un archivo ZIP.')
+                return redirect(request.url)
+                
+            resultado = procesar_informales(files_map, UPLOAD_FOLDER, prefijo)
+            
+            if resultado['status'] == 'error':
+                flash(f"Error: {resultado['message']}")
+            else:
+                session['res_informales'] = resultado
+                return render_template('informales_tool.html', resultados=resultado)
+                
+        except Exception as e:
+            traceback.print_exc()
+            flash(f"Error crítico: {str(e)}")
+            return redirect(request.url)
+            
+    return render_template('informales_tool.html', resultados=res)
+
+@app.route('/download-informales/<filename>')
+def download_informales_zip(filename):
+    path = os.path.join(UPLOAD_FOLDER, filename)
+    if os.path.exists(path):
+        return send_file(path, as_attachment=True)
+    else:
+        flash('El archivo ha expirado o no existe.')
+        return redirect(url_for('informales_tool'))
+
+@app.route('/clear_informales')
+def clear_informales():
+    res = session.get('res_informales')
+    if res and 'zip_path' in res:
+        try: os.remove(res['zip_path'])
+        except: pass
+        
+    session.pop('res_informales', None)
+    flash('Sesión limpiada.')
+    return redirect(url_for('informales_tool'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)

@@ -118,22 +118,42 @@ def procesar_renumeracion(file_stream, tipo_config):
         df_revisar['GRUPO'] = df_nue.loc[mask_t_nuevo, 'GRUPO_GEO']
         
         for grupo_mza, datos_nuevos in df_revisar.groupby('GRUPO'):
+            # Los que ya existían: NO provisinales
             mask_existentes = (df_nue['GRUPO_GEO'] == grupo_mza) & (~es_nuevo_ant)
             predios_viejos = df_audit[mask_existentes]
 
             if not predios_viejos.empty:
-                max_viejo = int(parse_code(predios_viejos[col_nuevo])['TERRENO'].max())
-                for _, row in datos_nuevos.iterrows():
-                    try:
-                        terr_asignado = int(row[col_nuevo][17:21])
-                        if terr_asignado <= max_viejo:
-                            todos_errores.append({
-                                'REGLA': '4. CONSECUTIVO TERRENO',
-                                'DETALLE': f'Asignado {terr_asignado} <= Máx existente {max_viejo}',
-                                'ANTERIOR': row[col_anterior],
-                                'NUEVO': row[col_nuevo]
-                            })
-                    except: pass
+                # FIX: Filtrar solo terrenos "normales" para el máximo (excluir PHs que empiezan por 9 o series altas)
+                # Asumimos que terreno > 9000 o similar es PH. El usuario menciona "901", asi que filtramos > 900
+                viejos_codigos = predios_viejos[col_nuevo].apply(lambda x: int(x[17:21]) if x[17:21].isdigit() else 0)
+                # Solo consideramos para el MAX los que sean menores a 900 (Terrenos físicos, no PHs)
+                viejos_fisicos = viejos_codigos[viejos_codigos < 900]
+                
+                if not viejos_fisicos.empty:
+                    max_viejo = viejos_fisicos.max()
+                    
+                    for _, row in datos_nuevos.iterrows():
+                        try:
+                            # FIX 2: Si el predio nuevo es INFORMAL (Posición 22 != 0), ignorar esta regla
+                            # El usuario indica que la posición 22 (índice 21) es condición.
+                            condicion = row[col_nuevo][21] # Caracter 22
+                            if condicion != '0':
+                                continue # Es informal o especial, no valida consecutivo estricto
+                                
+                            terr_asignado = int(row[col_nuevo][17:21])
+                            
+                            # Si asignamos un 800 teniendo max 10, es error. 
+                            # Pero si asignamos 16 teniendo max 10, es error? 
+                            # La regla dice "deben iniciar después del último". O sea > max_viejo.
+                            # Si terr_asignado <= max_viejo, significa que estamos reusando números viejos o solapando.
+                            if terr_asignado <= max_viejo:
+                                todos_errores.append({
+                                    'REGLA': '4. CONSECUTIVO TERRENO',
+                                    'DETALLE': f'Asignado {terr_asignado} <= Máx existente {max_viejo}',
+                                    'ANTERIOR': row[col_anterior],
+                                    'NUEVO': row[col_nuevo]
+                                })
+                        except: pass
 
     # --- [5] REINICIO EN MANZANAS NUEVAS ---
     mask_mza_nueva = es_provisional(df_ant['MANZANA']) & ~es_provisional(df_ant['SECTOR'])
@@ -324,7 +344,11 @@ class AuditoriaRenumeracionPDF(FPDF):
     def footer(self):
         self.set_y(-15)
         self.set_font('Helvetica', 'I', 8)
-        self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'C')
+        self.cell(0, 5, f'Página {self.page_no()}', 0, 1, 'C')
+        self.set_font('Helvetica', '', 7)
+        self.set_text_color(128, 128, 128)
+        self.cell(0, 5, 'by casabero.com', 0, 0, 'C')
+        self.set_text_color(0, 0, 0)
 
 def generar_pdf_renumeracion(resultados):
     """Genera un reporte PDF detallado con los resultados de la auditoría"""
@@ -364,11 +388,16 @@ def generar_pdf_renumeracion(resultados):
             # Limpiar nombres de reglas para el gráfico
             short_rules = [r.split('.')[0] for r in rules]
             
-            plt.bar(short_rules, counts, color='#FB923C') # Color naranja alerta
-            plt.title('Alertas por Regla (Fase 1)', fontsize=12)
-            plt.xlabel('Número de Regla', fontsize=10)
-            plt.ylabel('Cantidad', fontsize=10)
-            plt.grid(axis='y', linestyle='--', alpha=0.7)
+            # Verde muy suave o gris azulado para ser más sutil
+            plt.bar(short_rules, counts, color='#cbd5e1', edgecolor='#94a3b8') 
+            plt.title('Distribución de Alertas por Regla (Fase 1)', fontsize=11, color='#475569')
+            plt.xlabel('Regla', fontsize=9)
+            plt.ylabel('Cantidad', fontsize=9)
+            plt.grid(axis='y', linestyle=':', alpha=0.5)
+            
+            # Remover bordes innecesarios
+            plt.gca().spines['top'].set_visible(False)
+            plt.gca().spines['right'].set_visible(False)
             
             img_buf = io.BytesIO()
             plt.savefig(img_buf, format='png', dpi=150)
@@ -382,7 +411,9 @@ def generar_pdf_renumeracion(resultados):
 
     # 3. Resumen de Reglas Alfanuméricas
     pdf.set_font('Helvetica', 'B', 12)
-    pdf.cell(0, 10, 'Resumen de Reglas Alfanuméricas', 0, 1)
+    # 3. Resumen de Reglas Alfanuméricas
+    pdf.set_font('Helvetica', 'B', 12)
+    pdf.cell(0, 10, 'Fase 1: Revisión Renumeración CICA vs SNC', 0, 1)
     
     pdf.set_font('Helvetica', 'B', 9)
     pdf.cell(80, 8, 'Regla / Validación', 1)
@@ -420,7 +451,10 @@ def generar_pdf_renumeracion(resultados):
     if errores_f1:
         pdf.add_page()
         pdf.set_font('Helvetica', 'B', 12)
-        pdf.cell(0, 10, 'Detalle de Alertas Alfanuméricas (Fase 1)', 0, 1)
+    if errores_f1:
+        pdf.add_page()
+        pdf.set_font('Helvetica', 'B', 12)
+        pdf.cell(0, 10, 'Detalle de Alertas (Fase 1: CICA/SNC)', 0, 1)
         pdf.ln(2)
         
         pdf.set_font('Helvetica', '', 9)
@@ -462,7 +496,10 @@ def generar_pdf_renumeracion(resultados):
     if resultados.get('errores_geo'):
         pdf.add_page()
         pdf.set_font('Helvetica', 'B', 12)
-        pdf.cell(0, 10, 'Fase 2: Cruce Geográfico (GDB vs SNC)', 0, 1)
+    if resultados.get('errores_geo'):
+        pdf.add_page()
+        pdf.set_font('Helvetica', 'B', 12)
+        pdf.cell(0, 10, 'Fase 2: Cruce Geográfico (Formal + Informal)', 0, 1)
         pdf.ln(2)
         
         pdf.set_font('Helvetica', '', 9)

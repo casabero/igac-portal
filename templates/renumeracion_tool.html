@@ -116,7 +116,8 @@
         <!-- SECCIÓN 1: AUDITORÍA ALFANUMÉRICA -->
         <div class="space-y-4">
             <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                <span class="material-symbols-outlined text-sm">description</span> Fase 1: Auditoría Alfanumérica
+                <span class="material-symbols-outlined text-sm">description</span> Fase 1: Revisión Renumeración CICA vs
+                SNC
             </h4>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {% for i in range(1, 7) %}
@@ -139,7 +140,7 @@
 
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mt-4">
                 <div class="px-6 py-4 border-b border-gray-50 bg-gray-50/30">
-                    <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Inconsistencias
+                    <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Alertas
                         Alfanuméricas ({{ resultados.errores|length }})</h4>
                 </div>
                 <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
@@ -180,12 +181,12 @@
         {% if resultados.errores_geo is defined %}
         <div class="space-y-4">
             <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                <span class="material-symbols-outlined text-sm">map</span> Fase 2: Auditoría Geográfica (GDB vs Excel)
+                <span class="material-symbols-outlined text-sm">map</span> Fase 2: Cruce Geográfico (Formal + Informal)
             </h4>
 
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-50 bg-gray-50/30 flex justify-between items-center">
-                    <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Inconsistencias
+                    <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Alertas
                         Geográficas ({{ resultados.errores_geo|length }})</h4>
                 </div>
                 <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
