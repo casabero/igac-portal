@@ -434,7 +434,7 @@ def informales_tool():
         try:
             # Obtener archivos
             files_map = {}
-            for key in ['r_inf', 'u_inf', 'r_ctm', 'u_ctm']:
+            for key in ['zip_inf', 'zip_formal']:
                 f = request.files.get(key)
                 if f and f.filename:
                     # Guardar temporalmente
