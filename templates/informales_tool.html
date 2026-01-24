@@ -13,7 +13,7 @@
             <span class="material-symbols-outlined text-accent">pin_drop</span> Renumeración Geográfica (GeoPandas)
         </h2>
 
-        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form method="POST" enctype="multipart/form-data" class="space-y-6" id="renumForm">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Informales -->
@@ -58,11 +58,24 @@
                     placeholder="Ej: 200000">
             </div>
 
-            <button type="submit"
+            <button type="submit" id="submitBtn"
                 class="w-full bg-gray-900 text-white py-4 rounded-2xl hover:bg-accent hover:shadow-xl hover:shadow-accent/20 transition-all font-bold text-sm tracking-widest flex justify-center items-center gap-3">
                 <span class="material-symbols-outlined">play_circle</span> EJECUTAR RENUMERACIÓN
             </button>
         </form>
+
+        <!-- LOADING OVERLAY -->
+        <div id="loadingOverlay"
+            class="hidden absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-2xl">
+            <div class="w-16 h-16 border-4 border-accent border-t-transparent rounded-full animate-spin mb-4"></div>
+            <h3 class="text-lg font-bold text-gray-900">Procesando Geometrías...</h3>
+            <p class="text-sm text-gray-500 mt-2">Esto puede tardar varios minutos dependiendo del tamaño de las GDBs.
+            </p>
+            <div
+                class="mt-6 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                No cierre ni refresque esta pestaña
+            </div>
+        </div>
     </div>
     {% endif %}
 
@@ -190,4 +203,21 @@
         </ul>
     </section>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const renumForm = document.getElementById('renumForm');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const submitBtn = document.getElementById('submitBtn');
+
+    if (renumForm) {
+        renumForm.addEventListener('submit', function () {
+            loadingOverlay.classList.remove('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> PROCESANDO...';
+        });
+    }
+</script>
 {% endblock %}

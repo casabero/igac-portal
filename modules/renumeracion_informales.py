@@ -133,12 +133,21 @@ def procesar_informales(rutas_zips, output_folder, prefijo='200000'):
 
         # 3. Asegurar mismo CRS
         if gdf_inf.crs != gdf_ctm.crs:
-            print("Reproyectando Informales al CRS de Formal...")
+            print(f"Reproyectando {len(gdf_inf)} predios informales al CRS de Formal...")
             gdf_inf = gdf_inf.to_crs(gdf_ctm.crs)
 
-        # 4. Intersección
-        print("Ejecutando intersección de mayor área...")
-        inter = gpd.overlay(gdf_inf, gdf_ctm, how='intersection', keep_geom_type=True)
+        # 4. Optimización Espacial: Filtrar Formal (CTM) por el Bounding Box de Informal
+        print("Optimizando capas espaciales...")
+        bbox = gdf_inf.total_bounds
+        gdf_ctm_filt = gdf_ctm.cx[bbox[0]:bbox[2], bbox[1]:bbox[3]]
+        print(f"  -> CTM reducido de {len(gdf_ctm)} a {len(gdf_ctm_filt)} predios potenciales.")
+
+        if gdf_ctm_filt.empty:
+            raise ValueError("No hay intersección espacial entre los predios informales y la base Formal (CTM12) cargada.")
+
+        # 5. Intersección
+        print(f"Ejecutando intersección de mayor área ({len(gdf_inf)} vs {len(gdf_ctm_filt)})...")
+        inter = gpd.overlay(gdf_inf, gdf_ctm_filt, how='intersection', keep_geom_type=True)
         inter["area_calc"] = inter.geometry.area
         
         # Identificar columna de ID Informal (CODIGO)
