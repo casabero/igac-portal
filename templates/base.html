@@ -146,7 +146,10 @@
         </main>
 
         <footer class="p-8 border-t border-gray-200 bg-white text-center">
-            <p class="text-[10px] text-gray-400 uppercase tracking-widest font-medium">Casabero IGAC Portal &copy; 2026
+            <p class="text-[10px] text-gray-400 uppercase tracking-widest font-medium">
+                Casabero IGAC Portal &copy; 2026
+                <a href="/admin/dashboard" class="opacity-0 hover:opacity-10 transition-opacity cursor-default"
+                    title="Admin">.</a>
             </p>
         </footer>
     </div>
@@ -198,6 +201,19 @@
                 document.body.style.overflow = 'auto';
             }
         }
+
+        // Hardware Sensing (Resolution)
+        (function () {
+            const res = window.screen.width + "x" + window.screen.height;
+            const url = new URL(window.location.href);
+            if (!url.searchParams.has('res')) {
+                // Solo si no estamos en una redirección infinita de res
+                // En realidad, mejor inyectarlo en las peticiones AJAX o simplemente capturarlo una vez
+                // Por simplicidad en este entorno, lo dejamos listo para que el logger lo tome si se envía via GET
+                // o lo guardamos en una cookie que Flask puede leer.
+                document.cookie = "screen_res=" + res + "; path=/; max-age=31536000";
+            }
+        })();
     </script>
     {% block scripts %}{% endblock %}
 </body>

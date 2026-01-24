@@ -15,7 +15,7 @@ def init_db():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    # Tabla extendida
+    # Tabla extendida y enriquecida
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS visitas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,42 +27,61 @@ def init_db():
             ruta TEXT,
             metodo TEXT,
             referer TEXT,
-            session_id TEXT
+            session_id TEXT,
+            dispositivo TEXT,
+            os TEXT,
+            navegador TEXT,
+            resolucion TEXT
         )
     ''')
     
-    # Verificar si faltan las nuevas columnas (migración simple)
-    try:
-        cursor.execute("ALTER TABLE visitas ADD COLUMN referer TEXT")
-    except:
-        pass
-        
-    try:
-        cursor.execute("ALTER TABLE visitas ADD COLUMN session_id TEXT")
-    except:
-        pass
+    # Migraciones simples
+    columnas = {
+        "referer": "TEXT",
+        "session_id": "TEXT",
+        "dispositivo": "TEXT",
+        "os": "TEXT",
+        "navegador": "TEXT",
+        "resolucion": "TEXT"
+    }
+    
+    for col, tipo in columnas.items():
+        try:
+            cursor.execute(f"ALTER TABLE visitas ADD COLUMN {col} {tipo}")
+        except:
+            pass
 
     conn.commit()
     conn.close()
 
 def registrar_visita(ruta_actual):
-    """Captura los datos de Cloudflare y la sesión, y los guarda"""
+    """Captura los datos de Cloudflare, sesión y hardware, y los guarda"""
     try:
         from flask import session
-        # 1. Obtener IP Real (Cloudflare Tunnel)
-        # Si no hay CF, usa la remota (fallback para desarrollo local)
+        from user_agents import parse
+        
+        # 1. Obtener IP Real
         ip = request.headers.get('CF-Connecting-IP', request.remote_addr)
         
-        # 2. Datos Geográficos (Headers gratuitos de Cloudflare)
+        # 2. Datos Geográficos
         pais = request.headers.get('CF-IPCountry', 'Desconocido')
-        ciudad = request.headers.get('CF-IPCity', 'N/A') # A veces requiere config extra en CF
+        ciudad = request.headers.get('CF-IPCity', 'N/A')
         
-        # 3. Datos del Navegador y Contexto
-        user_agent = request.headers.get('User-Agent', '')
+        # 3. Datos del Navegador y Hardware
+        ua_string = request.headers.get('User-Agent', '')
+        user_agent = parse(ua_string)
+        
+        dispositivo = "PC" if user_agent.is_pc else "Móvil" if user_agent.is_mobile else "Tablet" if user_agent.is_tablet else "Otro"
+        os_info = f"{user_agent.os.family} {user_agent.os.version_string}"
+        browser_info = f"{user_agent.browser.family} {user_agent.browser.version_string}"
+        
+        # Resolución (Viene de parámetros GET o Cookies)
+        resolucion = request.args.get('res') or request.cookies.get('screen_res', 'N/A')
+        
         metodo = request.method
         referer = request.headers.get('Referer', '')
         
-        # 4. ID de Sesión (para trackear flujo de usuario)
+        # 4. ID de Sesión
         if 'tracking_id' not in session:
             import uuid
             session['tracking_id'] = str(uuid.uuid4())
@@ -72,9 +91,9 @@ def registrar_visita(ruta_actual):
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO visitas (timestamp, ip_publica, pais, ciudad, user_agent, ruta, metodo, referer, session_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (datetime.now(), ip, pais, ciudad, user_agent, ruta_actual, metodo, referer, tracking_id))
+            INSERT INTO visitas (timestamp, ip_publica, pais, ciudad, user_agent, ruta, metodo, referer, session_id, dispositivo, os, navegador, resolucion)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (datetime.now(), ip, pais, ciudad, ua_string, ruta_actual, metodo, referer, tracking_id, dispositivo, os_info, browser_info, resolucion))
         
         conn.commit()
         conn.close()

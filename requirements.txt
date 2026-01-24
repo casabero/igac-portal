@@ -10,3 +10,4 @@ geopandas==0.14.1
 fiona==1.9.5
 shapely==2.0.2
 pyogrio==0.7.2
+user-agents==2.2.0

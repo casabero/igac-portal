@@ -7,80 +7,88 @@
 {% block content %}
 <div class="space-y-8">
     <!-- Header Actions -->
-    <div class="flex justify-between items-center">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
             <h2 class="text-3xl font-display font-bold text-gray-900">Estadísticas del Portal</h2>
-            <p class="text-gray-500">Monitoreo en tiempo real de la actividad del sistema.</p>
+            <p class="text-gray-500">Monitoreo avanzado de tráfico y hardware.</p>
         </div>
-        <a href="/admin/logout"
-            class="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors">
-            <span class="material-symbols-outlined">logout</span>
-            Cerrar Sesión
-        </a>
+        <div class="flex gap-3">
+            <a href="/admin/export-csv?inicio={{ fecha_inicio }}&fin={{ fecha_fin }}"
+                class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700 transition-colors shadow-lg shadow-green-200">
+                <span class="material-symbols-outlined">download</span>
+                Exportar CSV
+            </a>
+            <a href="/admin/logout"
+                class="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors">
+                <span class="material-symbols-outlined">logout</span>
+                Salir
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+        <form method="GET" class="flex flex-wrap items-end gap-6">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Fecha Inicio</label>
+                <input type="date" name="inicio" value="{{ fecha_inicio }}"
+                    class="w-full bg-gray-50 border-gray-200 rounded-lg text-sm focus:ring-accent">
+            </div>
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Fecha Fin</label>
+                <input type="date" name="fin" value="{{ fecha_fin }}"
+                    class="w-full bg-gray-50 border-gray-200 rounded-lg text-sm focus:ring-accent">
+            </div>
+            <div class="flex gap-2">
+                <button type="submit"
+                    class="px-6 py-2 bg-gray-900 text-white rounded-lg font-bold text-sm hover:bg-black transition-all">
+                    Filtrar
+                </button>
+                <a href="/admin/dashboard"
+                    class="px-6 py-2 bg-gray-100 text-gray-600 rounded-lg font-bold text-sm hover:bg-gray-200 transition-all text-center">
+                    Limpiar
+                </a>
+            </div>
+        </form>
     </div>
 
     <!-- KPI Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
-                    <span class="material-symbols-outlined">visibility</span>
-                </div>
-                <div>
-                    <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Visitas Totales</p>
-                    <h3 class="text-3xl font-display font-bold text-gray-900">{{ total_visitas }}</h3>
-                </div>
-            </div>
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm border-l-4 border-l-blue-500">
+            <p class="text-xs font-bold text-gray-400 uppercase mb-1">Visitas en Periodo</p>
+            <h3 class="text-3xl font-display font-bold text-gray-900">{{ total_visitas }}</h3>
         </div>
-
-        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center">
-                    <span class="material-symbols-outlined">group</span>
-                </div>
-                <div>
-                    <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Únicos</p>
-                    <h3 class="text-3xl font-display font-bold text-gray-900">{{ visitantes_unicos }}</h3>
-                </div>
-            </div>
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm border-l-4 border-l-green-500">
+            <p class="text-xs font-bold text-gray-400 uppercase mb-1">Usuarios Únicos</p>
+            <h3 class="text-3xl font-display font-bold text-gray-900">{{ visitantes_unicos }}</h3>
         </div>
-
-        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center">
-                    <span class="material-symbols-outlined">location_on</span>
-                </div>
-                <div>
-                    <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Países</p>
-                    <h3 class="text-3xl font-display font-bold text-gray-900">{{ stats_pais|length }}</h3>
-                </div>
-            </div>
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm border-l-4 border-l-amber-500">
+            <p class="text-xs font-bold text-gray-400 uppercase mb-1">Paises Activos</p>
+            <h3 class="text-3xl font-display font-bold text-gray-900">{{ stats_pais|length }}</h3>
         </div>
-
-        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
-                    <span class="material-symbols-outlined">apps</span>
-                </div>
-                <div>
-                    <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Apps Activas</p>
-                    <h3 class="text-3xl font-display font-bold text-gray-900">5</h3>
-                </div>
-            </div>
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm border-l-4 border-l-indigo-500">
+            <p class="text-xs font-bold text-gray-400 uppercase mb-1">Apps Usadas</p>
+            <h3 class="text-3xl font-display font-bold text-gray-900">{{ top_apps|length }}</h3>
         </div>
     </div>
 
     <!-- Charts Row -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
-            <h4 class="text-lg font-bold text-gray-900 mb-6">Uso por Aplicación</h4>
+        <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <h4 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-blue-500">bar_chart</span>
+                Uso por Aplicación
+            </h4>
             <div class="h-[300px] relative">
                 <canvas id="appsChart"></canvas>
             </div>
         </div>
 
-        <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
-            <h4 class="text-lg font-bold text-gray-900 mb-6">Distribución Geográfica</h4>
+        <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <h4 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-green-500">public</span>
+                Distribución Geográfica
+            </h4>
             <div class="h-[300px] relative">
                 <canvas id="geoChart"></canvas>
             </div>
@@ -89,45 +97,57 @@
 
     <!-- Recent Logs Table -->
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
             <h4 class="text-lg font-bold text-gray-900">Historial Detallado (Últimos 100)</h4>
-            <div class="flex gap-2">
-                <span
-                    class="px-3 py-1 bg-gray-100 rounded-full text-xs font-bold text-gray-500 border border-gray-200 uppercase">Live</span>
-            </div>
+            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-bold uppercase">Datos
+                Enriquecidos</span>
         </div>
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto custom-scrollbar">
             <table class="w-full text-left text-sm">
-                <thead class="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider text-xs">
+                <thead class="bg-gray-100/80 text-gray-500 font-bold uppercase tracking-wider text-[10px]">
                     <tr>
                         <th class="px-6 py-4">Fecha</th>
                         <th class="px-6 py-4">IP / Ubicación</th>
+                        <th class="px-6 py-4">Dispositivo / OS</th>
                         <th class="px-6 py-4">Ruta</th>
                         <th class="px-6 py-4">Navegador</th>
+                        <th class="px-6 py-4">Res.</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     {% for log in ultimos_logs %}
-                    <tr class="hover:bg-gray-50/50 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-600 font-medium">
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-500 text-xs">
                             {{ log.timestamp }}
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex flex-col">
                                 <span class="font-bold text-gray-900">{{ log.ip_publica }}</span>
-                                <span class="text-xs text-gray-400">{{ log.pais }} - {{ log.ciudad }}</span>
+                                <span class="text-[11px] text-gray-400">{{ log.pais }} - {{ log.ciudad }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col">
+                                <span class="font-medium text-gray-700 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-xs">{% if log.dispositivo == 'PC'
+                                        %}laptop{% elif log.dispositivo == 'Móvil' %}smartphone{% else %}devices{% endif
+                                        %}</span>
+                                    {{ log.dispositivo }}
+                                </span>
+                                <span class="text-[11px] text-gray-400">{{ log.os }}</span>
                             </div>
                         </td>
                         <td class="px-6 py-4">
                             <span
-                                class="px-2 py-1 bg-blue-50 text-blue-600 rounded-lg font-bold text-[11px] uppercase border border-blue-100">
+                                class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-bold border border-gray-200">
                                 {{ log.ruta }}
                             </span>
                         </td>
-                        <td class="px-6 py-4">
-                            <div class="max-w-[200px] truncate text-xs text-gray-500" title="{{ log.user_agent }}">
-                                {{ log.user_agent }}
-                            </div>
+                        <td class="px-6 py-4 text-xs text-gray-600">
+                            {{ log.navegador }}
+                        </td>
+                        <td class="px-6 py-4 text-[10px] text-gray-400 font-mono">
+                            {{ log.resolucion }}
                         </td>
                     </tr>
                     {% endfor %}

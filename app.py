@@ -109,40 +109,52 @@ def admin_dashboard():
     import sqlite3
     from modules.db_logger import DB_PATH
     
+    # Filtros
+    fecha_inicio = request.args.get('inicio', '')
+    fecha_fin = request.args.get('fin', '')
+    
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
+    query_base = " FROM visitas WHERE 1=1"
+    params = []
+    if fecha_inicio:
+        query_base += " AND timestamp >= ?"
+        params.append(f"{fecha_inicio} 00:00:00")
+    if fecha_fin:
+        query_base += " AND timestamp <= ?"
+        params.append(f"{fecha_fin} 23:59:59")
+
     # 1. Resumen general
-    cursor.execute("SELECT COUNT(*) as total FROM visitas")
+    cursor.execute(f"SELECT COUNT(*) as total {query_base}", params)
     total_visitas = cursor.fetchone()['total']
     
-    cursor.execute("SELECT COUNT(DISTINCT session_id) as total FROM visitas")
+    cursor.execute(f"SELECT COUNT(DISTINCT session_id) as total {query_base}", params)
     visitantes_unicos = cursor.fetchone()['total']
     
-    # 2. Top Apps (Rutas)
-    cursor.execute("""
+    # 2. Top Apps
+    cursor.execute(f"""
         SELECT ruta, COUNT(*) as count 
-        FROM visitas 
-        WHERE ruta != '/admin/dashboard'
+        {query_base} AND ruta != '/admin/dashboard'
         GROUP BY ruta 
         ORDER BY count DESC 
         LIMIT 5
-    """)
+    """, params)
     top_apps = [dict(row) for row in cursor.fetchall()]
     
     # 3. Visitas por País
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT pais, COUNT(*) as count 
-        FROM visitas 
+        {query_base}
         GROUP BY pais 
         ORDER BY count DESC 
         LIMIT 5
-    """)
+    """, params)
     stats_pais = [dict(row) for row in cursor.fetchall()]
     
     # 4. Últimas 100 visitas
-    cursor.execute("SELECT * FROM visitas ORDER BY timestamp DESC LIMIT 100")
+    cursor.execute(f"SELECT * {query_base} ORDER BY timestamp DESC LIMIT 100", params)
     ultimos_logs = [dict(row) for row in cursor.fetchall()]
     
     conn.close()
@@ -152,7 +164,51 @@ def admin_dashboard():
                            visitantes_unicos=visitantes_unicos,
                            top_apps=top_apps,
                            stats_pais=stats_pais,
-                           ultimos_logs=ultimos_logs)
+                           ultimos_logs=ultimos_logs,
+                           fecha_inicio=fecha_inicio,
+                           fecha_fin=fecha_fin)
+
+@app.route('/admin/export-csv')
+@login_required
+def export_logs_csv():
+    import sqlite3
+    import csv
+    import io
+    from modules.db_logger import DB_PATH
+    
+    fecha_inicio = request.args.get('inicio', '')
+    fecha_fin = request.args.get('fin', '')
+    
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    query = "SELECT * FROM visitas WHERE 1=1"
+    params = []
+    if fecha_inicio:
+        query += " AND timestamp >= ?"
+        params.append(f"{fecha_inicio} 00:00:00")
+    if fecha_fin:
+        query += " AND timestamp <= ?"
+        params.append(f"{fecha_fin} 23:59:59")
+    query += " ORDER BY timestamp DESC"
+    
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    
+    # Obtener nombres de columnas
+    column_names = [description[0] for description in cursor.description]
+    conn.close()
+    
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=';', quoting=csv.QUOTE_MINIMAL)
+    writer.writerow(column_names)
+    writer.writerows(rows)
+    
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=log_visitas_igac.csv"}
+    )
 
 # --- RUTA 4: ANALISIS AVALUOS ---
 UPLOAD_FOLDER = 'temp_uploads'
