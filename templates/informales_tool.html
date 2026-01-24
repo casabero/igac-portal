@@ -148,20 +148,64 @@
 {% endblock %}
 
 {% block help_content %}
-<div class="space-y-4 text-gray-600">
-    <h4 class="text-primary font-bold text-sm uppercase tracking-wider border-b pb-2 mb-4">Ayuda Rápida</h4>
-    <p class="text-xs">Esta herramienta cruza las capas de predios informales con CTM12 para asignar numeración.</p>
+<div class="space-y-6 text-gray-600">
+    <section>
+        <h4 class="text-primary font-bold text-sm uppercase tracking-wider border-b pb-2 mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-accent">menu_book</span>
+            Manual: Renumeración de Informales
+        </h4>
+        <p class="text-xs leading-relaxed">
+            Esta herramienta automatiza el proceso de asignación de nuevas cédulas catastrales a predios informales
+            basándose en su ubicación geográfica respecto a la capa CTM12.
+        </p>
+    </section>
 
-    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
-        <p class="text-[11px] text-blue-800 font-bold mb-1">Requisitos de Archivos</p>
-        <p class="text-[10px] text-blue-700">Cada archivo debe ser un .ZIP que contenga el Shapefile (.shp, .shx, .dbf,
-            .prj). El sistema buscará automáticamente el .shp dentro del ZIP.</p>
-    </div>
+    <section class="space-y-3">
+        <h5 class="text-[11px] font-bold text-gray-900 uppercase">¿Cómo funciona?</h5>
+        <div class="flex gap-3">
+            <span
+                class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold shrink-0">1</span>
+            <p class="text-[11px]"><b>Validación:</b> Se corrigen automáticamente problemas de topología
+                (auto-intersecciones) y se eliminan polígonos vacíos.</p>
+        </div>
+        <div class="flex gap-3">
+            <span
+                class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold shrink-0">2</span>
+            <p class="text-[11px]"><b>Intersección:</b> Se cruzan los predios informales con los rurales/urbanos del
+                CTM12.</p>
+        </div>
+        <div class="flex gap-3">
+            <span
+                class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold shrink-0">3</span>
+            <p class="text-[11px]"><b>Predio Dominante:</b> Si un informal cae en varios CTM, el sistema elige aquel con
+                el que tenga <b>mayor área de contacto</b>.</p>
+        </div>
+        <div class="flex gap-3">
+            <span
+                class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold shrink-0">4</span>
+            <p class="text-[11px]"><b>Renumeración:</b> Se genera un consecutivo de 3 dígitos por cada predio CTM y se
+                construye el nuevo código.</p>
+        </div>
+    </section>
 
-    <ul class="list-disc pl-4 text-[11px] space-y-1 mt-2">
-        <li>Se validan geometrías automáticamente (MakeValid).</li>
-        <li>Se elimina geometrías vacías.</li>
-        <li>Se intersecta y se prioriza por Mayor Área.</li>
-    </ul>
+    <section class="bg-amber-50 p-4 rounded-xl border border-amber-100">
+        <h4 class="text-amber-800 font-bold text-[10px] uppercase tracking-wider mb-2 flex items-center gap-2">
+            <span class="material-symbols-outlined text-amber-600 text-sm">warning</span>
+            IMPORTANTE: Archivos ZIP
+        </h4>
+        <p class="text-[10px] text-amber-700 leading-relaxed">
+            Debe cargar archivos <b>.ZIP</b> que contengan los componentes del Shapefile (.shp, .shx, .dbf, .prj). El
+            sistema buscará el archivo .shp recursivamente dentro del comprimido.
+        </p>
+    </section>
+
+    <section>
+        <h5 class="text-[11px] font-bold text-gray-900 uppercase mb-2">Salida de Datos</h5>
+        <ul class="list-disc pl-4 text-[10px] space-y-1">
+            <li><b>Shapefile Resultante:</b> Con campos NumRen y RENUMERADO.</li>
+            <li><b>Log de Proceso:</b> Archivo JSON con el resumen de cuántos informales se asignaron a cada código
+                matriz.</li>
+        </ul>
+    </section>
 </div>
 {% endblock %}
