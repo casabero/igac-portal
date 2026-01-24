@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - IGAC Portal{% endblock %}
+
+{% block page_title %}Dashboard de Métricas{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header Actions -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h2 class="text-3xl font-display font-bold text-gray-900">Estadísticas del Portal</h2>
+            <p class="text-gray-500">Monitoreo en tiempo real de la actividad del sistema.</p>
+        </div>
+        <a href="/admin/logout"
+            class="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors">
+            <span class="material-symbols-outlined">logout</span>
+            Cerrar Sesión
+        </a>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                    <span class="material-symbols-outlined">visibility</span>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Visitas Totales</p>
+                    <h3 class="text-3xl font-display font-bold text-gray-900">{{ total_visitas }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center">
+                    <span class="material-symbols-outlined">group</span>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Únicos</p>
+                    <h3 class="text-3xl font-display font-bold text-gray-900">{{ visitantes_unicos }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center">
+                    <span class="material-symbols-outlined">location_on</span>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Países</p>
+                    <h3 class="text-3xl font-display font-bold text-gray-900">{{ stats_pais|length }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                    <span class="material-symbols-outlined">apps</span>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Apps Activas</p>
+                    <h3 class="text-3xl font-display font-bold text-gray-900">5</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+            <h4 class="text-lg font-bold text-gray-900 mb-6">Uso por Aplicación</h4>
+            <div class="h-[300px] relative">
+                <canvas id="appsChart"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+            <h4 class="text-lg font-bold text-gray-900 mb-6">Distribución Geográfica</h4>
+            <div class="h-[300px] relative">
+                <canvas id="geoChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Logs Table -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+            <h4 class="text-lg font-bold text-gray-900">Historial Detallado (Últimos 100)</h4>
+            <div class="flex gap-2">
+                <span
+                    class="px-3 py-1 bg-gray-100 rounded-full text-xs font-bold text-gray-500 border border-gray-200 uppercase">Live</span>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider text-xs">
+                    <tr>
+                        <th class="px-6 py-4">Fecha</th>
+                        <th class="px-6 py-4">IP / Ubicación</th>
+                        <th class="px-6 py-4">Ruta</th>
+                        <th class="px-6 py-4">Navegador</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for log in ultimos_logs %}
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-600 font-medium">
+                            {{ log.timestamp }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-gray-900">{{ log.ip_publica }}</span>
+                                <span class="text-xs text-gray-400">{{ log.pais }} - {{ log.ciudad }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span
+                                class="px-2 py-1 bg-blue-50 text-blue-600 rounded-lg font-bold text-[11px] uppercase border border-blue-100">
+                                {{ log.ruta }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="max-w-[200px] truncate text-xs text-gray-500" title="{{ log.user_agent }}">
+                                {{ log.user_agent }}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Datos procesados desde Jinja2
+    const labelsApps = {{ top_apps| map(attribute = 'ruta') | list | tojson | safe }};
+    const dataApps = {{ top_apps| map(attribute = 'count') | list | tojson | safe }};
+
+    const labelsGeo = {{ stats_pais| map(attribute = 'pais') | list | tojson | safe }};
+    const dataGeo = {{ stats_pais| map(attribute = 'count') | list | tojson | safe }};
+
+    // Configuración Common
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    };
+
+    // Apps Chart
+    const ctxApps = document.getElementById('appsChart');
+    if (ctxApps) {
+        new Chart(ctxApps, {
+            type: 'bar',
+            data: {
+                labels: labelsApps,
+                datasets: [{
+                    label: 'Visitas',
+                    data: dataApps,
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 8
+                }]
+            },
+            options: chartOptions
+        });
+    }
+
+    // Geo Chart
+    const ctxGeo = document.getElementById('geoChart');
+    if (ctxGeo) {
+        new Chart(ctxGeo, {
+            type: 'doughnut',
+            data: {
+                labels: labelsGeo,
+                datasets: [{
+                    data: dataGeo,
+                    backgroundColor: ['#10b981', '#fbbf24', '#3b82f6', '#ef4444', '#8b5cf6'],
+                    hoverOffset: 4
+                }]
+            },
+            options: chartOptions
+        });
+    }
+</script>
+{% endblock %}
+
+{% block help_content %}
+<div class="space-y-4">
+    <h4 class="text-primary font-bold">Guía Administrativa</h4>
+    <p class="text-sm">El dashboard agrupa las visitas por <b>Session ID</b>, lo que permite diferenciar usuarios
+        individuales incluso si comparten la misma IP pública.</p>
+
+    <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+        <h5 class="text-xs font-bold text-blue-700 uppercase mb-2">Cloudflare Data</h5>
+        <p class="text-[11px] text-blue-600 leading-relaxed">
+            Los datos de ubicación dependen de los headers <code>CF-IPCountry</code> y <code>CF-IPCity</code>. Asegúrese
+            de que Cloudflare esté enviando esta información en su panel de control.
+        </p>
+    </div>
+</div>
+{% endblock %}

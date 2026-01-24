@@ -14,6 +14,19 @@ import traceback
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'casabero_igac_secure_key')
 
+# Configuración Admin
+ADMIN_USER = "casabero_admin"
+ADMIN_PASS = "F4k3ST123*"
+
+from functools import wraps
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('admin_logged_in'):
+            return redirect(url_for('admin_login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
 # Inicializar DB al arrancar la app
 try:
     init_db()
@@ -70,23 +83,76 @@ def snc_tool():
                 
     return render_template('snc_tool.html')
 
-# --- RUTA OCULTA: VER LOGS (Opcional, para que pruebes rápido) ---
-# Solo funcionará si visitas /ver-logs-secreto
-@app.route('/ver-logs-secreto')
-def ver_logs():
+# --- RUTAS DE ADMINISTRACIÓN ---
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        user = request.form.get('username')
+        pw = request.form.get('password')
+        if user == ADMIN_USER and pw == ADMIN_PASS:
+            session['admin_logged_in'] = True
+            flash('Bienvenido, Administrador.', 'success')
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Credenciales incorrectas.', 'danger')
+    return render_template('admin_login.html')
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    flash('Sesión cerrada.', 'info')
+    return redirect(url_for('index'))
+
+@app.route('/admin/dashboard')
+@login_required
+def admin_dashboard():
     import sqlite3
-    conn = sqlite3.connect('/app/data/igac_logs.db')
+    from modules.db_logger import DB_PATH
+    
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM visitas ORDER BY id DESC LIMIT 50')
-    logs = cursor.fetchall()
+    
+    # 1. Resumen general
+    cursor.execute("SELECT COUNT(*) as total FROM visitas")
+    total_visitas = cursor.fetchone()['total']
+    
+    cursor.execute("SELECT COUNT(DISTINCT session_id) as total FROM visitas")
+    visitantes_unicos = cursor.fetchone()['total']
+    
+    # 2. Top Apps (Rutas)
+    cursor.execute("""
+        SELECT ruta, COUNT(*) as count 
+        FROM visitas 
+        WHERE ruta != '/admin/dashboard'
+        GROUP BY ruta 
+        ORDER BY count DESC 
+        LIMIT 5
+    """)
+    top_apps = [dict(row) for row in cursor.fetchall()]
+    
+    # 3. Visitas por País
+    cursor.execute("""
+        SELECT pais, COUNT(*) as count 
+        FROM visitas 
+        GROUP BY pais 
+        ORDER BY count DESC 
+        LIMIT 5
+    """)
+    stats_pais = [dict(row) for row in cursor.fetchall()]
+    
+    # 4. Últimas 100 visitas
+    cursor.execute("SELECT * FROM visitas ORDER BY timestamp DESC LIMIT 100")
+    ultimos_logs = [dict(row) for row in cursor.fetchall()]
+    
     conn.close()
     
-    # HTML simple para ver los logs rápido
-    html = "<h1>Últimas 50 Visitas</h1><table border='1'><tr><th>ID</th><th>Fecha</th><th>IP</th><th>País</th><th>Ruta</th><th>User Agent</th></tr>"
-    for log in logs:
-        html += f"<tr><td>{log[0]}</td><td>{log[1]}</td><td>{log[2]}</td><td>{log[3]}</td><td>{log[6]}</td><td>{log[5][:30]}...</td></tr>"
-    html += "</table>"
-    return html
+    return render_template('admin_dashboard.html', 
+                           total_visitas=total_visitas,
+                           visitantes_unicos=visitantes_unicos,
+                           top_apps=top_apps,
+                           stats_pais=stats_pais,
+                           ultimos_logs=ultimos_logs)
 
 # --- RUTA 4: ANALISIS AVALUOS ---
 UPLOAD_FOLDER = 'temp_uploads'

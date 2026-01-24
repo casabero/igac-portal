@@ -8,14 +8,14 @@ DB_FOLDER = '/app/data'
 DB_PATH = os.path.join(DB_FOLDER, 'igac_logs.db')
 
 def init_db():
-    """Inicializa la base de datos si no existe"""
+    """Inicializa la base de datos si no existe y asegura las columnas nuevas"""
     # Asegurar que la carpeta exista (aunque Docker se encarga, es doble seguridad)
     os.makedirs(DB_FOLDER, exist_ok=True)
     
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    # Creamos tabla con: Fecha, IP, País, Ciudad, Dispositivo, Ruta visitada
+    # Tabla extendida
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS visitas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,15 +25,30 @@ def init_db():
             ciudad TEXT,
             user_agent TEXT,
             ruta TEXT,
-            metodo TEXT
+            metodo TEXT,
+            referer TEXT,
+            session_id TEXT
         )
     ''')
+    
+    # Verificar si faltan las nuevas columnas (migración simple)
+    try:
+        cursor.execute("ALTER TABLE visitas ADD COLUMN referer TEXT")
+    except:
+        pass
+        
+    try:
+        cursor.execute("ALTER TABLE visitas ADD COLUMN session_id TEXT")
+    except:
+        pass
+
     conn.commit()
     conn.close()
 
 def registrar_visita(ruta_actual):
-    """Captura los datos de Cloudflare y los guarda"""
+    """Captura los datos de Cloudflare y la sesión, y los guarda"""
     try:
+        from flask import session
         # 1. Obtener IP Real (Cloudflare Tunnel)
         # Si no hay CF, usa la remota (fallback para desarrollo local)
         ip = request.headers.get('CF-Connecting-IP', request.remote_addr)
@@ -42,17 +57,24 @@ def registrar_visita(ruta_actual):
         pais = request.headers.get('CF-IPCountry', 'Desconocido')
         ciudad = request.headers.get('CF-IPCity', 'N/A') # A veces requiere config extra en CF
         
-        # 3. Datos del Navegador
+        # 3. Datos del Navegador y Contexto
         user_agent = request.headers.get('User-Agent', '')
         metodo = request.method
+        referer = request.headers.get('Referer', '')
+        
+        # 4. ID de Sesión (para trackear flujo de usuario)
+        if 'tracking_id' not in session:
+            import uuid
+            session['tracking_id'] = str(uuid.uuid4())
+        tracking_id = session['tracking_id']
 
-        # 4. Insertar en DB
+        # 5. Insertar en DB
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO visitas (timestamp, ip_publica, pais, ciudad, user_agent, ruta, metodo)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (datetime.now(), ip, pais, ciudad, user_agent, ruta_actual, metodo))
+            INSERT INTO visitas (timestamp, ip_publica, pais, ciudad, user_agent, ruta, metodo, referer, session_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (datetime.now(), ip, pais, ciudad, user_agent, ruta_actual, metodo, referer, tracking_id))
         
         conn.commit()
         conn.close()
