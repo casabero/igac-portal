@@ -435,38 +435,40 @@ def renumeracion_tool():
     if request.method == 'POST':
         file = request.files.get('archivo_excel')
         tipo = request.form.get('tipo', '1') # 1: CICA, 2: LC
+        fase = request.form.get('fase', '1') # 1: Alfanumérica, 2: Geográfica
         
         if not file or file.filename == '':
-            flash('Seleccione un archivo Excel válido.')
+            flash('Seleccione un archivo Excel válido (SNC).')
             return redirect(request.url)
             
         try:
+            # Fase 1: Siempre se ejecuta (es el motor alfanumérico)
             res = procesar_renumeracion(file, tipo)
+            res['fase_ejecutada'] = int(fase)
             
-            # --- FASE 2: GEOGRÁFICA (Opcional) ---
-            gdb_f = request.files.get('archivo_gdb_formal')
-            gdb_i = request.files.get('archivo_gdb_informal')
-            
-            if gdb_f or gdb_i:
+            # --- FASE 2: GEOGRÁFICA (Solo si se solicita explícitamente) ---
+            if fase == '2':
+                gdb_f = request.files.get('archivo_gdb_formal')
+                gdb_i = request.files.get('archivo_gdb_informal')
+                
+                if not gdb_f and not gdb_i:
+                    flash('Para la Fase 2 (Geográfica) debe subir al menos una GDB (.zip).')
+                    return redirect(request.url)
+                
                 # set_alfa_activos es un set de CODIGO_SNC del diccionario de estados que son 'ACTIVO'
                 set_activos = {k for k, v in res['diccionario_estados'].items() if v == 'ACTIVO'}
                 errores_geo, logs_geo = procesar_geografica(gdb_f, gdb_i, set_activos, res['diccionario_estados'], res['df_referencia'])
                 res['errores_geo'] = errores_geo
                 res['logs_geo'] = logs_geo
             else:
+                # Si es solo Fase 1, limpiamos cualquier residuo geo
                 res['errores_geo'] = []
                 res['logs_geo'] = []
 
-            # Limpiar dataframe de referencia para no saturar JSON si es muy grande (opcional)
-            # res.pop('df_referencia', None)
-            # res.pop('diccionario_estados', None)
-            
             # Guardar resultados pesados en disco
             new_id = str(uuid.uuid4())
             path = os.path.join(UPLOAD_FOLDER, f"renum_{new_id}.json")
             with open(path, 'w', encoding='utf-8') as f:
-                # Convertimos a serie si es necesario o manejamos el error de serialización
-                # En este caso errores_geo es una lista de dicts, es serializable.
                 json.dump(res, f, ensure_ascii=False, default=str)
             
             session['renum_audit_id'] = new_id
@@ -495,7 +497,11 @@ def renumeracion_excel():
         with open(path, 'r', encoding='utf-8') as f:
             res = json.load(f)
             
-        output = generar_excel_renumeracion(res['errores'], res.get('errores_geo'))
+        output = generar_excel_renumeracion(
+            res['errores'], 
+            res.get('errores_geo'),
+            fase=res.get('fase_ejecutada', 1)
+        )
         return send_file(
             output,
             as_attachment=True,

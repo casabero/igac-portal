@@ -10,13 +10,14 @@
     {% if not resultados %}
     <div class="max-w-xl mx-auto bg-white p-8 rounded-2xl border border-gray-200 shadow-sm mt-4">
         <h2 class="text-xl font-bold mb-6 text-gray-900 flex items-center gap-2">
-            <span class="material-symbols-outlined text-accent">rule</span> Validar Renumeración (Fase 1 y 2)
+            <span class="material-symbols-outlined text-accent">rule</span> Auditoría de Renumeración
         </h2>
 
         <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            <!-- PASO 1: CONFIGURACIÓN DE TIPO -->
             <div class="space-y-4">
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Paso 1: Configuración
-                    de Tipo</label>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Paso 1: Tipo de
+                    Reporte</label>
                 <div class="grid grid-cols-2 gap-4">
                     <label
                         class="relative flex flex-col p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-all border-gray-200"
@@ -25,7 +26,7 @@
                             class="absolute top-4 right-4 text-accent focus:ring-accent" checked
                             onchange="updateRadioSelection()">
                         <span class="text-xs font-bold text-gray-900">CICA</span>
-                        <span class="text-[10px] text-gray-400 mt-1">Actualización por IGAC</span>
+                        <span class="text-[10px] text-gray-400 mt-1">SNC vs CICA (IGAC)</span>
                     </label>
                     <label
                         class="relative flex flex-col p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-all border-gray-200"
@@ -34,53 +35,94 @@
                             class="absolute top-4 right-4 text-accent focus:ring-accent"
                             onchange="updateRadioSelection()">
                         <span class="text-xs font-bold text-gray-900">Operadores</span>
-                        <span class="text-[10px] text-gray-400 mt-1">Terceros / ANT</span>
+                        <span class="text-[10px] text-gray-400 mt-1">SNC vs Gestor/Operador</span>
                     </label>
                 </div>
             </div>
 
+            <!-- PASO 2: SELECCIÓN DE FASE -->
+            <div class="space-y-4">
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Paso 2: Fase de
+                    Auditoría</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <label
+                        class="relative flex flex-col p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-all border-gray-200"
+                        id="label_fase_1">
+                        <input type="radio" name="fase" value="1"
+                            class="absolute top-4 right-4 text-accent focus:ring-accent" checked
+                            onchange="updateFaseSelection()">
+                        <span class="text-xs font-bold text-gray-900">Fase 1</span>
+                        <span class="text-[10px] text-gray-400 mt-1">Validación Alfanumérica</span>
+                    </label>
+                    <label
+                        class="relative flex flex-col p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-all border-gray-200"
+                        id="label_fase_2">
+                        <input type="radio" name="fase" value="2"
+                            class="absolute top-4 right-4 text-accent focus:ring-accent"
+                            onchange="updateFaseSelection()">
+                        <span class="text-xs font-bold text-gray-900">Fase 2</span>
+                        <span class="text-[10px] text-gray-400 mt-1">Cruce Geográfico (GDB)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ADVERTENCIA FASE 2 (OCULTA POR DEFECTO) -->
+            <div id="warning_fase2" class="hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                <div class="p-4 bg-amber-50 border border-amber-100 rounded-xl flex gap-3">
+                    <span class="material-symbols-outlined text-amber-600 text-sm">warning</span>
+                    <p class="text-[10px] text-amber-800 leading-relaxed font-medium">
+                        <b>Atención:</b> Para ejecutar la Fase 2 se asume que los predios ya cuentan con su respectiva
+                        validación técnica (Fase 1).
+                    </p>
+                </div>
+            </div>
+
+            <!-- CARGA EXCEL (OBLIGATORIA) -->
             <div class="space-y-3">
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Paso 2: Reporte
-                    Alfanumérico (.xlsx)</label>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Paso 3: Reporte SNC
+                    (.xlsx)</label>
                 <input type="file" name="archivo_excel" id="archivo_excel" class="hidden" accept=".xlsx" required>
                 <label for="archivo_excel"
-                    class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 hover:bg-white hover:border-accent transition-all cursor-pointer group">
+                    class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 hover:bg-white hover:border-accent transition-all cursor-pointer group">
                     <span
-                        class="material-symbols-outlined text-3xl text-gray-300 mb-2 group-hover:text-accent group-hover:scale-110 transition-transform">upload_file</span>
-                    <span class="text-xs font-medium text-gray-500" id="file_label">Seleccionar Excel de
-                        renumeración</span>
+                        class="material-symbols-outlined text-2xl text-gray-300 mb-1 group-hover:text-accent group-hover:scale-110 transition-transform">upload_file</span>
+                    <span class="text-[11px] font-medium text-gray-500" id="file_label">Seleccionar archivo Excel</span>
                 </label>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">GDB Formal
-                        (Opcional)</label>
-                    <input type="file" name="archivo_gdb_formal" id="gdb_f" class="hidden" accept=".zip">
-                    <label for="gdb_f"
-                        class="flex flex-col items-center justify-center h-24 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 hover:bg-white hover:border-accent transition-all cursor-pointer">
-                        <span class="material-symbols-outlined text-gray-300">map</span>
-                        <span class="text-[10px] text-gray-400 mt-1" id="label_gdb_f">Subir ZIP (Normal)</span>
-                    </label>
-                </div>
-                <div class="space-y-2">
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">GDB Informal
-                        (Opcional)</label>
-                    <input type="file" name="archivo_gdb_informal" id="gdb_i" class="hidden" accept=".zip">
-                    <label for="gdb_i"
-                        class="flex flex-col items-center justify-center h-24 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 hover:bg-white hover:border-accent transition-all cursor-pointer">
-                        <span class="material-symbols-outlined text-gray-300">location_on</span>
-                        <span class="text-[10px] text-gray-400 mt-1" id="label_gdb_i">Subir ZIP (Informal)</span>
-                    </label>
+            <!-- CARGA GDBS (SOLO FASE 2) -->
+            <div id="gdb_inputs" class="hidden space-y-4 animate-in fade-in duration-300">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">GDB
+                            Formal</label>
+                        <input type="file" name="archivo_gdb_formal" id="gdb_f" class="hidden" accept=".zip">
+                        <label for="gdb_f"
+                            class="flex flex-col items-center justify-center h-20 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 hover:bg-white hover:border-accent transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-gray-300">map</span>
+                            <span class="text-[10px] text-gray-400 mt-1" id="label_gdb_f">ZIP Capas Normal</span>
+                        </label>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">GDB
+                            Informal</label>
+                        <input type="file" name="archivo_gdb_informal" id="gdb_i" class="hidden" accept=".zip">
+                        <label for="gdb_i"
+                            class="flex flex-col items-center justify-center h-20 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 hover:bg-white hover:border-accent transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-gray-300">location_on</span>
+                            <span class="text-[10px] text-gray-400 mt-1" id="label_gdb_i">ZIP Capas Informal</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
             <button type="submit"
                 class="w-full bg-gray-900 text-white py-4 rounded-2xl hover:bg-accent hover:shadow-xl hover:shadow-accent/20 transition-all font-bold text-sm tracking-widest flex justify-center items-center gap-3">
-                <span class="material-symbols-outlined">analytics</span> EJECUTAR AUDITORÍA INTEGRAL
+                <span class="material-symbols-outlined">analytics</span> EJECUTAR VALIDACIÓN
             </button>
         </form>
     </div>
+
     {% endif %}
 
     <!-- RESULTADOS (SI EXISTEN) -->
@@ -116,8 +158,9 @@
         <!-- SECCIÓN 1: AUDITORÍA ALFANUMÉRICA -->
         <div class="space-y-4">
             <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                <span class="material-symbols-outlined text-sm">description</span> Fase 1: Revisión Renumeración CICA vs
-                SNC
+                <span class="material-symbols-outlined text-sm">description</span>
+                {% if resultados.fase_ejecutada == 1 %}Fase 1: Validación Alfanumérica{% else %}Fase 1: Base
+                Alfanumérica (Pre-validada){% endif %}
             </h4>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {% for i in range(1, 7) %}
@@ -138,10 +181,11 @@
                 {% endfor %}
             </div>
 
-            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mt-4">
+            <div
+                class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mt-4 {% if resultados.fase_ejecutada == 2 and not resultados.errores %}hidden{% endif %}">
                 <div class="px-6 py-4 border-b border-gray-50 bg-gray-50/30">
-                    <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Alertas
-                        Alfanuméricas ({{ resultados.errores|length }})</h4>
+                    <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Alertas Alfanuméricas ({{
+                        resultados.errores|length }})</h4>
                 </div>
                 <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
                     {% if resultados.errores %}
@@ -178,10 +222,10 @@
         </div>
 
         <!-- SECCIÓN 2: AUDITORÍA GEOGRÁFICA -->
-        {% if resultados.errores_geo is defined %}
+        {% if resultados.fase_ejecutada == 2 %}
         <div class="space-y-4">
             <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                <span class="material-symbols-outlined text-sm">map</span> Fase 2: Cruce Geográfico (Formal + Informal)
+                <span class="material-symbols-outlined text-sm">map</span> Fase 2: Cruce Geográfico (GDB)
             </h4>
 
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
@@ -297,8 +341,8 @@
 {% block scripts %}
 <script>
     function updateRadioSelection() {
-        const r1 = document.querySelector('input[value="1"]');
-        const r2 = document.querySelector('input[value="2"]');
+        const r1 = document.querySelector('input[name="tipo"][value="1"]');
+        const r2 = document.querySelector('input[name="tipo"][value="2"]');
 
         document.getElementById('label_tipo_1').classList.toggle('border-accent', r1.checked);
         document.getElementById('label_tipo_1').classList.toggle('bg-blue-50/30', r1.checked);
@@ -306,10 +350,33 @@
         document.getElementById('label_tipo_2').classList.toggle('bg-blue-50/30', r2.checked);
     }
 
+    function updateFaseSelection() {
+        const f1 = document.querySelector('input[name="fase"][value="1"]');
+        const f2 = document.querySelector('input[name="fase"][value="2"]');
+
+        const w2 = document.getElementById('warning_fase2');
+        const gdb = document.getElementById('gdb_inputs');
+
+        // Estilos de labels
+        document.getElementById('label_fase_1').classList.toggle('border-accent', f1.checked);
+        document.getElementById('label_fase_1').classList.toggle('bg-blue-50/30', f1.checked);
+        document.getElementById('label_fase_2').classList.toggle('border-accent', f2.checked);
+        document.getElementById('label_fase_2').classList.toggle('bg-blue-50/30', f2.checked);
+
+        // Visibilidad de secciones
+        if (f2.checked) {
+            w2.classList.remove('hidden');
+            gdb.classList.remove('hidden');
+        } else {
+            w2.classList.add('hidden');
+            gdb.classList.add('hidden');
+        }
+    }
+
     {% if not resultados %}
     document.getElementById('archivo_excel').addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
-            document.getElementById('file_label').innerHTML = `<b class="text-accent">✓ Excel: ${e.target.files[0].name}</b>`;
+            document.getElementById('file_label').innerHTML = `<b class="text-accent tracking-normal">Excel: ${e.target.files[0].name}</b>`;
         }
     });
     document.getElementById('gdb_f').addEventListener('change', (e) => {
@@ -323,6 +390,7 @@
         }
     });
     updateRadioSelection();
+    updateFaseSelection();
     {% endif %}
 </script>
 {% endblock %}
