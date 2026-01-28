@@ -417,7 +417,7 @@ class AuditoriaRenumeracionPDF(FPDF):
 
 def generar_pdf_renumeracion(resultados):
     """Genera un reporte PDF detallado con los resultados de la auditoría"""
-    pdf = AuditoriaRenumeracionPDF()
+    pdf = AuditoriaRenumeracionPDF(format='Letter')
     pdf.set_margins(20, 20, 20)
     pdf.add_page()
     
@@ -445,7 +445,7 @@ def generar_pdf_renumeracion(resultados):
     pdf.cell(0, 6, f"Auditoría: {label_comparacion}  |  Fecha: {fecha}", 0, 1, 'L')
     
     pdf.set_draw_color(229, 231, 235)
-    pdf.line(20, 38, 190, 38)
+    pdf.line(20, 38, 195, 38)
     pdf.ln(10)
     
     # === SECCIÓN 1: RESUMEN EJECUTIVO ===
@@ -546,14 +546,14 @@ def generar_pdf_renumeracion(resultados):
             pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Top 10 Códigos con Más Alertas', 0, 1); pdf.ln(2)
             pdf.set_font('Helvetica', '', 9); pdf.multi_cell(0, 5, 'Predios con más incumplimientos alfanuméricos.')
             pdf.ln(3); pdf.set_font('Helvetica', 'B', 8)
-            pdf.cell(10, 8, '#', 1, 0, 'C'); pdf.cell(50, 8, 'Código Predial', 1, 0, 'C')
-            pdf.cell(20, 8, 'Alertas', 1, 0, 'C'); pdf.cell(110, 8, 'Reglas Incumplidas', 1, 1, 'C')
+            pdf.cell(10, 8, '#', 1, 0, 'C'); pdf.cell(45, 8, 'Código Predial', 1, 0, 'C')
+            pdf.cell(20, 8, 'Alertas', 1, 0, 'C'); pdf.cell(100, 8, 'Reglas Incumplidas', 1, 1, 'C')
             pdf.set_font('Helvetica', '', 7)
             for idx, (codigo, num_errores, reglas) in enumerate(top_problematicos, 1):
-                pdf.cell(10, 6, str(idx), 1, 0, 'C'); pdf.cell(50, 6, str(codigo), 1, 0, 'C')
+                pdf.cell(10, 6, str(idx), 1, 0, 'C'); pdf.cell(45, 6, str(codigo), 1, 0, 'C')
                 pdf.set_text_color(220, 38, 38); pdf.cell(20, 6, str(num_errores), 1, 0, 'C')
                 pdf.set_text_color(0, 0, 0); reglas_txt = reglas[:70] + '...' if len(reglas) > 70 else reglas
-                pdf.cell(110, 6, reglas_txt, 1, 1)
+                pdf.cell(100, 6, reglas_txt, 1, 1)
             pdf.ln(5)
     else:
         # Muestra de Consistencia (Solo en Fase 2)
@@ -563,12 +563,12 @@ def generar_pdf_renumeracion(resultados):
             pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Muestra de Consistencia (Alfa vs Geo)', 0, 1); pdf.ln(2)
             pdf.set_font('Helvetica', '', 9); pdf.multi_cell(0, 5, 'Muestra aleatoria de predios que coinciden perfectamente en el reporte alfanumérico y la Geodatabase (Fase 2 exitosa).')
             pdf.ln(3); pdf.set_font('Helvetica', 'B', 8)
-            pdf.cell(10, 8, '#', 1, 0, 'C'); pdf.cell(80, 8, 'Código Predial (SNC)', 1, 0, 'C')
-            pdf.cell(50, 8, 'Validado en Excel', 1, 0, 'C'); pdf.cell(50, 8, 'Validado en GDB', 1, 1, 'C')
+            pdf.cell(10, 8, '#', 1, 0, 'C'); pdf.cell(75, 8, 'Código Predial (SNC)', 1, 0, 'C')
+            pdf.cell(45, 8, 'Validado en Excel', 1, 0, 'C'); pdf.cell(45, 8, 'Validado en GDB', 1, 1, 'C')
             pdf.set_font('Helvetica', '', 7)
             for idx, cod in enumerate(sample, 1):
-                pdf.cell(10, 6, str(idx), 1, 0, 'C'); pdf.cell(80, 6, str(cod), 1, 0, 'C')
-                pdf.set_text_color(22, 163, 74); pdf.cell(50, 6, 'OK', 1, 0, 'C'); pdf.cell(50, 6, 'DIBUJADO', 1, 1, 'C')
+                pdf.cell(10, 6, str(idx), 1, 0, 'C'); pdf.cell(75, 6, str(cod), 1, 0, 'C')
+                pdf.set_text_color(22, 163, 74); pdf.cell(45, 6, 'OK', 1, 0, 'C'); pdf.cell(45, 6, 'DIBUJADO', 1, 1, 'C')
                 pdf.set_text_color(0, 0, 0)
             pdf.ln(5)
 
@@ -577,7 +577,7 @@ def generar_pdf_renumeracion(resultados):
     pdf.set_font('Helvetica', 'B', 12)
     if fase == 1:
         pdf.cell(0, 10, f'Fase 1: Resumen de Reglas Alfanuméricas', 0, 1); pdf.ln(2)
-        pdf.set_font('Helvetica', 'B', 9); pdf.cell(80, 8, 'Regla / Validación', 1); pdf.cell(110, 8, 'Descripción', 1); pdf.ln()
+        pdf.set_font('Helvetica', 'B', 9); pdf.cell(75, 8, 'Regla / Validación', 1); pdf.cell(100, 8, 'Descripción', 1); pdf.ln()
         pdf.set_font('Helvetica', '', 8); rules_f1 = {'1. UNICIDAD': 'Duplicados en SNC.', '2. PERMANENCIA': 'Cambios en predios viejos.', '3. LIMPIEZA': 'Letras/Provisionales.', '4. CONSECUTIVO': 'Secuencia lógica.', '5. MANZANA NUEVA': 'Reinicio manzana.', '6. SECTOR NUEVO': 'Reinicio sector.'}
         stats = resultados.get('stats', {})
         for r_name, r_desc in rules_f1.items():
@@ -585,20 +585,20 @@ def generar_pdf_renumeracion(resultados):
             for k, v in stats.items():
                 if r_name in k: count = v
             pdf.set_text_color(220, 38, 38) if count > 0 else pdf.set_text_color(22, 163, 74)
-            pdf.cell(80, 7, f"{r_name} ({count} alertas)", 1); pdf.set_text_color(0, 0, 0); pdf.cell(110, 7, r_desc, 1); pdf.ln()
+            pdf.cell(75, 7, f"{r_name} ({count} alertas)", 1); pdf.set_text_color(0, 0, 0); pdf.cell(100, 7, r_desc, 1); pdf.ln()
     else:
         pdf.cell(0, 10, f'Fase 2: Resumen de Cruce Geográfico', 0, 1); pdf.ln(2)
         pdf.set_font('Helvetica', '', 9); pdf.multi_cell(0, 5, 'Análisis de cobertura entre el reporte Alfanumérico y las capas geográficas (U_TERRENO, R_TERRENO, etc.).')
         pdf.ln(3); pdf.set_font('Helvetica', 'B', 9)
-        pdf.cell(80, 8, 'Categoría', 1); pdf.cell(110, 8, 'Resultado', 1); pdf.ln()
+        pdf.cell(75, 8, 'Categoría', 1); pdf.cell(100, 8, 'Resultado', 1); pdf.ln()
         pdf.set_font('Helvetica', '', 8)
         s_geo = resultados.get('logs_geo', {}).get('stats_geo', {})
         if s_geo:
-            pdf.cell(80, 7, 'Predios en Reporte (Excel)', 1); pdf.cell(110, 7, str(s_geo['total_alfa']), 1); pdf.ln()
-            pdf.cell(80, 7, 'Predios en Mapa (GDB)', 1); pdf.cell(110, 7, str(s_geo['total_geo']), 1); pdf.ln()
-            pdf.set_text_color(22, 163, 74); pdf.cell(80, 7, 'Coincidencias (Cruzados)', 1); pdf.cell(110, 7, str(s_geo['coincidencias']), 1); pdf.ln()
-            pdf.set_text_color(220, 38, 38); pdf.cell(80, 7, 'Sin Geometría', 1); pdf.cell(110, 7, str(s_geo['sin_mapa']), 1); pdf.ln()
-            pdf.set_text_color(245, 158, 11); pdf.cell(80, 7, 'Sobran en GDB', 1); pdf.cell(110, 7, str(s_geo['sobran_gdb']), 1); pdf.ln()
+            pdf.cell(75, 7, 'Predios en Reporte (Excel)', 1); pdf.cell(100, 7, str(s_geo['total_alfa']), 1); pdf.ln()
+            pdf.cell(75, 7, 'Predios en Mapa (GDB)', 1); pdf.cell(100, 7, str(s_geo['total_geo']), 1); pdf.ln()
+            pdf.set_text_color(22, 163, 74); pdf.cell(75, 7, 'Coincidencias (Cruzados)', 1); pdf.cell(100, 7, str(s_geo['coincidencias']), 1); pdf.ln()
+            pdf.set_text_color(220, 38, 38); pdf.cell(75, 7, 'Sin Geometría', 1); pdf.cell(100, 7, str(s_geo['sin_mapa']), 1); pdf.ln()
+            pdf.set_text_color(245, 158, 11); pdf.cell(75, 7, 'Sobran en GDB', 1); pdf.cell(100, 7, str(s_geo['sobran_gdb']), 1); pdf.ln()
             pdf.set_text_color(0, 0, 0)
 
     # === SECCIÓN 5: RECOMENDACIONES ===
@@ -621,20 +621,20 @@ def generar_pdf_renumeracion(resultados):
     # === SECCIÓN 6/7: DETALLE DE ALERTAS ===
     if fase == 1 or resultados.get('errores'):
         pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Detalle de Alertas Alfanuméricas', 0, 1); pdf.ln(2)
-        pdf.set_font('Helvetica', 'B', 8); pdf.cell(50, 8, 'Regla', 1); pdf.cell(60, 8, 'Detalle', 1); pdf.cell(40, 8, f'{label_anterior}', 1); pdf.cell(40, 8, 'Nuevo (SNC)', 1); pdf.ln()
+        pdf.set_font('Helvetica', 'B', 8); pdf.cell(45, 8, 'Regla', 1); pdf.cell(55, 8, 'Detalle', 1); pdf.cell(37.5, 8, f'{label_anterior}', 1); pdf.cell(37.5, 8, 'Nuevo (SNC)', 1); pdf.ln()
         pdf.set_font('Helvetica', '', 7)
         for err in resultados.get('errores', [])[:100]:
             if pdf.get_y() > 260: pdf.add_page()
             d = str(err['DETALLE'])[:40] + '...' if len(str(err['DETALLE'])) > 40 else str(err['DETALLE'])
-            pdf.cell(50, 6, str(err['REGLA']), 1); pdf.cell(60, 6, d, 1); pdf.cell(40, 6, str(err['ANTERIOR']), 1); pdf.cell(40, 6, str(err['NUEVO']), 1); pdf.ln()
+            pdf.cell(45, 6, str(err['REGLA']), 1); pdf.cell(55, 6, d, 1); pdf.cell(37.5, 6, str(err['ANTERIOR']), 1); pdf.cell(37.5, 6, str(err['NUEVO']), 1); pdf.ln()
 
     if fase == 2 and resultados.get('errores_geo'):
         pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Detalle de Alertas Geográficas (Fase 2)', 0, 1); pdf.ln(2)
-        pdf.set_font('Helvetica', 'B', 8); pdf.cell(60, 8, 'Tipo de Alerta', 1); pdf.cell(50, 8, 'Código Predial', 1); pdf.cell(30, 8, 'Estado BD', 1); pdf.cell(50, 8, 'Acción', 1); pdf.ln()
+        pdf.set_font('Helvetica', 'B', 8); pdf.cell(55, 8, 'Tipo de Alerta', 1); pdf.cell(45, 8, 'Código Predial', 1); pdf.cell(30, 8, 'Estado BD', 1); pdf.cell(45, 8, 'Acción', 1); pdf.ln()
         pdf.set_font('Helvetica', '', 7)
         for err in resultados['errores_geo'][:150]:
             if pdf.get_y() > 260: pdf.add_page()
-            pdf.cell(60, 6, str(err['TIPO']), 1); pdf.cell(50, 6, str(err['CODIGO']), 1); pdf.cell(30, 6, str(err['ESTADO_BD']), 1); pdf.cell(50, 6, str(err['ACCION_SUGERIDA']), 1); pdf.ln()
+            pdf.cell(55, 6, str(err['TIPO']), 1); pdf.cell(45, 6, str(err['CODIGO']), 1); pdf.cell(30, 6, str(err['ESTADO_BD']), 1); pdf.cell(45, 6, str(err['ACCION_SUGERIDA']), 1); pdf.ln()
 
     return bytes(pdf.output())
 
