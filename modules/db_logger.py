@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from flask import request
 
 # Ruta persistente según tus SOPs
@@ -93,7 +93,7 @@ def registrar_visita(ruta_actual):
         cursor.execute('''
             INSERT INTO visitas (timestamp, ip_publica, pais, ciudad, user_agent, ruta, metodo, referer, session_id, dispositivo, os, navegador, resolucion)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (datetime.now(), ip, pais, ciudad, ua_string, ruta_actual, metodo, referer, tracking_id, dispositivo, os_info, browser_info, resolucion))
+        ''', (datetime.now(timezone(timedelta(hours=-5))), ip, pais, ciudad, ua_string, ruta_actual, metodo, referer, tracking_id, dispositivo, os_info, browser_info, resolucion))
         
         conn.commit()
         conn.close()

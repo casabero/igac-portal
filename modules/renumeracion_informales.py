@@ -5,7 +5,7 @@ import os
 import shutil
 import zipfile
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import traceback
 
 def unzip_file(zip_path, extract_to):
@@ -198,7 +198,7 @@ def procesar_informales(rutas_zips, output_folder, prefijo='200000'):
             )
             .reset_index()
         )
-        log_df["fecha_proceso"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_df["fecha_proceso"] = datetime.now(timezone(timedelta(hours=-5))).strftime("%Y-%m-%d %H:%M:%S")
         log_data = log_df.to_dict(orient="records")
         
         # 6. Exportar SHP resultado

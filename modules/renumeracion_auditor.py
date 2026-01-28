@@ -5,7 +5,7 @@ import os
 import zipfile
 import shutil
 import tempfile
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 try:
     import geopandas as gpd
     import fiona
@@ -230,7 +230,7 @@ def procesar_renumeracion(file_stream, tipo_config):
         'df_referencia': df_audit[[col_nuevo, col_anterior]].rename(columns={col_nuevo: 'CODIGO_SNC', col_anterior: 'CODIGO_ANTERIOR'}),
         'success': True,
         'tipo_config': tipo_config,
-        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'timestamp': datetime.now(timezone(timedelta(hours=-5))).strftime('%Y-%m-%d %H:%M:%S'),
         'tasa_error': round(tasa_error, 2),
         'top_problematicos': top_problematicos
     }
@@ -375,7 +375,7 @@ def generar_excel_renumeracion(errores_alfa, errores_geo=None, fase=1):
         df_meta = pd.DataFrame([
             {'REPORTE': 'Reporte de Auditoría de Renumeración', 'FRIO': ''},
             {'CAMPO': 'Fase Ejecutada', 'VALOR': fase_txt},
-            {'CAMPO': 'Fecha de Generación', 'VALOR': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+            {'CAMPO': 'Fecha de Generación', 'VALOR': datetime.now(timezone(timedelta(hours=-5))).strftime('%Y-%m-%d %H:%M:%S')}
         ])
         if fase == 2:
             df_meta = pd.concat([df_meta, pd.DataFrame([{'CAMPO': 'Nota', 'VALOR': 'Se asume validación Fase 1 aprobada'}])], ignore_index=True)
