@@ -413,7 +413,7 @@ def generar_pdf_renumeracion(resultados):
     pdf.set_font('Helvetica', '', 10)
     pdf.set_text_color(107, 114, 128) # Gray-500
     fecha = resultados.get('timestamp', 'N/A')
-    pdf.cell(0, 6, f"{label_comparacion}  •  {fecha}", 0, 1, 'L')
+    pdf.cell(0, 6, f"{label_comparacion}  |  {fecha}", 0, 1, 'L')
     
     # Línea separadora sutil
     pdf.set_draw_color(229, 231, 235) # Gray-200
