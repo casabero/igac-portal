@@ -46,14 +46,29 @@ def procesar_renumeracion(file_stream, tipo_config):
     except Exception as e:
         raise ValueError(f"Error al leer el archivo Excel: {str(e)}")
 
+    # Lógica modificada: Si es Operadores (2), forzamos renombrado por posición
+    if tipo_config == '2':
+        if len(df_full.columns) < 2:
+            raise ValueError("El archivo debe tener al menos 2 columnas para el modo Operadores.")
+            
+        # Renombrar por posición: Col 0 -> Nuevo, Col 1 -> Anterior
+        # Mantenemos los nombres originales de las otras columnas (como Estado)
+        mapa_cols = {
+            df_full.columns[0]: col_nuevo, # Pos 0 -> Numero SNC
+            df_full.columns[1]: col_anterior # Pos 1 -> Numero Anterior (LC)
+        }
+        df_full = df_full.rename(columns=mapa_cols)
+
     columnas_requeridas = [col_nuevo, col_anterior, col_estado]
     faltantes = [c for c in columnas_requeridas if c not in df_full.columns]
     if faltantes:
-        raise ValueError(f"Faltan las columnas requeridas: {', '.join(faltantes)}")
+        raise ValueError(f"Faltan las columnas requeridas: {', '.join(faltantes)}. (Nota: En modo Operadores la col 1 es SNC y la 2 es Anterior, pero se requiere una columna llamada 'Estado')")
 
     # Limpieza
     df_full[col_anterior] = df_full[col_anterior].str.strip()
     df_full[col_nuevo] = df_full[col_nuevo].str.strip()
+    # Si la columna Estado no existe, intentar buscar algo parecido o fallar
+    # Por ahora asumimos que existe como validamos arriba
     df_full[col_estado] = df_full[col_estado].str.strip().str.upper()
 
     # Diccionario de referencia para Fase 2 (TODOS los estados)
