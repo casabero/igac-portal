@@ -378,9 +378,7 @@ import io
 
 class AuditoriaRenumeracionPDF(FPDF):
     def header(self):
-        self.set_font('Helvetica', 'B', 12)
-        self.cell(0, 10, 'REPORTE DE AUDITORÍA DE RENUMERACIÓN - IGAC PORTAL', 0, 1, 'C')
-        self.ln(5)
+        pass
 
     def footer(self):
         self.set_y(-15)
@@ -405,17 +403,22 @@ def generar_pdf_renumeracion(resultados):
         label_anterior = 'Operadores'
         label_comparacion = 'Operadores vs SNC'
     
-    # === SECCIÓN 0: METADATOS ===
-    pdf.set_font('Helvetica', 'B', 16)
-    pdf.set_text_color(51, 51, 51)
-    pdf.cell(0, 10, 'AUDITORÍA DE RENUMERACIÓN CATASTRAL', 0, 1, 'C')
-    pdf.ln(3)
+    # === CABECERA MINIMALISTA ===
+    # Título Principal
+    pdf.set_font('Helvetica', 'B', 18)
+    pdf.set_text_color(17, 24, 39) # Gray-900
+    pdf.cell(0, 10, 'Informe de Validación Catastral', 0, 1, 'L')
     
-    pdf.set_font('Helvetica', '', 9)
-    pdf.set_text_color(128, 128, 128)
-    pdf.cell(0, 5, f"Tipo de Auditoría: {label_comparacion}", 0, 1, 'C')
-    pdf.cell(0, 5, f"Fecha de Procesamiento: {resultados.get('timestamp', 'N/A')}", 0, 1, 'C')
-    pdf.ln(8)
+    # Subtítulo / Metadatos en linea simple
+    pdf.set_font('Helvetica', '', 10)
+    pdf.set_text_color(107, 114, 128) # Gray-500
+    fecha = resultados.get('timestamp', 'N/A')
+    pdf.cell(0, 6, f"{label_comparacion}  •  {fecha}", 0, 1, 'L')
+    
+    # Línea separadora sutil
+    pdf.set_draw_color(229, 231, 235) # Gray-200
+    pdf.line(10, 35, 200, 35)
+    pdf.ln(10)
     
     # === SECCIÓN 1: RESUMEN EJECUTIVO ===
     pdf.set_font('Helvetica', 'B', 14)
