@@ -463,7 +463,7 @@ def renumeracion_tool():
             else:
                 # Si es solo Fase 1, limpiamos cualquier residuo geo
                 res['errores_geo'] = []
-                res['logs_geo'] = []
+                res['logs_geo'] = {}
 
             # Guardar resultados pesados en disco
             new_id = str(uuid.uuid4())

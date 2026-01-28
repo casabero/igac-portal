@@ -480,7 +480,8 @@ def generar_pdf_renumeracion(resultados):
     pdf.set_text_color(0, 0, 0)
     
     if 'errores_geo' in resultados:
-        stats_geo = resultados.get('logs_geo', {}).get('stats_geo', {})
+        logs_geo = resultados.get('logs_geo', {})
+        stats_geo = logs_geo.get('stats_geo', {}) if isinstance(logs_geo, dict) else {}
         total_geo_alertas = len(resultados.get('errores_geo', []))
         
         pdf.set_font('Helvetica', '', 10)
@@ -523,7 +524,8 @@ def generar_pdf_renumeracion(resultados):
             except Exception as e: print(f"Error gráfico: {e}")
     else:
         # Gráfico de Consistencia para Fase 2
-        stats_geo = resultados.get('logs_geo', {}).get('stats_geo', {})
+        logs_geo = resultados.get('logs_geo', {})
+        stats_geo = logs_geo.get('stats_geo', {}) if isinstance(logs_geo, dict) else {}
         if stats_geo:
             try:
                 plt.figure(figsize=(6, 4))
@@ -557,7 +559,8 @@ def generar_pdf_renumeracion(resultados):
             pdf.ln(5)
     else:
         # Muestra de Consistencia (Solo en Fase 2)
-        sample = resultados.get('logs_geo', {}).get('coincidencias_sample', [])
+        logs_geo = resultados.get('logs_geo', {})
+        sample = logs_geo.get('coincidencias_sample', []) if isinstance(logs_geo, dict) else []
         if sample:
             pdf.add_page()
             pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Muestra de Consistencia (Alfa vs Geo)', 0, 1); pdf.ln(2)
@@ -592,7 +595,8 @@ def generar_pdf_renumeracion(resultados):
         pdf.ln(3); pdf.set_font('Helvetica', 'B', 9)
         pdf.cell(75, 8, 'Categoría', 1); pdf.cell(100, 8, 'Resultado', 1); pdf.ln()
         pdf.set_font('Helvetica', '', 8)
-        s_geo = resultados.get('logs_geo', {}).get('stats_geo', {})
+        logs_geo = resultados.get('logs_geo', {})
+        s_geo = logs_geo.get('stats_geo', {}) if isinstance(logs_geo, dict) else {}
         if s_geo:
             pdf.cell(75, 7, 'Predios en Reporte (Excel)', 1); pdf.cell(100, 7, str(s_geo['total_alfa']), 1); pdf.ln()
             pdf.cell(75, 7, 'Predios en Mapa (GDB)', 1); pdf.cell(100, 7, str(s_geo['total_geo']), 1); pdf.ln()
@@ -610,7 +614,8 @@ def generar_pdf_renumeracion(resultados):
             if tasa_error > 5: recomendaciones.append("CRÍTICO: Alta tasa de error alfanumérico. No se recomienda cierre.")
             recomendaciones.append("Revisar predios con códigos provisionales o letras antes del cierre.")
     else:
-        s_geo = resultados.get('logs_geo', {}).get('stats_geo', {})
+        logs_geo = resultados.get('logs_geo', {})
+        s_geo = logs_geo.get('stats_geo', {}) if isinstance(logs_geo, dict) else {}
         if s_geo:
             consistencia = (s_geo['coincidencias'] / s_geo['total_alfa'] * 100) if s_geo['total_alfa'] > 0 else 0
             if consistencia < 90: recomendaciones.append(f"Geográfico: Consistencia baja ({consistencia:.1f}%). Falta dibujo masivo.")
