@@ -5,6 +5,7 @@ import os
 import zipfile
 import shutil
 import tempfile
+from datetime import datetime
 try:
     import geopandas as gpd
     import fiona
@@ -200,13 +201,38 @@ def procesar_renumeracion(file_stream, tipo_config):
     df_err = pd.DataFrame(todos_errores) if todos_errores else pd.DataFrame(columns=['REGLA'])
     stats = df_err['REGLA'].value_counts().to_dict() if not df_err.empty else {}
 
+    # Calcular estadísticas adicionales
+    total_errores = len(todos_errores)
+    tasa_error = (total_errores / len(df_audit) * 100) if len(df_audit) > 0 else 0
+    
+    # Top 10 códigos con más errores
+    top_problematicos = []
+    if todos_errores:
+        codigos_problema = {}
+        for err in todos_errores:
+            cod = err['NUEVO']
+            if cod not in codigos_problema:
+                codigos_problema[cod] = []
+            codigos_problema[cod].append(err['REGLA'])
+        
+        # Ordenar por cantidad de errores
+        top_problematicos = sorted(
+            [(cod, len(reglas), ', '.join(set(reglas))) for cod, reglas in codigos_problema.items()],
+            key=lambda x: x[1],
+            reverse=True
+        )[:10]
+
     return {
         'total_auditado': len(df_audit),
         'errores': todos_errores,
         'stats': stats,
         'diccionario_estados': diccionario_estados,
         'df_referencia': df_audit[[col_nuevo, col_anterior]].rename(columns={col_nuevo: 'CODIGO_SNC', col_anterior: 'CODIGO_ANTERIOR'}),
-        'success': True
+        'success': True,
+        'tipo_config': tipo_config,
+        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'tasa_error': round(tasa_error, 2),
+        'top_problematicos': top_problematicos
     }
 
 def extraer_datos_gdb(zip_stream, capas_objetivo):
@@ -370,47 +396,82 @@ def generar_pdf_renumeracion(resultados):
     pdf = AuditoriaRenumeracionPDF()
     pdf.add_page()
     
-    # 1. Resumen General
+    # Determinar etiquetas dinámicas según tipo de auditoría
+    tipo_config = resultados.get('tipo_config', '1')
+    if tipo_config == '1':
+        label_anterior = 'CICA'
+        label_comparacion = 'CICA vs SNC'
+    else:
+        label_anterior = 'Operadores'
+        label_comparacion = 'Operadores vs SNC'
+    
+    # === SECCIÓN 0: METADATOS ===
+    pdf.set_font('Helvetica', 'B', 16)
+    pdf.set_text_color(51, 51, 51)
+    pdf.cell(0, 10, 'AUDITORÍA DE RENUMERACIÓN CATASTRAL', 0, 1, 'C')
+    pdf.ln(3)
+    
+    pdf.set_font('Helvetica', '', 9)
+    pdf.set_text_color(128, 128, 128)
+    pdf.cell(0, 5, f"Tipo de Auditoría: {label_comparacion}", 0, 1, 'C')
+    pdf.cell(0, 5, f"Fecha de Procesamiento: {resultados.get('timestamp', 'N/A')}", 0, 1, 'C')
+    pdf.ln(8)
+    
+    # === SECCIÓN 1: RESUMEN EJECUTIVO ===
     pdf.set_font('Helvetica', 'B', 14)
+    pdf.set_text_color(0, 0, 0)
     pdf.cell(0, 10, 'Resumen Ejecutivo', 0, 1)
     pdf.ln(2)
     
-    pdf.set_font('Helvetica', '', 10)
-    pdf.cell(60, 8, 'Total Predios Auditados:', 0)
-    pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(0, 8, str(resultados.get('total_auditado', 0)), 0, 1)
+    # Métricas principales
+    total_auditado = resultados.get('total_auditado', 0)
+    total_errores = len(resultados.get('errores', []))
+    tasa_error = resultados.get('tasa_error', 0)
     
     pdf.set_font('Helvetica', '', 10)
-    pdf.cell(60, 8, 'Total Alertas Alfanuméricas:', 0)
+    pdf.cell(70, 8, 'Total Predios Auditados:', 0)
     pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(0, 8, str(len(resultados.get('errores', []))), 0, 1)
+    pdf.cell(0, 8, f"{total_auditado:,}", 0, 1)
+    
+    pdf.set_font('Helvetica', '', 10)
+    pdf.cell(70, 8, 'Total Alertas Alfanuméricas:', 0)
+    pdf.set_font('Helvetica', 'B', 10)
+    color = (220, 38, 38) if total_errores > 0 else (22, 163, 74)
+    pdf.set_text_color(*color)
+    pdf.cell(0, 8, f"{total_errores:,}", 0, 1)
+    pdf.set_text_color(0, 0, 0)
+    
+    pdf.set_font('Helvetica', '', 10)
+    pdf.cell(70, 8, 'Tasa de Error:', 0)
+    pdf.set_font('Helvetica', 'B', 10)
+    color = (220, 38, 38) if tasa_error > 5 else (22, 163, 74) if tasa_error == 0 else (234, 179, 8)
+    pdf.set_text_color(*color)
+    pdf.cell(0, 8, f"{tasa_error}%", 0, 1)
+    pdf.set_text_color(0, 0, 0)
     
     if 'errores_geo' in resultados:
         pdf.set_font('Helvetica', '', 10)
-        pdf.cell(60, 8, 'Total Alertas Geográficas:', 0)
+        pdf.cell(70, 8, 'Total Alertas Geográficas:', 0)
         pdf.set_font('Helvetica', 'B', 10)
         pdf.cell(0, 8, str(len(resultados.get('errores_geo', []))), 0, 1)
     
     pdf.ln(5)
     
-    # 2. Gráfico de Errores por Regla (Fase 1)
+    # === SECCIÓN 2: GRÁFICO DE DISTRIBUCIÓN ===
     stats = resultados.get('stats', {})
     if stats:
         try:
             plt.figure(figsize=(6, 4))
             rules = list(stats.keys())
             counts = list(stats.values())
-            # Limpiar nombres de reglas para el gráfico
             short_rules = [r.split('.')[0] for r in rules]
             
-            # Verde muy suave o gris azulado para ser más sutil
             plt.bar(short_rules, counts, color='#cbd5e1', edgecolor='#94a3b8') 
             plt.title('Distribución de Alertas por Regla (Fase 1)', fontsize=11, color='#475569')
             plt.xlabel('Regla', fontsize=9)
             plt.ylabel('Cantidad', fontsize=9)
             plt.grid(axis='y', linestyle=':', alpha=0.5)
             
-            # Remover bordes innecesarios
             plt.gca().spines['top'].set_visible(False)
             plt.gca().spines['right'].set_visible(False)
             
@@ -424,11 +485,54 @@ def generar_pdf_renumeracion(resultados):
         except Exception as e:
             print(f"Error generando gráfico PDF: {e}")
 
-    # 3. Resumen de Reglas Alfanuméricas
+    # === SECCIÓN 3: TOP 10 CÓDIGOS PROBLEMÁTICOS ===
+    top_problematicos = resultados.get('top_problematicos', [])
+    if top_problematicos:
+        pdf.add_page()
+        pdf.set_font('Helvetica', 'B', 12)
+        pdf.cell(0, 10, 'Top 10 Códigos con Más Alertas', 0, 1)
+        pdf.ln(2)
+        
+        pdf.set_font('Helvetica', '', 9)
+        pdf.multi_cell(0, 5, 'Códigos prediales que presentan múltiples incumplimientos y requieren atención prioritaria.')
+        pdf.ln(3)
+        
+        # Tabla
+        pdf.set_font('Helvetica', 'B', 8)
+        pdf.cell(10, 8, '#', 1, 0, 'C')
+        pdf.cell(50, 8, 'Código Predial', 1, 0, 'C')
+        pdf.cell(20, 8, 'Alertas', 1, 0, 'C')
+        pdf.cell(110, 8, 'Reglas Incumplidas', 1, 1, 'C')
+        
+        pdf.set_font('Helvetica', '', 7)
+        for idx, (codigo, num_errores, reglas) in enumerate(top_problematicos, 1):
+            if pdf.get_y() > 260:
+                pdf.add_page()
+                pdf.set_font('Helvetica', 'B', 8)
+                pdf.cell(10, 8, '#', 1, 0, 'C')
+                pdf.cell(50, 8, 'Código Predial', 1, 0, 'C')
+                pdf.cell(20, 8, 'Alertas', 1, 0, 'C')
+                pdf.cell(110, 8, 'Reglas Incumplidas', 1, 1, 'C')
+                pdf.set_font('Helvetica', '', 7)
+            
+            pdf.cell(10, 6, str(idx), 1, 0, 'C')
+            pdf.cell(50, 6, str(codigo), 1, 0, 'C')
+            pdf.set_font('Helvetica', 'B', 7)
+            pdf.set_text_color(220, 38, 38)
+            pdf.cell(20, 6, str(num_errores), 1, 0, 'C')
+            pdf.set_text_color(0, 0, 0)
+            pdf.set_font('Helvetica', '', 7)
+            
+            # Truncar reglas si es muy largo
+            reglas_txt = reglas[:70] + '...' if len(reglas) > 70 else reglas
+            pdf.cell(110, 6, reglas_txt, 1, 1)
+        
+        pdf.ln(5)
+
+    # === SECCIÓN 4: RESUMEN DE REGLAS ALFANUMÉRICAS ===
+    pdf.add_page()
     pdf.set_font('Helvetica', 'B', 12)
-    # 3. Resumen de Reglas Alfanuméricas
-    pdf.set_font('Helvetica', 'B', 12)
-    pdf.cell(0, 10, 'Fase 1: Revisión Renumeración CICA vs SNC', 0, 1)
+    pdf.cell(0, 10, f'Fase 1: Revisión Renumeración {label_comparacion}', 0, 1)
     
     pdf.set_font('Helvetica', 'B', 9)
     pdf.cell(80, 8, 'Regla / Validación', 1)
@@ -436,7 +540,6 @@ def generar_pdf_renumeracion(resultados):
     pdf.ln()
     
     pdf.set_font('Helvetica', '', 8)
-    # Definiciones de reglas
     reglas_def = {
         '1. UNICIDAD': 'No se permiten duplicados en el número SNC.',
         '2. PERMANENCIA': 'Predios antiguos deben conservar su número.',
@@ -452,52 +555,81 @@ def generar_pdf_renumeracion(resultados):
             if r_name in k: count = v
         
         if count > 0:
-            pdf.set_text_color(220, 38, 38) # Rojo
+            pdf.set_text_color(220, 38, 38)
         else:
-            pdf.set_text_color(22, 163, 74) # Verde
+            pdf.set_text_color(22, 163, 74)
             
         pdf.cell(80, 7, f"{r_name} ({count} alertas)", 1)
         pdf.set_text_color(0, 0, 0)
         pdf.cell(110, 7, r_desc, 1)
         pdf.ln()
 
-    # 4. Detalle de Alertas Alfanuméricas (Tabla Nueva)
+    # === SECCIÓN 5: RECOMENDACIONES ===
+    pdf.ln(5)
+    pdf.set_font('Helvetica', 'B', 12)
+    pdf.cell(0, 10, 'Recomendaciones', 0, 1)
+    pdf.set_font('Helvetica', '', 9)
+    
+    recomendaciones = []
+    
+    if tasa_error == 0:
+        recomendaciones.append("Excelente trabajo. La renumeracion cumple con todas las reglas tecnicas del IGAC.")
+    else:
+        if tasa_error > 10:
+            recomendaciones.append("CRITICO: Tasa de error superior al 10%. Se recomienda revision exhaustiva antes de cierre.")
+        elif tasa_error > 5:
+            recomendaciones.append("ADVERTENCIA: Tasa de error entre 5-10%. Revisar alertas prioritarias.")
+        
+        # Recomendaciones específicas por regla
+        for regla, count in stats.items():
+            if '1. UNICIDAD' in regla and count > 0:
+                recomendaciones.append(f"Duplicados detectados ({count}): Verificar si son errores de digitacion o predios realmente duplicados en campo.")
+            if '2. PERMANENCIA' in regla and count > 0:
+                recomendaciones.append(f"Cambios indebidos ({count}): Predios antiguos no deben cambiar de numero. Revisar con el operador.")
+            if '3. LIMPIEZA' in regla and count > 0:
+                recomendaciones.append(f"Codigos provisionales ({count}): Eliminar letras y codigos '9' antes del cierre definitivo.")
+            if '4. CONSECUTIVO' in regla and count > 0:
+                recomendaciones.append(f"Secuencia incorrecta ({count}): Nuevos terrenos deben continuar despues del ultimo existente.")
+    
+    if 'errores_geo' in resultados and len(resultados.get('errores_geo', [])) > 0:
+        recomendaciones.append(f"Inconsistencias geograficas detectadas. Revisar seccion de cruce GDB.")
+    
+    for rec in recomendaciones:
+        pdf.multi_cell(0, 5, rec)
+        pdf.ln(2)
+
+    # === SECCIÓN 6: DETALLE DE ALERTAS ALFANUMÉRICAS ===
     errores_f1 = resultados.get('errores', [])
     if errores_f1:
         pdf.add_page()
         pdf.set_font('Helvetica', 'B', 12)
-    if errores_f1:
-        pdf.add_page()
-        pdf.set_font('Helvetica', 'B', 12)
-        pdf.cell(0, 10, 'Detalle de Alertas (Fase 1: CICA/SNC)', 0, 1)
+        pdf.cell(0, 10, f'Detalle de Alertas (Fase 1: {label_comparacion})', 0, 1)
         pdf.ln(2)
         
         pdf.set_font('Helvetica', '', 9)
-        pdf.multi_cell(0, 5, 'A continuación se listan las primeras 200 alertas detectadas en la validación alfanumérica.')
+        pdf.multi_cell(0, 5, 'A continuacion se listan las primeras 200 alertas detectadas en la validacion alfanumerica.')
         pdf.ln(4)
         
         # Cabecera tabla
         pdf.set_font('Helvetica', 'B', 8)
         pdf.cell(50, 8, 'Regla', 1)
         pdf.cell(60, 8, 'Detalle', 1)
-        pdf.cell(40, 8, 'Anterior', 1)
+        pdf.cell(40, 8, f'{label_anterior}', 1)
         pdf.cell(40, 8, 'Nuevo (SNC)', 1)
         pdf.ln()
         
         pdf.set_font('Helvetica', '', 7)
-        # Limitar a 200 para no explotar el PDF
         for err in errores_f1[:200]:
             if pdf.get_y() > 260: 
                 pdf.add_page()
                 pdf.set_font('Helvetica', 'B', 8)
                 pdf.cell(50, 8, 'Regla', 1)
                 pdf.cell(60, 8, 'Detalle', 1)
-                pdf.cell(40, 8, 'Anterior', 1)
+                pdf.cell(40, 8, f'{label_anterior}', 1)
                 pdf.cell(40, 8, 'Nuevo (SNC)', 1)
                 pdf.ln()
                 pdf.set_font('Helvetica', '', 7)
             
-            # Truncar textos largos
             detalle = str(err['DETALLE'])[:40]
             if len(str(err['DETALLE'])) > 40: detalle += '...'
             
@@ -507,14 +639,11 @@ def generar_pdf_renumeracion(resultados):
             pdf.cell(40, 6, str(err['NUEVO']), 1)
             pdf.ln()
 
-    # 5. Resultados Geográficos (si existen)
+    # === SECCIÓN 7: RESULTADOS GEOGRÁFICOS ===
     if resultados.get('errores_geo'):
         pdf.add_page()
         pdf.set_font('Helvetica', 'B', 12)
-    if resultados.get('errores_geo'):
-        pdf.add_page()
-        pdf.set_font('Helvetica', 'B', 12)
-        pdf.cell(0, 10, 'Fase 2: Cruce Geográfico (Formal + Informal)', 0, 1)
+        pdf.cell(0, 10, 'Fase 2: Cruce Geografico (Formal + Informal)', 0, 1)
         pdf.ln(2)
         
         pdf.set_font('Helvetica', '', 9)
@@ -524,9 +653,9 @@ def generar_pdf_renumeracion(resultados):
         # Tabla resumen geo
         pdf.set_font('Helvetica', 'B', 8)
         pdf.cell(60, 8, 'Tipo de Alerta', 1)
-        pdf.cell(50, 8, 'Código Predial', 1)
+        pdf.cell(50, 8, 'Codigo Predial', 1)
         pdf.cell(30, 8, 'Estado en BD', 1)
-        pdf.cell(50, 8, 'Acción sugerida', 1)
+        pdf.cell(50, 8, 'Accion sugerida', 1)
         pdf.ln()
         
         pdf.set_font('Helvetica', '', 7)
@@ -535,9 +664,9 @@ def generar_pdf_renumeracion(resultados):
                 pdf.add_page()
                 pdf.set_font('Helvetica', 'B', 8)
                 pdf.cell(60, 8, 'Tipo de Alerta', 1)
-                pdf.cell(50, 8, 'Código Predial', 1)
+                pdf.cell(50, 8, 'Codigo Predial', 1)
                 pdf.cell(30, 8, 'Estado en BD', 1)
-                pdf.cell(50, 8, 'Acción sugerida', 1)
+                pdf.cell(50, 8, 'Accion sugerida', 1)
                 pdf.ln()
                 pdf.set_font('Helvetica', '', 7)
             
