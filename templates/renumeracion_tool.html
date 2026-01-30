@@ -16,7 +16,7 @@
                 prediales y consistencia geográfica.</p>
         </div>
 
-        <form method="POST" enctype="multipart/form-data" class="space-y-10">
+        <form method="POST" enctype="multipart/form-data" id="form_renum" class="space-y-10">
             <!-- PASO 1: CONFIGURACIÓN DE TIPO -->
             <div class="space-y-6">
                 <label class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em]">01. Fuente
@@ -46,7 +46,7 @@
 
             <!-- PASO 2: SELECCIÓN DE FASE -->
             <div class="space-y-6">
-                <label class="block text-[10px] font-bold text-gray-500 mb-4 uppercase tracking-widest">01. Fase de la
+                <label class="block text-[10px] font-bold text-gray-500 mb-4 uppercase tracking-widest">02. Fase de la
                     Auditoría</label>
                 <div class="grid grid-cols-2 gap-4">
                     <label class="cursor-pointer group">
@@ -83,15 +83,54 @@
             <!-- CARGA EXCEL (OBLIGATORIA) -->
             <div class="space-y-4 font-mono">
                 <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-loose">
-                    02. Archivo de Datos (Excel)</label>
-                <input type="file" name="file_excel" id="file_excel" class="hidden" accept=".xlsx,.xls" required>
-                <label for="file_excel"
-                    class="flex flex-col items-center justify-center w-full h-32 border border-dashed border-gray-400 bg-gray-50/30 hover:bg-white hover:border-gray-900 transition-all cursor-pointer group">
-                    <span id="name_excel"
-                        class="text-[10px] font-bold text-gray-400 text-center px-4 uppercase tracking-widest group-hover:text-gray-900 transition-colors">
-                        Seleccione el archivo .xlsx
-                    </span>
-                </label>
+                    03. Archivo de Datos (Excel)</label>
+                <div class="flex gap-4">
+                    <div class="flex-grow">
+                        <input type="file" name="file_excel" id="file_excel" class="hidden" accept=".xlsx,.xls"
+                            required>
+                        <label for="file_excel"
+                            class="flex flex-col items-center justify-center w-full h-32 border border-dashed border-gray-400 bg-gray-50/30 hover:bg-white hover:border-gray-900 transition-all cursor-pointer group">
+                            <span id="name_excel"
+                                class="text-[10px] font-bold text-gray-400 text-center px-4 uppercase tracking-widest group-hover:text-gray-900 transition-colors">
+                                Seleccione el archivo .xlsx
+                            </span>
+                        </label>
+                    </div>
+                    <button type="button" id="btn_preanalizar" onclick="preanalizarExcel()"
+                        class="bg-gray-100 border border-gray-900 text-gray-900 px-6 font-bold text-[10px] tracking-widest uppercase hover:bg-gray-900 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                        disabled>
+                        Pre-analizar
+                    </button>
+                </div>
+            </div>
+
+            <!-- PANEL DE MAPEO DE COLUMNAS -->
+            <div id="mapping_panel"
+                class="hidden space-y-6 p-8 border-2 border-gray-900 bg-gray-50 animate-in zoom-in duration-300">
+                <label
+                    class="block text-[10px] font-mono font-bold text-gray-900 uppercase tracking-[0.2em] mb-4 underline">Mapeo
+                    Manual de Columnas</label>
+
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="space-y-3">
+                        <label class="block text-[9px] font-bold text-gray-500 uppercase italic">Columna Número Anterior
+                            (CICA/LC)</label>
+                        <select name="col_ant" id="col_ant"
+                            class="w-full bg-white border border-gray-900 p-3 text-[11px] font-mono focus:ring-1 focus:ring-gray-900 outline-none">
+                            <option value="">Detectando...</option>
+                        </select>
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[9px] font-bold text-gray-500 uppercase italic">Columna Número Nuevo
+                            (SNC)</label>
+                        <select name="col_snc" id="col_snc"
+                            class="w-full bg-white border border-gray-900 p-3 text-[11px] font-mono focus:ring-1 focus:ring-gray-900 outline-none">
+                            <option value="">Detectando...</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="text-[9px] text-gray-400 font-mono mt-4 uppercase">Verifique que las columnas coincidan con el
+                    contenido real de su archivo antes de procesar.</p>
             </div>
 
             <!-- CARGA GDBS (SOLO FASE 2) -->
@@ -120,7 +159,7 @@
                 </div>
             </div>
 
-            <button type="submit"
+            <button type="submit" id="btn_submit"
                 class="w-full bg-gray-900 text-white py-5 border border-gray-900 hover:bg-white hover:text-gray-900 transition-all font-mono font-bold text-[10px] tracking-[0.3em] flex justify-center items-center gap-4 uppercase active:scale-[0.98]">
                 <span class="material-symbols-outlined font-light">verified_user</span> Ejecutar Validación
             </button>
@@ -210,11 +249,12 @@
                         <tbody class="divide-y divide-gray-50">
                             {% for err in resultados.errores %}
                             <tr class="hover:bg-red-50/30 transition-colors uppercase">
-                                <td class="px-8 py-5"><span class="font-bold text-red-600 text-xs">${ err.REGLA }</span>
+                                <td class="px-8 py-5"><span class="font-bold text-red-600 text-xs">{{ err.REGLA
+                                        }}</span>
                                 </td>
-                                <td class="px-8 py-5 text-gray-600 text-[10px] font-mono">${ err.DETALLE }</td>
-                                <td class="px-8 py-5 font-mono text-gray-400">${ err.ANTERIOR }</td>
-                                <td class="px-8 py-5 font-mono font-bold text-gray-900">${ err.NUEVO }</td>
+                                <td class="px-8 py-5 text-gray-600 text-[10px] font-mono">{{ err.DETALLE }}</td>
+                                <td class="px-8 py-5 font-mono text-gray-400">{{ err.ANTERIOR }}</td>
+                                <td class="px-8 py-5 font-mono font-bold text-gray-900">{{ err.NUEVO }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -262,18 +302,18 @@
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-8 py-5">
                                     <div class="flex flex-col gap-1">
-                                        <span class="text-gray-900 font-bold">${ err.TIPO }</span>
-                                        <span class="text-gray-400 font-normal text-[9px]">${ err.DETALLE }</span>
+                                        <span class="text-gray-900 font-bold">{{ err.TIPO }}</span>
+                                        <span class="text-gray-400 font-normal text-[9px]">{{ err.DETALLE }}</span>
                                     </div>
                                 </td>
-                                <td class="px-8 py-5 font-bold text-gray-900">${ err.CODIGO }</td>
+                                <td class="px-8 py-5 font-bold text-gray-900">{{ err.CODIGO }}</td>
                                 <td class="px-8 py-5">
                                     <span
                                         class="px-3 py-1 border {% if err.ESTADO_BD == 'ACTIVO' %}border-gray-900 text-gray-900{% elif err.ESTADO_BD == 'NO EXISTE EN BD' %}border-red-600 text-red-600{% else %}border-gray-400 text-gray-400{% endif %} font-bold text-[9px] tracking-widest">
-                                        ${ err.ESTADO_BD }
+                                        {{ err.ESTADO_BD }}
                                     </span>
                                 </td>
-                                <td class="px-8 py-5 text-gray-900 font-bold tracking-tighter">${ err.ACCION_SUGERIDA }
+                                <td class="px-8 py-5 text-gray-900 font-bold tracking-tighter">{{ err.ACCION_SUGERIDA }}
                                 </td>
                             </tr>
                             {% endfor %}
@@ -348,10 +388,10 @@
         const r1 = document.querySelector('input[name="tipo"][value="1"]');
         const r2 = document.querySelector('input[name="tipo"][value="2"]');
 
-        document.getElementById('label_tipo_1').classList.toggle('border-gray-900', r1.checked);
-        document.getElementById('label_tipo_1').classList.toggle('bg-gray-50', r1.checked);
-        document.getElementById('label_tipo_2').classList.toggle('border-gray-900', r2.checked);
-        document.getElementById('label_tipo_2').classList.toggle('bg-gray-50', r2.checked);
+        if (document.getElementById('label_tipo_1')) document.getElementById('label_tipo_1').classList.toggle('border-gray-900', r1.checked);
+        if (document.getElementById('label_tipo_1')) document.getElementById('label_tipo_1').classList.toggle('bg-gray-50', r1.checked);
+        if (document.getElementById('label_tipo_2')) document.getElementById('label_tipo_2').classList.toggle('border-gray-900', r2.checked);
+        if (document.getElementById('label_tipo_2')) document.getElementById('label_tipo_2').classList.toggle('bg-gray-50', r2.checked);
     }
 
     function toggleFase(val) {
@@ -359,18 +399,81 @@
         const gdb = document.getElementById('gdb_inputs');
 
         if (val == "2") {
-            w2.classList.remove('hidden');
-            gdb.classList.remove('hidden');
+            if (w2) w2.classList.remove('hidden');
+            if (gdb) gdb.classList.remove('hidden');
         } else {
-            w2.classList.add('hidden');
-            gdb.classList.add('hidden');
+            if (w2) w2.classList.add('hidden');
+            if (gdb) gdb.classList.add('hidden');
+        }
+    }
+
+    async function preanalizarExcel() {
+        const fileInput = document.getElementById('file_excel');
+        const btn = document.getElementById('btn_preanalizar');
+        const panel = document.getElementById('mapping_panel');
+        const selAnt = document.getElementById('col_ant');
+        const selSnc = document.getElementById('col_snc');
+
+        if (!fileInput.files.length) return;
+
+        btn.disabled = true;
+        btn.innerHTML = "Analizando...";
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        try {
+            const response = await fetch('/renumeracion/detectar-columnas', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.error) {
+                alert("Error: " + data.error);
+            } else {
+                // Limpiar y poblar
+                selAnt.innerHTML = "";
+                selSnc.innerHTML = "";
+
+                data.columnas.forEach(col => {
+                    const opt1 = document.createElement('option');
+                    opt1.value = col; opt1.textContent = col;
+                    selAnt.appendChild(opt1);
+
+                    const opt2 = document.createElement('option');
+                    opt2.value = col; opt2.textContent = col;
+                    selSnc.appendChild(opt2);
+                });
+
+                // Auto-detectar
+                const colAntMatch = data.columnas.find(c => c.toUpperCase().includes('CICA') || c.toUpperCase().includes('ANTERIOR') || c.toUpperCase().includes('LC'));
+                const colSncMatch = data.columnas.find(c => c.toUpperCase().includes('SNC') || c.toUpperCase().includes('NUEVO'));
+
+                if (colAntMatch) selAnt.value = colAntMatch;
+                if (colSncMatch) selSnc.value = colSncMatch;
+
+                panel.classList.remove('hidden');
+            }
+        } catch (e) {
+            alert("Error de conexión");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = "Pre-analizar";
         }
     }
 
     {% if not resultados %}
     document.getElementById('file_excel').addEventListener('change', (e) => {
+        const btnPre = document.getElementById('btn_preanalizar');
+        const nameDisplay = document.getElementById('name_excel');
         if (e.target.files.length > 0) {
-            document.getElementById('name_excel').innerHTML = '<span class="text-gray-900 font-bold uppercase tracking-tight">✓ ' + e.target.files[0].name.toUpperCase() + '</span>';
+            nameDisplay.innerHTML = '<span class="text-gray-900 font-bold uppercase tracking-tight">✓ ' + e.target.files[0].name.toUpperCase() + '</span>';
+            btnPre.disabled = false;
+            // Reset panel if file changes
+            document.getElementById('mapping_panel').classList.add('hidden');
+        } else {
+            btnPre.disabled = true;
         }
     });
 

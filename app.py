@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, flash, redirect, url_for, session, Response
+from flask import Flask, render_template, request, send_file, flash, redirect, url_for, session, Response, jsonify
 from modules.snc_processor import procesar_dataframe
 from modules.db_logger import init_db, registrar_visita  # <--- IMPORTANTE
 from modules.avaluo_analisis import procesar_incremento_web 
@@ -6,6 +6,7 @@ from modules.auditoria_maestra import procesar_auditoria, generar_pdf_auditoria
 from modules.renumeracion_auditor import procesar_renumeracion, generar_excel_renumeracion, procesar_geografica, generar_pdf_renumeracion
 from modules.renumeracion_informales import procesar_informales
 
+import pandas as pd
 import os
 import uuid
 import json
@@ -410,16 +411,30 @@ def clear_auditoria():
             try: os.remove(path)
             except: pass
         session.pop(key, None)
-    
-    flash('Sesión y temporales limpiados correctamente.')
-    return redirect(url_for('index'))
+    flash('Se han limpiado los datos de la sesión de auditoría.')
+    return redirect(url_for('auditoria_tool'))
 
-# --- RUTA 6: AUDITORÍA DE RENUMERACIÓN ---
+@app.route('/renumeracion/detectar-columnas', methods=['POST'])
+def detectar_columnas_renumeracion():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    if file:
+        try:
+            # Leer solo las primeras filas para detectar columnas
+            df = pd.read_excel(file, nrows=5)
+            columnas = df.columns.tolist()
+            return jsonify({'columnas': columnas})
+        except Exception as e:
+            return jsonify({'error': f'Error al leer el archivo: {str(e)}'}), 500
+    return jsonify({'error': 'Unexpected error'}), 500
+
+# --- RUTA 6: RENUMERACION ---
 @app.route('/renumeracion', methods=['GET', 'POST'])
 def renumeracion_tool():
     registrar_visita('/renumeracion')
-    
-    # Intentar recuperar resultados de la sesión (id del archivo json)
     audit_id = session.get('renum_audit_id')
     resultados = None
     
@@ -436,6 +451,8 @@ def renumeracion_tool():
         file = request.files.get('file_excel')
         tipo = request.form.get('tipo', '1') # 1: CICA, 2: LC
         fase = request.form.get('fase', '1') # 1: Alfanumérica, 2: Geográfica
+        col_snc = request.form.get('col_snc')
+        col_ant = request.form.get('col_ant')
         
         if not file or file.filename == '':
             flash('Seleccione el archivo de reporte (Excel) para continuar.')
@@ -443,7 +460,7 @@ def renumeracion_tool():
             
         try:
             # Fase 1: Siempre se ejecuta (es el motor alfanumérico)
-            res = procesar_renumeracion(file, tipo)
+            res = procesar_renumeracion(file, tipo, col_snc_manual=col_snc, col_ant_manual=col_ant)
             res['fase_ejecutada'] = int(fase)
             
             # --- FASE 2: GEOGRÁFICA (Solo si se solicita explícitamente) ---

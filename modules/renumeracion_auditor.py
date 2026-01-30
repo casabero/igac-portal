@@ -29,41 +29,43 @@ def es_provisional(serie):
     """Detecta si un código es provisional (empieza por 9 o tiene letras)"""
     return serie.str.startswith('9') | serie.str.contains('[A-Z]', regex=True, na=False)
 
-def procesar_renumeracion(file_stream, tipo_config):
+def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant_manual=None):
     """
     Fase 1: Auditoría Alfanumérica.
     Retorna errores y un diccionario de referencia de estados.
     """
-    if tipo_config == '1':
-        col_anterior = 'Número predial CICA'
-    else:
-        col_anterior = 'Número predial LC_PREDIO'
-    
-    col_nuevo = 'Número predial SNC'
-    col_estado = 'Estado'
-
     try:
         df_full = pd.read_excel(file_stream, dtype=str)
     except Exception as e:
         raise ValueError(f"Error al leer el archivo Excel: {str(e)}")
 
-    # Lógica modificada: Si es Operadores (2), forzamos renombrado por posición
-    if tipo_config == '2':
-        if len(df_full.columns) < 2:
-            raise ValueError("El archivo debe tener al menos 2 columnas para el modo Operadores.")
-            
-        # Renombrar por posición: Col 0 -> Nuevo, Col 1 -> Anterior
-        # Mantenemos los nombres originales de las otras columnas (como Estado)
-        mapa_cols = {
-            df_full.columns[0]: col_nuevo, # Pos 0 -> Numero SNC
-            df_full.columns[1]: col_anterior # Pos 1 -> Numero Anterior (LC)
-        }
-        df_full = df_full.rename(columns=mapa_cols)
+    if col_snc_manual and col_ant_manual:
+        col_nuevo = col_snc_manual
+        col_anterior = col_ant_manual
+    else:
+        # Fallback a lógica automática si no se proveen nombres manuales
+        if tipo_config == '1':
+            col_anterior = 'Número predial CICA'
+        else:
+            col_anterior = 'Número predial LC_PREDIO'
+        col_nuevo = 'Número predial SNC'
+
+    col_estado = 'Estado'
+
+    # Lógica para modo Operadores (2) si no hay mapeo manual e intentamos forzar posición
+    if tipo_config == '2' and not (col_snc_manual and col_ant_manual):
+        if len(df_full.columns) >= 2:
+            mapa_cols = {
+                df_full.columns[0]: 'Número predial SNC',
+                df_full.columns[1]: col_anterior
+            }
+            df_full = df_full.rename(columns=mapa_cols)
+            col_nuevo = 'Número predial SNC'
 
     columnas_requeridas = [col_nuevo, col_anterior, col_estado]
     faltantes = [c for c in columnas_requeridas if c not in df_full.columns]
     if faltantes:
-        raise ValueError(f"Faltan las columnas requeridas: {', '.join(faltantes)}. (Nota: En modo Operadores la col 1 es SNC y la 2 es Anterior, pero se requiere una columna llamada 'Estado')")
+        raise ValueError(f"Faltan las columnas requeridas: {', '.join(faltantes)}")
 
     # Limpieza
     df_full[col_anterior] = df_full[col_anterior].str.strip()
@@ -174,7 +176,7 @@ def procesar_renumeracion(file_stream, tipo_config):
     # --- [5] REINICIO EN MANZANAS NUEVAS ---
     mask_mza_nueva = es_provisional(df_ant['MANZANA']) & ~es_provisional(df_ant['SECTOR'])
     try:
-        errores_mza = df_audit[mask_mza_nueva & (df_nue['TERRENO'].astype(int) > 50)]
+        errores_mza = df_audit[mask_mza_nueva & (df_nue['TERRERENO'].astype(int) > 50)]
         for _, row in errores_mza.iterrows():
             todos_errores.append({
                 'REGLA': '5. MANZANA NUEVA',
@@ -245,6 +247,8 @@ def extraer_datos_gdb(zip_stream, capas_objetivo):
     
     with tempfile.TemporaryDirectory() as tmpdir:
         zip_path = os.path.join(tmpdir, "upload.zip")
+        # Asegurarse de que el stream esté al inicio
+        zip_stream.seek(0)
         with open(zip_path, "wb") as f:
             f.write(zip_stream.read())
         
@@ -404,16 +408,31 @@ import io
 
 class AuditoriaRenumeracionPDF(FPDF):
     def header(self):
-        pass
+        # Fondo oscuro para el encabezado (Civil-Hacker)
+        self.set_fill_color(17, 24, 39) # #111827
+        self.rect(0, 0, 216, 35, 'F') 
+        
+        self.set_y(12)
+        self.set_font('Helvetica', 'B', 16)
+        self.set_text_color(255, 255, 255)
+        self.cell(0, 10, 'REPORTE DE RENOMERACIÓN - IGAC', 0, 1, 'C')
+        
+        self.set_font('Helvetica', '', 8)
+        self.set_text_color(156, 163, 175)
+        self.cell(0, 5, 'SISTEMA DE AUDITORÍA CATASTRAL MULTIPROPÓSITO', 0, 1, 'C')
+        self.ln(15)
 
     def footer(self):
-        self.set_y(-15)
+        self.set_y(-20)
+        self.set_draw_color(229, 231, 235)
+        self.line(20, self.get_y(), 196, self.get_y())
+        self.ln(2)
+        
         self.set_font('Helvetica', 'I', 8)
-        self.cell(0, 5, f'Página {self.page_no()}', 0, 1, 'C')
-        self.set_font('Helvetica', '', 7)
-        self.set_text_color(128, 128, 128)
-        self.cell(0, 5, 'by casabero.com', 0, 0, 'C')
-        self.set_text_color(0, 0, 0)
+        self.set_text_color(107, 114, 128)
+        # Firma solicitada
+        self.cell(0, 10, 'by casabero quien se hace llamar joseph.gari', 0, 0, 'L')
+        self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'R')
 
 def generar_pdf_renumeracion(resultados):
     """Genera un reporte PDF detallado con los resultados de la auditoría"""
@@ -435,18 +454,16 @@ def generar_pdf_renumeracion(resultados):
     title_main = 'Validación de Datos' if fase == 1 else 'Cruce de Mapas (GDB)'
     
     # === CABECERA MINIMALISTA ===
-    pdf.set_font('Helvetica', 'B', 18)
-    pdf.set_text_color(17, 24, 39)
-    pdf.cell(0, 10, f'Reporte de {title_main}', 0, 1, 'L')
+    # El título ahora está en el Header oscuro
+    # pdf.cell(0, 10, f'Reporte de {title_main}', 0, 1, 'L')
+    pdf.ln(2)
     
     pdf.set_font('Helvetica', '', 10)
     pdf.set_text_color(107, 114, 128)
     fecha = resultados.get('timestamp', 'N/A')
     pdf.cell(0, 6, f"Auditoría: {label_comparacion}  |  Fecha: {fecha}", 0, 1, 'L')
     
-    pdf.set_draw_color(229, 231, 235)
-    pdf.line(20, 38, 195, 38)
-    pdf.ln(10)
+    pdf.ln(5)
     
     # === SECCIÓN 1: RESUMEN EJECUTIVO ===
     pdf.set_font('Helvetica', 'B', 14)
@@ -642,4 +659,3 @@ def generar_pdf_renumeracion(resultados):
             pdf.cell(55, 6, str(err['TIPO']), 1); pdf.cell(45, 6, str(err['CODIGO']), 1); pdf.cell(30, 6, str(err['ESTADO_BD']), 1); pdf.cell(45, 6, str(err['ACCION_SUGERIDA']), 1); pdf.ln()
 
     return bytes(pdf.output())
-
