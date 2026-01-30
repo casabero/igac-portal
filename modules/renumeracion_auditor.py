@@ -266,8 +266,8 @@ def generar_pdf_renumeracion(resultados):
         ("2. Permanencia", "Asegura que los predios 'viejos' (ya definitivos en CICA/LC) no hayan cambiado su código base sin justificación."),
         ("3. Limpieza", "Valida que los códigos definitivos en SNC no contengan caracteres provisionales (letras o números de serie 9000)."),
         ("4. Consecutivos", "Controla que los nuevos predios dentro de una manzana sigan un orden numérico superior al último existente."),
-        ("5. Manzana Nueva", "Identifica posibles errores de reinicio de contador en manzanas recién creadas."),
-        ("6. Sector Nuevo", "Valida la coherencia de la numeración en aperturas de nuevos sectores geográficos.")
+        ("5. Manzana Nueva (Reinicio)", "Detecta manzanas nuevas (antes provisionales) donde la numeración de predios no se reinició desde 0001 (encontrando valores > 50)."),
+        ("6. Sector Nuevo (Reinicio)", "Detecta sectores nuevos donde la numeración de manzanas no se reinició desde 0001 (encontrando valores > 20).")
     ]
     
     for r_title, r_text in rules_desc:
@@ -283,9 +283,9 @@ def generar_pdf_renumeracion(resultados):
     top_p = resultados.get('top_problematicos', [])
     if top_p:
         pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Top 10 Códigos con Más Alertas', 0, 1); pdf.ln(2); pdf.set_font('Helvetica', 'B', 8); pdf.cell(10, 8, '#', 1, 0, 'C')
-        pdf.cell(55, 8, 'Código Predial', 1, 0, 'C'); pdf.cell(20, 8, 'Alertas', 1, 0, 'C'); pdf.cell(100, 8, 'Reglas Incumplidas', 1, 1, 'C'); pdf.set_font('Helvetica', '', 7)
+        pdf.cell(55, 8, 'Código Predial', 1, 0, 'C'); pdf.cell(20, 8, 'Alertas', 1, 0, 'C'); pdf.cell(90, 8, 'Reglas Incumplidas', 1, 1, 'C'); pdf.set_font('Helvetica', '', 7)
         for idx, (cod, n, r) in enumerate(top_p, 1):
-            pdf.cell(10, 6, str(idx), 1, 0, 'C'); pdf.cell(55, 6, str(cod), 1, 0, 'C'); pdf.set_text_color(220, 38, 38); pdf.cell(20, 6, str(n), 1, 0, 'C'); pdf.set_text_color(0, 0, 0); pdf.cell(100, 6, r[:75], 1, 1)
+            pdf.cell(10, 6, str(idx), 1, 0, 'C'); pdf.cell(55, 6, str(cod), 1, 0, 'C'); pdf.set_text_color(220, 38, 38); pdf.cell(20, 6, str(n), 1, 0, 'C'); pdf.set_text_color(0, 0, 0); pdf.cell(90, 6, r[:65], 1, 1)
 
     pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Detalle de Alertas Alfanuméricas', 0, 1); pdf.ln(2); pdf.set_font('Helvetica', 'B', 8)
     pdf.cell(35, 8, 'Regla', 1); pdf.cell(35, 8, 'Detalle', 1); pdf.cell(53, 8, f'{l_ant}', 1); pdf.cell(53, 8, 'Nuevo (SNC)', 1); pdf.ln()

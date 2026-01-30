@@ -216,24 +216,7 @@
                 {% if resultados.fase_ejecutada == 1 %}Fase 1: Validación Alfanumérica{% else %}Fase 1: Base
                 Alfanumérica (Pre-validada){% endif %}
             </h4>
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {% for i in range(1, 7) %}
-                {% set rule_key = i ~ ". " %}
-                {% set count = 0 %}
-                {% for k, v in resultados.stats.items() %}
-                {% if rule_key in k %}{% set count = v %}{% endif %}
-                {% endfor %}
-                <div
-                    class="bg-white p-6 border {% if count > 0 %}border-red-600 border-l-8{% else %}border-gray-900{% endif %} flex flex-col gap-2 transition-all">
-                    <p
-                        class="text-[9px] {% if count > 0 %}text-red-600{% else %}text-gray-500{% endif %} font-bold uppercase tracking-widest">
-                        REGLA_0{{ i }}</p>
-                    <p
-                        class="text-3xl font-display font-bold {% if count > 0 %}text-red-600{% else %}text-gray-900{% endif %}">
-                        {{ count }}</p>
-                </div>
-                {% endfor %}
-            </div>
+
 
             <div
                 class="bg-white border border-gray-900 overflow-hidden mt-6 {% if resultados.fase_ejecutada == 2 and not resultados.errores %}hidden{% endif %}">
@@ -276,6 +259,16 @@
                     {% endif %}
                 </div>
             </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4">
+            {% for counter in resultados.dashboard_counters %}
+            <div class="bg-white border border-gray-900 p-6 flex flex-col items-center justify-center space-y-2">
+                <span class="material-symbols-outlined text-4xl text-gray-900">{{ counter.icon }}</span>
+                <p class="text-xs font-bold text-gray-900 uppercase tracking-widest text-center">{{ counter.label }}</p>
+                <p class="text-3xl font-bold text-gray-900">{{ counter.value }}</p>
+            </div>
+            {% endfor %}
         </div>
 
         <!-- SECCIÓN 2: AUDITORÍA GEOGRÁFICA -->
