@@ -7,11 +7,11 @@
 {% block content %}
 <div class="max-w-3xl mx-auto py-4">
     <div class="bg-white p-8 border border-gray-900">
-        <div class="mb-10 border-l-4 border-gray-900 pl-6">
-            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">Herramienta //
-                Convertidor de Archivos</h2>
-            <p class="text-xs font-mono text-gray-500 mt-2 uppercase">Convierte archivos de datos de predios a formato
-                Excel.</p>
+        <div class="mb-10 border-l-4 border-accent pl-6">
+            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">MODULE_01 //
+                SNC_CONVERTER</h2>
+            <p class="text-xs font-mono text-gray-500 mt-2 uppercase">Execution: raw_data to excel_stream conversion.
+            </p>
         </div>
 
         <form method="POST" enctype="multipart/form-data" class="space-y-8">
@@ -20,7 +20,7 @@
                 <label class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">01.
                     Seleccione el tipo de registro</label>
                 <select name="opcion"
-                    class="block w-full border-gray-900 text-xs font-mono focus:ring-0 focus:border-gray-900 bg-white py-3 px-4 uppercase"
+                    class="block w-full border-gray-900 text-xs font-mono focus:ring-0 focus:border-accent bg-white py-3 px-4 uppercase"
                     required>
                     <option value="" selected disabled>Seleccionar...</option>
                     <option value="1">Datos Básicos de Predios (R1)</option>
@@ -151,13 +151,13 @@
     const dropzone = fileInput.parentElement;
     ['dragenter', 'dragover'].forEach(eventName => {
         dropzone.addEventListener(eventName, () => {
-            dropzone.classList.add('border-accent', 'bg-blue-50/20');
+            dropzone.classList.add('border-accent', 'bg-accent/5');
         }, false);
     });
 
     ['dragleave', 'drop'].forEach(eventName => {
         dropzone.addEventListener(eventName, () => {
-            dropzone.classList.remove('border-accent', 'bg-blue-50/20');
+            dropzone.classList.remove('border-accent', 'bg-accent/5');
         }, false);
     });
 </script>

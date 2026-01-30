@@ -120,11 +120,11 @@
             <p class="text-[10px] font-mono font-bold uppercase tracking-[0.3em]">esperando_flujo_datos...</p>
         </div>
         {% else %}
-        <div class="flex items-center justify-between border-l-4 border-gray-900 pl-6 mb-4">
+        <div class="flex items-center justify-between border-l-4 border-accent pl-6 mb-4">
             <h2
                 class="text-2xl font-display font-bold text-gray-900 flex items-center gap-4 uppercase tracking-tighter">
                 <span class="material-symbols-outlined text-gray-900 font-light">location_city</span>
-                LOC: {{ resultados.municipio }}
+                LOC_DATA: {{ resultados.municipio }}
             </h2>
             <div class="flex items-center gap-6">
                 <a href="/clear_auditoria"
@@ -147,10 +147,10 @@
                     REGISTROS_AUDITADOS</p>
                 <p class="text-3xl font-display font-bold text-gray-900 uppercase">{{ resultados.total_predios }}</p>
             </div>
-            <div class="bg-white p-8 border border-gray-900 border-l-8 border-l-red-600">
-                <p class="text-[9px] font-mono text-red-600 uppercase font-bold mb-2 tracking-widest">
+            <div class="bg-white p-8 border border-gray-900 border-l-8 border-l-accent">
+                <p class="text-[9px] font-mono text-accent uppercase font-bold mb-2 tracking-widest">
                     CRIT_AVALÚO_NULO</p>
-                <p class="text-3xl font-display font-bold text-red-600 uppercase">{{
+                <p class="text-3xl font-display font-bold text-accent uppercase">{{
                     resultados.totales.conteo_zero_critico }}</p>
             </div>
             <div class="bg-white p-8 border border-gray-900">

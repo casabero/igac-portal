@@ -31,11 +31,11 @@
     <!-- FORMULARIO DE CARGA (SI NO HAY RESULTADOS) -->
     {% if not resultados %}
     <div class="max-w-2xl mx-auto bg-white p-10 border border-gray-900 mt-4">
-        <div class="mb-10 border-l-4 border-gray-900 pl-6">
-            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">Herramienta //
-                Análisis de Avalúos</h2>
-            <p class="text-xs font-mono text-gray-500 mt-2 uppercase">Compara los valores de los predios antes y después
-                del cierre catastral.</p>
+        <div class="mb-10 border-l-4 border-accent pl-6">
+            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">MODULE_02 //
+                AVALUO_ANALYSIS</h2>
+            <p class="text-xs font-mono text-gray-500 mt-2 uppercase">Execution: pre_close vs post_close delta
+                detection.</p>
         </div>
 
         <form method="POST" enctype="multipart/form-data" class="space-y-10">
@@ -115,7 +115,7 @@
                         <span id="lblPct" class="text-xs font-bold text-gray-900">100%</span>
                     </div>
                     <input type="range" name="sample_pct" id="sample_pct" min="1" max="100" value="100"
-                        class="w-full h-1 bg-gray-200 appearance-none cursor-pointer accent-gray-900"
+                        class="w-full h-1 bg-gray-200 appearance-none cursor-pointer accent-accent"
                         oninput="document.getElementById('lblPct').textContent = this.value + '%'">
                 </div>
             </div>

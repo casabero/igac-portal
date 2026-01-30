@@ -6,7 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>{% block title %}IGAC Portal{% endblock %}</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
@@ -17,7 +17,7 @@
                 extend: {
                     fontFamily: {
                         "sans": ["Inter", "sans-serif"],
-                        "display": ["Outfit", "sans-serif"],
+                        "display": ["Inter", "sans-serif"],
                         "mono": ["Fira Code", "monospace"],
                     },
                     colors: {
@@ -25,7 +25,7 @@
                             900: "#111111", 700: "#333333", 500: "#666666", 200: "#E5E5E5", 50: "#F9FAFB"
                         },
                         primary: "#111111",
-                        accent: "#111111"
+                        accent: "#D4AF37"
                     }
                 }
             }
@@ -73,7 +73,7 @@
                 <div class="p-2 bg-primary text-white transition-colors">
                     <span class="material-symbols-outlined font-light">terminal</span>
                 </div>
-                <span class="font-display font-bold text-lg tracking-tight uppercase">Casabero_IGAC</span>
+                <span class="font-display font-bold text-lg tracking-tight uppercase">CASABERO_IGAC</span>
             </a>
         </div>
 
@@ -128,7 +128,7 @@
                 </h2>
             </div>
             <div class="flex items-center gap-4">
-                <span class="text-[10px] font-mono bg-gray-900 text-white px-2 py-1 font-bold">V_1.2_SYS_ESTABLE</span>
+                <span class="text-[10px] font-mono bg-accent text-primary px-2 py-1 font-bold">V_2.0_SYS_STABLE</span>
                 <div class="h-8 w-8 bg-white border border-gray-900 flex items-center justify-center text-gray-900">
                     <span class="material-symbols-outlined text-[20px] font-light">terminal</span>
                 </div>
@@ -153,7 +153,7 @@
 
         <footer class="p-8 border-t border-gray-900 bg-white flex flex-col items-center gap-2">
             <p class="text-[10px] font-mono text-gray-900 uppercase tracking-[0.2em] font-bold">
-                by:casabero.com
+                sys_author: CASABERO.COM
             </p>
             <p class="text-[8px] font-mono text-gray-400 uppercase tracking-[0.2em] font-medium">
                 sys_meta: portal_igac_v2026 | arch: x64_hybrid | loc: latam_remote
