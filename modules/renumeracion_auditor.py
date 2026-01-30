@@ -231,7 +231,7 @@ import matplotlib.pyplot as plt
 
 class AuditoriaRenumeracionPDF(FPDF):
     def header(self):
-        self.set_fill_color(17, 24, 39); self.rect(0, 0, 216, 35, 'F'); self.set_y(12); self.set_font('Helvetica', 'B', 16); self.set_text_color(255, 255, 255); self.cell(0, 10, 'REPORTE DE RENOMERACIÓN - IGAC', 0, 1, 'C')
+        self.set_fill_color(17, 24, 39); self.rect(0, 0, 216, 35, 'F'); self.set_y(12); self.set_font('Helvetica', 'B', 16); self.set_text_color(255, 255, 255); self.cell(0, 10, 'REPORTE DE RENUMERACIÓN - IGAC', 0, 1, 'C')
         self.set_font('Helvetica', '', 8); self.set_text_color(156, 163, 175); self.cell(0, 5, 'SISTEMA DE AUDITORÍA CATASTRAL MULTIPROPÓSITO', 0, 1, 'C'); self.ln(15)
 
     def footer(self):
@@ -256,24 +256,36 @@ def generar_pdf_renumeracion(resultados):
     add_meta('Tasa de Error:', f"{t_err_rate}%", (220, 38, 38) if t_err_rate > 5 else (22, 163, 74) if t_err_rate == 0 else (234, 179, 8))
     if 'errores_geo' in resultados: add_meta('Alertas de Mapas Encontradas:', f"{len(resultados.get('errores_geo', [])):,}", (220, 38, 38) if len(resultados.get('errores_geo', [])) > 0 else (22, 163, 74))
     pdf.ln(5)
-    if f == 1:
-        stats = resultados.get('stats', {})
-        if stats:
-            try:
-                plt.figure(figsize=(6, 4)); plt.bar([r.split('.')[0] for r in stats.keys()], stats.values(), color='#cbd5e1', edgecolor='#94a3b8'); plt.title('Distribución de Alertas por Regla', fontsize=11, color='#475569'); plt.grid(axis='y', linestyle=':', alpha=0.5); i_b = io.BytesIO(); plt.savefig(i_b, format='png', dpi=150); plt.close(); i_b.seek(0); pdf.image(i_b, x=45, w=120); pdf.ln(5)
-            except Exception: pass
-    else:
+
+    # --- EXPLICACIÓN DE REGLAS (Nueva sección solicitada) ---
+    pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Protocolo de Validación Alfanumérica', 0, 1); pdf.ln(1)
+    pdf.set_font('Helvetica', '', 9); pdf.multi_cell(0, 4, 'Se aplican 6 reglas estrictas para garantizar la integridad de la renumeración del predial nacional (22 a 30 dígitos):'); pdf.ln(2)
+    
+    rules_desc = [
+        ("1. Unicidad", "Verifica que no existan predios duplicados con el mismo código nuevo (SNC) marcado como activo."),
+        ("2. Permanencia", "Asegura que los predios 'viejos' (ya definitivos en CICA/LC) no hayan cambiado su código base sin justificación."),
+        ("3. Limpieza", "Valida que los códigos definitivos en SNC no contengan caracteres provisionales (letras o números de serie 9000)."),
+        ("4. Consecutivos", "Controla que los nuevos predios dentro de una manzana sigan un orden numérico superior al último existente."),
+        ("5. Manzana Nueva", "Identifica posibles errores de reinicio de contador en manzanas recién creadas."),
+        ("6. Sector Nuevo", "Valida la coherencia de la numeración en aperturas de nuevos sectores geográficos.")
+    ]
+    
+    for r_title, r_text in rules_desc:
+        pdf.set_font('Helvetica', 'B', 9); pdf.cell(35, 5, r_title + ":", 0, 0); pdf.set_font('Helvetica', '', 9); pdf.multi_cell(0, 5, r_text); pdf.ln(1)
+
+    if f == 2:
         l_g = resultados.get('logs_geo', {}); s_g = l_g.get('stats_geo', {}) if isinstance(l_g, dict) else {}
         if s_g:
             try:
-                plt.figure(figsize=(6, 4)); plt.pie([s_g['coincidencias'], s_g['sin_mapa'], s_g['sobran_gdb']], labels=['Consistentes', 'Faltan GDB', 'Sobran GDB'], autopct='%1.1f%%', startangle=140, colors=['#22c55e', '#ef4444', '#f59e0b']); plt.title('Consistencia Datos vs Mapas', fontsize=11, color='#475569'); i_b = io.BytesIO(); plt.savefig(i_b, format='png', dpi=150); plt.close(); i_b.seek(0); pdf.image(i_b, x=45, w=120); pdf.ln(5)
+                plt.figure(figsize=(6, 4)); plt.pie([s_g['coincidencias'], s_g['sin_mapa'], s_g['sobran_gdb']], labels=['Consistentes', 'Faltan GDB', 'Sobran GDB'], autopct='%1.1f%%', startangle=140, colors=['#22c55e', '#ef4444', '#f59e0b']); plt.title('Consistencia Datos vs Mapas', fontsize=11, color='#475569'); i_b = io.BytesIO(); plt.savefig(i_b, format='png', dpi=150); plt.close(); i_b.seek(0); pdf.add_page(); pdf.image(i_b, x=45, w=120); pdf.ln(5)
             except Exception: pass
+
     top_p = resultados.get('top_problematicos', [])
-    if f == 1 and top_p:
+    if top_p:
         pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Top 10 Códigos con Más Alertas', 0, 1); pdf.ln(2); pdf.set_font('Helvetica', 'B', 8); pdf.cell(10, 8, '#', 1, 0, 'C')
-        pdf.cell(55, 8, 'Código Predial', 1, 0, 'C'); pdf.cell(20, 8, 'Alertas', 1, 0, 'C'); pdf.cell(90, 8, 'Reglas Incumplidas', 1, 1, 'C'); pdf.set_font('Helvetica', '', 7)
+        pdf.cell(55, 8, 'Código Predial', 1, 0, 'C'); pdf.cell(20, 8, 'Alertas', 1, 0, 'C'); pdf.cell(100, 8, 'Reglas Incumplidas', 1, 1, 'C'); pdf.set_font('Helvetica', '', 7)
         for idx, (cod, n, r) in enumerate(top_p, 1):
-            pdf.cell(10, 6, str(idx), 1, 0, 'C'); pdf.cell(55, 6, str(cod), 1, 0, 'C'); pdf.set_text_color(220, 38, 38); pdf.cell(20, 6, str(n), 1, 0, 'C'); pdf.set_text_color(0, 0, 0); pdf.cell(90, 6, r[:65], 1, 1)
+            pdf.cell(10, 6, str(idx), 1, 0, 'C'); pdf.cell(55, 6, str(cod), 1, 0, 'C'); pdf.set_text_color(220, 38, 38); pdf.cell(20, 6, str(n), 1, 0, 'C'); pdf.set_text_color(0, 0, 0); pdf.cell(100, 6, r[:75], 1, 1)
 
     pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Detalle de Alertas Alfanuméricas', 0, 1); pdf.ln(2); pdf.set_font('Helvetica', 'B', 8)
     pdf.cell(35, 8, 'Regla', 1); pdf.cell(35, 8, 'Detalle', 1); pdf.cell(53, 8, f'{l_ant}', 1); pdf.cell(53, 8, 'Nuevo (SNC)', 1); pdf.ln()
