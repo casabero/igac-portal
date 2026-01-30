@@ -29,7 +29,7 @@ def es_provisional(serie):
     """Detecta si un código es provisional (empieza por 9 o tiene letras)"""
     return serie.str.startswith('9') | serie.str.contains('[A-Z]', regex=True, na=False)
 
-def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant_manual=None):
+def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant_manual=None, col_estado_manual=None):
     """
     Fase 1: Auditoría Alfanumérica.
     Retorna errores y un diccionario de referencia de estados.
@@ -50,7 +50,8 @@ def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant
             col_anterior = 'Número predial LC_PREDIO'
         col_nuevo = 'Número predial SNC'
 
-    col_estado = 'Estado'
+    # Asignar columna de estado (manual o por defecto)
+    col_estado = col_estado_manual if col_estado_manual else 'Estado'
 
     # Lógica para modo Operadores (2) si no hay mapeo manual e intentamos forzar posición
     if tipo_config == '2' and not (col_snc_manual and col_ant_manual):
@@ -70,8 +71,6 @@ def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant
     # Limpieza
     df_full[col_anterior] = df_full[col_anterior].str.strip()
     df_full[col_nuevo] = df_full[col_nuevo].str.strip()
-    # Si la columna Estado no existe, intentar buscar algo parecido o fallar
-    # Por ahora asumimos que existe como validamos arriba
     df_full[col_estado] = df_full[col_estado].str.strip().str.upper()
 
     # Diccionario de referencia para Fase 2 (TODOS los estados)
@@ -141,10 +140,7 @@ def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant
             predios_viejos = df_audit[mask_existentes]
 
             if not predios_viejos.empty:
-                # FIX: Filtrar solo terrenos "normales" para el máximo (excluir PHs que empiezan por 9 o series altas)
-                # Asumimos que terreno > 9000 o similar es PH. El usuario menciona "901", asi que filtramos > 900
                 viejos_codigos = predios_viejos[col_nuevo].apply(lambda x: int(x[17:21]) if x[17:21].isdigit() else 0)
-                # Solo consideramos para el MAX los que sean menores a 900 (Terrenos físicos, no PHs)
                 viejos_fisicos = viejos_codigos[viejos_codigos < 900]
                 
                 if not viejos_fisicos.empty:
@@ -152,18 +148,12 @@ def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant
                     
                     for _, row in datos_nuevos.iterrows():
                         try:
-                            # FIX 2: Si el predio nuevo es INFORMAL (Posición 22 != 0), ignorar esta regla
-                            # El usuario indica que la posición 22 (índice 21) es condición.
                             condicion = row[col_nuevo][21] # Caracter 22
                             if condicion != '0':
                                 continue # Es informal o especial, no valida consecutivo estricto
                                 
                             terr_asignado = int(row[col_nuevo][17:21])
                             
-                            # Si asignamos un 800 teniendo max 10, es error. 
-                            # Pero si asignamos 16 teniendo max 10, es error? 
-                            # La regla dice "deben iniciar después del último". O sea > max_viejo.
-                            # Si terr_asignado <= max_viejo, significa que estamos reusando números viejos o solapando.
                             if terr_asignado <= max_viejo:
                                 todos_errores.append({
                                     'REGLA': '4. CONSECUTIVO TERRENO',
@@ -176,7 +166,7 @@ def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant
     # --- [5] REINICIO EN MANZANAS NUEVAS ---
     mask_mza_nueva = es_provisional(df_ant['MANZANA']) & ~es_provisional(df_ant['SECTOR'])
     try:
-        errores_mza = df_audit[mask_mza_nueva & (df_nue['TERRERENO'].astype(int) > 50)]
+        errores_mza = df_audit[mask_mza_nueva & (df_nue['TERRENO'].astype(int) > 50)]
         for _, row in errores_mza.iterrows():
             todos_errores.append({
                 'REGLA': '5. MANZANA NUEVA',
@@ -217,7 +207,6 @@ def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant
                 codigos_problema[cod] = []
             codigos_problema[cod].append(err['REGLA'])
         
-        # Ordenar por cantidad de errores
         top_problematicos = sorted(
             [(cod, len(reglas), ', '.join(set(reglas))) for cod, reglas in codigos_problema.items()],
             key=lambda x: x[1],
@@ -247,7 +236,6 @@ def extraer_datos_gdb(zip_stream, capas_objetivo):
     
     with tempfile.TemporaryDirectory() as tmpdir:
         zip_path = os.path.join(tmpdir, "upload.zip")
-        # Asegurarse de que el stream esté al inicio
         zip_stream.seek(0)
         with open(zip_path, "wb") as f:
             f.write(zip_stream.read())
@@ -316,7 +304,7 @@ def procesar_geografica(zip_formal, zip_informal, set_alfa_activos, diccionario_
     
     reporte = []
     
-    # 1. Faltan en GDB (Están en Excel Activos, no en GDB)
+    # 1. Faltan en GDB
     sin_mapa = set_alfa - set_geo
     for cod in sin_mapa:
         reporte.append({
@@ -327,7 +315,7 @@ def procesar_geografica(zip_formal, zip_informal, set_alfa_activos, diccionario_
             'ACCION_SUGERIDA': 'Dibujar predio o revisar vigencia'
         })
         
-    # 2. Sobran en GDB (Están en GDB, no están en Excel Activos)
+    # 2. Sobran en GDB
     sin_alfa = set_geo - set_alfa
     for cod in sin_alfa:
         estado_real = diccionario_estados.get(cod, "NO EXISTE EN BD")
@@ -350,9 +338,9 @@ def procesar_geografica(zip_formal, zip_informal, set_alfa_activos, diccionario_
             'ACCION_SUGERIDA': accion
         })
 
-    # 3. Coincidencias (Están en ambos)
+    # 3. Coincidencias (Muestra)
     coincidencias = set_alfa & set_geo
-    coincidencias_sample = list(coincidencias)[:20] # Muestra de 20 para el reporte
+    coincidencias_sample = list(coincidencias)[:20]
     
     stats_geo = {
         'total_alfa': len(set_alfa),
@@ -374,7 +362,6 @@ def generar_excel_renumeracion(errores_alfa, errores_geo=None, fase=1):
     df_geo = pd.DataFrame(errores_geo) if errores_geo else pd.DataFrame()
     
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        # Pestaña de Metadatos / Fase
         fase_txt = "Fase 1: Alfanumérica" if fase == 1 else "Fase 2: Geográfica (+ Base Fase 1)"
         df_meta = pd.DataFrame([
             {'REPORTE': 'Reporte de Auditoría de Renumeración', 'FRIO': ''},
@@ -385,7 +372,6 @@ def generar_excel_renumeracion(errores_alfa, errores_geo=None, fase=1):
             df_meta = pd.concat([df_meta, pd.DataFrame([{'CAMPO': 'Nota', 'VALOR': 'Se asume validación Fase 1 aprobada'}])], ignore_index=True)
         df_meta.to_excel(writer, sheet_name='METADATOS', index=False)
 
-        # Pestaña Resumen Alfanumérico
         if not df_alfa.empty:
             resumen = df_alfa.groupby(['REGLA', 'DETALLE']).size().reset_index(name='CANTIDAD')
             resumen.to_excel(writer, sheet_name='RESUMEN_ALFA', index=False)
@@ -393,7 +379,6 @@ def generar_excel_renumeracion(errores_alfa, errores_geo=None, fase=1):
         else:
             pd.DataFrame([{'RESULTADO': 'TODO PERFECTO'}]).to_excel(writer, sheet_name='ALFA_OK', index=False)
             
-        # Pestaña Geográfica
         if not df_geo.empty:
             df_geo.to_excel(writer, sheet_name='DETALLE_GEO', index=False)
         elif errores_geo is not None:
@@ -404,19 +389,15 @@ def generar_excel_renumeracion(errores_alfa, errores_geo=None, fase=1):
 
 from fpdf import FPDF
 import matplotlib.pyplot as plt
-import io
 
 class AuditoriaRenumeracionPDF(FPDF):
     def header(self):
-        # Fondo oscuro para el encabezado (Civil-Hacker)
-        self.set_fill_color(17, 24, 39) # #111827
+        self.set_fill_color(17, 24, 39)
         self.rect(0, 0, 216, 35, 'F') 
-        
         self.set_y(12)
         self.set_font('Helvetica', 'B', 16)
         self.set_text_color(255, 255, 255)
         self.cell(0, 10, 'REPORTE DE RENOMERACIÓN - IGAC', 0, 1, 'C')
-        
         self.set_font('Helvetica', '', 8)
         self.set_text_color(156, 163, 175)
         self.cell(0, 5, 'SISTEMA DE AUDITORÍA CATASTRAL MULTIPROPÓSITO', 0, 1, 'C')
@@ -427,120 +408,65 @@ class AuditoriaRenumeracionPDF(FPDF):
         self.set_draw_color(229, 231, 235)
         self.line(20, self.get_y(), 196, self.get_y())
         self.ln(2)
-        
         self.set_font('Helvetica', 'I', 8)
         self.set_text_color(107, 114, 128)
-        # Firma solicitada
         self.cell(0, 10, 'by casabero quien se hace llamar joseph.gari', 0, 0, 'L')
         self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'R')
 
 def generar_pdf_renumeracion(resultados):
-    """Genera un reporte PDF detallado con los resultados de la auditoría"""
+    """Genera un reporte PDF detallado"""
     pdf = AuditoriaRenumeracionPDF(format='Letter')
     pdf.set_margins(20, 20, 20)
     pdf.add_page()
     
-    # Determinar etiquetas dinámicas según tipo y fase
     tipo_config = resultados.get('tipo_config', '1')
     fase = resultados.get('fase_ejecutada', 1)
     
-    if tipo_config == '1':
-        label_comparacion = 'CICA vs SNC'
-        label_anterior = 'CICA'
-    else:
-        label_comparacion = 'Operadores vs SNC'
-        label_anterior = 'Operadores'
-        
-    title_main = 'Validación de Datos' if fase == 1 else 'Cruce de Mapas (GDB)'
+    label_comparacion = 'CICA vs SNC' if tipo_config == '1' else 'Operadores vs SNC'
+    label_anterior = 'CICA' if tipo_config == '1' else 'Operadores'
     
-    # === CABECERA MINIMALISTA ===
-    # El título ahora está en el Header oscuro
-    # pdf.cell(0, 10, f'Reporte de {title_main}', 0, 1, 'L')
     pdf.ln(2)
-    
     pdf.set_font('Helvetica', '', 10)
     pdf.set_text_color(107, 114, 128)
     fecha = resultados.get('timestamp', 'N/A')
     pdf.cell(0, 6, f"Auditoría: {label_comparacion}  |  Fecha: {fecha}", 0, 1, 'L')
-    
     pdf.ln(5)
     
-    # === SECCIÓN 1: RESUMEN EJECUTIVO ===
-    pdf.set_font('Helvetica', 'B', 14)
-    pdf.cell(0, 10, 'Resumen Ejecutivo', 0, 1)
-    pdf.ln(2)
+    pdf.set_font('Helvetica', 'B', 14); pdf.cell(0, 10, 'Resumen Ejecutivo', 0, 1); pdf.ln(2)
     
-    # Métricas principales
     total_auditado = resultados.get('total_auditado', 0)
     total_errores = len(resultados.get('errores', []))
     tasa_error = resultados.get('tasa_error', 0)
     
-    pdf.set_font('Helvetica', '', 10)
-    pdf.cell(70, 8, 'Total Predios Auditados:', 0)
-    pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(0, 8, f"{total_auditado:,} predios", 0, 1)
-    
-    pdf.set_font('Helvetica', '', 10)
-    pdf.cell(70, 8, 'Alertas de Datos Encintradas:', 0)
-    pdf.set_font('Helvetica', 'B', 10)
-    color = (220, 38, 38) if total_errores > 0 else (22, 163, 74)
-    pdf.set_text_color(*color)
-    pdf.cell(0, 8, f"{total_errores:,}", 0, 1)
-    pdf.set_text_color(0, 0, 0)
-    
-    pdf.set_font('Helvetica', '', 10)
-    pdf.cell(70, 8, 'Tasa de Error:', 0)
-    pdf.set_font('Helvetica', 'B', 10)
-    color = (220, 38, 38) if tasa_error > 5 else (22, 163, 74) if tasa_error == 0 else (234, 179, 8)
-    pdf.set_text_color(*color)
-    pdf.cell(0, 8, f"{tasa_error}%", 0, 1)
-    pdf.set_text_color(0, 0, 0)
+    def add_meta(label, val, color=(0,0,0)):
+        pdf.set_font('Helvetica', '', 10); pdf.cell(70, 8, label, 0)
+        pdf.set_font('Helvetica', 'B', 10); pdf.set_text_color(*color); pdf.cell(0, 8, val, 0, 1); pdf.set_text_color(0,0,0)
+
+    add_meta('Total Predios Auditados:', f"{total_auditado:,} predios")
+    c_err = (220, 38, 38) if total_errores > 0 else (22, 163, 74)
+    add_meta('Alertas de Datos Encontradas:', f"{total_errores:,}", c_err)
+    c_tasa = (220, 38, 38) if tasa_error > 5 else (22, 163, 74) if tasa_error == 0 else (234, 179, 8)
+    add_meta('Tasa de Error:', f"{tasa_error}%", c_tasa)
     
     if 'errores_geo' in resultados:
-        logs_geo = resultados.get('logs_geo', {})
-        stats_geo = logs_geo.get('stats_geo', {}) if isinstance(logs_geo, dict) else {}
-        total_geo_alertas = len(resultados.get('errores_geo', []))
-        
-        pdf.set_font('Helvetica', '', 10)
-        pdf.cell(70, 8, 'Alertas de Mapas Encontradas:', 0)
-        pdf.set_font('Helvetica', 'B', 10)
-        color = (220, 38, 38) if total_geo_alertas > 0 else (22, 163, 74)
-        pdf.set_text_color(*color)
-        pdf.cell(0, 8, f"{total_geo_alertas:,}", 0, 1)
-        pdf.set_text_color(0, 0, 0)
-        
-        if stats_geo:
-            pdf.set_font('Helvetica', '', 10)
-            pdf.cell(70, 8, 'Consistencia Mapas/Datos:', 0)
-            pdf.set_font('Helvetica', 'B', 10)
-            porcentaje = (stats_geo['coincidencias'] / stats_geo['total_alfa'] * 100) if stats_geo['total_alfa'] > 0 else 0
-            color = (22, 163, 74) if porcentaje > 95 else (234, 179, 8) if porcentaje > 80 else (220, 38, 38)
-            pdf.set_text_color(*color)
-            pdf.cell(0, 8, f"{porcentaje:.1f}%", 0, 1)
-            pdf.set_text_color(0, 0, 0)
-    
+        total_geo = len(resultados.get('errores_geo', []))
+        add_meta('Alertas de Mapas Encontradas:', f"{total_geo:,}", (220, 38, 38) if total_geo > 0 else (22, 163, 74))
+
     pdf.ln(5)
     
-    # === SECCIÓN 2: GRÁFICO / MÉTRICAS DE FASE ===
     if fase == 1:
         stats = resultados.get('stats', {})
         if stats:
             try:
                 plt.figure(figsize=(6, 4))
-                rules = list(stats.keys())
-                counts = list(stats.values())
-                short_rules = [r.split('.')[0] for r in rules]
-                plt.bar(short_rules, counts, color='#cbd5e1', edgecolor='#94a3b8') 
+                short_rules = [r.split('.')[0] for r in stats.keys()]
+                plt.bar(short_rules, stats.values(), color='#cbd5e1', edgecolor='#94a3b8') 
                 plt.title('Distribución de Alertas por Regla', fontsize=11, color='#475569')
-                plt.xlabel('Regla de Validación', fontsize=9); plt.ylabel('Cantidad', fontsize=9)
                 plt.grid(axis='y', linestyle=':', alpha=0.5)
-                plt.gca().spines['top'].set_visible(False); plt.gca().spines['right'].set_visible(False)
-                img_buf = io.BytesIO()
-                plt.savefig(img_buf, format='png', dpi=150); plt.close(); img_buf.seek(0)
+                img_buf = io.BytesIO(); plt.savefig(img_buf, format='png', dpi=150); plt.close(); img_buf.seek(0)
                 pdf.image(img_buf, x=45, w=120); pdf.ln(5)
             except Exception as e: print(f"Error gráfico: {e}")
     else:
-        # Gráfico de Consistencia para Fase 2
         logs_geo = resultados.get('logs_geo', {})
         stats_geo = logs_geo.get('stats_geo', {}) if isinstance(logs_geo, dict) else {}
         if stats_geo:
@@ -548,114 +474,26 @@ def generar_pdf_renumeracion(resultados):
                 plt.figure(figsize=(6, 4))
                 labels = ['Consistentes', 'Faltan GDB', 'Sobran GDB']
                 sizes = [stats_geo['coincidencias'], stats_geo['sin_mapa'], stats_geo['sobran_gdb']]
-                colors = ['#22c55e', '#ef4444', '#f59e0b']
-                plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=colors, textprops={'fontsize': 9})
+                plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=['#22c55e', '#ef4444', '#f59e0b'])
                 plt.title('Consistencia Datos vs Mapas', fontsize=11, color='#475569')
-                img_buf = io.BytesIO()
-                plt.savefig(img_buf, format='png', dpi=150); plt.close(); img_buf.seek(0)
+                img_buf = io.BytesIO(); plt.savefig(img_buf, format='png', dpi=150); plt.close(); img_buf.seek(0)
                 pdf.image(img_buf, x=45, w=120); pdf.ln(5)
             except Exception as e: print(f"Error gráfico geo: {e}")
 
-    # === SECCIÓN 3: DETALLE SEGÚN FASE ===
-    if fase == 1:
-        # Top 10 Problemáticos (Solo en Fase 1 tiene sentido prioritario)
-        top_problematicos = resultados.get('top_problematicos', [])
-        if top_problematicos:
-            pdf.add_page()
-            pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Top 10 Códigos con Más Alertas', 0, 1); pdf.ln(2)
-            pdf.set_font('Helvetica', '', 9); pdf.multi_cell(0, 5, 'Predios con más incumplimientos alfanuméricos.')
-            pdf.ln(3); pdf.set_font('Helvetica', 'B', 8)
-            pdf.cell(10, 8, '#', 1, 0, 'C'); pdf.cell(45, 8, 'Código Predial', 1, 0, 'C')
-            pdf.cell(20, 8, 'Alertas', 1, 0, 'C'); pdf.cell(100, 8, 'Reglas Incumplidas', 1, 1, 'C')
-            pdf.set_font('Helvetica', '', 7)
-            for idx, (codigo, num_errores, reglas) in enumerate(top_problematicos, 1):
-                pdf.cell(10, 6, str(idx), 1, 0, 'C'); pdf.cell(45, 6, str(codigo), 1, 0, 'C')
-                pdf.set_text_color(220, 38, 38); pdf.cell(20, 6, str(num_errores), 1, 0, 'C')
-                pdf.set_text_color(0, 0, 0); reglas_txt = reglas[:70] + '...' if len(reglas) > 70 else reglas
-                pdf.cell(100, 6, reglas_txt, 1, 1)
-            pdf.ln(5)
-    else:
-        # Muestra de Consistencia (Solo en Fase 2)
-        logs_geo = resultados.get('logs_geo', {})
-        sample = logs_geo.get('coincidencias_sample', []) if isinstance(logs_geo, dict) else []
-        if sample:
-            pdf.add_page()
-            pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Muestra de Consistencia (Datos vs Mapas)', 0, 1); pdf.ln(2)
-            pdf.set_font('Helvetica', '', 9); pdf.multi_cell(0, 5, 'Muestra de predios que coinciden correctamente en el reporte y el mapa.')
-            pdf.ln(3); pdf.set_font('Helvetica', 'B', 8)
-            pdf.cell(10, 8, '#', 1, 0, 'C'); pdf.cell(75, 8, 'Código Predial (SNC)', 1, 0, 'C')
-            pdf.cell(45, 8, 'Validado en Excel', 1, 0, 'C'); pdf.cell(45, 8, 'Validado en GDB', 1, 1, 'C')
-            pdf.set_font('Helvetica', '', 7)
-            for idx, cod in enumerate(sample, 1):
-                pdf.cell(10, 6, str(idx), 1, 0, 'C'); pdf.cell(75, 6, str(cod), 1, 0, 'C')
-                pdf.set_text_color(22, 163, 74); pdf.cell(45, 6, 'OK', 1, 0, 'C'); pdf.cell(45, 6, 'DIBUJADO', 1, 1, 'C')
-                pdf.set_text_color(0, 0, 0)
-            pdf.ln(5)
-
-    # === SECCIÓN 4: RESUMEN TÉCNICO ===
-    pdf.add_page()
-    pdf.set_font('Helvetica', 'B', 12)
-    if fase == 1:
-        pdf.cell(0, 10, f'Resumen de Reglas de Validación', 0, 1); pdf.ln(2)
-        pdf.set_font('Helvetica', 'B', 9); pdf.cell(75, 8, 'Regla / Validación', 1); pdf.cell(100, 8, 'Descripción', 1); pdf.ln()
-        pdf.set_font('Helvetica', '', 8); rules_f1 = {'1. UNICIDAD': 'Predios duplicados.', '2. PERMANENCIA': 'Cambios indebidos en predios viejos.', '3. LIMPIEZA': 'Códigos con letras o provisionales.', '4. CONSECUTIVO': 'Secuencia lógica de números.', '5. MANZANA NUEVA': 'Reinicio de numeración en manzana.', '6. SECTOR NUEVO': 'Reinicio de numeración en sector.'}
-        stats = resultados.get('stats', {})
-        for r_name, r_desc in rules_f1.items():
-            count = 0
-            for k, v in stats.items():
-                if r_name in k: count = v
-            pdf.set_text_color(220, 38, 38) if count > 0 else pdf.set_text_color(22, 163, 74)
-            pdf.cell(75, 7, f"{r_name} ({count} alertas)", 1); pdf.set_text_color(0, 0, 0); pdf.cell(100, 7, r_desc, 1); pdf.ln()
-    else:
-        pdf.cell(0, 10, f'Resumen de Cruce con Mapas', 0, 1); pdf.ln(2)
-        pdf.set_font('Helvetica', '', 9); pdf.multi_cell(0, 5, 'Análisis de cobertura entre el reporte de datos y las capas del mapa oficial (U_TERRENO, R_TERRENO).')
-        pdf.ln(3); pdf.set_font('Helvetica', 'B', 9)
-        pdf.cell(75, 8, 'Categoría', 1); pdf.cell(100, 8, 'Resultado', 1); pdf.ln()
-        pdf.set_font('Helvetica', '', 8)
-        logs_geo = resultados.get('logs_geo', {})
-        s_geo = logs_geo.get('stats_geo', {}) if isinstance(logs_geo, dict) else {}
-        if s_geo:
-            pdf.cell(75, 7, 'Predios en Reporte (Datos)', 1); pdf.cell(100, 7, str(s_geo['total_alfa']), 1); pdf.ln()
-            pdf.cell(75, 7, 'Predios en el Mapa (GDB)', 1); pdf.cell(100, 7, str(s_geo['total_geo']), 1); pdf.ln()
-            pdf.set_text_color(22, 163, 74); pdf.cell(75, 7, 'Coincidencias (Cruzados)', 1); pdf.cell(100, 7, str(s_geo['coincidencias']), 1); pdf.ln()
-            pdf.set_text_color(220, 38, 38); pdf.cell(75, 7, 'Sin Geometría', 1); pdf.cell(100, 7, str(s_geo['sin_mapa']), 1); pdf.ln()
-            pdf.set_text_color(245, 158, 11); pdf.cell(75, 7, 'Sobran en GDB', 1); pdf.cell(100, 7, str(s_geo['sobran_gdb']), 1); pdf.ln()
-            pdf.set_text_color(0, 0, 0)
-
-    # === SECCIÓN 5: RECOMENDACIONES ===
-    pdf.ln(5); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Recomendaciones Estratégicas', 0, 1)
-    pdf.set_font('Helvetica', '', 9); recomendaciones = []
-    if fase == 1:
-        if tasa_error == 0: recomendaciones.append("Alfanumérico: Sin observaciones. Proceder a Fase 2.")
-        else:
-            if tasa_error > 5: recomendaciones.append("CRÍTICO: Alta tasa de error alfanumérico. No se recomienda cierre.")
-            recomendaciones.append("Revisar predios con códigos provisionales o letras antes del cierre.")
-    else:
-        logs_geo = resultados.get('logs_geo', {})
-        s_geo = logs_geo.get('stats_geo', {}) if isinstance(logs_geo, dict) else {}
-        if s_geo:
-            consistencia = (s_geo['coincidencias'] / s_geo['total_alfa'] * 100) if s_geo['total_alfa'] > 0 else 0
-            if consistencia < 90: recomendaciones.append(f"Mapas: Consistencia baja ({consistencia:.1f}%). Faltan predios por dibujar.")
-            if s_geo['sin_mapa'] > 0: recomendaciones.append(f"Existen {s_geo['sin_mapa']} predios en el reporte que no tienen un polígono en el mapa.")
-            if s_geo['sobran_gdb'] > 0: recomendaciones.append(f"Se detectaron {s_geo['sobran_gdb']} polígonos en el mapa que no están en el reporte de activos.")
-    for rec in recomendaciones: pdf.multi_cell(0, 5, f"- {rec}"); pdf.ln(1)
-
-    # === SECCIÓN 6/7: DETALLE DE ALERTAS ===
-    if fase == 1 or resultados.get('errores'):
-        pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Detalle de Alertas Alfanuméricas', 0, 1); pdf.ln(2)
-        pdf.set_font('Helvetica', 'B', 8); pdf.cell(45, 8, 'Regla', 1); pdf.cell(55, 8, 'Detalle', 1); pdf.cell(37.5, 8, f'{label_anterior}', 1); pdf.cell(37.5, 8, 'Nuevo (SNC)', 1); pdf.ln()
+    # Detalle de alertas (Top 10)
+    top_problematicos = resultados.get('top_problematicos', [])
+    if fase == 1 and top_problematicos:
+        pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Top 10 Códigos con Más Alertas', 0, 1); pdf.ln(2)
+        pdf.set_font('Helvetica', 'B', 8); pdf.cell(10, 8, '#', 1, 0, 'C'); pdf.cell(45, 8, 'Código Predial', 1, 0, 'C'); pdf.cell(20, 8, 'Alertas', 1, 0, 'C'); pdf.cell(100, 8, 'Reglas Incumplidas', 1, 1, 'C')
         pdf.set_font('Helvetica', '', 7)
-        for err in resultados.get('errores', [])[:100]:
-            if pdf.get_y() > 260: pdf.add_page()
-            d = str(err['DETALLE'])[:40] + '...' if len(str(err['DETALLE'])) > 40 else str(err['DETALLE'])
-            pdf.cell(45, 6, str(err['REGLA']), 1); pdf.cell(55, 6, d, 1); pdf.cell(37.5, 6, str(err['ANTERIOR']), 1); pdf.cell(37.5, 6, str(err['NUEVO']), 1); pdf.ln()
+        for idx, (codigo, num, reglas) in enumerate(top_problematicos, 1):
+            pdf.cell(10, 6, str(idx), 1, 0, 'C'); pdf.cell(45, 6, str(codigo), 1, 0, 'C'); pdf.set_text_color(220, 38, 38); pdf.cell(20, 6, str(num), 1, 0, 'C'); pdf.set_text_color(0, 0, 0); pdf.cell(100, 6, reglas[:70], 1, 1)
 
-    if fase == 2 and resultados.get('errores_geo'):
-        pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Detalle de Alertas en Mapas', 0, 1); pdf.ln(2)
-        pdf.set_font('Helvetica', 'B', 8); pdf.cell(55, 8, 'Tipo de Alerta', 1); pdf.cell(45, 8, 'Código Predial', 1); pdf.cell(30, 8, 'Estado BD', 1); pdf.cell(45, 8, 'Acción sugerida', 1); pdf.ln()
-        pdf.set_font('Helvetica', '', 7)
-        for err in resultados['errores_geo'][:150]:
-            if pdf.get_y() > 260: pdf.add_page()
-            pdf.cell(55, 6, str(err['TIPO']), 1); pdf.cell(45, 6, str(err['CODIGO']), 1); pdf.cell(30, 6, str(err['ESTADO_BD']), 1); pdf.cell(45, 6, str(err['ACCION_SUGERIDA']), 1); pdf.ln()
+    pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Detalle de Alertas Alfanuméricas', 0, 1); pdf.ln(2)
+    pdf.set_font('Helvetica', 'B', 8); pdf.cell(45, 8, 'Regla', 1); pdf.cell(55, 8, 'Detalle', 1); pdf.cell(37.5, 8, f'{label_anterior}', 1); pdf.cell(37.5, 8, 'Nuevo (SNC)', 1); pdf.ln()
+    pdf.set_font('Helvetica', '', 7)
+    for err in resultados.get('errores', [])[:100]:
+        if pdf.get_y() > 260: pdf.add_page()
+        pdf.cell(45, 6, str(err['REGLA']), 1); pdf.cell(55, 6, str(err['DETALLE'])[:40], 1); pdf.cell(37.5, 6, str(err['ANTERIOR']), 1); pdf.cell(37.5, 6, str(err['NUEVO']), 1); pdf.ln()
 
     return bytes(pdf.output())

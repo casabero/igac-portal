@@ -111,7 +111,7 @@
                     class="block text-[10px] font-mono font-bold text-gray-900 uppercase tracking-[0.2em] mb-4 underline">Mapeo
                     Manual de Columnas</label>
 
-                <div class="grid grid-cols-2 gap-8">
+                <div class="grid grid-cols-3 gap-8">
                     <div class="space-y-3">
                         <label class="block text-[9px] font-bold text-gray-500 uppercase italic">Columna Número Anterior
                             (CICA/LC)</label>
@@ -124,6 +124,13 @@
                         <label class="block text-[9px] font-bold text-gray-500 uppercase italic">Columna Número Nuevo
                             (SNC)</label>
                         <select name="col_snc" id="col_snc"
+                            class="w-full bg-white border border-gray-900 p-3 text-[11px] font-mono focus:ring-1 focus:ring-gray-900 outline-none">
+                            <option value="">Detectando...</option>
+                        </select>
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[9px] font-bold text-gray-500 uppercase italic">Columna Estado</label>
+                        <select name="col_estado" id="col_estado"
                             class="w-full bg-white border border-gray-900 p-3 text-[11px] font-mono focus:ring-1 focus:ring-gray-900 outline-none">
                             <option value="">Detectando...</option>
                         </select>
@@ -413,6 +420,7 @@
         const panel = document.getElementById('mapping_panel');
         const selAnt = document.getElementById('col_ant');
         const selSnc = document.getElementById('col_snc');
+        const selEstado = document.getElementById('col_estado'); // Added for col_estado
 
         if (!fileInput.files.length) return;
 
@@ -435,6 +443,7 @@
                 // Limpiar y poblar
                 selAnt.innerHTML = "";
                 selSnc.innerHTML = "";
+                selEstado.innerHTML = ""; // Clear for col_estado
 
                 data.columnas.forEach(col => {
                     const opt1 = document.createElement('option');
@@ -444,14 +453,20 @@
                     const opt2 = document.createElement('option');
                     opt2.value = col; opt2.textContent = col;
                     selSnc.appendChild(opt2);
+
+                    const opt3 = document.createElement('option'); // Option for col_estado
+                    opt3.value = col; opt3.textContent = col;
+                    selEstado.appendChild(opt3);
                 });
 
                 // Auto-detectar
                 const colAntMatch = data.columnas.find(c => c.toUpperCase().includes('CICA') || c.toUpperCase().includes('ANTERIOR') || c.toUpperCase().includes('LC'));
                 const colSncMatch = data.columnas.find(c => c.toUpperCase().includes('SNC') || c.toUpperCase().includes('NUEVO'));
+                const colEstadoMatch = data.columnas.find(c => c.toUpperCase().includes('ESTADO') || c.toUpperCase().includes('STATUS')); // Auto-detect for col_estado
 
                 if (colAntMatch) selAnt.value = colAntMatch;
                 if (colSncMatch) selSnc.value = colSncMatch;
+                if (colEstadoMatch) selEstado.value = colEstadoMatch; // Set value for col_estado
 
                 panel.classList.remove('hidden');
             }
