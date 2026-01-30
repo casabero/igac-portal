@@ -301,7 +301,7 @@ def procesar_auditoria(files_dict, pct_incremento, zona_filtro='General'):
 class AuditoriaPDF(FPDF):
     def header(self):
         self.set_font('Helvetica', 'B', 12)
-        self.cell(0, 10, 'REPORTE DE AUDITORÍA CATASTRAL - CASABERO', 0, 1, 'C')
+        self.cell(0, 10, 'REPORTE DE AUDITORÍA DE CIERRE - IGAC', 0, 1, 'C')
         self.ln(5)
 
     def footer(self):
@@ -339,12 +339,12 @@ def generar_pdf_auditoria(resultados):
         pdf.cell(0, 7, "Totales Financieros:", 0, 1)
         pdf.set_font('Helvetica', '', 9)
         t = resultados['totales']
-        pdf.cell(100, 6, f"Avaluo Precierre Total: $ {t['avaluo_precierre']:,.0f}", 0, 1)
-        pdf.cell(100, 6, f"Avaluo Cierre Total: $ {t['avaluo_cierre_listado']:,.0f}", 0, 1)
-        pdf.cell(100, 6, f"Avaluo Cierre Calc. Total: $ {t['avaluo_cierre_calculado']:,.0f}", 0, 1)
+        pdf.cell(100, 6, f"Avaluo Base Total: $ {t['avaluo_precierre']:,.0f}", 0, 1)
+        pdf.cell(100, 6, f"Avaluo Final Total: $ {t['avaluo_cierre_listado']:,.0f}", 0, 1)
+        pdf.cell(100, 6, f"Avaluo Calculado Total: $ {t['avaluo_cierre_calculado']:,.0f}", 0, 1)
         pdf.set_font('Helvetica', 'B', 9)
         dif_global = t['avaluo_cierre_listado'] - t['avaluo_precierre']
-        pdf.cell(80, 6, f"Diferencia Real (Cierre - Precierre): $ {dif_global:,.0f}", 0, 1)
+        pdf.cell(80, 6, f"Diferencia (Final - Base): $ {dif_global:,.0f}", 0, 1)
     
     # Gráfico de Variación (Box Plot)
     if 'variaciones_all' in resultados and resultados['variaciones_all']:
@@ -353,7 +353,7 @@ def generar_pdf_auditoria(resultados):
             plt.boxplot(resultados['variaciones_all'], vert=False, patch_artist=True,
                         boxprops=dict(facecolor='#EEF2FF', color='#4F46E5'),
                         medianprops=dict(color='#EF4444'))
-            plt.title('Distribución de % Variación (Cierre vs Precierre)', fontsize=10)
+            plt.title('Distribución de % Variación (Final vs Base)', fontsize=10)
             plt.xlabel('% Variación', fontsize=8)
             plt.grid(axis='x', linestyle='--', alpha=0.7)
             plt.tight_layout()

@@ -10,68 +10,58 @@
     {% if not resultados %}
     <div class="max-w-3xl mx-auto bg-white p-10 border border-gray-900 mt-4 relative">
         <div class="mb-10 border-l-4 border-gray-900 pl-6">
-            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">módulo_sistema //
-                renumeración_informales</h2>
-            <p class="text-xs font-mono text-gray-500 mt-2 uppercase">Motor de asignación geoespacial (SNC //
-                Convergencia CTM12).</p>
+            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">Herramienta //
+                Renumeración de Predios Informales</h2>
+            <p class="text-[10px] font-mono text-gray-500 mt-2 uppercase">Asignación de números prediales mediante cruce
+                de capas geográficas.</p>
         </div>
 
         <form method="POST" enctype="multipart/form-data" class="space-y-6" id="renumForm">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Informales -->
-                <div class="space-y-6">
-                    <h3 class="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest">01_ENTRADA_INFORMAL
-                    </h3>
-                    <div class="space-y-4">
-                        <label
-                            class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">FUENTE_GDB_INF
-                            (.zip)</label>
-                        <p class="text-[9px] font-mono text-gray-400 mb-2">OBJETIVOS: R_TERRENO_INFORMAL //
-                            U_TERRENO_INFORMAL</p>
-                        <input type="file" name="zip_inf" id="zip_inf" class="block w-full text-xs text-gray-500 font-mono
-                            file:mr-4 file:py-2 file:px-6
-                            file:border file:border-gray-900
-                            file:bg-white file:text-gray-900
-                            file:text-[10px] file:font-bold file:uppercase
-                            hover:file:bg-gray-900 hover:file:text-white transition-all cursor-pointer" accept=".zip"
-                            required>
-                    </div>
+                <div class="space-y-4 font-mono">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-loose">
+                        01. Capa de Predios Informales (.zip con GDB)</label>
+                    <input type="file" name="file_informal" id="file_informal" class="hidden" accept=".zip" required>
+                    <label for="file_informal"
+                        class="flex flex-col items-center justify-center w-full h-32 border border-dashed border-gray-400 bg-gray-50/30 hover:bg-white hover:border-gray-900 transition-all cursor-pointer group">
+                        <span id="name_inf"
+                            class="text-[10px] font-bold text-gray-400 text-center px-4 uppercase tracking-widest group-hover:text-gray-900 transition-colors">
+                            Suba el archivo .zip de informales
+                        </span>
+                    </label>
                 </div>
 
                 <!-- CTM -->
-                <div class="space-y-6">
-                    <h3 class="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest">02_MAESTRO_FORMAL
-                        (CTM12)</h3>
-                    <div class="space-y-4">
-                        <label
-                            class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">FUENTE_GDB_CTM
-                            (.zip)</label>
-                        <p class="text-[9px] font-mono text-gray-400 mb-2">OBJETIVOS: R_TERRENO // U_TERRENO (CTM12_REF)
-                        </p>
-                        <input type="file" name="zip_formal" id="zip_formal" class="block w-full text-xs text-gray-500 font-mono
-                            file:mr-4 file:py-2 file:px-6
-                            file:border file:border-gray-900
-                            file:bg-white file:text-gray-900
-                            file:text-[10px] file:font-bold file:uppercase
-                            hover:file:bg-gray-900 hover:file:text-white transition-all cursor-pointer" accept=".zip"
-                            required>
-                    </div>
+                <div class="space-y-4 font-mono">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-loose">
+                        02. Capa de Predios Formales (.zip con GDB)</label>
+                    <input type="file" name="file_formal" id="file_formal" class="hidden" accept=".zip" required>
+                    <label for="file_formal"
+                        class="flex flex-col items-center justify-center w-full h-32 border border-dashed border-gray-400 bg-gray-50/30 hover:bg-white hover:border-gray-900 transition-all cursor-pointer group">
+                        <span id="name_for"
+                            class="text-[10px] font-bold text-gray-400 text-center px-4 uppercase tracking-widest group-hover:text-gray-900 transition-colors">
+                            Suba el archivo .zip de formales (CTM12)
+                        </span>
+                    </label>
                 </div>
             </div>
 
             <!-- Config -->
             <div class="border-t border-gray-900 pt-8 font-mono">
-                <label
-                    class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">PREFIJO_RENUMERACIÓN</label>
-                <input type="text" name="prefijo" value="200000"
-                    class="w-full py-4 px-6 border border-gray-900 bg-white text-xs font-bold focus:ring-0 focus:border-gray-900 uppercase"
-                    placeholder="200000">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-3 tracking-widest">03. Prefijo
+                        para la Numeración</label>
+                    <input type="text" name="prefijo" placeholder="Ej: ANT"
+                        class="w-full border-gray-900 bg-white text-xs font-mono py-4 px-4 focus:ring-0 focus:border-gray-900 uppercase font-bold"
+                        required>
+                </div>
             </div>
 
             <button type="submit" id="submitBtn"
                 class="w-full bg-gray-900 text-white py-5 border border-gray-900 hover:bg-white hover:text-gray-900 transition-all font-mono font-bold text-xs tracking-[0.3em] flex justify-center items-center gap-4 uppercase active:scale-[0.98]">
-                <span class="material-symbols-outlined font-light">terminal</span> EJECUTAR_PROCESAMIENTO_GEO
+                <span class="material-symbols-outlined font-light">map</span> Iniciar Cruce Geográfico
             </button>
         </form>
 
@@ -81,10 +71,11 @@
             <div class="w-16 h-16 border-2 border-gray-900 border-t-transparent animate-spin mb-8"></div>
             <h3 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">
                 PROCESAMIENTO_GEOMETRÍA_BLOQUEADO</h3>
-            <p class="text-[10px] font-mono text-gray-500 mt-4 uppercase tracking-widest">Esperando computación
-                espacial. La secuencia puede variar según la complejidad de la GDB.</p>
-            <div class="mt-10 px-8 py-4 bg-gray-900 text-white text-[9px] font-bold uppercase tracking-[0.3em]">
-                NO_INTERRUMPIR_SESIÓN
+            <p class="text-[10px] font-mono text-white mb-6 uppercase tracking-widest">El sistema está procesando los
+                mapas y asignando los nuevos números prediales. Por favor, espere.</p>
+            <div class="flex items-center gap-4 text-gray-500 font-mono text-[9px] uppercase">
+                <span class="w-1.5 h-1.5 bg-gray-500 rounded-full animate-ping"></span>
+                <span>Analizando cruces espaciales...</span>
             </div>
         </div>
     </div>
@@ -162,45 +153,41 @@
 <div class="space-y-10 font-mono text-[11px] text-gray-900 uppercase">
     <section>
         <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
-            <span class="material-symbols-outlined font-light">menu_book</span>
-            01_MANUAL_PROTOCOLO_RENUMERACIÓN
+            <span class="material-symbols-outlined font-light">map</span>
+            01. ¿Cómo funciona esta herramienta?
         </h4>
-        <p>Asignación automatizada de firmas basadas en coordenadas para nodos informales. Lógica de convergencia
-            derivada de la referencia espacial CTM12.</p>
+        <p>Esta herramienta toma los terrenos que no tienen un número predial claro (informales) y busca en qué sector o
+            manzana se encuentran ubicados en el mapa oficial. Luego, les asigna un nuevo número predial
+            automáticamente.</p>
     </section>
 
-    <section class="space-y-6">
-        <h5 class="font-bold text-gray-900 tracking-widest">SECUENCIA_MOTOR_NÚCLEO</h5>
-        <div class="flex gap-4">
-            <span
-                class="w-10 h-10 border border-gray-900 flex items-center justify-center text-[11px] font-bold shrink-0">01</span>
-            <p class="text-[10px] text-gray-500 leading-relaxed"><b>SANEAMIENTO_TOPOLOGÍA:</b> Reparación automatizada
-                de auto-intersecciones y poda de geometrías nulas a través del núcleo GeoPandas.</p>
-        </div>
-        <div class="flex gap-4">
-            <span
-                class="w-10 h-10 border border-gray-900 flex items-center justify-center text-[11px] font-bold shrink-0">02</span>
-            <p class="text-[10px] text-gray-500 leading-relaxed"><b>INTERSECCIÓN_ESPACIAL:</b> Referencia cruzada de
-                matriz completa entre vectores informales y capas maestras CTM12 rurales/urbanas.</p>
-        </div>
-        <div class="flex gap-4">
-            <span
-                class="w-10 h-10 border border-gray-900 flex items-center justify-center text-[11px] font-bold shrink-0">03</span>
-            <p class="text-[10px] text-gray-500 leading-relaxed"><b>CÁLCULO_DOMINANCIA:</b> Intersecciones multipunto
-                resueltas mediante el protocolo de área de contacto máxima (MaxArea).</p>
+    <section>
+        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+            <span class="material-symbols-outlined font-light">info</span>
+            02. Requisitos de los Archivos
+        </h4>
+        <div class="grid grid-cols-1 gap-4">
+            <div class="border border-gray-200 p-4 font-mono">
+                <p class="font-bold mb-1">Capa Informal</p>
+                <p class="text-gray-500">Un archivo .zip que contiene la Geodatabase con los polígonos de los predios a
+                    los que se les quiere asignar un número.</p>
+            </div>
+            <div class="border border-gray-200 p-4 font-mono">
+                <p class="font-bold mb-1">Capa Formal (CTM12)</p>
+                <p class="text-gray-500">La capa del mapa oficial que ya tiene los sectores y manzanas definidos por el
+                    IGAC.</p>
+            </div>
         </div>
     </section>
 
     <section class="bg-gray-900 p-8 border border-gray-900 text-white">
         <h4
             class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
-            <span class="material-symbols-outlined text-gray-400 font-light">warning</span>
-            ESTRUCTURA_CARGA_ZIP
+            <span class="material-symbols-outlined text-gray-400 font-light">public</span>
+            Precisión del Mapa
         </h4>
-        <p class="text-[10px] text-gray-400 leading-relaxed italic">
-            nota_protocolo: Debe incluir la suite completa de Shapefile (.shp, .shx, .dbf, .prj). Análisis recursivo
-            activo para estructuras GDB anidadas.
-        </p>
+        <p class="text-[10px] text-gray-400 italic">El sistema utiliza coordenadas precisas para asegurar que el predio
+            quede ubicado en la manzana correcta.</p>
     </section>
 </div>
 {% endblock %}
@@ -218,6 +205,19 @@
             submitBtn.disabled = true;
             submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
             submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> PROCESANDO...';
+        });
+
+        // Feedback de archivos
+        document.getElementById('file_informal').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                document.getElementById('name_inf').innerHTML = '<span class="text-gray-900 font-bold uppercase tracking-tight">✓ ' + e.target.files[0].name.toUpperCase() + '</span>';
+            }
+        });
+
+        document.getElementById('file_formal').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                document.getElementById('name_for').innerHTML = '<span class="text-gray-900 font-bold uppercase tracking-tight">✓ ' + e.target.files[0].name.toUpperCase() + '</span>';
+            }
         });
     }
 </script>

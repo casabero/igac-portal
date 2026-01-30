@@ -8,33 +8,33 @@
 <div class="max-w-3xl mx-auto py-4">
     <div class="bg-white p-8 border border-gray-900">
         <div class="mb-10 border-l-4 border-gray-900 pl-6">
-            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">módulo_sistema //
-                convertidor_snc</h2>
-            <p class="text-xs font-mono text-gray-500 mt-2 uppercase">Protocolo de transformación de conjunto de datos.
-                Mapeo FWF a XLSX.</p>
+            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">Herramienta //
+                Convertidor de Archivos</h2>
+            <p class="text-xs font-mono text-gray-500 mt-2 uppercase">Convierte archivos de datos de predios a formato
+                Excel.</p>
         </div>
 
         <form method="POST" enctype="multipart/form-data" class="space-y-8">
             <!-- 1. Selección de Registro -->
             <div>
-                <label
-                    class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">01_IDENTIFICAR_TIPO_REGISTRO</label>
+                <label class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">01.
+                    Seleccione el tipo de registro</label>
                 <select name="opcion"
                     class="block w-full border-gray-900 text-xs font-mono focus:ring-0 focus:border-gray-900 bg-white py-3 px-4 uppercase"
                     required>
-                    <option value="" selected disabled>SELECCIONAR_OPCIÓN...</option>
-                    <option value="1">R1_SNC_DATOS_BÁSICOS</option>
-                    <option value="2">R2_SNC_DETALLES_CONSTRUCCIÓN</option>
-                    <option value="3">RES_T1_PROCEDIMIENTOS_GENERALES</option>
-                    <option value="4">RES_T2_DETALLES_FÍSICOS</option>
-                    <option value="5">RES_T3_DECRETOS_LEGALES</option>
+                    <option value="" selected disabled>Seleccionar...</option>
+                    <option value="1">Datos Básicos de Predios (R1)</option>
+                    <option value="2">Detalles de Construcción (R2)</option>
+                    <option value="3">Procedimientos Generales (T1)</option>
+                    <option value="4">Detalles Físicos (T2)</option>
+                    <option value="5">Decretos Legales (T3)</option>
                 </select>
             </div>
 
             <!-- 2. Archivo -->
             <div>
-                <label
-                    class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">02_CARGAR_CARGA_BRUTA
+                <label class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">02.
+                    Cargue el archivo original
                     (.txt / .prn)</label>
                 <div class="relative group">
                     <input type="file" name="archivo" id="archivo" class="hidden" required>
@@ -43,9 +43,9 @@
                         <span
                             class="material-symbols-outlined text-4xl text-gray-300 mb-3 group-hover:text-gray-900 transition-colors font-light">terminal</span>
                         <span class="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest"
-                            id="file_label">esperando_selección_archivo</span>
-                        <span class="mt-2 text-[9px] font-mono text-gray-400 uppercase tracking-tight">motor_fwf:
-                            codificación_latin-1_detectada</span>
+                            id="file_label">Seleccione un archivo</span>
+                        <span class="mt-2 text-[9px] font-mono text-gray-400 uppercase tracking-tight">Lectura de datos
+                            optimizada</span>
                     </label>
                 </div>
             </div>
@@ -53,9 +53,9 @@
             <!-- 3. Acción -->
             <div class="pt-6">
                 <button type="submit"
-                    class="w-full flex justify-center items-center gap-3 py-4 border border-gray-900 text-xs font-mono font-bold text-white bg-gray-900 hover:bg-white hover:text-gray-900 transition-all active:scale-[0.98] uppercase tracking-[0.2em]">
-                    <span class="material-symbols-outlined text-[20px] font-light">terminal</span>
-                    ejecutar_conversión --descargar
+                    class="w-full flex justify-center items-center gap-3 py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
+                    <span class="material-symbols-outlined text-[20px] font-light">download</span>
+                    Convertir y Descargar Excel
                 </button>
             </div>
         </form>
@@ -67,10 +67,11 @@
             <span class="material-symbols-outlined font-light">info</span>
         </div>
         <div>
-            <h4 class="text-[10px] font-mono font-bold text-gray-900 uppercase tracking-widest mb-2">NOTA_SISTEMA</h4>
+            <h4 class="text-[10px] font-mono font-bold text-gray-900 uppercase tracking-widest mb-2">Nota del Sistema
+            </h4>
             <p class="text-[11px] font-mono text-gray-600 leading-relaxed uppercase">
-                La lógica de conversión se adhiere estrictamente a las especificaciones FWF del IGAC. Sin pérdida de
-                datos durante el mapeo. Alineación columnar optimizada para auditoría SQL/XLSX.
+                Esta herramienta organiza la información de los predios exactamente como viene en el archivo original,
+                asegurando que no se pierda ningún dato durante la conversión a Excel.
             </p>
         </div>
     </div>
@@ -82,32 +83,31 @@
     <section>
         <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
             <span class="material-symbols-outlined font-light">description</span>
-            01_OBJETIVO_NÚCLEO
+            01. Propósito de la Herramienta
         </h4>
-        <p>Este módulo procesa registros de exportación de ancho fijo del Sistema Nacional Catastral (SNC). No requiere
-            saneamiento manual.</p>
+        <p>Esta herramienta procesa archivos de predios exportados del Sistema Nacional Catastral. No necesita limpiar
+            los datos manualmente, el sistema lo hace por usted.</p>
     </section>
 
     <section>
         <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
             <span class="material-symbols-outlined font-light">layers</span>
-            02_REGISTROS_SOPORTADOS
+            02. Tipos de Archivos Soportados
         </h4>
         <div class="grid grid-cols-1 gap-4">
             <div class="border border-gray-200 p-4 font-mono">
-                <p class="font-bold mb-1">R1_SNC (ÍNDICE_BÁSICO)</p>
-                <p class="text-gray-500">Datos de propiedad, direcciones y valores de avalúo actuales. Archivo maestro
-                    para interrogación del sistema.</p>
+                <p class="font-bold mb-1">Datos Básicos (R1)</p>
+                <p class="text-gray-500">Contiene información de los propietarios, direcciones y valores de avalúo. Es
+                    el archivo más importante.</p>
             </div>
             <div class="border border-gray-200 p-4 font-mono">
-                <p class="font-bold mb-1">R2_SNC (MORFOLOGÍA)</p>
-                <p class="text-gray-500">Detalles estructurales: área de terreno, especificaciones de construcción,
-                    conteo de pisos y estado de servicios.</p>
+                <p class="font-bold mb-1">Morfología y Construcción (R2)</p>
+                <p class="text-gray-500">Detalles sobre las áreas de los predios, tipos de construcción, número de pisos
+                    y servicios.</p>
             </div>
             <div class="border border-gray-200 p-4 font-mono">
-                <p class="font-bold mb-1">RES_LOGS (ALIMENTACIÓN_PROTOCOLO)</p>
-                <p class="text-gray-500">Logs de procedimientos internos. Clasificados automáticamente mediante
-                    algoritmo de detección de tipo (T1/T2/T3).</p>
+                <p class="font-bold mb-1">Registros de Procesos (T1, T2, T3)</p>
+                <p class="text-gray-500">Archivos que registran los cambios y trámites realizados sobre los predios.</p>
             </div>
         </div>
     </section>
@@ -115,21 +115,20 @@
     <section>
         <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
             <span class="material-symbols-outlined font-light">tips_and_updates</span>
-            03_PROTOCOLOS_RECOMENDADOS
+            03. Recomendaciones de Uso
         </h4>
         <ul class="space-y-3">
             <li class="flex items-start gap-2">
                 <span>--</span>
-                <span>No modifique la fuente FWF en editores de texto enriquecido (potencial corrupción de
-                    columnas).</span>
+                <span>Suba el archivo original sin abrirlo ni modificarlo en otros programas.</span>
             </li>
             <li class="flex items-start gap-2">
                 <span>--</span>
-                <span>La codificación Latin-1 asegura la integridad de caracteres para símbolos especiales.</span>
+                <span>El sistema garantiza que los nombres y números se lean correctamente.</span>
             </li>
             <li class="flex items-start gap-2">
                 <span>--</span>
-                <span>Descarga inmediata activada tras POST:200.</span>
+                <span>La descarga comenzará automáticamente después de procesar el archivo.</span>
             </li>
         </ul>
     </section>
@@ -144,7 +143,7 @@
 
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
-            fileLabel.innerHTML = `<b class="text-accent">✓ ${e.target.files[0].name}</b>`;
+            fileLabel.innerHTML = '<b class="text-accent">✓ ' + e.target.files[0].name.toUpperCase() + '</b>';
         }
     });
 

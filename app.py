@@ -57,14 +57,14 @@ def snc_tool():
     
     if request.method == 'POST':
         if 'archivo' not in request.files:
-            flash('No se subió ningún archivo')
+            flash('Por favor, suba un archivo para procesar')
             return redirect(request.url)
             
         file = request.files['archivo']
         opcion = request.form.get('opcion')
         
         if file.filename == '':
-            flash('Selecciona un archivo válido')
+            flash('Seleccione un archivo válido (Excel o CSV)')
             return redirect(request.url)
             
         if file and opcion:
@@ -242,7 +242,7 @@ def avaluos_tool():
         f_post_final = session.get('path_post')
 
         if not f_pre_final or not f_post_final:
-            flash('Faltan archivos (Base o Sistema)')
+            flash('Debe cargar ambos archivos (Base y Sistema) para realizar la comparación.')
             return redirect(request.url)
         
         # Get params
@@ -285,7 +285,7 @@ def clear_analysis():
     session.pop('path_post', None)
     session.pop('name_post', None)
     
-    flash('Sesión y archivos temporales eliminados.')
+    flash('Se han limpiado los datos de la sesión.')
     return redirect(url_for('avaluos_tool'))
 
 
@@ -303,7 +303,7 @@ def auditoria_tool():
         incremento = request.form.get('incremento', 3)
         
         if not f_prop or not f_calc:
-            flash('Se requieren ambos archivos para la auditoría.')
+            flash('Se requieren ambos archivos (Propietarios y Listado) para la auditoría.')
             return redirect(request.url)
             
         try:
@@ -433,12 +433,12 @@ def renumeracion_tool():
                 session.pop('renum_audit_id', None)
 
     if request.method == 'POST':
-        file = request.files.get('archivo_excel')
+        file = request.files.get('file_excel')
         tipo = request.form.get('tipo', '1') # 1: CICA, 2: LC
         fase = request.form.get('fase', '1') # 1: Alfanumérica, 2: Geográfica
         
         if not file or file.filename == '':
-            flash('Seleccione un archivo Excel válido (SNC).')
+            flash('Seleccione el archivo de reporte (Excel) para continuar.')
             return redirect(request.url)
             
         try:
@@ -562,7 +562,7 @@ def informales_tool():
         try:
             # Obtener archivos
             files_map = {}
-            for key in ['zip_inf', 'zip_formal']:
+            for key in ['file_informal', 'file_formal']:
                 f = request.files.get(key)
                 if f and f.filename:
                     # Guardar temporalmente
@@ -582,7 +582,7 @@ def informales_tool():
             resultado = procesar_informales(files_map, UPLOAD_FOLDER, prefijo)
             
             if resultado['status'] == 'error':
-                flash(f"Error: {resultado['message']}")
+                flash(f"Hubo un problema al procesar: {resultado['message']}")
             else:
                 session['res_informales'] = resultado
                 return render_template('informales_tool.html', resultados=resultado)
@@ -611,7 +611,7 @@ def clear_informales():
         except: pass
         
     session.pop('res_informales', None)
-    flash('Sesión limpiada.')
+    flash('Se han borrado los resultados y archivos temporales.')
     return redirect(url_for('informales_tool'))
 
 if __name__ == '__main__':

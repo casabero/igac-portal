@@ -41,16 +41,16 @@
                 <div class="space-y-6">
                     <div>
                         <label
-                            class="block text-[10px] font-mono font-bold text-gray-900 mb-3 uppercase tracking-tight">DATOS_PROPIETARIOS_R1
-                            (.xlsx)</label>
+                            class="block text-[10px] font-mono font-bold text-gray-900 mb-3 uppercase tracking-tight">Datos
+                            Propietarios (Excel)</label>
                         <input type="file" name="file_prop" accept=".xlsx"
                             class="block w-full text-[10px] font-mono text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-900 file:text-[10px] file:font-bold file:bg-gray-900 file:text-white hover:file:bg-white hover:file:text-gray-900 transition-all cursor-pointer"
                             required>
                     </div>
                     <div>
                         <label
-                            class="block text-[10px] font-mono font-bold text-gray-900 mb-3 uppercase tracking-tight">LISTA_AVALÚOS
-                            (.xlsx)</label>
+                            class="block text-[10px] font-mono font-bold text-gray-900 mb-3 uppercase tracking-tight">Listado
+                            Auditoría (Excel)</label>
                         <input type="file" name="file_calc" accept=".xlsx"
                             class="block w-full text-[10px] font-mono text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-900 file:text-[10px] file:font-bold file:bg-gray-900 file:text-white hover:file:bg-white hover:file:text-gray-900 transition-all cursor-pointer"
                             required>
@@ -78,7 +78,8 @@
                             <option value="Urbana" {% if resultados.zona_filtro=='Urbana' %}selected{% endif %}>
                                 ZONA_URBANA
                             </option>
-                            <option value="Rural" {% if resultados.zona_filtro=='Rural' %}selected{% endif %}>ZONA_RURAL
+                            <option value="Rural" {% if resultados.zona_filtro=='Rural' %}selected{% endif %}>
+                                ZONA_RURAL
                             </option>
                             <option value="Corregimientos" {% if resultados.zona_filtro=='Corregimientos' %}selected{%
                                 endif %}>CORREGIMIENTOS</option>
@@ -87,8 +88,8 @@
 
                     <button type="submit"
                         class="w-full bg-gray-900 text-white font-mono font-bold py-4 px-4 border border-gray-900 transition-all flex items-center justify-center gap-3 hover:bg-white hover:text-gray-900 active:scale-[0.98] uppercase tracking-widest text-xs">
-                        <span class="material-symbols-outlined text-[20px] font-light">terminal</span>
-                        iniciar_secuencia_auditoría
+                        <span class="material-symbols-outlined text-[20px] font-light">verified_user</span>
+                        Ejecutar Auditoría
                     </button>
                 </div>
             </form>
@@ -128,8 +129,8 @@
             <div class="flex items-center gap-6">
                 <a href="/clear_auditoria"
                     class="bg-white border border-gray-900 text-gray-900 px-6 py-2 text-[10px] font-mono font-bold hover:bg-gray-900 hover:text-white transition-all flex items-center gap-3 uppercase tracking-widest">
-                    <span class="material-symbols-outlined text-[18px] font-light">terminal</span>
-                    REINICIAR_LOG_AUDITORÍA
+                    <span class="material-symbols-outlined text-[18px] font-light">refresh</span>
+                    Reiniciar Auditoría
                 </a>
                 <div class="flex items-center gap-3">
                     <span class="w-2 h-2 bg-green-500 rounded-none animate-pulse"></span>
@@ -152,19 +153,16 @@
                 <p class="text-3xl font-display font-bold text-red-600 uppercase">{{
                     resultados.totales.conteo_zero_critico }}</p>
             </div>
-            <div class="bg-white p-8 border border-gray-900 border-l-8 border-l-gray-900">
-                <p class="text-[9px] font-mono text-gray-900 uppercase font-bold mb-2 tracking-widest">PH_AVALÚO_NULO
-                </p>
-                <p class="text-3xl font-display font-bold text-gray-900 uppercase">{{ resultados.totales.conteo_zero_ph
-                    }}</p>
+            <div class="bg-white p-8 border border-gray-900">
+                <p class="text-[9px] font-mono text-gray-400 uppercase font-bold mb-2 tracking-widest">Predios PH</p>
+                <p class="text-3xl font-display font-bold text-gray-900 uppercase tracking-tighter">{{
+                    resultados.totales.conteo_zero_ph }}</p>
             </div>
-            <div class="bg-gray-900 p-8 border border-gray-900">
-                <div class="relative z-10">
-                    <p class="text-[9px] font-mono text-gray-500 uppercase font-bold mb-2 tracking-widest">
-                        DETECCIÓN_ANOMALÍAS</p>
-                    <p class="text-3xl font-display font-bold text-white uppercase">{{ resultados.total_predios -
-                        resultados.resumen_estados.get('OK', 0) }}</p>
-                </div>
+            <div class="bg-gray-900 p-8 border border-gray-900 text-white">
+                <p class="text-[9px] font-mono text-gray-500 uppercase font-bold mb-2 tracking-widest">Alertas Totales
+                </p>
+                <p class="text-3xl font-display font-bold text-white uppercase">{{ resultados.total_predios -
+                    resultados.resumen_estados.get('OK', 0) }}</p>
             </div>
         </div>
 
@@ -184,14 +182,12 @@
 
             <div class="overflow-x-auto max-h-[700px] custom-scrollbar">
                 <table class="w-full text-[10px] font-mono text-left border-collapse uppercase" id="resultsTable">
-                    <thead class="bg-gray-900 text-gray-400 font-bold sticky top-0 z-10 border-b border-gray-900">
+                    <thead class="bg-gray-900 border-b border-gray-900 text-gray-400 font-bold sticky top-0 z-10">
                         <tr>
-                            <th class="px-8 py-5 tracking-widest">ID_PREDIAL</th>
-                            <th class="px-8 py-5 tracking-widest">ZONA</th>
-                            <th class="px-8 py-5 text-right tracking-widest">AVALÚO_BASE</th>
-                            <th class="px-8 py-5 text-right tracking-widest">VAL_LISTADO</th>
-                            <th class="px-8 py-5 text-right tracking-widest">VAL_CALCULADO</th>
-                            <th class="px-8 py-5 tracking-widest">ESTADO</th>
+                            <th class="px-8 py-5 text-[9px] font-bold tracking-widest uppercase">Número Predial</th>
+                            <th class="px-8 py-5 text-[9px] font-bold tracking-widest uppercase">Dirección</th>
+                            <th class="px-8 py-5 text-[9px] font-bold tracking-widest uppercase text-right">Avalúo</th>
+                            <th class="px-8 py-5 text-[9px] font-bold tracking-widest uppercase">Estado</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200" id="tableBody"></tbody>
@@ -218,36 +214,39 @@
 <div class="space-y-10 font-mono text-[11px] text-gray-900 uppercase">
     <section>
         <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
-            <span class="material-symbols-outlined font-light">verified</span>
-            01_PROTOCOLO_AUDITORÍA_CIERRE
+            <span class="material-symbols-outlined font-light">checklist</span>
+            01. ¿Qué hace esta herramienta?
         </h4>
-        <p>VALidada la consistencia final de valores para entregables de conservación y renovación masiva.</p>
+        <p>Realiza una inspección profunda de los avalúos para asegurar que no existan predios con valor de $0 antes de
+            finalizar el proceso catastral. También separa los predios en Propiedad Horizontal (PH).</p>
     </section>
 
     <section>
         <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
-            <span class="material-symbols-outlined font-light">priority_high</span>
-            02_AVALÚOS_NULOS_CRÍTICOS
+            <span class="material-symbols-outlined font-light">notifications_active</span>
+            02. Tipos de Alertas
         </h4>
-        <div class="grid grid-cols-1 gap-6">
-            <div class="border-l-4 border-red-600 pl-4 py-2 bg-white">
-                <p class="font-bold text-red-600 mb-1">EXCEPCIÓN_CRÍTICA</p>
-                <p class="text-gray-500">Propiedad activa sin valor de avalúo ($0). Revisión inmediata requerida.</p>
+        <div class="space-y-6">
+            <div class="flex gap-4">
+                <span class="px-3 py-1 bg-red-600 text-white font-bold h-fit">Alerta Máxima</span>
+                <p class="text-[10px] text-gray-500">Se detectó un predio activo pero con avalúo de $0 o campos vacíos.
+                    Requiere revisión urgente.</p>
             </div>
-            <div class="border-l-4 border-gray-900 pl-4 py-2 bg-white">
-                <p class="font-bold text-gray-900 mb-1">REGISTRO_PH (PROP_HORIZONTAL)</p>
-                <p class="text-gray-500">Régimen PH sin valor de avalúo. Verifique el estado del registro.</p>
+            <div class="flex gap-4">
+                <span class="px-3 py-1 bg-gray-900 text-white font-bold h-fit">Nota de PH</span>
+                <p class="text-[10px] text-gray-500">Predio identificado como parte de una Propiedad Horizontal.</p>
             </div>
         </div>
     </section>
 
-    <section>
-        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
-            <span class="material-symbols-outlined font-light">picture_as_pdf</span>
-            03_VISUALIZACIÓN_DATOS
+    <section class="bg-gray-900 p-8 border border-gray-900 text-white">
+        <h4
+            class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
+            <span class="material-symbols-outlined text-gray-400 font-light">verified</span>
+            Generación de Reportes
         </h4>
-        <p>El reporte incluye análisis de variación (BoxPlot) y libro completo de hallazgos para documentación oficial.
-        </p>
+        <p class="text-[10px] text-gray-400 italic">Al finalizar, puede descargar un PDF oficial que sirve como soporte
+            técnico de la auditoría realizada.</p>
     </section>
 </div>
 {% endblock %}
