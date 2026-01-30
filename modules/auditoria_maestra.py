@@ -246,9 +246,8 @@ def procesar_auditoria(files_dict, pct_incremento, zona_filtro='General'):
     full.rename(columns={'ID_Unico': 'Numero_Predial'}, inplace=True)
     predios_zero.rename(columns={'ID_Unico': 'Numero_Predial'}, inplace=True)
 
-    # Limpieza final de NaNs para evitar errores de serialización JSON (NaN -> null/0)
+    # Limpieza final de NaNs para evitar errores de serialización JSON
     for col in full.columns:
-        # Si es categórico (como _merge), convertir a objeto primero
         if str(full[col].dtype) == 'category':
             full[col] = full[col].astype(object)
             
@@ -257,12 +256,11 @@ def procesar_auditoria(files_dict, pct_incremento, zona_filtro='General'):
         else:
             full[col] = full[col].fillna(0)
     
-    # Asegurar que Numero_Predial sea siempre string para evitar fallos en JS (.includes)
+    # Asegurar que Numero_Predial sea siempre string
     full['Numero_Predial'] = full['Numero_Predial'].astype(str)
     predios_zero['Numero_Predial'] = predios_zero['Numero_Predial'].astype(str).fillna('N/A')
 
-    # Outliers (Top 5 y Bottom 5 de variaciones significativas)
-    # Mostramos Numero_Predial, Pct_Variacion y Valor_Cierre_Listado
+    # Outliers
     top_5_var = full[full['_merge'] == 'both'].sort_values(by='Pct_Variacion', ascending=False).head(5)[['Numero_Predial', 'Pct_Variacion', 'Valor_Cierre_Listado', 'Base_Usada']].to_dict(orient='records')
     bottom_5_var = full[full['_merge'] == 'both'].sort_values(by='Pct_Variacion', ascending=True).head(5)[['Numero_Predial', 'Pct_Variacion', 'Valor_Cierre_Listado', 'Base_Usada']].to_dict(orient='records')
 
@@ -292,7 +290,7 @@ def procesar_auditoria(files_dict, pct_incremento, zona_filtro='General'):
         'totales': totales,
         'outliers': {'top': top_5_var, 'bottom': bottom_5_var},
         'predios_zero': predios_zero.head(100).to_dict(orient='records'),
-        'variaciones_all': full[full['_merge'] == 'both']['Pct_Variacion'].tolist(), # Para el BoxPlot
+        'variaciones_all': full[full['_merge'] == 'both']['Pct_Variacion'].tolist(),
         'full_data': full.to_dict(orient='records'),
         'pct_incremento': pct_incremento,
         'zona_filtro': zona_filtro
@@ -300,245 +298,93 @@ def procesar_auditoria(files_dict, pct_incremento, zona_filtro='General'):
 
 class AuditoriaPDF(FPDF):
     def header(self):
-        # Fondo oscuro para el encabezado (Civil-Hacker)
-        self.set_fill_color(17, 24, 39) # #111827
-        self.rect(0, 0, 216, 35, 'F') # Ajuste para Letter (216mm ancho)
-        
+        self.set_fill_color(17, 24, 39)
+        self.rect(0, 0, 216, 35, 'F') 
         self.set_y(12)
         self.set_font('Helvetica', 'B', 16)
         self.set_text_color(255, 255, 255)
         self.cell(0, 10, 'REPORTE DE AUDITORÍA DE CIERRE - IGAC', 0, 1, 'C')
-        
-        self.set_font('Helvetica', '', 8)
-        self.set_text_color(156, 163, 175) # Gris claro
+        self.set_font('Helvetica', '', 8); self.set_text_color(156, 163, 175)
         self.cell(0, 5, 'PLATAFORMA DE GESTIÓN CATASTRAL AVANZADA', 0, 1, 'C')
         self.ln(15)
 
     def footer(self):
-        self.set_y(-20)
-        self.set_draw_color(229, 231, 235)
-        self.line(20, self.get_y(), 196, self.get_y())
-        self.ln(2)
-        
-        self.set_font('Helvetica', 'I', 8)
-        self.set_text_color(107, 114, 128)
-        # Firma solicitada
-        self.cell(0, 10, 'by casabero quien se hace llamar joseph.gari', 0, 0, 'L')
+        self.set_y(-20); self.set_draw_color(229, 231, 235)
+        self.line(20, self.get_y(), 196, self.get_y()); self.ln(2)
+        self.set_font('Helvetica', 'I', 7); self.set_text_color(156, 163, 175)
+        self.cell(0, 10, 'by casabero', 0, 0, 'L')
         self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'R')
 
 def generar_pdf_auditoria(resultados):
-    pdf = AuditoriaPDF()
-    pdf.add_page()
-    pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(50, 7, 'Municipio:', 0)
-    pdf.set_font('Helvetica', '', 10)
-    pdf.cell(0, 7, resultados.get('municipio', 'Desconocido'), 0, 1)
+    pdf = AuditoriaPDF(); pdf.set_margins(20, 20, 20); pdf.add_page()
     
-    pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(50, 7, 'Zona Analizada:', 0)
-    pdf.set_font('Helvetica', '', 10)
-    pdf.cell(0, 7, resultados.get('zona_filtro', 'General'), 0, 1)
-    
-    pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(50, 7, 'Incremento:', 0)
-    pdf.set_font('Helvetica', '', 10)
-    pdf.cell(0, 7, f"{resultados['pct_incremento']}%", 0, 1)
+    def add_meta(label, val):
+        pdf.set_font('Helvetica', 'B', 10); pdf.cell(50, 7, label, 0)
+        pdf.set_font('Helvetica', '', 10); pdf.cell(0, 7, str(val), 0, 1)
 
-    pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(50, 7, 'Total Predios Auditados:', 0)
-    pdf.set_font('Helvetica', '', 10)
-    pdf.cell(0, 7, f"{resultados['total_predios']}", 0, 1)
+    add_meta('Municipio:', resultados.get('municipio', 'Desconocido'))
+    add_meta('Zona Analizada:', resultados.get('zona_filtro', 'General'))
+    add_meta('Incremento:', f"{resultados['pct_incremento']}%")
+    add_meta('Total Predios Auditados:', f"{resultados['total_predios']}")
     
-    # Totales monetarios en el PDF
     if 'totales' in resultados:
-        pdf.ln(2)
-        pdf.set_font('Helvetica', 'B', 10)
-        pdf.cell(0, 7, "Totales Financieros:", 0, 1)
-        pdf.set_font('Helvetica', '', 9)
-        t = resultados['totales']
+        pdf.ln(2); pdf.set_font('Helvetica', 'B', 10); pdf.cell(0, 7, "Totales Financieros:", 0, 1)
+        pdf.set_font('Helvetica', '', 9); t = resultados['totales']
         pdf.cell(100, 6, f"Avaluo Base Total: $ {t['avaluo_precierre']:,.0f}", 0, 1)
         pdf.cell(100, 6, f"Avaluo Final Total: $ {t['avaluo_cierre_listado']:,.0f}", 0, 1)
         pdf.cell(100, 6, f"Avaluo Calculado Total: $ {t['avaluo_cierre_calculado']:,.0f}", 0, 1)
-        pdf.set_font('Helvetica', 'B', 9)
-        dif_global = t['avaluo_cierre_listado'] - t['avaluo_precierre']
+        pdf.set_font('Helvetica', 'B', 9); dif_global = t['avaluo_cierre_listado'] - t['avaluo_precierre']
         pdf.cell(80, 6, f"Diferencia (Final - Base): $ {dif_global:,.0f}", 0, 1)
     
-    # Gráfico de Variación (Box Plot)
     if 'variaciones_all' in resultados and resultados['variaciones_all']:
         try:
             plt.figure(figsize=(6, 3))
-            plt.boxplot(resultados['variaciones_all'], vert=False, patch_artist=True,
-                        boxprops=dict(facecolor='#EEF2FF', color='#4F46E5'),
-                        medianprops=dict(color='#EF4444'))
-            plt.title('Distribución de % Variación (Final vs Base)', fontsize=10)
-            plt.xlabel('% Variación', fontsize=8)
-            plt.grid(axis='x', linestyle='--', alpha=0.7)
-            plt.tight_layout()
-            
-            img_buf = io.BytesIO()
-            plt.savefig(img_buf, format='png', dpi=150)
-            plt.close()
-            img_buf.seek(0)
-            
-            pdf.ln(5)
-            # Centrar imagen
-            pdf.image(img_buf, x=35, w=140)
-            pdf.ln(5)
-        except Exception as e:
-            print(f"Error generando gráfico: {e}")
+            plt.boxplot(resultados['variaciones_all'], vert=False, patch_artist=True, boxprops=dict(facecolor='#EEF2FF', color='#4F46E5'), medianprops=dict(color='#EF4444'))
+            plt.title('Distribución de % Variación', fontsize=10); plt.xlabel('% Variación', fontsize=8)
+            plt.grid(axis='x', linestyle='--', alpha=0.7); plt.tight_layout()
+            img_buf = io.BytesIO(); plt.savefig(img_buf, format='png', dpi=150); plt.close(); img_buf.seek(0)
+            pdf.ln(5); pdf.image(img_buf, x=35, w=140); pdf.ln(5)
+        except Exception: pass
 
-    pdf.ln(5)
-    
-    # Outliers: Top/Bottom 5 variaciones
     if 'outliers' in resultados:
-        pdf.add_page()
-        pdf.set_font('Helvetica', 'B', 12)
-        pdf.cell(0, 10, 'Análisis de Outliers (% de Variación)', 0, 1)
-        
-        pdf.set_font('Helvetica', 'B', 10)
-        pdf.cell(0, 7, 'Top 5 Mayores Incrementos %:', 0, 1)
-        pdf.set_font('Helvetica', 'B', 8)
-        pdf.cell(50, 7, 'Número Predial', 1)
-        pdf.cell(35, 7, 'Avaluo Precierre', 1)
-        pdf.cell(35, 7, 'Avaluo Cierre', 1)
-        pdf.cell(30, 7, '% Var.', 1)
-        pdf.ln()
-        pdf.set_font('Helvetica', '', 7)
-        for item in resultados['outliers']['top']:
-            pdf.cell(50, 6, str(item['Numero_Predial']), 1)
-            pdf.cell(35, 6, f"{item['Base_Usada']:,.0f}", 1)
-            pdf.cell(35, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
-            pdf.cell(30, 6, f"{item['Pct_Variacion']:.2f}%", 1)
-            pdf.ln()
+        pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Análisis de Outliers (% de Variación)', 0, 1)
+        for group in ['top', 'bottom']:
+            label = 'Mayores Incrementos %:' if group == 'top' else 'Menores Incrementos %:'
+            pdf.set_font('Helvetica', 'B', 10); pdf.cell(0, 7, label, 0, 1); pdf.set_font('Helvetica', 'B', 8)
+            pdf.cell(55, 7, 'Número Predial', 1); pdf.cell(30, 7, 'Base', 1); pdf.cell(30, 7, 'Cierre', 1); pdf.cell(30, 7, '% Var.', 1); pdf.ln()
+            pdf.set_font('Helvetica', '', 7)
+            for item in resultados['outliers'][group]:
+                pdf.cell(55, 6, str(item['Numero_Predial']), 1); pdf.cell(30, 6, f"{item['Base_Usada']:,.0f}", 1); pdf.cell(30, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1); pdf.cell(30, 6, f"{item['Pct_Variacion']:.2f}%", 1); pdf.ln()
+            pdf.ln(5)
 
-        pdf.ln(5)
-        pdf.set_font('Helvetica', 'B', 10)
-        pdf.cell(0, 7, 'Top 5 Menores Incrementos %:', 0, 1)
-        pdf.set_font('Helvetica', 'B', 8)
-        pdf.cell(50, 7, 'Número Predial', 1)
-        pdf.cell(35, 7, 'Avaluo Precierre', 1)
-        pdf.cell(35, 7, 'Avaluo Cierre', 1)
-        pdf.cell(30, 7, '% Var.', 1)
-        pdf.ln()
-        pdf.set_font('Helvetica', '', 7)
-        for item in resultados['outliers']['bottom']:
-            pdf.cell(50, 6, str(item['Numero_Predial']), 1)
-            pdf.cell(35, 6, f"{item['Base_Usada']:,.0f}", 1)
-            pdf.cell(35, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
-            pdf.cell(30, 6, f"{item['Pct_Variacion']:.2f}%", 1)
-            pdf.ln()
-
-    # Sección de Avalúos en $0 (Alerta)
-    # ---------------------------------------------------------
-    # SECCIÓN DE ALERTAS: PREDIO EN $0 (Siempre presente)
-    # ---------------------------------------------------------
-    pdf.add_page()
-    pdf.set_font('Helvetica', 'B', 11)
-    pdf.set_text_color(220, 38, 38) # Rojo
-    pdf.cell(0, 10, 'ALERTA: PREDIOS CON AVALÚO EN $0 (Base o Cierre)', 0, 1)
-    pdf.set_text_color(0, 0, 0)
-    pdf.set_font('Helvetica', '', 9)
-    pdf.multi_cell(0, 5, 'Esta sección identifica los predios que presentan un valor de $0 pesos en el precierre (R1) o en el cierre del listado de avalúos. Es una inconsistencia que debe ser revisada.')
-    pdf.ln(2)
+    pdf.add_page(); pdf.set_font('Helvetica', 'B', 11); pdf.set_text_color(220, 38, 38)
+    pdf.cell(0, 10, 'ALERTA: PREDIOS CON AVALÚO EN $0', 0, 1); pdf.set_text_color(0, 0, 0); pdf.set_font('Helvetica', '', 9)
+    pdf.multi_cell(0, 5, 'Predios con valor de $0 pesos detectados en el proceso.'); pdf.ln(2)
 
     if not resultados['predios_zero']:
-        pdf.set_font('Helvetica', 'I', 10)
-        pdf.set_text_color(107, 114, 128)
-        pdf.cell(0, 10, 'Sin hallazgos de avalúos en $0 para este municipio.', 0, 1, 'C')
-        pdf.set_text_color(0, 0, 0)
+        pdf.set_font('Helvetica', 'I', 10); pdf.set_text_color(107, 114, 128); pdf.cell(0, 10, 'Sin hallazgos.', 0, 1, 'C'); pdf.set_text_color(0, 0, 0)
     else:
-        # Tabla de predios en cero
-        pdf.set_font('Helvetica', 'B', 8)
-        pdf.cell(50, 7, 'Número Predial', 1)
-        pdf.cell(30, 7, 'Avaluo Precierre', 1)
-        pdf.cell(30, 7, 'Avaluo Cierre', 1)
-        pdf.cell(30, 7, 'Categoría', 1)
-        pdf.cell(40, 7, 'Estado', 1)
-        pdf.ln()
+        pdf.set_font('Helvetica', 'B', 8); pdf.cell(55, 7, 'Número Predial', 1); pdf.cell(25, 7, 'Base', 1); pdf.cell(25, 7, 'Cierre', 1); pdf.cell(25, 7, 'Categoría', 1); pdf.cell(45, 7, 'Estado', 1); pdf.ln()
         pdf.set_font('Helvetica', '', 7)
         for item in resultados['predios_zero']:
-            # Salto de página si es necesario
             if pdf.get_y() > 260:
-                pdf.add_page()
-                pdf.set_font('Helvetica', 'B', 8)
-                pdf.cell(50, 7, 'Número Predial', 1)
-                pdf.cell(30, 7, 'Avaluo Precierre', 1)
-                pdf.cell(30, 7, 'Avaluo Cierre', 1)
-                pdf.cell(30, 7, 'Categoría', 1)
-                pdf.cell(40, 7, 'Estado', 1)
-                pdf.ln()
-                pdf.set_font('Helvetica', '', 7)
+                pdf.add_page(); pdf.set_font('Helvetica', 'B', 8); pdf.cell(55, 7, 'Número Predial', 1); pdf.cell(25, 7, 'Base', 1); pdf.cell(25, 7, 'Cierre', 1); pdf.cell(25, 7, 'Categoría', 1); pdf.cell(45, 7, 'Estado', 1); pdf.ln(); pdf.set_font('Helvetica', '', 7)
+            pdf.cell(55, 6, str(item['Numero_Predial']), 1); pdf.cell(25, 6, f"{item['Base_Usada']:,.0f}", 1); pdf.cell(25, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
+            cat = item.get('Zero_Category', 'Otros $0'); pdf.set_text_color(239, 68, 68) if cat == 'Crítico' else pdf.set_text_color(59, 130, 246) if cat == 'Informal' else pdf.set_text_color(147, 51, 234) if cat == 'PH' else pdf.set_text_color(0,0,0)
+            pdf.cell(25, 6, str(cat), 1); pdf.set_text_color(0, 0, 0); pdf.cell(45, 6, str(item['Estado']), 1); pdf.ln()
 
-            pdf.cell(50, 6, str(item['Numero_Predial']), 1)
-            pdf.cell(30, 6, f"{item['Base_Usada']:,.0f}", 1)
-            pdf.cell(30, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
-            
-            # Color por categoría
-            cat = item.get('Zero_Category', 'Otros $0')
-            if cat == 'Crítico':
-                pdf.set_text_color(239, 68, 68) 
-            elif cat == 'Informal':
-                pdf.set_text_color(59, 130, 246)
-            elif cat == 'PH':
-                pdf.set_text_color(147, 51, 234) # Púrpura para PH
-            
-            pdf.cell(30, 6, str(cat), 1)
-            pdf.set_text_color(0, 0, 0)
-            pdf.cell(40, 6, str(item['Estado']), 1)
-            pdf.ln()
-    pdf.set_text_color(0, 0, 0)
-
-    # Tabla de Zonas (en nueva página si es necesario)
-    pdf.add_page()
-    pdf.set_font('Helvetica', 'B', 12)
-    pdf.cell(0, 10, 'Distribución por Zona', 0, 1)
-    pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(60, 7, 'Zona', 1)
-    pdf.cell(30, 7, 'Cant. R1', 1)
-    pdf.cell(30, 7, 'Cant. Listado', 1)
-    pdf.cell(30, 7, 'Diferencia', 1)
-    pdf.ln()
-    pdf.set_font('Helvetica', '', 10)
+    pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Distribución por Zona', 0, 1); pdf.set_font('Helvetica', 'B', 10)
+    pdf.cell(70, 7, 'Zona', 1); pdf.cell(30, 7, 'Cant. R1', 1); pdf.cell(30, 7, 'Cant. Listado', 1); pdf.cell(30, 7, 'Diferencia', 1); pdf.ln(); pdf.set_font('Helvetica', '', 9)
     for row in resultados['stats_zonas']:
-        pdf.cell(60, 7, str(row['Zona']), 1)
-        pdf.cell(30, 7, str(row['R1']), 1)
-        pdf.cell(30, 7, str(row['Listado']), 1)
-        pdf.cell(30, 7, str(row['Dif']), 1)
-        pdf.ln()
+        pdf.cell(70, 7, str(row['Zona']), 1); pdf.cell(30, 7, str(row['R1']), 1); pdf.cell(30, 7, str(row['Listado']), 1); pdf.cell(30, 7, str(row['Dif']), 1); pdf.ln()
 
-    # DETALLE DE INCONSISTENCIAS (TODAS)
     if resultados['inconsistencias']:
-        pdf.add_page()
-        pdf.set_font('Helvetica', 'B', 12)
-        pdf.cell(0, 10, 'Detalle de Inconsistencias (Total)', 0, 1)
-        
-        # Función para imprimir cabecera de tabla de inconsistencias
-        def print_table_header():
-            pdf.set_font('Helvetica', 'B', 7)
-            pdf.cell(45, 7, 'Número Predial', 1)
-            pdf.cell(27, 7, 'Avaluo Precierre', 1)
-            pdf.cell(27, 7, 'Avaluo Cierre', 1)
-            pdf.cell(27, 7, 'Avaluo Cierre Calc.', 1)
-            pdf.cell(18, 7, '% Var.', 1)
-            pdf.cell(45, 7, 'Estado', 1)
-            pdf.ln()
-
-        print_table_header()
-        pdf.set_font('Helvetica', '', 6)
-        
+        pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Detalle de Inconsistencias (Total)', 0, 1)
+        def h():
+            pdf.set_font('Helvetica', 'B', 7); pdf.cell(55, 7, 'Número Predial', 1); pdf.cell(25, 7, 'Base', 1); pdf.cell(25, 7, 'Cierre', 1); pdf.cell(25, 7, 'Cierre Calc.', 1); pdf.cell(15, 7, '% Var.', 1); pdf.cell(30, 7, 'Estado', 1); pdf.ln()
+        h(); pdf.set_font('Helvetica', '', 6)
         for item in resultados['inconsistencias']:
-            # Control de salto de página manual para tablas largas
-            if pdf.get_y() > 250:
-                pdf.add_page()
-                print_table_header()
-                pdf.set_font('Helvetica', '', 6)
-
-            pdf.cell(45, 6, str(item['Numero_Predial']), 1)
-            pdf.cell(27, 6, f"{item['Base_Usada']:,.0f}", 1)
-            pdf.cell(27, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
-            pdf.cell(27, 6, f"{item['Cierre_Calculado']:,.0f}", 1)
-            pdf.cell(18, 6, f"{item['Pct_Variacion']:.2f}%", 1)
-            pdf.cell(45, 6, str(item['Estado']), 1)
-            pdf.ln()
+            if pdf.get_y() > 250: pdf.add_page(); h(); pdf.set_font('Helvetica', '', 6)
+            pdf.cell(55, 6, str(item['Numero_Predial']), 1); pdf.cell(25, 6, f"{item['Base_Usada']:,.0f}", 1); pdf.cell(25, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1); pdf.cell(25, 6, f"{item['Cierre_Calculado']:,.0f}", 1); pdf.cell(15, 6, f"{item['Pct_Variacion']:.2f}%", 1); pdf.cell(30, 6, str(item['Estado']), 1); pdf.ln()
 
     return bytes(pdf.output())
