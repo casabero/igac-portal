@@ -5,69 +5,72 @@
 {% block page_title %}Convertidor Registros Catastrales{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto py-4">
-    <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
-        <div class="mb-8">
-            <h2 class="text-xl font-bold text-gray-900 font-display">Carga de Archivos SNC</h2>
-            <p class="text-sm text-gray-500 mt-1">Procesa archivos planos del Sistema Nacional Catastral directamente a
-                Excel.</p>
+<div class="max-w-3xl mx-auto py-4">
+    <div class="bg-white p-8 border border-gray-900">
+        <div class="mb-10 border-l-4 border-gray-900 pl-6">
+            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">sys_module //
+                snc_converter</h2>
+            <p class="text-xs font-mono text-gray-500 mt-2 uppercase">Core dataset transformation protocol. FWF to XLSX
+                mapping.</p>
         </div>
 
-        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form method="POST" enctype="multipart/form-data" class="space-y-8">
             <!-- 1. Selección de Registro -->
             <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Paso 1: Tipo de
-                    Registro</label>
+                <label
+                    class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">01_IDENTIFY_REGISTRY_TYPE</label>
                 <select name="opcion"
-                    class="block w-full rounded-xl border-gray-200 text-sm focus:border-accent focus:ring-accent shadow-sm py-3 px-4"
+                    class="block w-full border-gray-900 text-xs font-mono focus:ring-0 focus:border-gray-900 bg-white py-3 px-4 uppercase"
                     required>
-                    <option value="" selected disabled>Seleccione una opción...</option>
-                    <option value="1">Registro 1 SNC (Datos Básicos)</option>
-                    <option value="2">Registro 2 SNC (Detalles Constructivos)</option>
-                    <option value="3">Resoluciones Tipo 1 (Trámites Generales)</option>
-                    <option value="4">Resoluciones Tipo 2 (Detalles Físicos)</option>
-                    <option value="5">Resoluciones Tipo 3 (Decretos)</option>
+                    <option value="" selected disabled>SELECT_OPTION...</option>
+                    <option value="1">R1_SNC_BASIC_DATA</option>
+                    <option value="2">R2_SNC_CONSTRUCTION_DETAILS</option>
+                    <option value="3">RES_T1_GENERAL_PROCEDURES</option>
+                    <option value="4">RES_T2_PHYSICAL_DETAILS</option>
+                    <option value="5">RES_T3_LEGAL_DECREES</option>
                 </select>
             </div>
 
             <!-- 2. Archivo -->
             <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Paso 2: Archivo
-                    Plano (.txt o .prn)</label>
+                <label
+                    class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">02_UPLOAD_RAW_PAYLOAD
+                    (.txt / .prn)</label>
                 <div class="relative group">
                     <input type="file" name="archivo" id="archivo" class="hidden" required>
                     <label for="archivo"
-                        class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 hover:bg-white hover:border-accent transition-all cursor-pointer">
+                        class="flex flex-col items-center justify-center w-full h-48 border border-dashed border-gray-400 bg-gray-50/30 hover:bg-white hover:border-gray-900 transition-all cursor-pointer">
                         <span
-                            class="material-symbols-outlined text-4xl text-gray-300 mb-2 group-hover:text-accent group-hover:scale-110 transition-transform">upload_file</span>
-                        <span class="text-sm font-medium text-gray-500" id="file_label">Seleccionar o arrastrar
-                            archivo</span>
-                        <span class="mt-1 text-[10px] text-gray-400">Formatos: .txt, .prn (Codificación Latin-1)</span>
+                            class="material-symbols-outlined text-4xl text-gray-300 mb-3 group-hover:text-gray-900 transition-colors font-light">terminal</span>
+                        <span class="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest"
+                            id="file_label">awaiting_file_selection</span>
+                        <span class="mt-2 text-[9px] font-mono text-gray-400 uppercase tracking-tight">fwf_engine:
+                            latin-1_encoding_detected</span>
                     </label>
                 </div>
             </div>
 
             <!-- 3. Acción -->
-            <div class="pt-4">
+            <div class="pt-6">
                 <button type="submit"
-                    class="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl text-sm font-bold text-white bg-gray-900 hover:bg-accent shadow-lg transition-all active:scale-95">
-                    <span class="material-symbols-outlined text-[20px]">download</span>
-                    Convertir y Descargar Excel
+                    class="w-full flex justify-center items-center gap-3 py-4 border border-gray-900 text-xs font-mono font-bold text-white bg-gray-900 hover:bg-white hover:text-gray-900 transition-all active:scale-[0.98] uppercase tracking-[0.2em]">
+                    <span class="material-symbols-outlined text-[20px] font-light">terminal</span>
+                    execute_conversion --download
                 </button>
             </div>
         </form>
     </div>
 
     <!-- Info Card -->
-    <div class="mt-8 bg-blue-50/50 border border-blue-100 rounded-xl p-6 flex gap-4">
-        <div class="text-blue-500">
-            <span class="material-symbols-outlined">info</span>
+    <div class="mt-10 bg-white border border-gray-900 p-8 flex gap-6">
+        <div class="text-gray-900">
+            <span class="material-symbols-outlined font-light">info</span>
         </div>
         <div>
-            <h4 class="text-xs font-bold text-blue-700 uppercase tracking-wider mb-1">Nota Técnica</h4>
-            <p class="text-xs text-blue-600 leading-relaxed">
-                El convertidor mantiene la estructura original del IGAC (FWF). No se eliminan datos, solo se mapean a
-                columnas legibles para auditoría.
+            <h4 class="text-[10px] font-mono font-bold text-gray-900 uppercase tracking-widest mb-2">SYSTEM_NOTE</h4>
+            <p class="text-[11px] font-mono text-gray-600 leading-relaxed uppercase">
+                The conversion logic strictly adheres to IGAC FWF specifications. No data loss during mapping. Columnar
+                alignment optimized for SQL/XLSX auditing.
             </p>
         </div>
     </div>
@@ -75,51 +78,58 @@
 {% endblock %}
 
 {% block help_content %}
-<div class="space-y-8 text-gray-600">
+<div class="space-y-10 font-mono text-[11px] text-gray-900 uppercase">
     <section>
-        <h4 class="text-primary font-bold text-sm uppercase tracking-wider border-b pb-2 mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-accent">description</span>
-            1. Propósito de la Herramienta
+        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+            <span class="material-symbols-outlined font-light">description</span>
+            01_CORE_OBJECTIVE
         </h4>
-        <p class="text-sm">Esta aplicación procesa archivos planos de ancho fijo (Fixed-Width format) exportados
-            directamente desde el Sistema Nacional Catastral del IGAC.</p>
+        <p>This module processes fixed-width export logs from the National Cadastral System (SNC). No manual
+            sanitization required.</p>
     </section>
 
     <section>
-        <h4 class="text-primary font-bold text-sm uppercase tracking-wider border-b pb-2 mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-accent">layers</span>
-            2. Tipos de Registros Soportados
+        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+            <span class="material-symbols-outlined font-light">layers</span>
+            02_SUPPORTED_REGISTRIES
         </h4>
         <div class="grid grid-cols-1 gap-4">
-            <div class="bg-gray-50 p-4 rounded-xl">
-                <p class="font-bold text-gray-900 text-xs mb-1">Registro 1 (R1)</p>
-                <p class="text-[12px]">Contiene la información básica: Propietario, Cédula, Dirección, Destino y
-                    <b>Avalúo Actual</b>. Es el archivo base para cualquier análisis.</p>
+            <div class="border border-gray-200 p-4 font-mono">
+                <p class="font-bold mb-1">R1_SNC (BASIC_INDEX)</p>
+                <p class="text-gray-500">Ownership data, addresses, and current appraisal values. Master file for system
+                    interrogation.</p>
             </div>
-            <div class="bg-gray-50 p-4 rounded-xl">
-                <p class="font-bold text-gray-900 text-xs mb-1">Registro 2 (R2)</p>
-                <p class="text-[12px]">Información física: Áreas de terreno por zonas, detalles de construcción, número
-                    de pisos, baños y estrato.</p>
+            <div class="border border-gray-200 p-4 font-mono">
+                <p class="font-bold mb-1">R2_SNC (MORPHOLOGY)</p>
+                <p class="text-gray-500">Structural details: terrain area, building specifics, floor counts, and utility
+                    status.</p>
             </div>
-            <div class="bg-gray-50 p-4 rounded-xl">
-                <p class="font-bold text-gray-900 text-xs mb-1">Resoluciones</p>
-                <p class="text-[12px]">Registros de trámites internos. El sistema filtra automáticamente por el tipo de
-                    registro (Resolución 1, 2 o 3) según la selección en el formulario.</p>
+            <div class="border border-gray-200 p-4 font-mono">
+                <p class="font-bold mb-1">RES_LOGS (PROTOCOL_FEED)</p>
+                <p class="text-gray-500">Internal procedure logs. Automatically sorted via type_detection algorithm
+                    (T1/T2/T3).</p>
             </div>
         </div>
     </section>
 
     <section>
-        <h4 class="text-primary font-bold text-sm uppercase tracking-wider border-b pb-2 mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-accent">tips_and_updates</span>
-            3. Recomendaciones
+        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+            <span class="material-symbols-outlined font-light">tips_and_updates</span>
+            03_RECOM_PROTOCOLS
         </h4>
-        <ul class="list-disc list-inside text-sm space-y-2">
-            <li>Asegúrese de que el archivo no haya sido modificado manualmente en un editor de texto que pueda
-                corromper el ancho fijo de las columnas.</li>
-            <li>El encoding se detecta automáticamente (usualmente Latin-1), permitiendo procesar tildes y eñes
-                correctamente.</li>
-            <li>El archivo resultante se descarga instantáneamente tras el procesamiento.</li>
+        <ul class="space-y-3">
+            <li class="flex items-start gap-2">
+                <span>--</span>
+                <span>Do not modify FWF source in rich text editors (potential column corruption).</span>
+            </li>
+            <li class="flex items-start gap-2">
+                <span>--</span>
+                <span>Latin-1 encoding ensures character integrity for special symbols.</span>
+            </li>
+            <li class="flex items-start gap-2">
+                <span>--</span>
+                <span>Immediate download triggered upon POST:200.</span>
+            </li>
         </ul>
     </section>
 </div>

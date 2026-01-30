@@ -18,13 +18,14 @@
                     fontFamily: {
                         "sans": ["Inter", "sans-serif"],
                         "display": ["Outfit", "sans-serif"],
+                        "mono": ["Fira Code", "monospace"],
                     },
                     colors: {
                         gray: {
-                            900: "#111827", 700: "#374151", 500: "#6B7280", 200: "#E5E7EB", 50: "#F9FAFB"
+                            900: "#111111", 700: "#333333", 500: "#666666", 200: "#E5E5E5", 50: "#F9FAFB"
                         },
-                        primary: "#1e293b",
-                        accent: "#2563eb"
+                        primary: "#111111",
+                        accent: "#111111"
                     }
                 }
             }
@@ -41,18 +42,23 @@
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #e2e8f0;
-            border-radius: 10px;
+            background: #111111;
+            border-radius: 0px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #cbd5e1;
+            background: #333333;
         }
 
         .nav-item-active {
-            background-color: #f1f5f9;
-            color: #0f172a;
-            border-right: 3px solid #3b82f6;
+            background-color: #111111;
+            color: #FFFFFF;
+            border-right: 3px solid #111111;
+        }
+
+        .grid-bg {
+            background-image: radial-gradient(#11111133 1px, transparent 1px);
+            background-size: 40px 40px;
         }
     </style>
     {% block head %}{% endblock %}
@@ -61,70 +67,70 @@
 <body class="bg-[#F8FAFC] text-gray-900 font-sans antialiased min-h-screen flex">
 
     <!-- SIDEBAR -->
-    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-40">
-        <div class="p-6 border-b border-gray-100">
+    <aside class="w-64 bg-white border-r border-gray-900 flex flex-col fixed h-full z-40">
+        <div class="p-6 border-b border-gray-900">
             <a href="/" class="flex items-center gap-3 group">
-                <div class="p-2 bg-primary rounded-lg text-white group-hover:bg-accent transition-colors">
-                    <span class="material-symbols-outlined">grid_view</span>
+                <div class="p-2 bg-primary text-white transition-colors">
+                    <span class="material-symbols-outlined font-light">terminal</span>
                 </div>
-                <span class="font-display font-bold text-lg tracking-tight">IGAC Apps</span>
+                <span class="font-display font-bold text-lg tracking-tight uppercase">Casabero_IGAC</span>
             </a>
         </div>
 
         <nav class="flex-1 py-4 overflow-y-auto custom-scrollbar">
             <div class="px-3 mb-2">
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-2">Herramientas</p>
+                <p class="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest px-3 mb-4">SYSTEM_TOOLS</p>
                 <a href="/snc"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all group {% if request.path == '/snc' %}nav-item-active{% endif %}">
-                    <span class="material-symbols-outlined text-[20px]">table_view</span>
-                    <span class="text-sm font-medium">Convertidor SNC</span>
+                    class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/snc' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
+                    <span class="material-symbols-outlined text-[20px] font-light">data_object</span>
+                    <span class="text-xs font-mono font-medium uppercase">SNC_CONVERT</span>
                 </a>
                 <a href="/avaluos"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all group {% if request.path == '/avaluos' %}nav-item-active{% endif %}">
-                    <span class="material-symbols-outlined text-[20px]">analytics</span>
-                    <span class="text-sm font-medium">Análisis de Avalúos</span>
+                    class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/avaluos' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
+                    <span class="material-symbols-outlined text-[20px] font-light">analytics</span>
+                    <span class="text-xs font-mono font-medium uppercase">APPRAISAL_ANALYSIS</span>
                 </a>
                 <a href="/auditoria"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all group {% if request.path == '/auditoria' %}nav-item-active{% endif %}">
-                    <span class="material-symbols-outlined text-[20px]">verified_user</span>
-                    <span class="text-sm font-medium">Auditoría de Cierre</span>
+                    class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/auditoria' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
+                    <span class="material-symbols-outlined text-[20px] font-light">verified</span>
+                    <span class="text-xs font-mono font-medium uppercase">CLOSURE_AUDIT</span>
                 </a>
                 <a href="/renumeracion"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all group {% if request.path == '/renumeracion' %}nav-item-active{% endif %}">
-                    <span class="material-symbols-outlined text-[20px]">rule</span>
-                    <span class="text-sm font-medium">Auditoría Renumeración</span>
+                    class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/renumeracion' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
+                    <span class="material-symbols-outlined text-[20px] font-light">rule_folder</span>
+                    <span class="text-xs font-mono font-medium uppercase">RENUMBER_AUDIT</span>
                 </a>
                 <a href="/renumeracion-informales"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all group {% if request.path == '/renumeracion-informales' %}nav-item-active{% endif %}">
-                    <span class="material-symbols-outlined text-[20px]">pin_drop</span>
-                    <span class="text-sm font-medium">Renumeración Informales</span>
+                    class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/renumeracion-informales' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
+                    <span class="material-symbols-outlined text-[20px] font-light">location_searching</span>
+                    <span class="text-xs font-mono font-medium uppercase">INFORMAL_RENUMBER</span>
                 </a>
             </div>
         </nav>
 
-        <div class="p-4 border-t border-gray-100">
+        <div class="p-4 border-t border-gray-900">
             <button onclick="toggleHelpModal()"
-                class="w-full flex items-center justify-center gap-2 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-100 transition-all">
-                <span class="material-symbols-outlined text-[18px]">help</span>
-                Centro de Ayuda
+                class="w-full flex items-center justify-center gap-2 py-2 bg-white border border-gray-900 text-[10px] font-mono font-bold text-gray-900 hover:bg-gray-900 hover:text-white transition-all">
+                <span class="material-symbols-outlined text-[16px] font-light">help_center</span>
+                HELP_CENTER
             </button>
         </div>
     </aside>
 
     <!-- MAIN CONTENT AREA -->
-    <div class="flex-1 ml-64 flex flex-col min-h-screen">
+    <div class="flex-1 ml-64 flex flex-col min-h-screen grid-bg">
         <!-- TOPBAR -->
-        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-30">
+        <header class="h-16 bg-white border-b border-gray-900 flex items-center justify-between px-8 sticky top-0 z-30">
             <div class="flex items-center gap-4">
-                <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-                    {% block page_title %}Dashboard{% endblock %}
+                <h2 class="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest">
+                    > {% block page_title %}DASHBOARD{% endblock %}
                 </h2>
             </div>
             <div class="flex items-center gap-4">
-                <span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold">V 1.2</span>
+                <span class="text-[10px] font-mono bg-gray-900 text-white px-2 py-1 font-bold">V_1.2_SYS_STABLE</span>
                 <div
-                    class="h-8 w-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400">
-                    <span class="material-symbols-outlined text-[20px]">account_circle</span>
+                    class="h-8 w-8 bg-white border border-gray-900 flex items-center justify-center text-gray-900">
+                    <span class="material-symbols-outlined text-[20px] font-light">terminal</span>
                 </div>
             </div>
         </header>
@@ -134,9 +140,9 @@
             {% if messages %}
             {% for message in messages %}
             <div
-                class="mb-6 p-4 {% if 'Error' in message or 'Faltan' in message %}bg-red-50 border-red-200 text-red-700{% else %}bg-green-50 border-green-200 text-green-700{% endif %} border rounded-xl text-sm flex items-center gap-3 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
-                <span class="material-symbols-outlined text-[20px]">info</span>
-                <span class="font-medium">{{ message }}</span>
+                class="mb-6 p-4 {% if 'Error' in message or 'Faltan' in message %}bg-white border-red-600 text-red-600{% else %}bg-white border-gray-900 text-gray-900{% endif %} border text-[10px] font-mono flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+                <span class="material-symbols-outlined text-[18px] font-light">info</span>
+                <span class="font-bold uppercase tracking-tight">REPORT: {{ message }}</span>
             </div>
             {% endfor %}
             {% endif %}
@@ -145,9 +151,9 @@
             {% block content %}{% endblock %}
         </main>
 
-        <footer class="p-8 border-t border-gray-200 bg-white text-center">
-            <p class="text-[10px] text-gray-400 uppercase tracking-widest font-medium">
-                Casabero IGAC Portal &copy; 2026
+        <footer class="p-8 border-t border-gray-900 bg-white text-center">
+            <p class="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] font-medium">
+                sys_meta: casabero_igAC_portal_v2026 | arch: x64_hybrid | loc: latam_remote
                 <a href="/admin/dashboard" class="opacity-0 hover:opacity-10 transition-opacity cursor-default"
                     title="Admin">.</a>
             </p>
@@ -158,33 +164,32 @@
     <div id="helpModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
         aria-modal="true">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" aria-hidden="true"
+            <div class="fixed inset-0 bg-gray-900/40 transition-opacity" aria-hidden="true"
                 onclick="toggleHelpModal()"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <div
-                class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-100">
-                <div class="bg-primary px-8 py-6 flex justify-between items-center text-white">
-                    <h3 class="text-xl font-bold font-display flex items-center gap-3">
-                        <span class="material-symbols-outlined">menu_book</span>
-                        Manual de Usuario
+                class="inline-block align-bottom bg-white text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-900">
+                <div class="bg-gray-900 px-8 py-6 flex justify-between items-center text-white">
+                    <h3 class="text-sm font-mono font-bold flex items-center gap-3 uppercase tracking-widest">
+                        <span class="material-symbols-outlined font-light">terminal</span>
+                        manual_v1.2 // execute --help
                     </h3>
                     <button onclick="toggleHelpModal()"
-                        class="hover:bg-gray-700/50 p-2 rounded-full transition-colors flex items-center justify-center">
-                        <span class="material-symbols-outlined">close</span>
+                        class="hover:bg-white/10 p-2 transition-colors flex items-center justify-center">
+                        <span class="material-symbols-outlined font-light">close</span>
                     </button>
                 </div>
                 <div class="px-8 py-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                    <div id="helpContent" class="prose prose-sm max-w-none text-gray-600">
+                    <div id="helpContent" class="prose prose-sm max-w-none text-gray-900 font-mono text-[11px]">
                         {% block help_content %}
-                        <p>Bienvenido al Centro de Ayuda. Seleccione una herramienta en el menú lateral para ver su
-                            manual específico.</p>
+                        <p>> [SYSTEM_MSG]: Select a module from the sidebar to display specific technical documentation.</p>
                         {% endblock %}
                     </div>
                 </div>
-                <div class="bg-gray-50 px-8 py-4 flex justify-end">
+                <div class="bg-white border-t border-gray-900 px-8 py-4 flex justify-end">
                     <button onclick="toggleHelpModal()"
-                        class="bg-primary text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-black transition-all shadow-lg active:scale-95">
-                        Entendido
+                        class="bg-gray-900 text-white px-6 py-2 border border-gray-900 text-xs font-mono font-bold hover:bg-white hover:text-gray-900 transition-all active:scale-95">
+                        EXIT_MANUAL
                     </button>
                 </div>
             </div>

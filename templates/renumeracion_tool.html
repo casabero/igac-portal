@@ -8,85 +8,90 @@
 <div class="max-w-[1400px] mx-auto">
     <!-- FORMULARIO DE CARGA (SI NO HAY RESULTADOS) -->
     {% if not resultados %}
-    <div class="max-w-xl mx-auto bg-white p-8 rounded-2xl border border-gray-200 shadow-sm mt-4">
-        <h2 class="text-xl font-bold mb-6 text-gray-900 flex items-center gap-2">
-            <span class="material-symbols-outlined text-accent">rule</span> Auditoría de Renumeración
-        </h2>
+    <div class="max-w-2xl mx-auto bg-white p-10 border border-gray-900 mt-4">
+        <div class="mb-10 border-l-4 border-gray-900 pl-6">
+            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">sys_module //
+                renumbering_audit</h2>
+            <p class="text-xs font-mono text-gray-500 mt-2 uppercase">Integrated protocol for ID migration logic (SNC vs
+                GDB).</p>
+        </div>
 
-        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form method="POST" enctype="multipart/form-data" class="space-y-10">
             <!-- PASO 1: CONFIGURACIÓN DE TIPO -->
-            <div class="space-y-4">
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Paso 1: Tipo de
-                    Reporte</label>
-                <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-6">
+                <label
+                    class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em]">01_IDENTIFY_REPORT_SOURCE</label>
+                <div class="grid grid-cols-2 gap-6">
                     <label
-                        class="relative flex flex-col p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-all border-gray-200"
+                        class="relative flex flex-col p-6 border cursor-pointer hover:bg-gray-50 transition-all border-gray-900"
                         id="label_tipo_1">
                         <input type="radio" name="tipo" value="1"
-                            class="absolute top-4 right-4 text-accent focus:ring-accent" checked
+                            class="absolute top-4 right-4 text-gray-900 focus:ring-0" checked
                             onchange="updateRadioSelection()">
-                        <span class="text-xs font-bold text-gray-900">CICA</span>
-                        <span class="text-[10px] text-gray-400 mt-1">SNC vs CICA (IGAC)</span>
+                        <span class="text-xs font-mono font-bold text-gray-900 uppercase">CICA_PROTOCOL</span>
+                        <span class="text-[9px] font-mono text-gray-400 mt-2 uppercase">SNC vs CICA (IGAC MASTER)</span>
                     </label>
                     <label
-                        class="relative flex flex-col p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-all border-gray-200"
+                        class="relative flex flex-col p-6 border cursor-pointer hover:bg-gray-50 transition-all border-gray-200"
                         id="label_tipo_2">
                         <input type="radio" name="tipo" value="2"
-                            class="absolute top-4 right-4 text-accent focus:ring-accent"
-                            onchange="updateRadioSelection()">
-                        <span class="text-xs font-bold text-gray-900">Operadores</span>
-                        <span class="text-[10px] text-gray-400 mt-1">SNC vs Gestor/Operador</span>
+                            class="absolute top-4 right-4 text-gray-900 focus:ring-0" onchange="updateRadioSelection()">
+                        <span class="text-xs font-mono font-bold text-gray-900 uppercase">OPERATOR_FEED</span>
+                        <span class="text-[9px] font-mono text-gray-400 mt-2 uppercase">SNC vs GESTOR/OPERATOR
+                            EXTERNAL</span>
                     </label>
                 </div>
             </div>
 
             <!-- PASO 2: SELECCIÓN DE FASE -->
-            <div class="space-y-4">
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Paso 2: Fase de
-                    Auditoría</label>
-                <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-6">
+                <label
+                    class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em]">02_AUDIT_PHASE_GATE</label>
+                <div class="grid grid-cols-2 gap-6">
                     <label
-                        class="relative flex flex-col p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-all border-gray-200"
+                        class="relative flex flex-col p-6 border cursor-pointer hover:bg-gray-50 transition-all border-gray-200"
                         id="label_fase_1">
                         <input type="radio" name="fase" value="1"
-                            class="absolute top-4 right-4 text-accent focus:ring-accent" checked
+                            class="absolute top-4 right-4 text-gray-900 focus:ring-0" checked
                             onchange="updateFaseSelection()">
-                        <span class="text-xs font-bold text-gray-900">Fase 1</span>
-                        <span class="text-[10px] text-gray-400 mt-1">Validación Alfanumérica</span>
+                        <span class="text-xs font-mono font-bold text-gray-900 uppercase">PHASE_01 (ALFA)</span>
+                        <span class="text-[9px] font-mono text-gray-400 mt-2 uppercase">ALPHANUMERIC SEQUENCE
+                            LOGIC</span>
                     </label>
                     <label
-                        class="relative flex flex-col p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-all border-gray-200"
+                        class="relative flex flex-col p-6 border cursor-pointer hover:bg-gray-50 transition-all border-gray-200"
                         id="label_fase_2">
                         <input type="radio" name="fase" value="2"
-                            class="absolute top-4 right-4 text-accent focus:ring-accent"
-                            onchange="updateFaseSelection()">
-                        <span class="text-xs font-bold text-gray-900">Fase 2</span>
-                        <span class="text-[10px] text-gray-400 mt-1">Cruce Geográfico (GDB)</span>
+                            class="absolute top-4 right-4 text-gray-900 focus:ring-0" onchange="updateFaseSelection()">
+                        <span class="text-xs font-mono font-bold text-gray-900 uppercase">PHASE_02 (GEO)</span>
+                        <span class="text-[9px] font-mono text-gray-400 mt-2 uppercase">GDB SPATIAL OVERLAY
+                            CRUNCH</span>
                     </label>
                 </div>
             </div>
 
-            <!-- ADVERTENCIA FASE 2 (OCULTA POR DEFECTO) -->
+            <!-- ADVERTENCIA FASE 2 -->
             <div id="warning_fase2" class="hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                <div class="p-4 bg-amber-50 border border-amber-100 rounded-xl flex gap-3">
-                    <span class="material-symbols-outlined text-amber-600 text-sm">warning</span>
-                    <p class="text-[10px] text-amber-800 leading-relaxed font-medium">
-                        <b>Atención:</b> Para ejecutar la Fase 2 se asume que los predios ya cuentan con su respectiva
-                        validación técnica (Fase 1).
+                <div class="p-6 bg-gray-900 border border-gray-900 flex gap-4 text-white">
+                    <span class="material-symbols-outlined text-gray-400 font-light">warning</span>
+                    <p class="text-[10px] font-mono leading-relaxed uppercase tracking-tight">
+                        PROTOCOL_ADVISORY: Phase 02 requires validated Phase 01 alfanumeric integrity. Ensure source
+                        dataset is sanitized.
                     </p>
                 </div>
             </div>
 
             <!-- CARGA EXCEL (OBLIGATORIA) -->
-            <div class="space-y-3">
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Paso 3: Reporte SNC
+            <div class="space-y-4 font-mono">
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">03_UPLOAD_SNC_REPORT
                     (.xlsx)</label>
                 <input type="file" name="archivo_excel" id="archivo_excel" class="hidden" accept=".xlsx" required>
                 <label for="archivo_excel"
-                    class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 hover:bg-white hover:border-accent transition-all cursor-pointer group">
+                    class="flex flex-col items-center justify-center w-full h-32 border border-dashed border-gray-400 bg-gray-50/30 hover:bg-white hover:border-gray-900 transition-all cursor-pointer group">
                     <span
-                        class="material-symbols-outlined text-2xl text-gray-300 mb-1 group-hover:text-accent group-hover:scale-110 transition-transform">upload_file</span>
-                    <span class="text-[11px] font-medium text-gray-500" id="file_label">Seleccionar archivo Excel</span>
+                        class="material-symbols-outlined text-3xl text-gray-300 mb-3 group-hover:text-gray-900 transition-colors font-light">terminal</span>
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+                        id="file_label">awaiting_data_stream</span>
                 </label>
             </div>
 
@@ -127,30 +132,31 @@
 
     <!-- RESULTADOS (SI EXISTEN) -->
     {% if resultados %}
-    <div id="resultado_renum" class="space-y-8">
-        <div class="flex items-center justify-between bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center text-accent">
-                    <span class="material-symbols-outlined text-3xl">fact_check</span>
+    <div id="resultado_renum" class="space-y-10 uppercase font-mono">
+        <div class="flex items-center justify-between bg-white p-10 border border-gray-900">
+            <div class="flex items-center gap-6">
+                <div class="w-14 h-14 bg-gray-900 flex items-center justify-center text-white">
+                    <span class="material-symbols-outlined text-3xl font-light">fact_check</span>
                 </div>
                 <div>
-                    <h3 class="text-xl font-bold text-gray-900">Resultados de Auditoría Integrada</h3>
-                    <p class="text-xs text-gray-400">Total predios activos auditados: <b>{{ resultados.total_auditado
-                            }}</b></p>
+                    <h3 class="text-2xl font-display font-bold text-gray-900 uppercase tracking-tighter">
+                        sys_report_integrated</h3>
+                    <p class="text-[10px] text-gray-500 mt-2 font-mono">NODES_AUDITED: {{ resultados.total_auditado }}
+                    </p>
                 </div>
             </div>
-            <div class="flex gap-3">
+            <div class="flex gap-4">
                 <a href="/renumeracion/excel"
-                    class="bg-gray-900 text-white px-5 py-3 rounded-xl text-xs font-bold hover:bg-accent transition-all flex items-center gap-2 shadow-lg shadow-gray-900/10">
-                    <span class="material-symbols-outlined text-[18px]">table_view</span> Excel Detallado
+                    class="bg-white border border-gray-900 text-gray-900 px-6 py-3 text-[10px] font-bold hover:bg-gray-900 hover:text-white transition-all flex items-center gap-3 tracking-widest">
+                    <span class="material-symbols-outlined text-[18px] font-light">table_view</span> XLSX_EXPORT
                 </a>
                 <a href="/renumeracion/pdf"
-                    class="bg-red-600 text-white px-5 py-3 rounded-xl text-xs font-bold hover:bg-red-700 transition-all flex items-center gap-2 shadow-lg shadow-red-600/10">
-                    <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span> Informe PDF
+                    class="bg-white border border-red-600 text-red-600 px-6 py-3 text-[10px] font-bold hover:bg-red-600 hover:text-white transition-all flex items-center gap-3 tracking-widest">
+                    <span class="material-symbols-outlined text-[18px] font-light">picture_as_pdf</span> PDF_DOCKET
                 </a>
                 <a href="/clear_renumeracion"
-                    class="bg-white border border-red-100 text-red-600 px-4 py-3 rounded-xl text-xs font-bold hover:bg-red-50 transition-all flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[18px]">delete_sweep</span> Nueva Auditoría
+                    class="bg-gray-900 text-white px-6 py-3 text-[10px] font-bold hover:bg-white hover:text-gray-900 border border-gray-900 transition-all flex items-center gap-3 tracking-widest">
+                    <span class="material-symbols-outlined text-[18px] font-light">terminal</span> RESET_BUFFER
                 </a>
             </div>
         </div>
@@ -170,22 +176,23 @@
                 {% if rule_key in k %}{% set count = v %}{% endif %}
                 {% endfor %}
                 <div
-                    class="bg-white p-4 rounded-2xl border {% if count > 0 %}border-red-100 bg-red-50/30{% else %}border-gray-100{% endif %} shadow-sm flex flex-col gap-1 transition-all hover:scale-[1.02]">
+                    class="bg-white p-6 border {% if count > 0 %}border-red-600 border-l-8{% else %}border-gray-900{% endif %} flex flex-col gap-2 transition-all">
                     <p
-                        class="text-[9px] {% if count > 0 %}text-red-400{% else %}text-gray-400{% endif %} font-bold uppercase">
-                        Regla {{ i }}</p>
+                        class="text-[9px] {% if count > 0 %}text-red-600{% else %}text-gray-500{% endif %} font-bold uppercase tracking-widest">
+                        RULE_0{{ i }}</p>
                     <p
-                        class="text-2xl font-display font-bold {% if count > 0 %}text-red-600{% else %}text-gray-900{% endif %}">
+                        class="text-3xl font-display font-bold {% if count > 0 %}text-red-600{% else %}text-gray-900{% endif %}">
                         {{ count }}</p>
                 </div>
                 {% endfor %}
             </div>
 
             <div
-                class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mt-4 {% if resultados.fase_ejecutada == 2 and not resultados.errores %}hidden{% endif %}">
-                <div class="px-6 py-4 border-b border-gray-50 bg-gray-50/30">
-                    <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Alertas Alfanuméricas ({{
-                        resultados.errores|length }})</h4>
+                class="bg-white border border-gray-900 overflow-hidden mt-6 {% if resultados.fase_ejecutada == 2 and not resultados.errores %}hidden{% endif %}">
+                <div class="p-8 border-b border-gray-900 bg-gray-50/30">
+                    <h4
+                        class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-gray-900 pl-4">
+                        ALPHANUMERIC_EXCEPTION_STREAM ({{ resultados.errores|length }})</h4>
                 </div>
                 <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
                     {% if resultados.errores %}
@@ -200,11 +207,12 @@
                         </thead>
                         <tbody class="divide-y divide-gray-50">
                             {% for err in resultados.errores %}
-                            <tr class="hover:bg-red-50/30 transition-colors">
-                                <td class="px-6 py-4"><span class="font-bold text-red-600">{{ err.REGLA }}</span></td>
-                                <td class="px-6 py-4 text-gray-600">{{ err.DETALLE }}</td>
-                                <td class="px-6 py-4 font-mono text-gray-400">{{ err.ANTERIOR }}</td>
-                                <td class="px-6 py-4 font-mono font-bold text-gray-900">{{ err.NUEVO }}</td>
+                            <tr class="hover:bg-red-50/30 transition-colors uppercase">
+                                <td class="px-8 py-5"><span class="font-bold text-red-600 text-xs">${ err.REGLA }</span>
+                                </td>
+                                <td class="px-8 py-5 text-gray-600 text-[10px] font-mono">${ err.DETALLE }</td>
+                                <td class="px-8 py-5 font-mono text-gray-400">${ err.ANTERIOR }</td>
+                                <td class="px-8 py-5 font-mono font-bold text-gray-900">${ err.NUEVO }</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -223,54 +231,58 @@
 
         <!-- SECCIÓN 2: AUDITORÍA GEOGRÁFICA -->
         {% if resultados.fase_ejecutada == 2 %}
-        <div class="space-y-4">
-            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                <span class="material-symbols-outlined text-sm">map</span> Fase 2: Cruce Geográfico (GDB)
+        <div class="space-y-6">
+            <h4 class="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest flex items-center gap-3">
+                <span class="material-symbols-outlined text-sm font-light">map</span> PHASE_02: SPATIAL_OVERLAY_CRUNCH
+                (GDB)
             </h4>
 
-            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-50 bg-gray-50/30 flex justify-between items-center">
-                    <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Alertas
-                        Geográficas ({{ resultados.errores_geo|length }})</h4>
+            <div class="bg-white border border-gray-900 overflow-hidden">
+                <div class="p-8 border-b border-gray-900 bg-gray-50/30 flex justify-between items-center">
+                    <h4
+                        class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-gray-900 pl-4">
+                        GEOSPATIAL_EXCEPTION_LEDGER ({{ resultados.errores_geo|length }})</h4>
                 </div>
                 <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
                     {% if resultados.errores_geo %}
-                    <table class="w-full text-left border-collapse text-[11px]">
-                        <thead class="sticky top-0 bg-white border-b border-gray-100 text-gray-400 font-bold uppercase">
+                    <table class="w-full text-left border-collapse text-[10px] uppercase font-mono">
+                        <thead
+                            class="sticky top-0 bg-gray-900 border-b border-gray-900 text-gray-400 font-bold tracking-widest">
                             <tr>
-                                <th class="px-6 py-3">Incidencia</th>
-                                <th class="px-6 py-3">Código Involucrado</th>
-                                <th class="px-6 py-3">Estado en BD</th>
-                                <th class="px-6 py-3">Acción Recomendada</th>
+                                <th class="px-8 py-5">INCIDENCE_TYPE</th>
+                                <th class="px-8 py-5">NODE_ID</th>
+                                <th class="px-8 py-5">DB_STATUS</th>
+                                <th class="px-8 py-5">RECOM_ACTION</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-50">
+                        <tbody class="divide-y divide-gray-200">
                             {% for err in resultados.errores_geo %}
-                            <tr class="hover:bg-amber-50/30 transition-colors">
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 rounded-md text-[9px] font-bold flex flex-col gap-1">
-                                        <span class="text-gray-900">{{ err.TIPO }}</span>
-                                        <span class="text-gray-400 font-normal">{{ err.DETALLE }}</span>
-                                    </span>
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-8 py-5">
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-gray-900 font-bold">${ err.TIPO }</span>
+                                        <span class="text-gray-400 font-normal text-[9px]">${ err.DETALLE }</span>
+                                    </div>
                                 </td>
-                                <td class="px-6 py-4 font-mono font-bold text-gray-900">{{ err.CODIGO }}</td>
-                                <td class="px-6 py-4">
+                                <td class="px-8 py-5 font-bold text-gray-900">${ err.CODIGO }</td>
+                                <td class="px-8 py-5">
                                     <span
-                                        class="px-2 py-0.5 rounded-full {% if err.ESTADO_BD == 'ACTIVO' %}bg-green-100 text-green-700{% elif err.ESTADO_BD == 'NO EXISTE EN BD' %}bg-red-100 text-red-700{% else %}bg-gray-100 text-gray-600{% endif %} font-bold text-[9px]">
-                                        {{ err.ESTADO_BD }}
+                                        class="px-3 py-1 border {% if err.ESTADO_BD == 'ACTIVO' %}border-gray-900 text-gray-900{% elif err.ESTADO_BD == 'NO EXISTE EN BD' %}border-red-600 text-red-600{% else %}border-gray-400 text-gray-400{% endif %} font-bold text-[9px] tracking-widest">
+                                        ${ err.ESTADO_BD }
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-blue-600 font-medium">{{ err.ACCION_SUGERIDA }}</td>
+                                <td class="px-8 py-5 text-gray-900 font-bold tracking-tighter">${ err.ACCION_SUGERIDA }
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                     {% else %}
-                    <div class="p-12 text-center">
-                        <span class="material-symbols-outlined text-5xl text-green-200 mb-2">public</span>
-                        <h5 class="text-sm font-bold text-gray-900">Consistencia Geográfica PerfectA</h5>
-                        <p class="text-[11px] text-gray-400">Todos los predios de la GDB coinciden con el reporte de
-                            renumeración.</p>
+                    <div class="p-16 text-center">
+                        <span class="material-symbols-outlined text-5xl text-gray-200 mb-4 font-light">public</span>
+                        <h5 class="text-xs font-bold text-gray-900 tracking-widest">GEOSPATIAL_INTEGRITY_VERIFIED</h5>
+                        <p class="text-[10px] text-gray-400 mt-2">All GDB vectors align with renumbering report
+                            signatures.</p>
                     </div>
                     {% endif %}
                 </div>
@@ -283,57 +295,62 @@
 {% endblock %}
 
 {% block help_content %}
-<div class="space-y-8 text-gray-600">
+<div class="space-y-10 font-mono text-[11px] text-gray-900 uppercase">
     <section>
-        <h4 class="text-primary font-bold text-sm uppercase tracking-wider border-b pb-2 mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-accent">rule</span>
-            Auditoría de Renumeración Integral
+        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+            <span class="material-symbols-outlined font-light">rule</span>
+            01_INTEGRATED_RENUMBERING_AUDIT
         </h4>
-        <p class="text-sm">Esta herramienta valida de forma unificada el proceso de cambio de códigos prediales (SNC).
-            El proceso se divide en dos fases fundamentales:</p>
-        <div class="mt-4 space-y-3">
-            <div class="flex gap-3">
+        <p>Unified validation protocol for ID migration (SNC). Split into two mandatory/optional execution branches:</p>
+        <div class="mt-8 space-y-6">
+            <div class="flex gap-4">
                 <span
-                    class="w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-[10px] font-bold shrink-0">1</span>
+                    class="w-10 h-10 border border-gray-900 flex items-center justify-center text-[11px] font-bold shrink-0">01</span>
                 <div>
-                    <p class="text-xs font-bold text-gray-900">Fase Alfanumérica (Obligatoria)</p>
-                    <p class="text-[11px]">Valida las 6 reglas técnicas del IGAC (Unicidad, Permanencia, Limpieza,
-                        Consecutivos y Reinicios). Requiere el Excel del SNC con columna de "Estado".</p>
+                    <p class="font-bold text-gray-900">ALPHANUMERIC_PHASE (MANDATORY)</p>
+                    <p class="text-gray-500 mt-1">Validates 6 technical IGAC rules: Uniqueness, Permanence,
+                        Sanitization, Continuity, and Reset logic.</p>
                 </div>
             </div>
-            <div class="flex gap-3">
+            <div class="flex gap-4">
                 <span
-                    class="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-[10px] font-bold shrink-0">2</span>
+                    class="w-10 h-10 border border-gray-400 text-gray-400 flex items-center justify-center text-[11px] font-bold shrink-0">02</span>
                 <div>
-                    <p class="text-xs font-bold text-gray-900">Fase Geográfica (Opcional)</p>
-                    <p class="text-[11px]">Cruza el Excel con las capas de la GDB (.zip). Identifica predios activos
-                        dibujados que no están en el reporte y viceversa.</p>
+                    <p class="font-bold text-gray-400">GEOSPATIAL_PHASE (OPTIONAL)</p>
+                    <p class="text-[10px] text-gray-400 mt-1">GDB overlay crunch (.zip). Identifies orphaned vectors vs
+                        undocumented system entries.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="bg-amber-50 p-6 rounded-2xl border border-amber-100">
-        <h4 class="text-amber-800 font-bold text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
-            <span class="material-symbols-outlined text-amber-600">warning</span>
-            IMPORTANTE: Cargue Alfanumérico
+    <section class="bg-gray-900 p-8 border border-gray-900 text-white">
+        <h4
+            class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
+            <span class="material-symbols-outlined text-gray-400 font-light">warning</span>
+            CRITICAL_PAYLOAD_REQUIREMENT
         </h4>
-        <p class="text-[11px] text-amber-700 leading-relaxed">
-            Es <b>indispensable</b> que el archivo Excel contenga todos los registros (Activos y Cancelados) para que la
-            fase geográfica pueda realizar el cruce correctamente e identificar si un polígono "sobrante" corresponde a
-            un predio ya cancelado en sistema.
+        <p class="text-[10px] text-gray-400 leading-relaxed italic">
+            protocol_note: xlsx source must include all technical states (active/canceled). Failure to provide full logs
+            corrupts spatial intersection logic.
         </p>
     </section>
 
     <section>
-        <h4 class="text-primary font-bold text-sm uppercase tracking-wider border-b pb-2 mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-accent">help</span>
-            Capas Auditadas en GDB
+        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+            <span class="material-symbols-outlined font-light">help</span>
+            03_GDB_LAYER_MAPPING
         </h4>
-        <ul class="text-[11px] space-y-1 list-disc pl-4">
-            <li><b>Formal:</b> U_TERRENO, R_TERRENO, TERRENO</li>
-            <li><b>Informal:</b> U_TERRENO_INFORMAL, R_TERRENO_INFORMAL, TERRENO_INFORMAL</li>
-        </ul>
+        <div class="grid grid-cols-2 gap-6">
+            <div class="border border-gray-200 p-4">
+                <p class="font-bold mb-1">FORMAL_LAYERS</p>
+                <p class="text-gray-400 text-[9px]">U_TERRENO // R_TERRENO // TERRENO</p>
+            </div>
+            <div class="border border-gray-200 p-4">
+                <p class="font-bold mb-1">INFORMAL_LAYERS</p>
+                <p class="text-gray-400 text-[9px]">U_TERRENO_INF // R_TERRENO_INF</p>
+            </div>
+        </div>
     </section>
 </div>
 {% endblock %}
@@ -344,10 +361,10 @@
         const r1 = document.querySelector('input[name="tipo"][value="1"]');
         const r2 = document.querySelector('input[name="tipo"][value="2"]');
 
-        document.getElementById('label_tipo_1').classList.toggle('border-accent', r1.checked);
-        document.getElementById('label_tipo_1').classList.toggle('bg-blue-50/30', r1.checked);
-        document.getElementById('label_tipo_2').classList.toggle('border-accent', r2.checked);
-        document.getElementById('label_tipo_2').classList.toggle('bg-blue-50/30', r2.checked);
+        document.getElementById('label_tipo_1').classList.toggle('border-gray-900', r1.checked);
+        document.getElementById('label_tipo_1').classList.toggle('bg-gray-50', r1.checked);
+        document.getElementById('label_tipo_2').classList.toggle('border-gray-900', r2.checked);
+        document.getElementById('label_tipo_2').classList.toggle('bg-gray-50', r2.checked);
     }
 
     function updateFaseSelection() {
@@ -358,10 +375,10 @@
         const gdb = document.getElementById('gdb_inputs');
 
         // Estilos de labels
-        document.getElementById('label_fase_1').classList.toggle('border-accent', f1.checked);
-        document.getElementById('label_fase_1').classList.toggle('bg-blue-50/30', f1.checked);
-        document.getElementById('label_fase_2').classList.toggle('border-accent', f2.checked);
-        document.getElementById('label_fase_2').classList.toggle('bg-blue-50/30', f2.checked);
+        document.getElementById('label_fase_1').classList.toggle('border-gray-900', f1.checked);
+        document.getElementById('label_fase_1').classList.toggle('bg-gray-50', f1.checked);
+        document.getElementById('label_fase_2').classList.toggle('border-gray-900', f2.checked);
+        document.getElementById('label_fase_2').classList.toggle('bg-gray-50', f2.checked);
 
         // Visibilidad de secciones
         if (f2.checked) {
@@ -376,19 +393,21 @@
     {% if not resultados %}
     document.getElementById('archivo_excel').addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
-            document.getElementById('file_label').innerHTML = `<b class="text-accent tracking-normal">Excel: ${e.target.files[0].name}</b>`;
+            document.getElementById('file_label').innerHTML = `<span class="text-gray-900 font-bold uppercase tracking-tight">✓ ${e.target.files[0].name.toUpperCase()}</span>`;
         }
     });
-    document.getElementById('gdb_f').addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            document.getElementById('label_gdb_f').innerHTML = `<b class="text-blue-600">✓ ${e.target.files[0].name}</b>`;
-        }
-    });
-    document.getElementById('gdb_i').addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            document.getElementById('label_gdb_i').innerHTML = `<b class="text-blue-600">✓ ${e.target.files[0].name}</b>`;
-        }
-    });
+
+    const setupFileLabel = (inputId, labelId) => {
+        document.getElementById(inputId).addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                document.getElementById(labelId).innerHTML = `<span class="text-gray-900 font-bold uppercase text-[9px]">✓ ${e.target.files[0].name.toUpperCase()}</span>`;
+            }
+        });
+    };
+
+    setupFileLabel('gdb_f', 'label_gdb_f');
+    setupFileLabel('gdb_i', 'label_gdb_i');
+
     updateRadioSelection();
     updateFaseSelection();
     {% endif %}

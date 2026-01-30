@@ -5,147 +5,145 @@
 {% block page_title %}Panel de Aplicaciones{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto py-4">
-    <div class="mb-10">
-        <h3 class="text-2xl font-display font-bold text-gray-900">Bienvenido al Portal de Herramientas</h3>
-        <p class="text-gray-500 mt-2">Seleccione una aplicación para comenzar el procesamiento de datos catastrales.</p>
+<div class="max-w-5xl mx-auto py-4">
+    <div class="mb-12 border-l-4 border-gray-900 pl-6">
+        <h3 class="text-3xl font-display font-bold text-gray-900 uppercase tracking-tighter">system_access //
+            entry_point</h3>
+        <p class="text-gray-500 mt-2 font-mono text-xs uppercase tracking-widest">Select module to initiate
+            data_processing_sequence.</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- App 1: Convertidor SNC -->
         <div
-            class="group bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl hover:border-accent/40 transition-all duration-300 flex flex-col justify-between">
+            class="group bg-white p-8 border border-gray-900 hover:bg-gray-50 transition-all duration-300 flex flex-col justify-between">
             <div>
                 <div
-                    class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-[32px]">table_view</span>
+                    class="w-12 h-12 border border-gray-900 flex items-center justify-center text-gray-900 mb-6 group-hover:bg-gray-900 group-hover:text-white transition-all font-light">
+                    <span class="material-symbols-outlined text-[28px]">data_object</span>
                 </div>
-                <div class="flex items-center gap-3 mb-3">
-                    <h4 class="text-lg font-bold text-gray-900">Convertidor SNC</h4>
+                <div class="flex items-center gap-3 mb-4">
+                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">SNC_CONVERT_V1.2
+                    </h4>
                     <span
-                        class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-500 border border-gray-200 uppercase">v1.2</span>
+                        class="px-2 py-0.5 text-[9px] font-mono font-bold bg-gray-900 text-white border border-gray-900">STABLE</span>
                 </div>
-                <p class="text-sm text-gray-500 leading-relaxed mb-8">
-                    Transforma archivos planos masivos del Sistema Nacional Catastral directamente a formatos Excel
-                    estructurados.
+                <p class="text-xs font-mono text-gray-500 leading-relaxed mb-10 uppercase">
+                    [PARSING_ENGINE]: Transform flat files (.txt/.prn) to structured system datasets (Excel).
                 </p>
             </div>
             <a href="/snc"
-                class="flex items-center justify-center gap-2 w-full py-3 bg-gray-900 text-white rounded-xl font-bold text-sm group-hover:bg-accent transition-colors shadow-lg active:scale-95">
-                Abrir Herramienta
-                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
+                execute_module
+                <span class="material-symbols-outlined text-[16px] font-light">arrow_forward</span>
             </a>
         </div>
 
         <!-- App 2: Análisis Avalúos -->
         <div
-            class="group bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl hover:border-green-400/40 transition-all duration-300 flex flex-col justify-between">
+            class="group bg-white p-8 border border-gray-900 hover:bg-gray-50 transition-all duration-300 flex flex-col justify-between">
             <div>
                 <div
-                    class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 mb-6 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-[32px]">analytics</span>
+                    class="w-12 h-12 border border-gray-900 flex items-center justify-center text-gray-900 mb-6 group-hover:bg-gray-900 group-hover:text-white transition-all font-light">
+                    <span class="material-symbols-outlined text-[28px]">analytics</span>
                 </div>
-                <div class="flex items-center gap-3 mb-3">
-                    <h4 class="text-lg font-bold text-gray-900">Análisis de Avalúos</h4>
-                    <span
-                        class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 border border-green-200 uppercase">Beta</span>
+                <div class="flex items-center gap-3 mb-4">
+                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">APPRAISAL_ANALYSIS
+                    </h4>
+                    <span class="px-2 py-0.5 text-[9px] font-mono font-bold border border-gray-900">BETA_04</span>
                 </div>
-                <p class="text-sm text-gray-500 leading-relaxed mb-8">
-                    Compara bases de precierre y poscierre, identificando automáticamente predios nuevos, eliminados e
-                    inconsistencias.
+                <p class="text-xs font-mono text-gray-500 leading-relaxed mb-10 uppercase">
+                    [COMPARATOR]: Cross-reference pre/post closure datasets. Identify anomalies + predial_inconsistency.
                 </p>
             </div>
             <a href="/avaluos"
-                class="flex items-center justify-center gap-2 w-full py-3 bg-gray-900 text-white rounded-xl font-bold text-sm group-hover:bg-green-600 transition-colors shadow-lg active:scale-95">
-                Abrir Herramienta
-                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
+                execute_module
+                <span class="material-symbols-outlined text-[16px] font-light">arrow_forward</span>
             </a>
         </div>
 
         <!-- App 3: Auditoría de Cierre -->
         <div
-            class="group bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl hover:border-blue-400/40 transition-all duration-300 flex flex-col justify-between">
+            class="group bg-white p-8 border border-gray-900 hover:bg-gray-50 transition-all duration-300 flex flex-col justify-between">
             <div>
                 <div
-                    class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-6 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-[32px]">verified_user</span>
+                    class="w-12 h-12 border border-gray-900 flex items-center justify-center text-gray-900 mb-6 group-hover:bg-gray-900 group-hover:text-white transition-all font-light">
+                    <span class="material-symbols-outlined text-[28px]">verified</span>
                 </div>
-                <div class="flex items-center gap-3 mb-3">
-                    <h4 class="text-lg font-bold text-gray-900">Auditoría de Cierre</h4>
-                    <span
-                        class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200 uppercase">Nuevo</span>
+                <div class="flex items-center gap-3 mb-4">
+                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">CLOSURE_AUDIT</h4>
+                    <span class="px-2 py-0.5 text-[9px] font-mono font-bold border border-gray-900">REQUIRED</span>
                 </div>
-                <p class="text-sm text-gray-500 leading-relaxed mb-8">
-                    Genera reportes técnicos oficiales en PDF con alertas financieras críticas y categorización de
-                    propiedades horizontales.
+                <p class="text-xs font-mono text-gray-500 leading-relaxed mb-10 uppercase">
+                    [REPORT_GEN]: Official PDF compilation. Critical financial alert sensing + horizontal_prop_cat.
                 </p>
             </div>
             <a href="/auditoria"
-                class="flex items-center justify-center gap-2 w-full py-3 bg-gray-900 text-white rounded-xl font-bold text-sm group-hover:bg-indigo-600 transition-colors shadow-lg active:scale-95">
-                Abrir Herramienta
-                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
+                execute_module
+                <span class="material-symbols-outlined text-[16px] font-light">arrow_forward</span>
             </a>
         </div>
 
         <!-- App 4: Auditoría de Renumeración -->
         <div
-            class="group bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl hover:border-amber-400/40 transition-all duration-300 flex flex-col justify-between">
+            class="group bg-white p-8 border border-gray-900 hover:bg-gray-50 transition-all duration-300 flex flex-col justify-between">
             <div>
                 <div
-                    class="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 mb-6 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-[32px]">rule</span>
+                    class="w-12 h-12 border border-gray-900 flex items-center justify-center text-gray-900 mb-6 group-hover:bg-gray-900 group-hover:text-white transition-all font-light">
+                    <span class="material-symbols-outlined text-[28px]">rule_folder</span>
                 </div>
-                <div class="flex items-center gap-3 mb-3">
-                    <h4 class="text-lg font-bold text-gray-900">Auditoría Renumeración</h4>
-                    <span
-                        class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200 uppercase">Nuevo</span>
+                <div class="flex items-center gap-3 mb-4">
+                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">RENUMBER_AUDIT
+                    </h4>
+                    <span class="px-2 py-0.5 text-[9px] font-mono font-bold border border-gray-900">VERIFIER</span>
                 </div>
-                <p class="text-sm text-gray-500 leading-relaxed mb-8">
-                    Valida las 6 reglas técnicas de cambio de numeración predial, asegurando la permanencia y secuencia
-                    lógica SNC.
+                <p class="text-xs font-mono text-gray-500 leading-relaxed mb-10 uppercase">
+                    [RULE_VALIDATOR]: Verify 06 technical protocols. Secure SNC sequence + predial permanency.
                 </p>
             </div>
             <a href="/renumeracion"
-                class="flex items-center justify-center gap-2 w-full py-3 bg-gray-900 text-white rounded-xl font-bold text-sm group-hover:bg-amber-600 transition-colors shadow-lg active:scale-95">
-                Abrir Herramienta
-                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
+                execute_module
+                <span class="material-symbols-outlined text-[16px] font-light">arrow_forward</span>
             </a>
         </div>
 
         <!-- App 5: Renumeración Predios Informales -->
         <div
-            class="group bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl hover:border-blue-600/40 transition-all duration-300 flex flex-col justify-between border-l-4 border-l-blue-600">
+            class="group bg-white p-8 border-l-8 border-y border-r border-gray-900 hover:bg-gray-50 transition-all duration-300 flex flex-col justify-between border-l-gray-900">
             <div>
                 <div
-                    class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-[32px]">pin_drop</span>
+                    class="w-12 h-12 border border-gray-900 flex items-center justify-center text-gray-900 mb-6 group-hover:bg-gray-900 group-hover:text-white transition-all font-light">
+                    <span class="material-symbols-outlined text-[28px]">location_searching</span>
                 </div>
-                <div class="flex items-center gap-3 mb-3">
-                    <h4 class="text-lg font-bold text-gray-900">Renumeración Informales</h4>
+                <div class="flex items-center gap-3 mb-4">
+                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">INFORMAL_RENUMBER
+                    </h4>
                     <span
-                        class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200 uppercase">GeoPandas</span>
+                        class="px-2 py-0.5 text-[9px] font-mono font-bold bg-gray-900 text-white border border-gray-900">GEOPANDAS</span>
                 </div>
-                <p class="text-sm text-gray-500 leading-relaxed mb-8">
-                    Cruce geográfico automático de predios informales con CTM12. Validación y renumeración por mayor
-                    área.
+                <p class="text-xs font-mono text-gray-500 leading-relaxed mb-10 uppercase">
+                    [GEO_SPATIAL]: Automatic CTM12 cross-referencing. Renumbering via max_area_logic.
                 </p>
             </div>
             <a href="/renumeracion-informales"
-                class="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-black transition-colors shadow-lg active:scale-95">
-                Abrir Herramienta
-                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
+                execute_module
+                <span class="material-symbols-outlined text-[16px] font-light">arrow_forward</span>
             </a>
         </div>
 
         <!-- App 7: Proximamente -->
         <div
-            class="bg-gray-50/50 p-8 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center text-center opacity-70">
+            class="bg-white/30 p-8 border border-dashed border-gray-400 flex flex-col items-center justify-center text-center">
             <div
-                class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-gray-400 mb-6 border border-gray-100">
-                <span class="material-symbols-outlined text-[32px]">rocket_launch</span>
+                class="w-12 h-12 border border-dashed border-gray-400 flex items-center justify-center text-gray-400 mb-6 font-light">
+                <span class="material-symbols-outlined text-[28px]">add</span>
             </div>
-            <h4 class="text-lg font-bold text-gray-400">Próxima Herramienta</h4>
-            <p class="text-sm text-gray-300 mt-2">Estamos desarrollando nuevas utilidades para tu municipio.</p>
+            <h4 class="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest">AWAITING_INPUT</h4>
+            <p class="text-[10px] font-mono text-gray-400 mt-2 uppercase">Core expansion in progress.</p>
         </div>
     </div>
 </div>

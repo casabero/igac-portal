@@ -8,72 +8,83 @@
 <div class="max-w-[1400px] mx-auto">
     <!-- FORMULARIO -->
     {% if not resultados %}
-    <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl border border-gray-200 shadow-sm mt-4">
-        <h2 class="text-xl font-bold mb-6 text-gray-900 flex items-center gap-2">
-            <span class="material-symbols-outlined text-accent">pin_drop</span> Renumeración Geográfica (GeoPandas)
-        </h2>
+    <div class="max-w-3xl mx-auto bg-white p-10 border border-gray-900 mt-4 relative">
+        <div class="mb-10 border-l-4 border-gray-900 pl-6">
+            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">sys_module //
+                informal_renumbering</h2>
+            <p class="text-xs font-mono text-gray-500 mt-2 uppercase">Geospatial assignment engine (SNC // CTM12
+                Convergence).</p>
+        </div>
 
         <form method="POST" enctype="multipart/form-data" class="space-y-6" id="renumForm">
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Informales -->
-                <div class="space-y-4">
-                    <h3 class="text-sm font-bold text-gray-700 uppercase">1. Componente Informal</h3>
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">GDB Informal
+                <div class="space-y-6">
+                    <h3 class="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest">01_INFORMAL_INPUT
+                    </h3>
+                    <div class="space-y-4">
+                        <label
+                            class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">GDB_SOURCE_INF
                             (.zip)</label>
-                        <p class="text-[9px] text-gray-400 mb-2">Contiene: R_TERRENO_INFORMAL, U_TERRENO_INFORMAL</p>
-                        <input type="file" name="zip_inf" id="zip_inf" class="block w-full text-xs text-gray-500
-                            file:mr-4 file:py-2 file:px-4
-                            file:rounded-full file:border-0
-                            file:text-xs file:font-semibold
-                            file:bg-blue-50 file:text-accent
-                            hover:file:bg-blue-100" accept=".zip" required>
+                        <p class="text-[9px] font-mono text-gray-400 mb-2">TARGETS: R_TERRENO_INFORMAL //
+                            U_TERRENO_INFORMAL</p>
+                        <input type="file" name="zip_inf" id="zip_inf" class="block w-full text-xs text-gray-500 font-mono
+                            file:mr-4 file:py-2 file:px-6
+                            file:border file:border-gray-900
+                            file:bg-white file:text-gray-900
+                            file:text-[10px] file:font-bold file:uppercase
+                            hover:file:bg-gray-900 hover:file:text-white transition-all cursor-pointer" accept=".zip"
+                            required>
                     </div>
                 </div>
 
                 <!-- CTM -->
-                <div class="space-y-4">
-                    <h3 class="text-sm font-bold text-gray-700 uppercase">2. Componente Formal (CTM12)</h3>
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">GDB Formal
+                <div class="space-y-6">
+                    <h3 class="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest">02_FORMAL_MASTER
+                        (CTM12)</h3>
+                    <div class="space-y-4">
+                        <label
+                            class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">GDB_SOURCE_CTM
                             (.zip)</label>
-                        <p class="text-[9px] text-gray-400 mb-2">Contiene: R_TERRENO, U_TERRENO (CTM12)</p>
-                        <input type="file" name="zip_formal" id="zip_formal" class="block w-full text-xs text-gray-500
-                           file:mr-4 file:py-2 file:px-4
-                           file:rounded-full file:border-0
-                           file:text-xs file:font-semibold
-                           file:bg-blue-50 file:text-accent
-                           hover:file:bg-blue-100" accept=".zip" required>
+                        <p class="text-[9px] font-mono text-gray-400 mb-2">TARGETS: R_TERRENO // U_TERRENO (CTM12_REF)
+                        </p>
+                        <input type="file" name="zip_formal" id="zip_formal" class="block w-full text-xs text-gray-500 font-mono
+                            file:mr-4 file:py-2 file:px-6
+                            file:border file:border-gray-900
+                            file:bg-white file:text-gray-900
+                            file:text-[10px] file:font-bold file:uppercase
+                            hover:file:bg-gray-900 hover:file:text-white transition-all cursor-pointer" accept=".zip"
+                            required>
                     </div>
                 </div>
             </div>
 
             <!-- Config -->
-            <div class="border-t pt-4">
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Prefijo
-                    Renumeración</label>
+            <div class="border-t border-gray-900 pt-8 font-mono">
+                <label
+                    class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">RENUMBER_PREFIX_STUB</label>
                 <input type="text" name="prefijo" value="200000"
-                    class="w-full p-3 border rounded-xl text-sm focus:ring-accent focus:border-accent"
-                    placeholder="Ej: 200000">
+                    class="w-full py-4 px-6 border border-gray-900 bg-white text-xs font-bold focus:ring-0 focus:border-gray-900 uppercase"
+                    placeholder="200000">
             </div>
 
             <button type="submit" id="submitBtn"
-                class="w-full bg-gray-900 text-white py-4 rounded-2xl hover:bg-accent hover:shadow-xl hover:shadow-accent/20 transition-all font-bold text-sm tracking-widest flex justify-center items-center gap-3">
-                <span class="material-symbols-outlined">play_circle</span> EJECUTAR RENUMERACIÓN
+                class="w-full bg-gray-900 text-white py-5 border border-gray-900 hover:bg-white hover:text-gray-900 transition-all font-mono font-bold text-xs tracking-[0.3em] flex justify-center items-center gap-4 uppercase active:scale-[0.98]">
+                <span class="material-symbols-outlined font-light">terminal</span> EXEC_GEO_CRUNCH
             </button>
         </form>
 
         <!-- LOADING OVERLAY -->
         <div id="loadingOverlay"
-            class="hidden absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-2xl">
-            <div class="w-16 h-16 border-4 border-accent border-t-transparent rounded-full animate-spin mb-4"></div>
-            <h3 class="text-lg font-bold text-gray-900">Procesando Geometrías...</h3>
-            <p class="text-sm text-gray-500 mt-2">Esto puede tardar varios minutos dependiendo del tamaño de las GDBs.
-            </p>
-            <div
-                class="mt-6 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-[10px] font-bold uppercase tracking-widest">
-                No cierre ni refresque esta pestaña
+            class="hidden absolute inset-0 bg-white/90 backdrop-blur-md z-50 flex flex-col items-center justify-center border border-gray-900">
+            <div class="w-16 h-16 border-2 border-gray-900 border-t-transparent animate-spin mb-8"></div>
+            <h3 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">
+                GEOMETRY_PROCESSING_LOCKED</h3>
+            <p class="text-[10px] font-mono text-gray-500 mt-4 uppercase tracking-widest">Awaiting spatial computation.
+                Sequence may vary with GDB complexity.</p>
+            <div class="mt-10 px-8 py-4 bg-gray-900 text-white text-[9px] font-bold uppercase tracking-[0.3em]">
+                DO_NOT_INTERRUPT_SESSION
             </div>
         </div>
     </div>
@@ -81,54 +92,59 @@
 
     <!-- RESULTADOS -->
     {% if resultados %}
-    <div class="space-y-8">
-        <div class="flex items-center justify-between bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
-                    <span class="material-symbols-outlined text-3xl">done_all</span>
+    <div class="space-y-10 uppercase font-mono">
+        <div class="flex items-center justify-between bg-white p-10 border border-gray-900">
+            <div class="flex items-center gap-6">
+                <div class="w-14 h-14 bg-gray-900 flex items-center justify-center text-white">
+                    <span class="material-symbols-outlined text-3xl font-light">done_all</span>
                 </div>
                 <div>
-                    <h3 class="text-xl font-bold text-gray-900">Proceso Completado</h3>
-                    <p class="text-xs text-gray-400">Total predios generados: <b>{{ resultados.total_procesados }}</b>
-                    </p>
+                    <h3 class="text-2xl font-display font-bold text-gray-900 uppercase tracking-tighter">
+                        sys_cycle_completed</h3>
+                    <p class="text-[10px] text-gray-500 mt-2 font-mono">NODES_GENERATED: {{ resultados.total_procesados
+                        }}</p>
                 </div>
             </div>
-            <div class="flex gap-3">
+            <div class="flex gap-4">
                 <a href="{{ url_for('download_informales_zip', filename=resultados.zip_filename) }}"
-                    class="bg-gray-900 text-white px-5 py-3 rounded-xl text-xs font-bold hover:bg-accent transition-all flex items-center gap-2 shadow-lg shadow-gray-900/10">
-                    <span class="material-symbols-outlined text-[18px]">download</span> Descargar ZIP
+                    class="bg-white border border-gray-900 text-gray-900 px-6 py-3 text-[10px] font-bold hover:bg-gray-900 hover:text-white transition-all flex items-center gap-3 tracking-widest">
+                    <span class="material-symbols-outlined text-[18px] font-light">download</span> PAYLOAD_ZIP
                 </a>
                 <a href="/clear_informales"
-                    class="bg-white border border-gray-200 text-gray-600 px-4 py-3 rounded-xl text-xs font-bold hover:bg-gray-50 transition-all flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[18px]">replay</span> Nuevo Proceso
+                    class="bg-gray-900 text-white px-6 py-3 text-[10px] font-bold hover:bg-white hover:text-gray-900 border border-gray-900 transition-all flex items-center gap-3 tracking-widest">
+                    <span class="material-symbols-outlined text-[18px] font-light">terminal</span> RESET_BUFFER
                 </a>
             </div>
         </div>
 
         <!-- LOG PREVIEW -->
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-50 bg-gray-50/30">
-                <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Resumen de Asignación
-                    (Primeros 100)</h4>
+        <div class="bg-white border border-gray-900 overflow-hidden">
+            <div class="p-8 border-b border-gray-900 bg-gray-50/30">
+                <h4
+                    class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-gray-900 pl-4">
+                    ALLOCATION_SUMMARY_STREAM (HEAD_100)</h4>
             </div>
-            <div class="overflow-x-auto max-h-[500px] overflow-y-auto custom-scrollbar">
-                <table class="w-full text-left border-collapse text-[11px]">
-                    <thead class="sticky top-0 bg-white border-b border-gray-100 text-gray-400 font-bold uppercase">
+            <div class="overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse text-[10px] uppercase font-mono">
+                    <thead
+                        class="sticky top-0 bg-gray-900 border-b border-gray-900 text-gray-400 font-bold tracking-widest">
                         <tr>
-                            <th class="px-6 py-3">Código CTM</th>
-                            <th class="px-6 py-3">Cantidad Informales</th>
-                            <th class="px-6 py-3">Área Intersectada</th>
-                            <th class="px-6 py-3">Códigos Generados (Muestra)</th>
+                            <th class="px-8 py-5">CTM_NODE_ID</th>
+                            <th class="px-8 py-5">INF_COUNT</th>
+                            <th class="px-8 py-5">INTERSECTION_AREA</th>
+                            <th class="px-8 py-5">GENERATED_SIGNATURES</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-50">
+                    <tbody class="divide-y divide-gray-200">
                         {% for row in resultados.log[:100] %}
-                        <tr class="hover:bg-gray-50/50 transition-colors">
-                            <td class="px-6 py-4 font-mono font-bold">{{ row.CODIGO_2 if row.CODIGO_2 else row.CODIGO }}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-8 py-5 font-bold text-gray-900">{{ row.CODIGO_2 if row.CODIGO_2 else
+                                row.CODIGO }}
                             </td>
-                            <td class="px-6 py-4">{{ row.cantidad }}</td>
-                            <td class="px-6 py-4 font-mono text-gray-500">{{ "%.2f"|format(row.area_total) }}</td>
-                            <td class="px-6 py-4 text-gray-600 truncate max-w-xs" title="{{ row.codigos_asignados }}">{{
+                            <td class="px-8 py-5 text-gray-500 font-bold">{{ row.cantidad }}</td>
+                            <td class="px-8 py-5 font-mono text-gray-400">{{ "%.2f"|format(row.area_total) }}</td>
+                            <td class="px-8 py-5 text-gray-500 tracking-tighter truncate max-w-xs"
+                                title="{{ row.codigos_asignados }}">{{
                                 row.codigos_asignados }}</td>
                         </tr>
                         {% endfor %}
@@ -143,64 +159,48 @@
 {% endblock %}
 
 {% block help_content %}
-<div class="space-y-6 text-gray-600">
+<div class="space-y-10 font-mono text-[11px] text-gray-900 uppercase">
     <section>
-        <h4 class="text-primary font-bold text-sm uppercase tracking-wider border-b pb-2 mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-accent">menu_book</span>
-            Manual: Renumeración de Informales
+        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+            <span class="material-symbols-outlined font-light">menu_book</span>
+            01_RENUMBERING_PROTOCOL_MANUAL
         </h4>
-        <p class="text-xs leading-relaxed">
-            Esta herramienta automatiza el proceso de asignación de nuevas cédulas catastrales a predios informales
-            basándose en su ubicación geográfica respecto a la capa CTM12.
-        </p>
+        <p>Automated coordinate-based signature assignment for informal nodes. Convergence logic derived from CTM12
+            spatial reference.</p>
     </section>
 
-    <section class="space-y-3">
-        <h5 class="text-[11px] font-bold text-gray-900 uppercase">¿Cómo funciona?</h5>
-        <div class="flex gap-3">
+    <section class="space-y-6">
+        <h5 class="font-bold text-gray-900 tracking-widest">CORE_ENGINE_SEQUENCE</h5>
+        <div class="flex gap-4">
             <span
-                class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold shrink-0">1</span>
-            <p class="text-[11px]"><b>Validación:</b> Se corrigen automáticamente problemas de topología
-                (auto-intersecciones) y se eliminan polígonos vacíos.</p>
+                class="w-10 h-10 border border-gray-900 flex items-center justify-center text-[11px] font-bold shrink-0">01</span>
+            <p class="text-[10px] text-gray-500 leading-relaxed"><b>TOPOLOGY_SANITY:</b> Automated repair of
+                self-intersections and null-geometry pruning via GeoPandas core.</p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-4">
             <span
-                class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold shrink-0">2</span>
-            <p class="text-[11px]"><b>Intersección:</b> Se cruzan los predios informales con los rurales/urbanos del
-                CTM12.</p>
+                class="w-10 h-10 border border-gray-900 flex items-center justify-center text-[11px] font-bold shrink-0">02</span>
+            <p class="text-[10px] text-gray-500 leading-relaxed"><b>SPATIAL_INTERSECTION:</b> Full-matrix
+                cross-reference between informal vectors and CTM12 rural/urban master layers.</p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-4">
             <span
-                class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold shrink-0">3</span>
-            <p class="text-[11px]"><b>Predio Dominante:</b> Si un informal cae en varios CTM, el sistema elige aquel con
-                el que tenga <b>mayor área de contacto</b>.</p>
-        </div>
-        <div class="flex gap-3">
-            <span
-                class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold shrink-0">4</span>
-            <p class="text-[11px]"><b>Renumeración:</b> Se genera un consecutivo de 3 dígitos por cada predio CTM y se
-                construye el nuevo código.</p>
+                class="w-10 h-10 border border-gray-900 flex items-center justify-center text-[11px] font-bold shrink-0">03</span>
+            <p class="text-[10px] text-gray-500 leading-relaxed"><b>DOMINANCE_CALC:</b> Multipoint intersections
+                resolved via maximum contact area (MaxArea) protocol.</p>
         </div>
     </section>
 
-    <section class="bg-amber-50 p-4 rounded-xl border border-amber-100">
-        <h4 class="text-amber-800 font-bold text-[10px] uppercase tracking-wider mb-2 flex items-center gap-2">
-            <span class="material-symbols-outlined text-amber-600 text-sm">warning</span>
-            IMPORTANTE: Archivos ZIP
+    <section class="bg-gray-900 p-8 border border-gray-900 text-white">
+        <h4
+            class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
+            <span class="material-symbols-outlined text-gray-400 font-light">warning</span>
+            ZIP_PAYLOAD_STRUCTURE
         </h4>
-        <p class="text-[10px] text-amber-700 leading-relaxed">
-            Debe cargar archivos <b>.ZIP</b> que contengan los componentes del Shapefile (.shp, .shx, .dbf, .prj). El
-            sistema buscará el archivo .shp recursivamente dentro del comprimido.
+        <p class="text-[10px] text-gray-400 leading-relaxed italic">
+            protocol_note: Must include full Shapefile suite (.shp, .shx, .dbf, .prj). Recursive parsing active for
+            nested GDB structures.
         </p>
-    </section>
-
-    <section>
-        <h5 class="text-[11px] font-bold text-gray-900 uppercase mb-2">Salida de Datos</h5>
-        <ul class="list-disc pl-4 text-[10px] space-y-1">
-            <li><b>Shapefile Resultante:</b> Con campos NumRen y RENUMERADO.</li>
-            <li><b>Log de Proceso:</b> Archivo JSON con el resumen de cuántos informales se asignaron a cada código
-                matriz.</li>
-        </ul>
     </section>
 </div>
 {% endblock %}

@@ -7,24 +7,24 @@
 {% block head %}
 <style>
     .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+        width: 4px;
+        height: 4px;
     }
 
     .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f1f1;
+        background: transparent;
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #ccc;
-        border-radius: 10px;
+        background: #111111;
+        border-radius: 0px;
     }
 
     tfoot {
         position: sticky;
         bottom: 0;
         background: white;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        border-top: 1px solid #111111;
     }
 </style>
 {% endblock %}
@@ -32,71 +32,80 @@
 {% block content %}
 <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
     <!-- Sidebar: Configuración Local -->
-    <div class="lg:col-span-1 space-y-6">
-        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-            <h2 class="text-xs font-bold mb-5 text-gray-400 uppercase tracking-widest">Configuración</h2>
-            <form action="/auditoria" method="POST" enctype="multipart/form-data" class="space-y-4">
-                <div class="space-y-4">
+    <div class="lg:col-span-1 space-y-8">
+        <div class="bg-white p-8 border border-gray-900">
+            <h2
+                class="text-[10px] font-mono font-bold mb-6 text-gray-500 uppercase tracking-widest border-b border-gray-900 pb-2">
+                SYS_CONFIG</h2>
+            <form action="/auditoria" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <div class="space-y-6">
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-2 uppercase tracking-tight">Archivo
-                            Propietarios (R1)</label>
+                        <label
+                            class="block text-[10px] font-mono font-bold text-gray-900 mb-3 uppercase tracking-tight">OWNER_DATA_R1
+                            (.xlsx)</label>
                         <input type="file" name="file_prop" accept=".xlsx"
-                            class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-white hover:file:bg-accent transition-all cursor-pointer"
+                            class="block w-full text-[10px] font-mono text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-900 file:text-[10px] file:font-bold file:bg-gray-900 file:text-white hover:file:bg-white hover:file:text-gray-900 transition-all cursor-pointer"
                             required>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-2 uppercase tracking-tight">Listado
-                            de Avalúos</label>
+                        <label
+                            class="block text-[10px] font-mono font-bold text-gray-900 mb-3 uppercase tracking-tight">APPRAISAL_LIST
+                            (.xlsx)</label>
                         <input type="file" name="file_calc" accept=".xlsx"
-                            class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-white hover:file:bg-accent transition-all cursor-pointer"
+                            class="block w-full text-[10px] font-mono text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-900 file:text-[10px] file:font-bold file:bg-gray-900 file:text-white hover:file:bg-white hover:file:text-gray-900 transition-all cursor-pointer"
                             required>
                     </div>
                 </div>
 
-                <div class="pt-4 border-t border-gray-100 flex flex-col gap-4">
+                <div class="pt-6 border-t border-gray-900 flex flex-col gap-6">
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2">Incremento Validar
+                        <label
+                            class="block text-[10px] font-mono font-bold text-gray-500 uppercase mb-3">INCREMENT_VALIDATION
                             (%)</label>
                         <input type="number" step="0.01" name="incremento"
                             value="{{ resultados.pct_incremento|default(3) }}"
-                            class="w-full bg-gray-50 border-gray-200 rounded-xl text-sm px-4 py-2.5 focus:ring-accent focus:border-accent"
+                            class="w-full bg-white border-gray-900 text-xs font-mono px-4 py-3 focus:ring-0 focus:border-gray-900"
                             required>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2">Zona de Análisis</label>
+                        <label
+                            class="block text-[10px] font-mono font-bold text-gray-500 uppercase mb-3">ZONE_THRESHOLD</label>
                         <select name="zona"
-                            class="w-full bg-gray-50 border-gray-200 rounded-xl text-sm px-4 py-2.5 focus:ring-accent focus:border-accent">
+                            class="w-full bg-white border-gray-900 text-xs font-mono px-4 py-3 focus:ring-0 focus:border-gray-900 uppercase">
                             <option value="General" {% if resultados.zona_filtro=='General' %}selected{% endif %}>
-                                General</option>
-                            <option value="Urbana" {% if resultados.zona_filtro=='Urbana' %}selected{% endif %}>Urbano
+                                GENERAL_POOL</option>
+                            <option value="Urbana" {% if resultados.zona_filtro=='Urbana' %}selected{% endif %}>
+                                URBAN_ZONE
                             </option>
-                            <option value="Rural" {% if resultados.zona_filtro=='Rural' %}selected{% endif %}>Rural
+                            <option value="Rural" {% if resultados.zona_filtro=='Rural' %}selected{% endif %}>RURAL_ZONE
                             </option>
                             <option value="Corregimientos" {% if resultados.zona_filtro=='Corregimientos' %}selected{%
-                                endif %}>Corregimientos</option>
+                                endif %}>SUB_DISTRICTS</option>
                         </select>
                     </div>
 
                     <button type="submit"
-                        class="w-full bg-accent text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-accent/20 hover:scale-[1.02] active:scale-95">
-                        <span class="material-symbols-outlined text-[20px]">analytics</span>
-                        Ejecutar Auditoría
+                        class="w-full bg-gray-900 text-white font-mono font-bold py-4 px-4 border border-gray-900 transition-all flex items-center justify-center gap-3 hover:bg-white hover:text-gray-900 active:scale-[0.98] uppercase tracking-widest text-xs">
+                        <span class="material-symbols-outlined text-[20px] font-light">terminal</span>
+                        init_audit_sequence
                     </button>
                 </div>
             </form>
         </div>
 
         {% if resultados %}
-        <div class="bg-gray-900 p-6 rounded-2xl shadow-xl shadow-gray-200">
-            <h2 class="text-xs font-bold mb-4 text-gray-400 uppercase tracking-widest">Exportar</h2>
+        <div class="bg-gray-900 p-8 border border-gray-900 text-white">
+            <h2
+                class="text-[10px] font-mono font-bold mb-5 text-gray-500 uppercase tracking-widest border-b border-gray-700 pb-2">
+                DATA_EXPORT</h2>
             <a href="/auditoria/pdf" target="_blank"
-                class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-900 transition-all shadow-md">
-                <span class="material-symbols-outlined text-[20px] text-red-600">picture_as_pdf</span>
-                Descargar Reporte PDF
+                class="w-full flex items-center justify-center gap-3 px-4 py-4 bg-white hover:bg-gray-100 text-[10px] font-mono font-bold text-gray-900 transition-all uppercase tracking-widest border border-white">
+                <span class="material-symbols-outlined text-[20px] text-red-600 font-light">picture_as_pdf</span>
+                FETCH_OFFICIAL_REPORT
             </a>
-            <p class="text-[9px] text-gray-500 mt-3 text-center italic">Genera el reporte oficial firmado por Casabero.
-            </p>
+            <p class="text-[9px] font-mono text-gray-500 mt-4 text-center uppercase tracking-tighter">sys_status:
+                encrypted_pdf_ready // authorized: CASABERO_ARCH_V1</p>
         </div>
         {% endif %}
     </div>
@@ -105,98 +114,97 @@
     <div class="lg:col-span-3 space-y-8">
         {% if not resultados %}
         <div
-            class="flex flex-col items-center justify-center py-32 text-gray-300 border-2 border-dashed border-gray-200 rounded-3xl bg-white">
-            <span class="material-symbols-outlined text-[64px] mb-4 opacity-50">data_exploration</span>
-            <p class="text-sm font-medium">Sube los archivos necesarios para iniciar la auditoría técnica.</p>
+            class="flex flex-col items-center justify-center py-40 text-gray-400 border border-dashed border-gray-400 bg-white/20">
+            <span class="material-symbols-outlined text-[64px] mb-6 opacity-30 font-light">sensors_off</span>
+            <p class="text-[10px] font-mono font-bold uppercase tracking-[0.3em]">waiting_for_data_stream...</p>
         </div>
         {% else %}
-        <div class="flex items-center justify-between mb-2">
-            <h2 class="text-xl font-bold text-gray-900 flex items-center gap-3 font-display">
-                <span class="material-symbols-outlined text-primary">location_city</span>
-                {{ resultados.municipio }}
+        <div class="flex items-center justify-between border-l-4 border-gray-900 pl-6 mb-4">
+            <h2
+                class="text-2xl font-display font-bold text-gray-900 flex items-center gap-4 uppercase tracking-tighter">
+                <span class="material-symbols-outlined text-gray-900 font-light">location_city</span>
+                LOC: {{ resultados.municipio }}
             </h2>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-6">
                 <a href="/clear_auditoria"
-                    class="bg-white border border-red-200 text-red-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-50 transition-all flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[18px]">delete_sweep</span> Limpiar Auditoría
+                    class="bg-white border border-gray-900 text-gray-900 px-6 py-2 text-[10px] font-mono font-bold hover:bg-gray-900 hover:text-white transition-all flex items-center gap-3 uppercase tracking-widest">
+                    <span class="material-symbols-outlined text-[18px] font-light">terminal</span> RESET_AUDIT_LOG
                 </a>
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">En línea</span>
+                <div class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-green-500 rounded-none animate-pulse"></span>
+                    <span
+                        class="text-[10px] font-mono font-bold text-gray-900 uppercase tracking-widest">SYS_ACTIVE</span>
                 </div>
             </div>
         </div>
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Total Auditado</p>
-                <p class="text-2xl font-bold text-gray-900">{{ resultados.total_predios }}</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="bg-white p-8 border border-gray-900">
+                <p class="text-[9px] font-mono text-gray-400 uppercase font-bold mb-2 tracking-widest">
+                    AUDITED_REGISTRIES</p>
+                <p class="text-3xl font-display font-bold text-gray-900 uppercase">{{ resultados.total_predios }}</p>
             </div>
-            <div class="bg-red-50 p-6 rounded-2xl border border-red-100 shadow-sm relative overflow-hidden group">
-                <div class="relative z-10">
-                    <p class="text-[10px] text-red-400 uppercase font-bold mb-1">Avalúos $0 Crit.</p>
-                    <p class="text-2xl font-bold text-red-700">{{ resultados.totales.conteo_zero_critico }}</p>
-                </div>
-                <span
-                    class="material-symbols-outlined absolute -right-2 -bottom-2 text-red-500/10 text-6xl group-hover:scale-110 transition-transform">error</span>
+            <div class="bg-white p-8 border border-gray-900 border-l-8 border-l-red-600">
+                <p class="text-[9px] font-mono text-red-600 uppercase font-bold mb-2 tracking-widest">
+                    NULL_APPRAISAL_CRIT</p>
+                <p class="text-3xl font-display font-bold text-red-600 uppercase">{{
+                    resultados.totales.conteo_zero_critico }}</p>
             </div>
-            <div class="bg-purple-50 p-6 rounded-2xl border border-purple-100 shadow-sm relative overflow-hidden group">
-                <div class="relative z-10">
-                    <p class="text-[10px] text-purple-400 uppercase font-bold mb-1">Avalúos $0 PH</p>
-                    <p class="text-2xl font-bold text-purple-700">{{ resultados.totales.conteo_zero_ph }}</p>
-                </div>
-                <span
-                    class="material-symbols-outlined absolute -right-2 -bottom-2 text-purple-500/10 text-6xl group-hover:scale-110 transition-transform">domain</span>
+            <div class="bg-white p-8 border border-gray-900 border-l-8 border-l-gray-900">
+                <p class="text-[9px] font-mono text-gray-900 uppercase font-bold mb-2 tracking-widest">NULL_APPRAISAL_PH
+                </p>
+                <p class="text-3xl font-display font-bold text-gray-900 uppercase">{{ resultados.totales.conteo_zero_ph
+                    }}</p>
             </div>
-            <div class="bg-gray-900 p-6 rounded-2xl shadow-sm relative overflow-hidden group">
+            <div class="bg-gray-900 p-8 border border-gray-900">
                 <div class="relative z-10">
-                    <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Diferencias</p>
-                    <p class="text-2xl font-bold text-white">{{ resultados.total_predios -
+                    <p class="text-[9px] font-mono text-gray-500 uppercase font-bold mb-2 tracking-widest">
+                        ANOMALY_DETECTION</p>
+                    <p class="text-3xl font-display font-bold text-white uppercase">{{ resultados.total_predios -
                         resultados.resumen_estados.get('OK', 0) }}</p>
                 </div>
-                <span
-                    class="material-symbols-outlined absolute -right-2 -bottom-2 text-gray-700/20 text-6xl group-hover:scale-110 transition-transform">rule</span>
             </div>
         </div>
 
         <!-- Results Table -->
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-            <div class="p-6 border-b border-gray-100 flex flex-wrap justify-between items-center gap-4 bg-gray-50/20">
-                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Detalle Técnico de Auditoría</h3>
-                <div class="relative w-full sm:w-80">
+        <div class="bg-white border border-gray-900 overflow-hidden flex flex-col">
+            <div class="p-8 border-b border-gray-900 flex flex-wrap justify-between items-center gap-6 bg-gray-50/30">
+                <h3
+                    class="text-[10px] font-mono font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-gray-900 pl-4">
+                    AUDIT_TECHNICAL_LEDGER</h3>
+                <div class="relative w-full sm:w-96">
                     <span
-                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-gray-300">search</span>
-                    <input type="text" id="tableSearch" placeholder="Número predial o estado..."
-                        class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-accent/20 focus:border-accent outline-none transition-all">
+                        class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[18px] text-gray-900 font-light">terminal</span>
+                    <input type="text" id="tableSearch" placeholder="SEARCH_BY_ID_OR_STATUS..."
+                        class="w-full pl-12 pr-4 py-3 bg-white border border-gray-900 text-xs font-mono uppercase focus:ring-0 focus:border-gray-900 outline-none transition-all placeholder:text-gray-300">
                 </div>
             </div>
 
-            <div class="overflow-x-auto max-h-[600px] custom-scrollbar">
-                <table class="w-full text-[11px] text-left border-collapse" id="resultsTable">
-                    <thead
-                        class="bg-gray-50 text-gray-400 uppercase font-bold sticky top-0 z-10 border-b border-gray-100">
+            <div class="overflow-x-auto max-h-[700px] custom-scrollbar">
+                <table class="w-full text-[10px] font-mono text-left border-collapse uppercase" id="resultsTable">
+                    <thead class="bg-gray-900 text-gray-400 font-bold sticky top-0 z-10 border-b border-gray-900">
                         <tr>
-                            <th class="px-6 py-4">ID Predial</th>
-                            <th class="px-6 py-4">Zona</th>
-                            <th class="px-6 py-4 text-right">Avalúo Base</th>
-                            <th class="px-6 py-4 text-right">Cierre Listado</th>
-                            <th class="px-6 py-4 text-right">Cálculo Propuesto</th>
-                            <th class="px-6 py-4">Estado</th>
+                            <th class="px-8 py-5 tracking-widest">PREDIAL_ID</th>
+                            <th class="px-8 py-5 tracking-widest">ZONE</th>
+                            <th class="px-8 py-5 text-right tracking-widest">BASE_APPRAISAL</th>
+                            <th class="px-8 py-5 text-right tracking-widest">LISTED_VAL</th>
+                            <th class="px-8 py-5 text-right tracking-widest">CALCULATED_VAL</th>
+                            <th class="px-8 py-5 tracking-widest">STATE</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-50" id="tableBody"></tbody>
+                    <tbody class="divide-y divide-gray-200" id="tableBody"></tbody>
                 </table>
             </div>
 
             <div
-                class="px-6 py-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400 bg-gray-50/50">
-                <div id="paginationInfo">Mostrando ...</div>
-                <div class="flex gap-2">
+                class="px-8 py-6 border-t border-gray-900 flex items-center justify-between text-[10px] font-mono font-bold text-gray-500 bg-gray-50/30">
+                <div id="paginationInfo">STREAMING_CHUNK ...</div>
+                <div class="flex gap-4">
                     <button id="prevPage"
-                        class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-100 disabled:opacity-30 transition-all font-bold">Anterior</button>
+                        class="px-6 py-3 bg-white border border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-gray-900 transition-all uppercase tracking-widest">prev_frame</button>
                     <button id="nextPage"
-                        class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-100 disabled:opacity-30 transition-all font-bold">Siguiente</button>
+                        class="px-6 py-3 bg-white border border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-gray-900 transition-all uppercase tracking-widest">next_frame</button>
                 </div>
             </div>
         </div>
@@ -206,42 +214,38 @@
 {% endblock %}
 
 {% block help_content %}
-<div class="space-y-8">
+<div class="space-y-10 font-mono text-[11px] text-gray-900 uppercase">
     <section>
-        <h4 class="text-primary font-bold text-sm uppercase tracking-wider border-b pb-2 mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-accent">verified</span>
-            Auditoría de Cierre
+        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+            <span class="material-symbols-outlined font-light">verified</span>
+            01_CLOSURE_AUDIT_PROTOCOL
         </h4>
-        <p class="text-sm">Esta herramienta valida la consistencia final de los avalúos catastrales para la entrega de
-            productos de conservación física y renovación masiva.</p>
+        <p>Validates final consistency of values for conservation and massive renovation deliverables.</p>
     </section>
 
     <section>
-        <h4 class="text-primary font-bold text-sm uppercase tracking-wider border-b pb-2 mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-accent">priority_high</span>
-            Alertas Críticas (Avalúos $0)
+        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+            <span class="material-symbols-outlined font-light">priority_high</span>
+            02_CRITICAL_NULL_APPRAISALS
         </h4>
-        <div class="grid grid-cols-1 gap-4">
-            <div class="border-l-4 border-red-500 pl-4 py-2 bg-red-50/30">
-                <p class="text-xs font-bold text-red-800 uppercase mb-1 italic">Crítico</p>
-                <p class="text-[12px] text-gray-600">Predios con condición de propiedad activa pero avalúo inexistente
-                    ($0).</p>
+        <div class="grid grid-cols-1 gap-6">
+            <div class="border-l-4 border-red-600 pl-4 py-2 bg-white">
+                <p class="font-bold text-red-600 mb-1">CRITICAL_EXCEPTION</p>
+                <p class="text-gray-500">Active ownership without appraisal value ($0). Immediate review required.</p>
             </div>
-            <div class="border-l-4 border-purple-500 pl-4 py-2 bg-purple-50/30">
-                <p class="text-xs font-bold text-purple-800 uppercase mb-1 italic">PH (Propiedad Horizontal)</p>
-                <p class="text-[12px] text-gray-600">Predios en régimen de PH con avalúo $0 que requieren revisión de
-                    matriculación.</p>
+            <div class="border-l-4 border-gray-900 pl-4 py-2 bg-white">
+                <p class="font-bold text-gray-900 mb-1">REGISTRY_PH (HORIZONTAL_PROP)</p>
+                <p class="text-gray-500">PH regime without appraisal value. Verify registration status.</p>
             </div>
         </div>
     </section>
 
     <section>
-        <h4 class="text-primary font-bold text-sm uppercase tracking-wider border-b pb-2 mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-accent">picture_as_pdf</span>
-            Reporte PDF
+        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+            <span class="material-symbols-outlined font-light">picture_as_pdf</span>
+            03_DATA_VISUALIZATION
         </h4>
-        <p class="text-sm">El reporte descargable incluye gráficos de variación (BoxPlot) y un listado total de
-            hallazgos para presentar ante la secretaría de hacienda o catastro departamental.</p>
+        <p>Report includes variation analysis (BoxPlot) and complete finding ledger for official documentation.</p>
     </section>
 </div>
 {% endblock %}
@@ -268,24 +272,24 @@
         const slice = filteredData.slice(start, end);
 
         tableBody.innerHTML = slice.map(item => `
-            <tr class="hover:bg-blue-50/30 transition-colors">
-                <td class="px-6 py-4 font-mono text-gray-400">${item.Numero_Predial}</td>
-                <td class="px-6 py-4 text-gray-500">${item.Zona}</td>
-                <td class="px-6 py-4 text-right">$${(item.Base_Usada || 0).toLocaleString('es-CO')}</td>
-                <td class="px-6 py-4 text-right font-bold text-gray-900">$${(item.Valor_Cierre_Listado || 0).toLocaleString('es-CO')}</td>
-                <td class="px-6 py-4 text-right text-accent font-medium">$${(item.Cierre_Calculado || 0).toLocaleString('es-CO')}</td>
-                <td class="px-6 py-4">
-                    <span class="px-2.5 py-1 rounded-lg text-[9px] font-bold 
-                        ${item.Estado === 'OK' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600 border border-red-100'}">
+            <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-8 py-5 font-mono text-gray-400">${item.Numero_Predial}</td>
+                <td class="px-8 py-5 text-gray-900">${item.Zona.toUpperCase()}</td>
+                <td class="px-8 py-5 text-right">$${(item.Base_Usada || 0).toLocaleString('es-CO')}</td>
+                <td class="px-8 py-5 text-right font-bold text-gray-900">$${(item.Valor_Cierre_Listado || 0).toLocaleString('es-CO')}</td>
+                <td class="px-8 py-5 text-right text-gray-900 font-bold">$${(item.Cierre_Calculado || 0).toLocaleString('es-CO')}</td>
+                <td class="px-8 py-5">
+                    <span class="px-3 py-1 border text-[9px] font-bold tracking-widest
+                        ${item.Estado === 'OK' ? 'border-gray-900 text-gray-900 bg-white' : 'border-red-600 text-red-600 bg-white'}">
                         ${item.Estado}
                     </span>
-                    <div class="text-[9px] text-gray-400 mt-1">${(item.Pct_Variacion || 0).toFixed(2)}% var.</div>
+                    <div class="text-[9px] text-gray-400 mt-2 font-mono">${(item.Pct_Variacion || 0).toFixed(2)}%_VAR</div>
                 </td>
             </tr>
         `).join('');
 
         const total = filteredData.length;
-        info.textContent = `Mostrando ${start + 1}-${Math.min(end, total)} de ${total} registros`;
+        info.textContent = `FETCH_FRAME: ${start + 1}-${Math.min(end, total)} // TOTAL_RECORDS: ${total}`;
         prevBtn.disabled = currentPage === 1;
         nextBtn.disabled = end >= total;
     }
