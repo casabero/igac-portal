@@ -79,31 +79,32 @@
 
         <nav class="flex-1 py-4 overflow-y-auto custom-scrollbar">
             <div class="px-3 mb-2">
-                <p class="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest px-3 mb-4">SYSTEM_TOOLS</p>
+                <p class="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest px-3 mb-4">
+                    SISTEMA_HERRAMIENTAS</p>
                 <a href="/snc"
                     class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/snc' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
-                    <span class="material-symbols-outlined text-[20px] font-light">data_object</span>
-                    <span class="text-xs font-mono font-medium uppercase">SNC_CONVERT</span>
+                    <span class="material-symbols-outlined text-[18px] font-light">data_object</span>
+                    <span class="text-xs font-mono font-medium uppercase">CONVERTIDOR_SNC</span>
                 </a>
                 <a href="/avaluos"
                     class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/avaluos' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
-                    <span class="material-symbols-outlined text-[20px] font-light">analytics</span>
-                    <span class="text-xs font-mono font-medium uppercase">APPRAISAL_ANALYSIS</span>
+                    <span class="material-symbols-outlined text-[18px] font-light">analytics</span>
+                    <span class="text-xs font-mono font-medium uppercase">ANALISIS_AVALUOS</span>
                 </a>
                 <a href="/auditoria"
                     class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/auditoria' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
-                    <span class="material-symbols-outlined text-[20px] font-light">verified</span>
-                    <span class="text-xs font-mono font-medium uppercase">CLOSURE_AUDIT</span>
+                    <span class="material-symbols-outlined text-[18px] font-light">verified</span>
+                    <span class="text-xs font-mono font-medium uppercase">AUDITORIA_CIERRE</span>
                 </a>
                 <a href="/renumeracion"
                     class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/renumeracion' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
-                    <span class="material-symbols-outlined text-[20px] font-light">rule_folder</span>
-                    <span class="text-xs font-mono font-medium uppercase">RENUMBER_AUDIT</span>
+                    <span class="material-symbols-outlined text-[18px] font-light">rule_folder</span>
+                    <span class="text-xs font-mono font-medium uppercase">RENUM_AUDITORIA</span>
                 </a>
                 <a href="/renumeracion-informales"
                     class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/renumeracion-informales' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
-                    <span class="material-symbols-outlined text-[20px] font-light">location_searching</span>
-                    <span class="text-xs font-mono font-medium uppercase">INFORMAL_RENUMBER</span>
+                    <span class="material-symbols-outlined text-[18px] font-light">location_searching</span>
+                    <span class="text-xs font-mono font-medium uppercase">RENUM_INFORMALES</span>
                 </a>
             </div>
         </nav>
@@ -112,7 +113,7 @@
             <button onclick="toggleHelpModal()"
                 class="w-full flex items-center justify-center gap-2 py-2 bg-white border border-gray-900 text-[10px] font-mono font-bold text-gray-900 hover:bg-gray-900 hover:text-white transition-all">
                 <span class="material-symbols-outlined text-[16px] font-light">help_center</span>
-                HELP_CENTER
+                CENTRO_AYUDA
             </button>
         </div>
     </aside>
@@ -123,13 +124,12 @@
         <header class="h-16 bg-white border-b border-gray-900 flex items-center justify-between px-8 sticky top-0 z-30">
             <div class="flex items-center gap-4">
                 <h2 class="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest">
-                    > {% block page_title %}DASHBOARD{% endblock %}
+                    > {% block page_title %}PANEL_CONTROL{% endblock %}
                 </h2>
             </div>
             <div class="flex items-center gap-4">
-                <span class="text-[10px] font-mono bg-gray-900 text-white px-2 py-1 font-bold">V_1.2_SYS_STABLE</span>
-                <div
-                    class="h-8 w-8 bg-white border border-gray-900 flex items-center justify-center text-gray-900">
+                <span class="text-[10px] font-mono bg-gray-900 text-white px-2 py-1 font-bold">V_1.2_SYS_ESTABLE</span>
+                <div class="h-8 w-8 bg-white border border-gray-900 flex items-center justify-center text-gray-900">
                     <span class="material-symbols-outlined text-[20px] font-light">terminal</span>
                 </div>
             </div>
@@ -142,7 +142,7 @@
             <div
                 class="mb-6 p-4 {% if 'Error' in message or 'Faltan' in message %}bg-white border-red-600 text-red-600{% else %}bg-white border-gray-900 text-gray-900{% endif %} border text-[10px] font-mono flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
                 <span class="material-symbols-outlined text-[18px] font-light">info</span>
-                <span class="font-bold uppercase tracking-tight">REPORT: {{ message }}</span>
+                <span class="font-bold uppercase tracking-tight">REPORTE: {{ message }}</span>
             </div>
             {% endfor %}
             {% endif %}
@@ -151,9 +151,12 @@
             {% block content %}{% endblock %}
         </main>
 
-        <footer class="p-8 border-t border-gray-900 bg-white text-center">
-            <p class="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] font-medium">
-                sys_meta: casabero_igAC_portal_v2026 | arch: x64_hybrid | loc: latam_remote
+        <footer class="p-8 border-t border-gray-900 bg-white flex flex-col items-center gap-2">
+            <p class="text-[10px] font-mono text-gray-900 uppercase tracking-[0.2em] font-bold">
+                by:casabero.com
+            </p>
+            <p class="text-[8px] font-mono text-gray-400 uppercase tracking-[0.2em] font-medium">
+                sys_meta: portal_igac_v2026 | arch: x64_hybrid | loc: latam_remote
                 <a href="/admin/dashboard" class="opacity-0 hover:opacity-10 transition-opacity cursor-default"
                     title="Admin">.</a>
             </p>
@@ -164,8 +167,8 @@
     <div id="helpModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
         aria-modal="true">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-900/40 transition-opacity" aria-hidden="true"
-                onclick="toggleHelpModal()"></div>
+            <div class="fixed inset-0 bg-gray-900/40 transition-opacity" aria-hidden="true" onclick="toggleHelpModal()">
+            </div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <div
                 class="inline-block align-bottom bg-white text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-900">
@@ -182,14 +185,16 @@
                 <div class="px-8 py-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
                     <div id="helpContent" class="prose prose-sm max-w-none text-gray-900 font-mono text-[11px]">
                         {% block help_content %}
-                        <p>> [SYSTEM_MSG]: Select a module from the sidebar to display specific technical documentation.</p>
+                        <p>> [MENSAJE_SISTEMA]: Seleccione un módulo en la barra lateral para desplegar la documentación
+                            técnica específica.
+                        </p>
                         {% endblock %}
                     </div>
                 </div>
                 <div class="bg-white border-t border-gray-900 px-8 py-4 flex justify-end">
                     <button onclick="toggleHelpModal()"
                         class="bg-gray-900 text-white px-6 py-2 border border-gray-900 text-xs font-mono font-bold hover:bg-white hover:text-gray-900 transition-all active:scale-95">
-                        EXIT_MANUAL
+                        SALIR_MANUAL
                     </button>
                 </div>
             </div>

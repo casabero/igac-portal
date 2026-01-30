@@ -8,86 +8,92 @@
 <div class="space-y-8">
     <!-- Header Actions -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-            <h2 class="text-3xl font-display font-bold text-gray-900">Estadísticas del Portal</h2>
-            <p class="text-gray-500">Monitoreo avanzado de tráfico y hardware.</p>
+        <div class="border-l-4 border-gray-900 pl-6">
+            <h2 class="text-3xl font-display font-bold text-gray-900 uppercase tracking-tighter">módulo_sistema //
+                dashboard_analitycs</h2>
+            <p class="text-[10px] font-mono text-gray-500 mt-2 uppercase">Monitoreo avanzado de tráfico y rendimiento
+                del núcleo.</p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-4 uppercase font-mono">
             <a href="/admin/export-csv?inicio={{ fecha_inicio }}&fin={{ fecha_fin }}"
-                class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700 transition-colors shadow-lg shadow-green-200">
-                <span class="material-symbols-outlined">download</span>
-                Exportar CSV
+                class="flex items-center gap-3 px-6 py-3 bg-white border border-gray-900 text-gray-900 font-bold text-[10px] hover:bg-gray-900 hover:text-white transition-all tracking-widest">
+                <span class="material-symbols-outlined text-[18px] font-light">download</span>
+                EXPORT_CSV_RAW
             </a>
             <a href="/admin/logout"
-                class="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors">
-                <span class="material-symbols-outlined">logout</span>
-                Salir
+                class="flex items-center gap-3 px-6 py-3 bg-gray-900 text-white font-bold text-[10px] hover:bg-white hover:text-gray-900 border border-gray-900 transition-all tracking-widest">
+                <span class="material-symbols-outlined text-[18px] font-light">logout</span>
+                TERMINAR_SESIÓN
             </a>
         </div>
     </div>
 
     <!-- Filtros -->
-    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-        <form method="GET" class="flex flex-wrap items-end gap-6">
+    <div class="bg-white p-8 border border-gray-900 font-mono">
+        <form method="GET" class="flex flex-wrap items-end gap-8">
             <div class="flex-1 min-w-[200px]">
-                <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Fecha Inicio</label>
+                <label
+                    class="block text-[10px] font-bold text-gray-500 uppercase mb-3 tracking-widest">MARCADOR_INICIO</label>
                 <input type="date" name="inicio" value="{{ fecha_inicio }}"
-                    class="w-full bg-gray-50 border-gray-200 rounded-lg text-sm focus:ring-accent">
+                    class="w-full bg-gray-50/30 border-gray-900 text-xs font-bold focus:ring-0 focus:border-gray-900 py-3 uppercase">
             </div>
             <div class="flex-1 min-w-[200px]">
-                <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Fecha Fin</label>
+                <label
+                    class="block text-[10px] font-bold text-gray-500 uppercase mb-3 tracking-widest">MARCADOR_FINAL</label>
                 <input type="date" name="fin" value="{{ fecha_fin }}"
-                    class="w-full bg-gray-50 border-gray-200 rounded-lg text-sm focus:ring-accent">
+                    class="w-full bg-gray-50/30 border-gray-900 text-xs font-bold focus:ring-0 focus:border-gray-900 py-3 uppercase">
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-4">
                 <button type="submit"
-                    class="px-6 py-2 bg-gray-900 text-white rounded-lg font-bold text-sm hover:bg-black transition-all">
-                    Filtrar
+                    class="px-8 py-3 bg-gray-900 text-white border border-gray-900 font-bold text-[10px] hover:bg-white hover:text-gray-900 transition-all tracking-widest uppercase">
+                    FILTRAR_LOG
                 </button>
                 <a href="/admin/dashboard"
-                    class="px-6 py-2 bg-gray-100 text-gray-600 rounded-lg font-bold text-sm hover:bg-gray-200 transition-all text-center">
-                    Limpiar
+                    class="px-8 py-3 bg-white text-gray-400 border border-gray-200 font-bold text-[10px] hover:border-gray-900 hover:text-gray-900 transition-all tracking-widest uppercase text-center">
+                    RESET_BUFFER
                 </a>
             </div>
         </form>
     </div>
 
     <!-- KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm border-l-4 border-l-blue-500">
-            <p class="text-xs font-bold text-gray-400 uppercase mb-1">Visitas en Periodo</p>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 font-mono">
+        <div class="bg-white p-8 border border-gray-900">
+            <p class="text-[9px] font-bold text-gray-500 uppercase mb-2 tracking-widest">FLUJO_VISITAS</p>
             <h3 class="text-3xl font-display font-bold text-gray-900">{{ total_visitas }}</h3>
         </div>
-        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm border-l-4 border-l-green-500">
-            <p class="text-xs font-bold text-gray-400 uppercase mb-1">Usuarios Únicos</p>
+        <div class="bg-white p-8 border border-gray-900 border-l-8 border-l-gray-900">
+            <p class="text-[9px] font-bold text-gray-900 uppercase mb-2 tracking-widest">AGENTES_ÚNICOS</p>
             <h3 class="text-3xl font-display font-bold text-gray-900">{{ visitantes_unicos }}</h3>
         </div>
-        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm border-l-4 border-l-amber-500">
-            <p class="text-xs font-bold text-gray-400 uppercase mb-1">Paises Activos</p>
+        <div class="bg-white p-8 border border-gray-900">
+            <p class="text-[9px] font-bold text-gray-500 uppercase mb-2 tracking-widest">NODOS_GEOGRÁFICOS</p>
             <h3 class="text-3xl font-display font-bold text-gray-900">{{ stats_pais|length }}</h3>
         </div>
-        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm border-l-4 border-l-indigo-500">
-            <p class="text-xs font-bold text-gray-400 uppercase mb-1">Apps Usadas</p>
-            <h3 class="text-3xl font-display font-bold text-gray-900">{{ top_apps|length }}</h3>
+        <div class="bg-gray-900 p-8 border border-gray-900 text-white">
+            <p class="text-[9px] font-bold text-gray-500 uppercase mb-2 tracking-widest">APLICATIVOS_ACTIVOS</p>
+            <h3 class="text-3xl font-display font-bold text-white">{{ top_apps|length }}</h3>
         </div>
     </div>
 
     <!-- Charts Row -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <h4 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <span class="material-symbols-outlined text-blue-500">bar_chart</span>
-                Uso por Aplicación
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 font-mono">
+        <div class="bg-white p-10 border border-gray-900">
+            <h4
+                class="text-[10px] font-bold text-gray-900 mb-8 flex items-center gap-3 uppercase tracking-widest border-b border-gray-900 pb-4">
+                <span class="material-symbols-outlined text-gray-900 font-light text-[20px]">bar_chart</span>
+                USO_POR_APLICATIVO_SISTEMA
             </h4>
             <div class="h-[300px] relative">
                 <canvas id="appsChart"></canvas>
             </div>
         </div>
 
-        <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <h4 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <span class="material-symbols-outlined text-green-500">public</span>
-                Distribución Geográfica
+        <div class="bg-white p-10 border border-gray-900">
+            <h4
+                class="text-[10px] font-bold text-gray-900 mb-8 flex items-center gap-3 uppercase tracking-widest border-b border-gray-900 pb-4">
+                <span class="material-symbols-outlined text-gray-900 font-light text-[20px]">public</span>
+                DISTRIBUCIÓN_GLOBAL_TRAFFICO
             </h4>
             <div class="h-[300px] relative">
                 <canvas id="geoChart"></canvas>
@@ -96,57 +102,60 @@
     </div>
 
     <!-- Recent Logs Table -->
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-            <h4 class="text-lg font-bold text-gray-900">Historial Detallado (Últimos 100)</h4>
-            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-bold uppercase">Datos
-                Enriquecidos</span>
+    <div class="bg-white border border-gray-900 overflow-hidden font-mono">
+        <div class="p-8 border-b border-gray-900 flex justify-between items-center bg-gray-50/30">
+            <h4 class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-gray-900 pl-4">
+                HISTORIAL_DETALLADO_LOG (TAIL_100)</h4>
+            <span
+                class="px-4 py-2 border border-gray-900 text-gray-900 text-[9px] font-bold uppercase tracking-widest">DATA_ENRIQUECIDA_ESTÁNDAR</span>
         </div>
         <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-left text-sm">
-                <thead class="bg-gray-100/80 text-gray-500 font-bold uppercase tracking-wider text-[10px]">
+            <table class="w-full text-left text-[10px] uppercase">
+                <thead class="bg-gray-900 text-gray-400 font-bold tracking-widest border-b border-gray-900">
                     <tr>
-                        <th class="px-6 py-4">Fecha</th>
-                        <th class="px-6 py-4">IP / Ubicación</th>
-                        <th class="px-6 py-4">Dispositivo / OS</th>
-                        <th class="px-6 py-4">Ruta</th>
-                        <th class="px-6 py-4">Navegador</th>
-                        <th class="px-6 py-4">Res.</th>
+                        <th class="px-8 py-5">TIMESTAMP</th>
+                        <th class="px-8 py-5">IP // LOC</th>
+                        <th class="px-8 py-5">HW // OS</th>
+                        <th class="px-8 py-5">ENDPOINT</th>
+                        <th class="px-8 py-5">BROWSER_STR</th>
+                        <th class="px-8 py-5">RES</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-200">
                     {% for log in ultimos_logs %}
-                    <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-500 text-xs">
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-8 py-5 text-gray-400 font-mono text-[9px]">
                             {{ log.timestamp }}
                         </td>
-                        <td class="px-6 py-4">
-                            <div class="flex flex-col">
+                        <td class="px-8 py-5">
+                            <div class="flex flex-col gap-1">
                                 <span class="font-bold text-gray-900">{{ log.ip_publica }}</span>
-                                <span class="text-[11px] text-gray-400">{{ log.pais }} - {{ log.ciudad }}</span>
+                                <span class="text-[9px] text-gray-400 font-normal">{{ log.pais }} - {{ log.ciudad
+                                    }}</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
-                            <div class="flex flex-col">
-                                <span class="font-medium text-gray-700 flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-xs">{% if log.dispositivo == 'PC'
+                        <td class="px-8 py-5">
+                            <div class="flex flex-col gap-1">
+                                <span class="font-bold text-gray-900 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[14px] font-light">{% if log.dispositivo
+                                        == 'PC'
                                         %}laptop{% elif log.dispositivo == 'Móvil' %}smartphone{% else %}devices{% endif
                                         %}</span>
                                     {{ log.dispositivo }}
                                 </span>
-                                <span class="text-[11px] text-gray-400">{{ log.os }}</span>
+                                <span class="text-[9px] text-gray-400 font-normal">{{ log.os }}</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-8 py-5">
                             <span
-                                class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-bold border border-gray-200">
+                                class="px-3 py-1 border border-gray-900 text-gray-900 text-[9px] font-bold tracking-widest">
                                 {{ log.ruta }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-xs text-gray-600">
+                        <td class="px-8 py-5 text-[9px] text-gray-500 font-normal">
                             {{ log.navegador }}
                         </td>
-                        <td class="px-6 py-4 text-[10px] text-gray-400 font-mono">
+                        <td class="px-8 py-5 text-[9px] text-gray-400 font-mono">
                             {{ log.resolucion }}
                         </td>
                     </tr>
@@ -214,17 +223,26 @@
 {% endblock %}
 
 {% block help_content %}
-<div class="space-y-4">
-    <h4 class="text-primary font-bold">Guía Administrativa</h4>
-    <p class="text-sm">El dashboard agrupa las visitas por <b>Session ID</b>, lo que permite diferenciar usuarios
-        individuales incluso si comparten la misma IP pública.</p>
+<div class="space-y-10 font-mono text-[11px] text-gray-900 uppercase">
+    <section>
+        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+            <span class="material-symbols-outlined font-light">monitoring</span>
+            01_PROTOCOLO_MONITOREO
+        </h4>
+        <p>El sistema agrupa las métricas por <b>ID_SESION</b> de forma persistente. Esto permite un seguimiento
+            granular del tráfico incluso tras multiplexación de IP pública.</p>
+    </section>
 
-    <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
-        <h5 class="text-xs font-bold text-blue-700 uppercase mb-2">Cloudflare Data</h5>
-        <p class="text-[11px] text-blue-600 leading-relaxed">
-            Los datos de ubicación dependen de los headers <code>CF-IPCountry</code> y <code>CF-IPCity</code>. Asegúrese
-            de que Cloudflare esté enviando esta información en su panel de control.
+    <section class="bg-gray-900 p-8 border border-gray-900 text-white">
+        <h4
+            class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
+            <span class="material-symbols-outlined text-gray-400 font-light">dns</span>
+            02_FLUJO_DATOS_CLOUDFLARE
+        </h4>
+        <p class="text-[10px] text-gray-400 leading-relaxed italic">
+            info_stack: La metadata geográfica depende estrictamente de los encabezados CF-IPCountry y CF-IPCity.
+            Verifique la propagación en el núcleo de red si detecta valores N/A.
         </p>
-    </div>
+    </section>
 </div>
 {% endblock %}

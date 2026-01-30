@@ -8,33 +8,33 @@
 <div class="max-w-3xl mx-auto py-4">
     <div class="bg-white p-8 border border-gray-900">
         <div class="mb-10 border-l-4 border-gray-900 pl-6">
-            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">sys_module //
-                snc_converter</h2>
-            <p class="text-xs font-mono text-gray-500 mt-2 uppercase">Core dataset transformation protocol. FWF to XLSX
-                mapping.</p>
+            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">módulo_sistema //
+                convertidor_snc</h2>
+            <p class="text-xs font-mono text-gray-500 mt-2 uppercase">Protocolo de transformación de conjunto de datos.
+                Mapeo FWF a XLSX.</p>
         </div>
 
         <form method="POST" enctype="multipart/form-data" class="space-y-8">
             <!-- 1. Selección de Registro -->
             <div>
                 <label
-                    class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">01_IDENTIFY_REGISTRY_TYPE</label>
+                    class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">01_IDENTIFICAR_TIPO_REGISTRO</label>
                 <select name="opcion"
                     class="block w-full border-gray-900 text-xs font-mono focus:ring-0 focus:border-gray-900 bg-white py-3 px-4 uppercase"
                     required>
-                    <option value="" selected disabled>SELECT_OPTION...</option>
-                    <option value="1">R1_SNC_BASIC_DATA</option>
-                    <option value="2">R2_SNC_CONSTRUCTION_DETAILS</option>
-                    <option value="3">RES_T1_GENERAL_PROCEDURES</option>
-                    <option value="4">RES_T2_PHYSICAL_DETAILS</option>
-                    <option value="5">RES_T3_LEGAL_DECREES</option>
+                    <option value="" selected disabled>SELECCIONAR_OPCIÓN...</option>
+                    <option value="1">R1_SNC_DATOS_BÁSICOS</option>
+                    <option value="2">R2_SNC_DETALLES_CONSTRUCCIÓN</option>
+                    <option value="3">RES_T1_PROCEDIMIENTOS_GENERALES</option>
+                    <option value="4">RES_T2_DETALLES_FÍSICOS</option>
+                    <option value="5">RES_T3_DECRETOS_LEGALES</option>
                 </select>
             </div>
 
             <!-- 2. Archivo -->
             <div>
                 <label
-                    class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">02_UPLOAD_RAW_PAYLOAD
+                    class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">02_CARGAR_CARGA_BRUTA
                     (.txt / .prn)</label>
                 <div class="relative group">
                     <input type="file" name="archivo" id="archivo" class="hidden" required>
@@ -43,9 +43,9 @@
                         <span
                             class="material-symbols-outlined text-4xl text-gray-300 mb-3 group-hover:text-gray-900 transition-colors font-light">terminal</span>
                         <span class="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest"
-                            id="file_label">awaiting_file_selection</span>
-                        <span class="mt-2 text-[9px] font-mono text-gray-400 uppercase tracking-tight">fwf_engine:
-                            latin-1_encoding_detected</span>
+                            id="file_label">esperando_selección_archivo</span>
+                        <span class="mt-2 text-[9px] font-mono text-gray-400 uppercase tracking-tight">motor_fwf:
+                            codificación_latin-1_detectada</span>
                     </label>
                 </div>
             </div>
@@ -55,7 +55,7 @@
                 <button type="submit"
                     class="w-full flex justify-center items-center gap-3 py-4 border border-gray-900 text-xs font-mono font-bold text-white bg-gray-900 hover:bg-white hover:text-gray-900 transition-all active:scale-[0.98] uppercase tracking-[0.2em]">
                     <span class="material-symbols-outlined text-[20px] font-light">terminal</span>
-                    execute_conversion --download
+                    ejecutar_conversión --descargar
                 </button>
             </div>
         </form>
@@ -67,10 +67,10 @@
             <span class="material-symbols-outlined font-light">info</span>
         </div>
         <div>
-            <h4 class="text-[10px] font-mono font-bold text-gray-900 uppercase tracking-widest mb-2">SYSTEM_NOTE</h4>
+            <h4 class="text-[10px] font-mono font-bold text-gray-900 uppercase tracking-widest mb-2">NOTA_SISTEMA</h4>
             <p class="text-[11px] font-mono text-gray-600 leading-relaxed uppercase">
-                The conversion logic strictly adheres to IGAC FWF specifications. No data loss during mapping. Columnar
-                alignment optimized for SQL/XLSX auditing.
+                La lógica de conversión se adhiere estrictamente a las especificaciones FWF del IGAC. Sin pérdida de
+                datos durante el mapeo. Alineación columnar optimizada para auditoría SQL/XLSX.
             </p>
         </div>
     </div>
@@ -82,32 +82,32 @@
     <section>
         <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
             <span class="material-symbols-outlined font-light">description</span>
-            01_CORE_OBJECTIVE
+            01_OBJETIVO_NÚCLEO
         </h4>
-        <p>This module processes fixed-width export logs from the National Cadastral System (SNC). No manual
-            sanitization required.</p>
+        <p>Este módulo procesa registros de exportación de ancho fijo del Sistema Nacional Catastral (SNC). No requiere
+            saneamiento manual.</p>
     </section>
 
     <section>
         <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
             <span class="material-symbols-outlined font-light">layers</span>
-            02_SUPPORTED_REGISTRIES
+            02_REGISTROS_SOPORTADOS
         </h4>
         <div class="grid grid-cols-1 gap-4">
             <div class="border border-gray-200 p-4 font-mono">
-                <p class="font-bold mb-1">R1_SNC (BASIC_INDEX)</p>
-                <p class="text-gray-500">Ownership data, addresses, and current appraisal values. Master file for system
-                    interrogation.</p>
+                <p class="font-bold mb-1">R1_SNC (ÍNDICE_BÁSICO)</p>
+                <p class="text-gray-500">Datos de propiedad, direcciones y valores de avalúo actuales. Archivo maestro
+                    para interrogación del sistema.</p>
             </div>
             <div class="border border-gray-200 p-4 font-mono">
-                <p class="font-bold mb-1">R2_SNC (MORPHOLOGY)</p>
-                <p class="text-gray-500">Structural details: terrain area, building specifics, floor counts, and utility
-                    status.</p>
+                <p class="font-bold mb-1">R2_SNC (MORFOLOGÍA)</p>
+                <p class="text-gray-500">Detalles estructurales: área de terreno, especificaciones de construcción,
+                    conteo de pisos y estado de servicios.</p>
             </div>
             <div class="border border-gray-200 p-4 font-mono">
-                <p class="font-bold mb-1">RES_LOGS (PROTOCOL_FEED)</p>
-                <p class="text-gray-500">Internal procedure logs. Automatically sorted via type_detection algorithm
-                    (T1/T2/T3).</p>
+                <p class="font-bold mb-1">RES_LOGS (ALIMENTACIÓN_PROTOCOLO)</p>
+                <p class="text-gray-500">Logs de procedimientos internos. Clasificados automáticamente mediante
+                    algoritmo de detección de tipo (T1/T2/T3).</p>
             </div>
         </div>
     </section>
@@ -115,25 +115,27 @@
     <section>
         <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
             <span class="material-symbols-outlined font-light">tips_and_updates</span>
-            03_RECOM_PROTOCOLS
+            03_PROTOCOLOS_RECOMENDADOS
         </h4>
         <ul class="space-y-3">
             <li class="flex items-start gap-2">
                 <span>--</span>
-                <span>Do not modify FWF source in rich text editors (potential column corruption).</span>
+                <span>No modifique la fuente FWF en editores de texto enriquecido (potencial corrupción de
+                    columnas).</span>
             </li>
             <li class="flex items-start gap-2">
                 <span>--</span>
-                <span>Latin-1 encoding ensures character integrity for special symbols.</span>
+                <span>La codificación Latin-1 asegura la integridad de caracteres para símbolos especiales.</span>
             </li>
             <li class="flex items-start gap-2">
                 <span>--</span>
-                <span>Immediate download triggered upon POST:200.</span>
+                <span>Descarga inmediata activada tras POST:200.</span>
             </li>
         </ul>
     </section>
 </div>
 {% endblock %}
+
 
 {% block scripts %}
 <script>

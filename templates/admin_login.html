@@ -6,64 +6,81 @@
 
 {% block content %}
 <div class="max-w-md mx-auto py-12">
-    <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl">
-        <div class="text-center mb-8">
-            <div class="w-16 h-16 bg-gray-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <span class="material-symbols-outlined text-[40px]">admin_panel_settings</span>
+    <div class="bg-white p-10 border border-gray-900 shadow-sm relative">
+        <div class="text-center mb-10 border-b border-gray-900 pb-6">
+            <div class="w-16 h-16 bg-gray-900 text-white flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-[40px] font-light">admin_panel_settings</span>
             </div>
-            <h3 class="text-2xl font-display font-bold text-gray-900">Panel de Control</h3>
-            <p class="text-gray-500 mt-2">Ingrese sus credenciales para continuar</p>
+            <h3 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">panel_control // acceso
+            </h3>
+            <p class="text-[10px] font-mono text-gray-500 mt-2 uppercase">Ingrese credenciales de administrador de
+                casabero.</p>
         </div>
 
-        <form method="POST" class="space-y-6">
+        <form method="POST" class="space-y-8 uppercase font-mono">
             <div>
-                <label for="username" class="block text-sm font-bold text-gray-700 mb-2">Usuario</label>
+                <label for="username"
+                    class="block text-[10px] font-bold text-gray-500 mb-3 tracking-widest">ID_USUARIO</label>
                 <div class="relative">
                     <span
-                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">person</span>
+                        class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-light text-[18px]">person</span>
                     <input type="text" id="username" name="username" required
-                        class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all outline-none"
-                        placeholder="casabero_admin">
+                        class="w-full pl-12 pr-4 py-4 bg-gray-50/30 border border-gray-900 text-xs focus:ring-0 focus:border-gray-900 transition-all outline-none uppercase font-bold"
+                        placeholder="ADMIN_ROOT">
                 </div>
             </div>
 
             <div>
-                <label for="password" class="block text-sm font-bold text-gray-700 mb-2">Contraseña</label>
+                <label for="password"
+                    class="block text-[10px] font-bold text-gray-500 mb-3 tracking-widest">TOKEN_ACCESO</label>
                 <div class="relative">
                     <span
-                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">lock</span>
+                        class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-light text-[18px]">lock</span>
                     <input type="password" id="password" name="password" required
-                        class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all outline-none"
+                        class="w-full pl-12 pr-4 py-4 bg-gray-50/30 border border-gray-900 text-xs focus:ring-0 focus:border-gray-900 transition-all outline-none uppercase font-bold"
                         placeholder="••••••••">
                 </div>
             </div>
 
             <button type="submit"
-                class="w-full py-4 bg-gray-900 text-white rounded-xl font-bold text-sm shadow-lg hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2">
-                Iniciar Sesión
-                <span class="material-symbols-outlined text-[20px]">login</span>
+                class="w-full py-5 bg-gray-900 text-white border border-gray-900 font-bold text-xs tracking-[0.3em] hover:bg-white hover:text-gray-900 transition-all active:scale-[0.98] flex items-center justify-center gap-3">
+                AUTENTICAR_SESIÓN
+                <span class="material-symbols-outlined text-[20px] font-light">login</span>
             </button>
         </form>
     </div>
 
-    <div class="mt-8 text-center">
+    <div class="mt-8 text-center uppercase font-mono">
         <a href="/"
-            class="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors flex items-center justify-center gap-2">
-            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-            Volver al Portal
+            class="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors flex items-center justify-center gap-3 tracking-widest">
+            <span class="material-symbols-outlined text-[18px] font-light">arrow_back</span>
+            VOLVER_AL_PORTAL_RAÍZ
         </a>
     </div>
 </div>
 {% endblock %}
 
 {% block help_content %}
-<div class="space-y-4">
-    <h4 class="text-primary font-bold">Aviso de Seguridad</h4>
-    <p class="text-sm text-gray-600">Este apartado es exclusivo para el administrador del sistema. Todas las acciones y
-        accesos son registrados con fines de auditoría.</p>
-    <div class="p-4 bg-amber-50 rounded-xl border border-amber-100 flex gap-3">
-        <span class="material-symbols-outlined text-amber-600">warning</span>
-        <p class="text-xs text-amber-700">Si ha olvidado sus credenciales, contacte al soporte técnico de Casabero.</p>
-    </div>
+<div class="space-y-10 font-mono text-[11px] text-gray-900 uppercase">
+    <section>
+        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+            <span class="material-symbols-outlined font-light">security</span>
+            01_PROTOCOLO_SEGURIDAD
+        </h4>
+        <p>Este apartado es exclusivo para el administrador del sistema. Todas las acciones y accesos son registrados en
+            el log persistente.</p>
+    </section>
+
+    <section class="bg-gray-900 p-8 border border-gray-900 text-white">
+        <h4
+            class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
+            <span class="material-symbols-outlined text-gray-400 font-light">warning</span>
+            ALERTA_CONTRASEÑA
+        </h4>
+        <p class="text-[10px] text-gray-400 leading-relaxed italic">
+            protocol_note: Si ha olvidado sus credenciales, contacte al soporte técnico de Casabero para reinicio físico
+            de token.
+        </p>
+    </section>
 </div>
 {% endblock %}

@@ -299,26 +299,27 @@
     <section>
         <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
             <span class="material-symbols-outlined font-light">rule</span>
-            01_INTEGRATED_RENUMBERING_AUDIT
+            01_AUDITORÍA_RENUMERACIÓN_INTEGRADA
         </h4>
-        <p>Unified validation protocol for ID migration (SNC). Split into two mandatory/optional execution branches:</p>
+        <p>Protocolo de validación unificado para la migración de ID (SNC). Dividido en dos ramas de ejecución
+            obligatoria/opcional:</p>
         <div class="mt-8 space-y-6">
             <div class="flex gap-4">
                 <span
                     class="w-10 h-10 border border-gray-900 flex items-center justify-center text-[11px] font-bold shrink-0">01</span>
                 <div>
-                    <p class="font-bold text-gray-900">ALPHANUMERIC_PHASE (MANDATORY)</p>
-                    <p class="text-gray-500 mt-1">Validates 6 technical IGAC rules: Uniqueness, Permanence,
-                        Sanitization, Continuity, and Reset logic.</p>
+                    <p class="font-bold text-gray-900">FASE_ALFANUMÉRICA (OBLIGATORIA)</p>
+                    <p class="text-gray-500 mt-1">Valida 6 reglas técnicas del IGAC: Unicidad, Permanencia, Saneamiento,
+                        Continuidad y lógica de Reinicio.</p>
                 </div>
             </div>
             <div class="flex gap-4">
                 <span
                     class="w-10 h-10 border border-gray-400 text-gray-400 flex items-center justify-center text-[11px] font-bold shrink-0">02</span>
                 <div>
-                    <p class="font-bold text-gray-400">GEOSPATIAL_PHASE (OPTIONAL)</p>
-                    <p class="text-[10px] text-gray-400 mt-1">GDB overlay crunch (.zip). Identifies orphaned vectors vs
-                        undocumented system entries.</p>
+                    <p class="font-bold text-gray-400">FASE_GEOESPACIAL (OPCIONAL)</p>
+                    <p class="text-[10px] text-gray-400 mt-1">Cruces GDB (.zip). Identifica vectores huérfanos vs
+                        registros del sistema no documentados.</p>
                 </div>
             </div>
         </div>
@@ -328,26 +329,26 @@
         <h4
             class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
             <span class="material-symbols-outlined text-gray-400 font-light">warning</span>
-            CRITICAL_PAYLOAD_REQUIREMENT
+            REQUERIMIENTO_CRÍTICO_DE_CARGA
         </h4>
         <p class="text-[10px] text-gray-400 leading-relaxed italic">
-            protocol_note: xlsx source must include all technical states (active/canceled). Failure to provide full logs
-            corrupts spatial intersection logic.
+            nota_protocolo: La fuente xlsx debe incluir todos los estados técnicos (activos/cancelados). No proporcionar
+            los logs completos corrompe la lógica de intersección espacial.
         </p>
     </section>
 
     <section>
         <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
             <span class="material-symbols-outlined font-light">help</span>
-            03_GDB_LAYER_MAPPING
+            03_MAPE_CAPAS_GDB
         </h4>
         <div class="grid grid-cols-2 gap-6">
             <div class="border border-gray-200 p-4">
-                <p class="font-bold mb-1">FORMAL_LAYERS</p>
+                <p class="font-bold mb-1">CAPAS_FORMALES</p>
                 <p class="text-gray-400 text-[9px]">U_TERRENO // R_TERRENO // TERRENO</p>
             </div>
             <div class="border border-gray-200 p-4">
-                <p class="font-bold mb-1">INFORMAL_LAYERS</p>
+                <p class="font-bold mb-1">CAPAS_INFORMALES</p>
                 <p class="text-gray-400 text-[9px]">U_TERRENO_INF // R_TERRENO_INF</p>
             </div>
         </div>

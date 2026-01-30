@@ -7,10 +7,10 @@
 {% block content %}
 <div class="max-w-5xl mx-auto py-4">
     <div class="mb-12 border-l-4 border-gray-900 pl-6">
-        <h3 class="text-3xl font-display font-bold text-gray-900 uppercase tracking-tighter">system_access //
-            entry_point</h3>
-        <p class="text-gray-500 mt-2 font-mono text-xs uppercase tracking-widest">Select module to initiate
-            data_processing_sequence.</p>
+        <h3 class="text-3xl font-display font-bold text-gray-900 uppercase tracking-tighter">acceso_sistema //
+            punto_entrada</h3>
+        <p class="text-gray-500 mt-2 font-mono text-xs uppercase tracking-widest">seleccione un módulo para iniciar la
+            secuencia_procesamiento_datos.</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -23,18 +23,20 @@
                     <span class="material-symbols-outlined text-[28px]">data_object</span>
                 </div>
                 <div class="flex items-center gap-3 mb-4">
-                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">SNC_CONVERT_V1.2
+                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">
+                        CONVERTIDOR_SNC_V1.2
                     </h4>
                     <span
-                        class="px-2 py-0.5 text-[9px] font-mono font-bold bg-gray-900 text-white border border-gray-900">STABLE</span>
+                        class="px-2 py-0.5 text-[9px] font-mono font-bold bg-gray-900 text-white border border-gray-900">ESTABLE</span>
                 </div>
                 <p class="text-xs font-mono text-gray-500 leading-relaxed mb-10 uppercase">
-                    [PARSING_ENGINE]: Transform flat files (.txt/.prn) to structured system datasets (Excel).
+                    [MOTOR_PARSING]: TRANSFORMACIÓN DE ARCHIVOS PLANOS (.TXT/.PRN) A CONJUNTOS DE DATOS ESTRUCTURADOS
+                    (EXCEL).
                 </p>
             </div>
             <a href="/snc"
                 class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
-                execute_module
+                ejecutar_módulo
                 <span class="material-symbols-outlined text-[16px] font-light">arrow_forward</span>
             </a>
         </div>
@@ -48,17 +50,18 @@
                     <span class="material-symbols-outlined text-[28px]">analytics</span>
                 </div>
                 <div class="flex items-center gap-3 mb-4">
-                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">APPRAISAL_ANALYSIS
+                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">ANÁLISIS_AVALÚOS
                     </h4>
                     <span class="px-2 py-0.5 text-[9px] font-mono font-bold border border-gray-900">BETA_04</span>
                 </div>
                 <p class="text-xs font-mono text-gray-500 leading-relaxed mb-10 uppercase">
-                    [COMPARATOR]: Cross-reference pre/post closure datasets. Identify anomalies + predial_inconsistency.
+                    [COMPARADOR]: CRUCE DE DATOS PRE/POST CIERRE. IDENTIFICACIÓN DE ANOMALÍAS E INCONSISTENCIAS
+                    PREDIALES.
                 </p>
             </div>
             <a href="/avaluos"
                 class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
-                execute_module
+                ejecutar_módulo
                 <span class="material-symbols-outlined text-[16px] font-light">arrow_forward</span>
             </a>
         </div>
@@ -72,16 +75,18 @@
                     <span class="material-symbols-outlined text-[28px]">verified</span>
                 </div>
                 <div class="flex items-center gap-3 mb-4">
-                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">CLOSURE_AUDIT</h4>
-                    <span class="px-2 py-0.5 text-[9px] font-mono font-bold border border-gray-900">REQUIRED</span>
+                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">AUDITORÍA_CIERRE
+                    </h4>
+                    <span class="px-2 py-0.5 text-[9px] font-mono font-bold border border-gray-900">REQUERIDO</span>
                 </div>
                 <p class="text-xs font-mono text-gray-500 leading-relaxed mb-10 uppercase">
-                    [REPORT_GEN]: Official PDF compilation. Critical financial alert sensing + horizontal_prop_cat.
+                    [GEN_REPORTE]: COMPILACIÓN PDF OFICIAL. DETECCIÓN DE ALERTAS FINANCIERAS CRÍTICAS Y PROPIEDAD
+                    HORIZONTAL.
                 </p>
             </div>
             <a href="/auditoria"
                 class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
-                execute_module
+                ejecutar_módulo
                 <span class="material-symbols-outlined text-[16px] font-light">arrow_forward</span>
             </a>
         </div>
@@ -95,17 +100,18 @@
                     <span class="material-symbols-outlined text-[28px]">rule_folder</span>
                 </div>
                 <div class="flex items-center gap-3 mb-4">
-                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">RENUMBER_AUDIT
+                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">
+                        AUDITORÍA_RENUMERACIÓN
                     </h4>
-                    <span class="px-2 py-0.5 text-[9px] font-mono font-bold border border-gray-900">VERIFIER</span>
+                    <span class="px-2 py-0.5 text-[9px] font-mono font-bold border border-gray-900">VERIFICADOR</span>
                 </div>
                 <p class="text-xs font-mono text-gray-500 leading-relaxed mb-10 uppercase">
-                    [RULE_VALIDATOR]: Verify 06 technical protocols. Secure SNC sequence + predial permanency.
+                    [VALIDADOR_REGLAS]: VERIFICACIÓN DE PROTOCOLOS TÉCNICOS. SECUENCIA SNC SEGURA Y PERMANENCIA PREDIAL.
                 </p>
             </div>
             <a href="/renumeracion"
                 class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
-                execute_module
+                ejecutar_módulo
                 <span class="material-symbols-outlined text-[16px] font-light">arrow_forward</span>
             </a>
         </div>
@@ -119,18 +125,19 @@
                     <span class="material-symbols-outlined text-[28px]">location_searching</span>
                 </div>
                 <div class="flex items-center gap-3 mb-4">
-                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">INFORMAL_RENUMBER
+                    <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">
+                        RENUMERACIÓN_INFORMALES
                     </h4>
                     <span
                         class="px-2 py-0.5 text-[9px] font-mono font-bold bg-gray-900 text-white border border-gray-900">GEOPANDAS</span>
                 </div>
                 <p class="text-xs font-mono text-gray-500 leading-relaxed mb-10 uppercase">
-                    [GEO_SPATIAL]: Automatic CTM12 cross-referencing. Renumbering via max_area_logic.
+                    [GEO_ESPACIAL]: CRUCE AUTOMÁTICO CTM12. RENUMERACIÓN MEDIANTE LÓGICA DE ÁREA MÁXIMA.
                 </p>
             </div>
             <a href="/renumeracion-informales"
                 class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
-                execute_module
+                ejecutar_módulo
                 <span class="material-symbols-outlined text-[16px] font-light">arrow_forward</span>
             </a>
         </div>
@@ -142,8 +149,8 @@
                 class="w-12 h-12 border border-dashed border-gray-400 flex items-center justify-center text-gray-400 mb-6 font-light">
                 <span class="material-symbols-outlined text-[28px]">add</span>
             </div>
-            <h4 class="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest">AWAITING_INPUT</h4>
-            <p class="text-[10px] font-mono text-gray-400 mt-2 uppercase">Core expansion in progress.</p>
+            <h4 class="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest">ESPERANDO_ENTRADA</h4>
+            <p class="text-[10px] font-mono text-gray-400 mt-2 uppercase">expansión del núcleo en progreso.</p>
         </div>
     </div>
 </div>
@@ -152,32 +159,56 @@
 {% block help_content %}
 <div class="space-y-6">
     <section>
-        <h4 class="text-primary font-bold text-lg mb-2">Acerca del Portal</h4>
-        <p>Este sistema ha sido diseñado por <b>Casabero.com</b> para facilitar el procesamiento de datos catastrales
-            complejos proporcionados por el IGAC.</p>
+        <h4
+            class="text-primary font-bold text-[11px] mb-2 uppercase tracking-widest border-b border-gray-900 pb-2 flex items-center gap-2">
+            <span class="material-symbols-outlined font-light text-[18px]">info</span>
+            ACERCA_DEL_PORTAL
+        </h4>
+        <p class="text-xs font-mono uppercase leading-relaxed text-gray-900">
+            ESTE sistema ha sido diseñado por <b class="bg-gray-900 text-white px-1">CASABERO.COM</b> para facilitar el
+            procesamiento de datos catastrales complejos proporcionados por el IGAC.
+        </p>
     </section>
 
     <section>
-        <h4 class="text-primary font-bold text-sm uppercase tracking-wider mb-4 border-b pb-2">Navegación</h4>
-        <ul class="space-y-3">
-            <li class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-accent">table_view</span>
-                <p class="text-sm"><b>Convertidor SNC:</b> Convierte archivos planos .txt o .prn a Excel.</p>
+        <h4
+            class="text-primary font-bold text-[11px] mb-4 uppercase tracking-widest border-b border-gray-900 pb-2 flex items-center gap-2">
+            <span class="material-symbols-outlined font-light text-[18px]">explore</span>
+            GUÍA_NAVEGACIÓN
+        </h4>
+        <ul class="space-y-4">
+            <li class="flex items-start gap-4">
+                <span class="material-symbols-outlined text-gray-900 font-light mt-0.5">table_view</span>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-900 tracking-tighter uppercase">CONVERTIDOR_SNC</p>
+                    <p class="text-[10px] font-mono text-gray-500 uppercase mt-1">PROCESA archivos planos .txt o .prn a
+                        formato excel para auditoría.</p>
+                </div>
             </li>
-            <li class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-green-600">analytics</span>
-                <p class="text-sm"><b>Análisis Avalúos:</b> Compara dos bases de datos y muestra variaciones
-                    estadísticas.</p>
+            <li class="flex items-start gap-4">
+                <span class="material-symbols-outlined text-gray-900 font-light mt-0.5">analytics</span>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-900 tracking-tighter uppercase">ANÁLISIS_AVALÚOS</p>
+                    <p class="text-[10px] font-mono text-gray-500 uppercase mt-1">COMPARA dos instantes temporales de la
+                        base de datos catastral.</p>
+                </div>
             </li>
-            <li class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-indigo-600">verified_user</span>
-                <p class="text-sm"><b>Auditoría Cierre:</b> Crea reportes PDF oficiales para firmas y alertas de avalúos
-                    en $0.</p>
+            <li class="flex items-start gap-4">
+                <span class="material-symbols-outlined text-gray-900 font-light mt-0.5">verified_user</span>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-900 tracking-tighter uppercase">AUDITORÍA_CIERRE</p>
+                    <p class="text-[10px] font-mono text-gray-500 uppercase mt-1">GENERA reportes oficiales y detecta
+                        anomalías en avalúos de $0.</p>
+                </div>
             </li>
-            <li class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-blue-600">pin_drop</span>
-                <p class="text-sm"><b>Renumeración Informales:</b> Realiza el cruce geográfico de mayor área para
-                    asignar nuevas cédulas a predios informales.</p>
+            <li class="flex items-start gap-4">
+                <span class="material-symbols-outlined text-gray-900 font-light mt-0.5">pin_drop</span>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-900 tracking-tighter uppercase">RENUMERACIÓN_INFORMALES
+                    </p>
+                    <p class="text-[10px] font-mono text-gray-500 uppercase mt-1">EJECUTA el cruce espacial de mayor
+                        área para predios sin cédula.</p>
+                </div>
             </li>
         </ul>
     </section>
