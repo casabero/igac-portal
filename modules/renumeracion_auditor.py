@@ -231,13 +231,13 @@ import matplotlib.pyplot as plt
 
 class AuditoriaRenumeracionPDF(FPDF):
     def header(self):
-        self.set_fill_color(17, 24, 39); self.rect(0, 0, 216, 35, 'F'); self.set_y(12); self.set_font('Helvetica', 'B', 16); self.set_text_color(255, 255, 255); self.cell(0, 10, 'REPORTE DE RENUMERACIÓN - IGAC', 0, 1, 'C')
+        self.set_fill_color(17, 17, 17); self.rect(0, 0, 216, 35, 'F'); self.set_y(12); self.set_font('Helvetica', 'B', 16); self.set_text_color(255, 255, 255); self.cell(0, 10, 'REPORTE DE RENUMERACIÓN - IGAC', 0, 1, 'C')
         self.set_font('Helvetica', '', 8); self.set_text_color(156, 163, 175); self.cell(0, 5, 'SISTEMA DE AUDITORÍA CATASTRAL MULTIPROPÓSITO', 0, 1, 'C'); self.ln(15)
 
     def footer(self):
         self.set_y(-20); self.set_draw_color(229, 231, 235); self.line(20, self.get_y(), 196, self.get_y()); self.ln(2)
         self.set_font('Helvetica', 'I', 7); self.set_text_color(156, 163, 175)
-        self.cell(0, 10, 'by casabero', 0, 0, 'L'); self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'R')
+        self.cell(0, 10, 'sys_author: CASABERO.COM', 0, 0, 'L'); self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'R')
 
 def generar_pdf_renumeracion(resultados):
     """Genera un reporte PDF detallado"""
@@ -277,7 +277,7 @@ def generar_pdf_renumeracion(resultados):
         l_g = resultados.get('logs_geo', {}); s_g = l_g.get('stats_geo', {}) if isinstance(l_g, dict) else {}
         if s_g:
             try:
-                plt.figure(figsize=(6, 4)); plt.pie([s_g['coincidencias'], s_g['sin_mapa'], s_g['sobran_gdb']], labels=['Consistentes', 'Faltan GDB', 'Sobran GDB'], autopct='%1.1f%%', startangle=140, colors=['#22c55e', '#ef4444', '#f59e0b']); plt.title('Consistencia Datos vs Mapas', fontsize=11, color='#475569'); i_b = io.BytesIO(); plt.savefig(i_b, format='png', dpi=150); plt.close(); i_b.seek(0); pdf.add_page(); pdf.image(i_b, x=45, w=120); pdf.ln(5)
+                plt.figure(figsize=(6, 4)); plt.pie([s_g['coincidencias'], s_g['sin_mapa'], s_g['sobran_gdb']], labels=['Consistentes', 'Faltan GDB', 'Sobran GDB'], autopct='%1.1f%%', startangle=140, colors=['#111111', '#e7d192', '#666666']); plt.title('Consistencia Datos vs Mapas', fontsize=11, color='#111111'); i_b = io.BytesIO(); plt.savefig(i_b, format='png', dpi=150); plt.close(); i_b.seek(0); pdf.add_page(); pdf.image(i_b, x=45, w=120); pdf.ln(5)
             except Exception: pass
 
     top_p = resultados.get('top_problematicos', [])

@@ -298,7 +298,7 @@ def procesar_auditoria(files_dict, pct_incremento, zona_filtro='General'):
 
 class AuditoriaPDF(FPDF):
     def header(self):
-        self.set_fill_color(17, 24, 39)
+        self.set_fill_color(17, 17, 17)
         self.rect(0, 0, 216, 35, 'F') 
         self.set_y(12)
         self.set_font('Helvetica', 'B', 16)
@@ -312,7 +312,7 @@ class AuditoriaPDF(FPDF):
         self.set_y(-20); self.set_draw_color(229, 231, 235)
         self.line(20, self.get_y(), 196, self.get_y()); self.ln(2)
         self.set_font('Helvetica', 'I', 7); self.set_text_color(156, 163, 175)
-        self.cell(0, 10, 'by casabero', 0, 0, 'L')
+        self.cell(0, 10, 'sys_author: CASABERO.COM', 0, 0, 'L')
         self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'R')
 
 def generar_pdf_auditoria(resultados):
@@ -338,8 +338,8 @@ def generar_pdf_auditoria(resultados):
     
     if 'variaciones_all' in resultados and resultados['variaciones_all']:
         try:
-            plt.figure(figsize=(6, 3))
-            plt.boxplot(resultados['variaciones_all'], vert=False, patch_artist=True, boxprops=dict(facecolor='#EEF2FF', color='#4F46E5'), medianprops=dict(color='#EF4444'))
+            plt.figure(figsize=(6, 3), facecolor='white')
+            plt.boxplot(resultados['variaciones_all'], vert=False, patch_artist=True, boxprops=dict(facecolor='#F3F4F6', color='#111111'), medianprops=dict(color='#e7d192'))
             plt.title('Distribución de % Variación', fontsize=10); plt.xlabel('% Variación', fontsize=8)
             plt.grid(axis='x', linestyle='--', alpha=0.7); plt.tight_layout()
             img_buf = io.BytesIO(); plt.savefig(img_buf, format='png', dpi=150); plt.close(); img_buf.seek(0)
