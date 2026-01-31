@@ -5,6 +5,7 @@ from modules.avaluo_analisis import procesar_incremento_web
 from modules.auditoria_maestra import procesar_auditoria, generar_pdf_auditoria
 from modules.renumeracion_auditor import procesar_renumeracion, generar_excel_renumeracion, procesar_geografica, generar_pdf_renumeracion
 from modules.renumeracion_informales import procesar_informales
+from modules.gis_converter import process_gdb_conversion
 
 import pandas as pd
 import os
@@ -442,6 +443,51 @@ def clear_informales():
     session.pop('res_informales', None)
     flash('Resultados borrados.')
     return redirect(url_for('informales_tool'))
+
+# --- RUTA 8: GIS CONVERTER ---
+@app.route('/gis/gdb-gpkg', methods=['GET', 'POST'])
+def gis_converter_tool():
+    registrar_visita('/gis/gdb-gpkg')
+    if request.method == 'POST':
+        if 'archivo_zip' not in request.files:
+            flash('No se seleccionó ningún archivo.')
+            return redirect(request.url)
+            
+        file = request.files['archivo_zip']
+        if file.filename == '':
+            flash('Nombre de archivo vacío.')
+            return redirect(request.url)
+            
+        if file and (file.filename.endswith('.zip') or file.filename.endswith('.rar')): # Basic check, strict check inside logic
+            try:
+                # Guardar el zip temporalmente
+                temp_filename = f"upload_{uuid.uuid4().hex}.zip"
+                temp_path = os.path.join(UPLOAD_FOLDER, temp_filename)
+                file.save(temp_path)
+                
+                # Procesar
+                try:
+                    output_gpkg = process_gdb_conversion(temp_path, UPLOAD_FOLDER)
+                    
+                    # Enviar archivo al usuario
+                    return send_file(
+                        output_gpkg, 
+                        as_attachment=True, 
+                        download_name=os.path.basename(output_gpkg)
+                    )
+                finally:
+                    # Limpiar el zip de entrada
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+                        
+            except Exception as e:
+                flash(f"Error en la conversión: {str(e)}")
+                return redirect(request.url)
+        else:
+            flash('Por favor suba un archivo .zip')
+            return redirect(request.url)
+            
+    return render_template('gis_converter_tool.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
