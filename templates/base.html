@@ -6,7 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>{% block title %}IGAC Portal{% endblock %}</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;700&family=Fira+Code:wght@400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL,GRAD@200,0,0&display=swap"
         rel="stylesheet" />
@@ -16,8 +16,8 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        "sans": ["Outfit", "sans-serif"],
-                        "display": ["Outfit", "sans-serif"],
+                        "sans": ["Inter", "sans-serif"],
+                        "display": ["Inter", "sans-serif"],
                         "mono": ["Fira Code", "monospace"],
                     },
                     colors: {
@@ -187,7 +187,18 @@
             </div>
         </nav>
 
-        <!-- Espacio inferior reservado para limpieza visual -->
+        <div class="px-3 mb-2 mt-4 space-y-1">
+            <button onclick="toggleHelpModal()"
+                class="w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 text-gray-400 hover:bg-gray-50 hover:text-gray-900 group">
+                <span class="material-symbols-outlined text-[20px] font-light">help_center</span>
+                <span class="text-[11px] uppercase tracking-wider font-bold">Ayuda y Guía</span>
+            </button>
+            <a href="/admin/login"
+                class="w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 text-gray-400 hover:bg-gray-50 hover:text-gray-900 group">
+                <span class="material-symbols-outlined text-[20px] font-light">admin_panel_settings</span>
+                <span class="text-[11px] uppercase tracking-wider font-bold">Gestión Admin</span>
+            </a>
+        </div>
     </aside>
 
     <!-- MAIN CONTENT AREA -->
@@ -233,21 +244,65 @@
         </footer>
     </div>
 
-    <!-- Eliminado Centro de Ayuda Lateral para mayor limpieza visual -->
+    <!-- HELP MODAL -->
+    <div id="helpModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-50/40 transition-opacity" aria-hidden="true" onclick="toggleHelpModal()">
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-100">
+                <div class="bg-gray-50 px-8 py-6 flex justify-between items-center text-gray-900">
+                    <h3
+                        class="text-[10px] font-mono font-bold flex items-center gap-3 uppercase tracking-widest text-gray-500">
+                        <span class="material-symbols-outlined font-light">terminal</span>
+                        SISTEMA_AYUDA // DOCUMENTACIÓN_USUARIO
+                    </h3>
+                    <button onclick="toggleHelpModal()"
+                        class="hover:bg-gray-100 p-2 rounded-full transition-colors flex items-center justify-center">
+                        <span class="material-symbols-outlined font-light">close</span>
+                    </button>
+                </div>
+                <div class="px-8 py-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                    <div id="helpContent"
+                        class="prose prose-sm max-w-none text-gray-600 font-sans text-xs leading-relaxed">
+                        {% block help_content %}
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-100 mb-6">
+                            <p class="font-mono text-[10px] text-blue-600 mb-2 font-bold uppercase tracking-tight">
+                                [MENSAJE_SISTEMA]:</p>
+                            <p>Bienvenido al Centro de Documentación. Seleccione un módulo en el menú lateral para ver
+                                instrucciones específicas de operación.</p>
+                        </div>
+                        {% endblock %}
+                    </div>
+                </div>
+                <div class="bg-gray-50 border-t border-gray-100 px-8 py-6 flex justify-end">
+                    <button onclick="toggleHelpModal()"
+                        class="bg-white text-gray-900 border border-gray-200 px-8 py-2 rounded-xl text-[10px] font-bold hover:bg-gray-50 transition-all uppercase tracking-widest">
+                        Cerrar Guía
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-            // Hardware Sensing (Resolution)
-            (function () {
-                const res = window.screen.width + "x" + window.screen.height;
-                const url = new URL(window.location.href);
-                if (!url.searchParams.has('res')) {
-                    // Solo si no estamos en una redirección infinita de res
-                    // En realidad, mejor inyectarlo en las peticiones AJAX o simplemente capturarlo una vez
-                    // Por simplicidad en este entorno, lo dejamos listo para que el logger lo tome si se envía via GET
-                    // o lo guardamos en una cookie que Flask puede leer.
-                    document.cookie = "screen_res=" + res + "; path=/; max-age=31536000";
-                }
-            })();
+        function toggleHelpModal() {
+            const modal = document.getElementById('helpModal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Hardware Sensing (Resolution)
+        (function () {
+            const res = window.screen.width + "x" + window.screen.height;
+            document.cookie = "screen_res=" + res + "; path=/; max-age=31536000";
+        })();
     </script>
     {% block scripts %}{% endblock %}
 </body>

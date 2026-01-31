@@ -17,7 +17,7 @@ app.secret_key = os.environ.get('SECRET_KEY', 'casabero_igac_secure_key')
 
 # Configuración Admin
 ADMIN_USER = "casabero_admin"
-ADMIN_PASS = "F4k3ST123*"
+ADMIN_PASS = "puerco123"
 
 from functools import wraps
 def login_required(f):

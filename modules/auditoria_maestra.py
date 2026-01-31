@@ -309,10 +309,10 @@ class AuditoriaPDF(FPDF):
         self.ln(15)
 
     def footer(self):
-        self.set_y(-20); self.set_draw_color(229, 231, 235)
+        self.set_y(-15); self.set_draw_color(243, 244, 246)
         self.line(20, self.get_y(), 196, self.get_y()); self.ln(2)
-        self.set_font('Helvetica', 'I', 7); self.set_text_color(156, 163, 175)
-        self.cell(0, 10, 'sys_author :: CASABERO.COM', 0, 0, 'L')
+        self.set_font('Helvetica', '', 7); self.set_text_color(156, 163, 175)
+        self.cell(0, 10, 'SISTEMA DE GESTIÓN CATASTRAL - PORTAL IGAC 2026', 0, 0, 'L')
         self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'R')
 
 def generar_pdf_auditoria(resultados):
@@ -341,7 +341,7 @@ def generar_pdf_auditoria(resultados):
             plt.figure(figsize=(6, 3), facecolor='white')
             plt.boxplot(resultados['variaciones_all'], vert=False, patch_artist=True, 
                         boxprops=dict(facecolor='#FFFFFF', color='#111111', linewidth=1), 
-                        medianprops=dict(color='#e7d192', linewidth=2),
+                        medianprops=dict(color='#333333', linewidth=2),
                         whiskerprops=dict(color='#111111', linewidth=1),
                         capprops=dict(color='#111111', linewidth=1))
             plt.title('Distribución de % Variación', fontsize=10); plt.xlabel('% Variación', fontsize=8)
@@ -355,10 +355,10 @@ def generar_pdf_auditoria(resultados):
         for group in ['top', 'bottom']:
             label = 'Mayores Incrementos %:' if group == 'top' else 'Menores Incrementos %:'
             pdf.set_font('Helvetica', 'B', 10); pdf.cell(0, 7, label, 0, 1); pdf.set_font('Helvetica', 'B', 8)
-            pdf.cell(55, 7, 'Número Predial', 1); pdf.cell(30, 7, 'Base', 1); pdf.cell(30, 7, 'Cierre', 1); pdf.cell(30, 7, '% Var.', 1); pdf.ln()
+            pdf.cell(65, 7, 'Número Predial', 1); pdf.cell(27, 7, 'Base', 1); pdf.cell(27, 7, 'Cierre', 1); pdf.cell(25, 7, '% Var.', 1); pdf.ln()
             pdf.set_font('Helvetica', '', 7)
             for item in resultados['outliers'][group]:
-                pdf.cell(55, 6, str(item['Numero_Predial']), 1); pdf.cell(30, 6, f"{item['Base_Usada']:,.0f}", 1); pdf.cell(30, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1); pdf.cell(30, 6, f"{item['Pct_Variacion']:.2f}%", 1); pdf.ln()
+                pdf.cell(65, 6, str(item['Numero_Predial']), 1); pdf.cell(27, 6, f"{item['Base_Usada']:,.0f}", 1); pdf.cell(27, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1); pdf.cell(25, 6, f"{item['Pct_Variacion']:.2f}%", 1); pdf.ln()
             pdf.ln(5)
 
     pdf.add_page(); pdf.set_font('Helvetica', 'B', 11); pdf.set_text_color(220, 38, 38)
@@ -368,12 +368,12 @@ def generar_pdf_auditoria(resultados):
     if not resultados['predios_zero']:
         pdf.set_font('Helvetica', 'I', 10); pdf.set_text_color(107, 114, 128); pdf.cell(0, 10, 'Sin hallazgos.', 0, 1, 'C'); pdf.set_text_color(0, 0, 0)
     else:
-        pdf.set_font('Helvetica', 'B', 8); pdf.cell(55, 7, 'Número Predial', 1); pdf.cell(25, 7, 'Base', 1); pdf.cell(25, 7, 'Cierre', 1); pdf.cell(25, 7, 'Categoría', 1); pdf.cell(45, 7, 'Estado', 1); pdf.ln()
+        pdf.set_font('Helvetica', 'B', 8); pdf.cell(65, 7, 'Número Predial', 1); pdf.cell(25, 7, 'Base', 1); pdf.cell(25, 7, 'Cierre', 1); pdf.cell(25, 7, 'Categoría', 1); pdf.cell(35, 7, 'Estado', 1); pdf.ln()
         pdf.set_font('Helvetica', '', 7)
         for item in resultados['predios_zero']:
             if pdf.get_y() > 260:
-                pdf.add_page(); pdf.set_font('Helvetica', 'B', 8); pdf.cell(55, 7, 'Número Predial', 1); pdf.cell(25, 7, 'Base', 1); pdf.cell(25, 7, 'Cierre', 1); pdf.cell(25, 7, 'Categoría', 1); pdf.cell(45, 7, 'Estado', 1); pdf.ln(); pdf.set_font('Helvetica', '', 7)
-            pdf.cell(55, 6, str(item['Numero_Predial']), 1); pdf.cell(25, 6, f"{item['Base_Usada']:,.0f}", 1); pdf.cell(25, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
+                pdf.add_page(); pdf.set_font('Helvetica', 'B', 8); pdf.cell(65, 7, 'Número Predial', 1); pdf.cell(25, 7, 'Base', 1); pdf.cell(25, 7, 'Cierre', 1); pdf.cell(25, 7, 'Categoría', 1); pdf.cell(35, 7, 'Estado', 1); pdf.ln(); pdf.set_font('Helvetica', '', 7)
+            pdf.cell(65, 6, str(item['Numero_Predial']), 1); pdf.cell(25, 6, f"{item['Base_Usada']:,.0f}", 1); pdf.cell(25, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1)
             cat = item.get('Zero_Category', 'Otros $0'); pdf.set_text_color(239, 68, 68) if cat == 'Crítico' else pdf.set_text_color(59, 130, 246) if cat == 'Informal' else pdf.set_text_color(147, 51, 234) if cat == 'PH' else pdf.set_text_color(0,0,0)
             pdf.cell(25, 6, str(cat), 1); pdf.set_text_color(0, 0, 0); pdf.cell(45, 6, str(item['Estado']), 1); pdf.ln()
 
@@ -385,10 +385,10 @@ def generar_pdf_auditoria(resultados):
     if resultados['inconsistencias']:
         pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Detalle de Inconsistencias (Total)', 0, 1)
         def h():
-            pdf.set_font('Helvetica', 'B', 7); pdf.cell(55, 7, 'Número Predial', 1); pdf.cell(25, 7, 'Base', 1); pdf.cell(25, 7, 'Cierre', 1); pdf.cell(25, 7, 'Cierre Calc.', 1); pdf.cell(15, 7, '% Var.', 1); pdf.cell(30, 7, 'Estado', 1); pdf.ln()
+            pdf.set_font('Helvetica', 'B', 7); pdf.cell(65, 7, 'Número Predial', 1); pdf.cell(22, 7, 'Base', 1); pdf.cell(22, 7, 'Cierre', 1); pdf.cell(22, 7, 'Cierre Calc.', 1); pdf.cell(15, 7, '% Var.', 1); pdf.cell(29, 7, 'Estado', 1); pdf.ln()
         h(); pdf.set_font('Helvetica', '', 6)
         for item in resultados['inconsistencias']:
             if pdf.get_y() > 250: pdf.add_page(); h(); pdf.set_font('Helvetica', '', 6)
-            pdf.cell(55, 6, str(item['Numero_Predial']), 1); pdf.cell(25, 6, f"{item['Base_Usada']:,.0f}", 1); pdf.cell(25, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1); pdf.cell(25, 6, f"{item['Cierre_Calculado']:,.0f}", 1); pdf.cell(15, 6, f"{item['Pct_Variacion']:.2f}%", 1); pdf.cell(30, 6, str(item['Estado']), 1); pdf.ln()
+            pdf.cell(65, 6, str(item['Numero_Predial']), 1); pdf.cell(22, 6, f"{item['Base_Usada']:,.0f}", 1); pdf.cell(22, 6, f"{item['Valor_Cierre_Listado']:,.0f}", 1); pdf.cell(22, 6, f"{item['Cierre_Calculado']:,.0f}", 1); pdf.cell(15, 6, f"{item['Pct_Variacion']:.2f}%", 1); pdf.cell(29, 6, str(item['Estado']), 1); pdf.ln()
 
     return bytes(pdf.output())

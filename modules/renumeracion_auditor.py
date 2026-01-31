@@ -235,9 +235,9 @@ class AuditoriaRenumeracionPDF(FPDF):
         self.set_font('Helvetica', '', 8); self.set_text_color(156, 163, 175); self.cell(0, 5, 'SIS_AUDITORÍA_CATASTRAL :: MULTIPROPÓSITO', 0, 1, 'C'); self.ln(15)
 
     def footer(self):
-        self.set_y(-20); self.set_draw_color(229, 231, 235); self.line(20, self.get_y(), 196, self.get_y()); self.ln(2)
-        self.set_font('Helvetica', 'I', 7); self.set_text_color(156, 163, 175)
-        self.cell(0, 10, 'sys_author :: CASABERO.COM', 0, 0, 'L'); self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'R')
+        self.set_y(-15); self.set_draw_color(243, 244, 246); self.line(20, self.get_y(), 196, self.get_y()); self.ln(2)
+        self.set_font('Helvetica', '', 7); self.set_text_color(156, 163, 175)
+        self.cell(0, 10, 'SISTEMA DE GESTIÓN CATASTRAL - PORTAL IGAC 2026', 0, 0, 'L'); self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'R')
 
 def generar_pdf_renumeracion(resultados):
     """Genera un reporte PDF detallado"""
@@ -277,21 +277,21 @@ def generar_pdf_renumeracion(resultados):
         l_g = resultados.get('logs_geo', {}); s_g = l_g.get('stats_geo', {}) if isinstance(l_g, dict) else {}
         if s_g:
             try:
-                plt.figure(figsize=(6, 4)); plt.pie([s_g['coincidencias'], s_g['sin_mapa'], s_g['sobran_gdb']], labels=['Consistentes', 'Faltan GDB', 'Sobran GDB'], autopct='%1.1f%%', startangle=140, colors=['#111111', '#e7d192', '#666666']); plt.title('Consistencia Datos vs Mapas', fontsize=11, color='#111111'); i_b = io.BytesIO(); plt.savefig(i_b, format='png', dpi=150); plt.close(); i_b.seek(0); pdf.add_page(); pdf.image(i_b, x=45, w=120); pdf.ln(5)
+                plt.figure(figsize=(6, 4)); plt.pie([s_g['coincidencias'], s_g['sin_mapa'], s_g['sobran_gdb']], labels=['Consistentes', 'Faltan GDB', 'Sobran GDB'], autopct='%1.1f%%', startangle=140, colors=['#111111', '#555555', '#999999']); plt.title('Consistencia Datos vs Mapas', fontsize=11, color='#111111'); i_b = io.BytesIO(); plt.savefig(i_b, format='png', dpi=150); plt.close(); i_b.seek(0); pdf.add_page(); pdf.image(i_b, x=45, w=120); pdf.ln(5)
             except Exception: pass
 
     top_p = resultados.get('top_problematicos', [])
     if top_p:
         pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Top 10 Códigos con Más Alertas', 0, 1); pdf.ln(2); pdf.set_font('Helvetica', 'B', 8); pdf.cell(10, 8, '#', 1, 0, 'C')
-        pdf.cell(55, 8, 'Código Predial', 1, 0, 'C'); pdf.cell(20, 8, 'Alertas', 1, 0, 'C'); pdf.cell(90, 8, 'Reglas Incumplidas', 1, 1, 'C'); pdf.set_font('Helvetica', '', 7)
+        pdf.cell(65, 8, 'Código Predial', 1, 0, 'C'); pdf.cell(20, 8, 'Alertas', 1, 0, 'C'); pdf.cell(80, 8, 'Reglas Incumplidas', 1, 1, 'C'); pdf.set_font('Helvetica', '', 7)
         for idx, (cod, n, r) in enumerate(top_p, 1):
-            pdf.cell(10, 6, str(idx), 1, 0, 'C'); pdf.cell(55, 6, str(cod), 1, 0, 'C'); pdf.set_text_color(220, 38, 38); pdf.cell(20, 6, str(n), 1, 0, 'C'); pdf.set_text_color(0, 0, 0); pdf.cell(90, 6, r[:65], 1, 1)
+            pdf.cell(10, 6, str(idx), 1, 0, 'C'); pdf.cell(65, 6, str(cod), 1, 0, 'C'); pdf.set_text_color(220, 38, 38); pdf.cell(20, 6, str(n), 1, 0, 'C'); pdf.set_text_color(0, 0, 0); pdf.cell(80, 6, r[:65], 1, 1)
 
     pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Detalle de Alertas Alfanuméricas', 0, 1); pdf.ln(2); pdf.set_font('Helvetica', 'B', 8)
-    pdf.cell(35, 8, 'Regla', 1); pdf.cell(35, 8, 'Detalle', 1); pdf.cell(53, 8, f'{l_ant}', 1); pdf.cell(53, 8, 'Nuevo (SNC)', 1); pdf.ln()
+    pdf.cell(30, 8, 'Regla', 1); pdf.cell(25, 8, 'Detalle', 1); pdf.cell(60, 8, f'{l_ant}', 1); pdf.cell(60, 8, 'Nuevo (SNC)', 1); pdf.ln()
     pdf.set_font('Helvetica', '', 6)
     for e in resultados.get('errores', [])[:100]:
-        if pdf.get_y() > 260: pdf.add_page(); pdf.set_font('Helvetica', 'B', 8); pdf.cell(35, 8, 'Regla', 1); pdf.cell(35, 8, 'Detalle', 1); pdf.cell(53, 8, f'{l_ant}', 1); pdf.cell(53, 8, 'Nuevo (SNC)', 1); pdf.ln(); pdf.set_font('Helvetica', '', 6)
-        pdf.cell(35, 6, str(e['REGLA']), 1); pdf.cell(35, 6, str(e['DETALLE'])[:35], 1); pdf.cell(53, 6, str(e['ANTERIOR']), 1); pdf.cell(53, 6, str(e['NUEVO']), 1); pdf.ln()
+        if pdf.get_y() > 260: pdf.add_page(); pdf.set_font('Helvetica', 'B', 8); pdf.cell(30, 8, 'Regla', 1); pdf.cell(25, 8, 'Detalle', 1); pdf.cell(60, 8, f'{l_ant}', 1); pdf.cell(60, 8, 'Nuevo (SNC)', 1); pdf.ln(); pdf.set_font('Helvetica', '', 6)
+        pdf.cell(30, 6, str(e['REGLA'])[:25], 1); pdf.cell(25, 6, str(e['DETALLE'])[:20], 1); pdf.cell(60, 6, str(e['ANTERIOR']), 1); pdf.cell(60, 6, str(e['NUEVO']), 1); pdf.ln()
 
     return bytes(pdf.output())

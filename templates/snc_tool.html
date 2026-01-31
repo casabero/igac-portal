@@ -17,38 +17,42 @@
         </div>
     </div>
     <div class="premium-card p-10 mt-4 relative overflow-hidden">
-        <div class="mb-10 border-l-4 border-blue-600 pl-6">
+        <div class="mb-10 border-l-4 border-gray-200 pl-6">
             <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">01 // CONVERTIDOR SNC
             </h2>
-            <p class="text-xs font-sans text-gray-500 mt-2 uppercase tracking-widest">EJECUCIÓN // FLUJO EXCEL PARSING
-            </p>
+            <p class="text-[10px] font-mono text-gray-400 mt-2 uppercase tracking-widest font-bold">FLUJO_PROCESO //
+                CONVERSIÓN_EXCEL</p>
         </div>
 
         <form method="POST" enctype="multipart/form-data" class="space-y-8">
             <!-- 1. Selección de Registro -->
             <div class="flex-1 space-y-4">
-                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-2">01. Selección de
-                    Parámetros</label>
-                <select name="config"
-                    class="w-full text-xs border border-gray-100 rounded-xl bg-gray-50/50 focus:ring-blue-500 focus:border-blue-500 py-4 px-6 uppercase font-bold transition-all">
-                    <option value="SNC_STANDARD">SNC_STANDARD // BASE_GENERAL</option>
-                    <option value="SNC_PH">SNC_PH // PROPIEDAD_HORIZONTAL</option>
-                    <option value="SNC_FULL">SNC_COMPLETO // TODOS_LOS_CAMPOS</option>
+                <label class="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest pl-2">01.
+                    Selección de Parámetros</label>
+                <select name="opcion"
+                    class="w-full text-xs border border-gray-100 rounded-xl bg-gray-50/50 focus:ring-gray-400 focus:border-gray-400 py-4 px-6 uppercase font-bold transition-all">
+                    <option value="" selected disabled>Seleccionar tipo de registro...</option>
+                    <option value="1">Datos Básicos de Predios (R1)</option>
+                    <option value="2">Detalles de Construcción (R2)</option>
+                    <option value="3">Procedimientos Generales (T1)</option>
+                    <option value="4">Detalles Físicos (T2)</option>
+                    <option value="5">Decretos Legales (T3)</option>
                 </select>
             </div>
 
             <!-- 2. Archivo -->
             <div class="flex-1 space-y-4">
-                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-2">02. Carga de
-                    Insumo (.txt/.prn)</label>
-                <input type="file" name="file" id="file" class="hidden" accept=".txt,.prn" required>
-                <label for="file" id="drop-zone"
-                    class="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/30 hover:bg-blue-50/30 hover:border-blue-300 transition-all cursor-pointer group">
+                <label class="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest pl-2">02.
+                    Carga de Insumo (.txt/.prn)</label>
+                <input type="file" name="archivo" id="archivo" class="hidden" accept=".txt,.prn" required>
+                <label for="archivo" id="drop-zone"
+                    class="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30 hover:bg-white hover:border-gray-900 transition-all cursor-pointer group">
                     <span
-                        class="material-symbols-outlined text-4xl text-gray-300 mb-3 group-hover:text-blue-500 transition-colors font-light">cloud_upload</span>
-                    <span class="text-[10px] font-bold text-gray-500 text-center px-6 leading-relaxed uppercase"
-                        id="file-name">
-                        Arrastra el archivo aquí o haz clic para seleccionar
+                        class="material-symbols-outlined text-4xl text-gray-300 mb-3 group-hover:text-gray-900 transition-colors font-light">upload_file</span>
+                    <span
+                        class="text-[10px] font-mono font-bold text-gray-400 text-center px-6 leading-relaxed uppercase"
+                        id="file_label">
+                        Esperando_archivo_fuente...
                     </span>
                 </label>
             </div>
@@ -56,8 +60,8 @@
             <!-- 3. Acción -->
             <div class="pt-6">
                 <button type="submit"
-                    class="w-full bg-blue-600 text-gray-900 py-5 rounded-2xl hover:bg-blue-700 transition-all font-bold text-[11px] tracking-[0.3em] flex justify-center items-center gap-4 uppercase shadow-lg shadow-blue-100 active:scale-[0.98]">
-                    <span class="material-symbols-outlined font-light">bolt</span> Procesar y Convertir a Excel
+                    class="w-full bg-gray-900 text-white py-5 rounded-2xl hover:bg-white hover:text-gray-900 border border-gray-900 transition-all font-bold text-[11px] tracking-[0.3em] flex justify-center items-center gap-4 uppercase active:scale-[0.98]">
+                    <span class="material-symbols-outlined font-light">bolt</span> Ejecutar Sincronización SNC
                 </button>
             </div>
         </form>
