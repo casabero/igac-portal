@@ -55,12 +55,12 @@ def snc_tool():
     registrar_visita('/snc')
     if request.method == 'POST':
         if 'archivo' not in request.files:
-            flash('Por favor, suba un archivo para procesar')
+            flash('ERROR_SISTEMA :: ARCHIVO_REQUERIDO_PARA_PROCESO')
             return redirect(request.url)
         file = request.files['archivo']
         opcion = request.form.get('opcion')
         if file.filename == '':
-            flash('Seleccione un archivo válido (Excel o CSV)')
+            flash('ERROR_FLUJO :: FORMATO_NO_ADMITIDO (REQUERIDO: TXT/PRN/EXCEL/CSV)')
             return redirect(request.url)
         if file and opcion:
             try:
@@ -84,16 +84,16 @@ def admin_login():
         pw = request.form.get('password')
         if user == ADMIN_USER and pw == ADMIN_PASS:
             session['admin_logged_in'] = True
-            flash('Bienvenido, Administrador.', 'success')
+            flash('SIS_ACCESO_CONCEDIDO // BIENVENIDO_ADMIN_ROOT', 'success')
             return redirect(url_for('admin_dashboard'))
         else:
-            flash('Credenciales incorrectas.', 'danger')
+            flash('SIS_ACCESO_DENEGADO // TOKEN_INVÁLIDO_BLOQUEADO', 'danger')
     return render_template('admin_login.html')
 
 @app.route('/admin/logout')
 def admin_logout():
     session.pop('admin_logged_in', None)
-    flash('Sesión cerrada.', 'info')
+    flash('SIS_SESIÓN_TERMINADA // REINICIO_CONEXIÓN', 'info')
     return redirect(url_for('index'))
 
 @app.route('/admin/dashboard')
@@ -210,7 +210,7 @@ def clear_analysis():
     session.pop('name_pre', None)
     session.pop('path_post', None)
     session.pop('name_post', None)
-    flash('Se han limpiado los datos de la sesión.')
+    flash('RES_BUFFER_DEPURADO // DATOS_SESIÓN_BORRADOS')
     return redirect(url_for('avaluos_tool'))
 
 # --- RUTA 5: AUDITORÍA DE CIERRE Y MASIVOS ---
@@ -290,7 +290,7 @@ def clear_auditoria():
             try: os.remove(path)
             except: pass
         session.pop(key, None)
-    flash('Se han limpiado los datos de la sesión de auditoría.')
+    flash('SIS_AUDITORIA_CACHE_DEPURADO // BUFFER_REINICIADO')
     return redirect(url_for('auditoria_tool'))
 
 @app.route('/renumeracion/detectar-columnas', methods=['POST'])

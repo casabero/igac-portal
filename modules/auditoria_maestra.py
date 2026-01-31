@@ -303,16 +303,16 @@ class AuditoriaPDF(FPDF):
         self.set_y(12)
         self.set_font('Helvetica', 'B', 16)
         self.set_text_color(255, 255, 255)
-        self.cell(0, 10, 'REPORTE DE AUDITORÍA DE CIERRE - IGAC', 0, 1, 'C')
+        self.cell(0, 10, 'REPORTE_AUDITORÍA_CIERRE // IGAC', 0, 1, 'C')
         self.set_font('Helvetica', '', 8); self.set_text_color(156, 163, 175)
-        self.cell(0, 5, 'PLATAFORMA DE GESTIÓN CATASTRAL AVANZADA', 0, 1, 'C')
+        self.cell(0, 5, 'SIS_GESTIÓN_CATASTRAL :: AVANZADO', 0, 1, 'C')
         self.ln(15)
 
     def footer(self):
         self.set_y(-20); self.set_draw_color(229, 231, 235)
         self.line(20, self.get_y(), 196, self.get_y()); self.ln(2)
         self.set_font('Helvetica', 'I', 7); self.set_text_color(156, 163, 175)
-        self.cell(0, 10, 'sys_author: CASABERO.COM', 0, 0, 'L')
+        self.cell(0, 10, 'sys_author :: CASABERO.COM', 0, 0, 'L')
         self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'R')
 
 def generar_pdf_auditoria(resultados):
@@ -339,7 +339,11 @@ def generar_pdf_auditoria(resultados):
     if 'variaciones_all' in resultados and resultados['variaciones_all']:
         try:
             plt.figure(figsize=(6, 3), facecolor='white')
-            plt.boxplot(resultados['variaciones_all'], vert=False, patch_artist=True, boxprops=dict(facecolor='#F3F4F6', color='#111111'), medianprops=dict(color='#e7d192'))
+            plt.boxplot(resultados['variaciones_all'], vert=False, patch_artist=True, 
+                        boxprops=dict(facecolor='#FFFFFF', color='#111111', linewidth=1), 
+                        medianprops=dict(color='#e7d192', linewidth=2),
+                        whiskerprops=dict(color='#111111', linewidth=1),
+                        capprops=dict(color='#111111', linewidth=1))
             plt.title('Distribución de % Variación', fontsize=10); plt.xlabel('% Variación', fontsize=8)
             plt.grid(axis='x', linestyle='--', alpha=0.7); plt.tight_layout()
             img_buf = io.BytesIO(); plt.savefig(img_buf, format='png', dpi=150); plt.close(); img_buf.seek(0)
