@@ -65,7 +65,7 @@
 {% endblock %}
 
 {% block help_content %}
-<div class="space-y-10 font-sans text-[11px] text-gray-900 uppercase">
+<div class="space-y-10 font-sans text-[11px] text-gray-900 dark:text-gray-200 uppercase">
     <section>
         <h4 class="border-b border-gray-200 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
             <span class="material-symbols-outlined font-light">security</span>
@@ -75,9 +75,10 @@
             el log persistente.</p>
     </section>
 
-    <section class="bg-gray-50 p-8 border border-gray-200 text-gray-900">
+    <section
+        class="bg-gray-50 dark:bg-gray-800 p-8 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white">
         <h4
-            class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
+            class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 dark:border-gray-600 pb-2">
             <span class="material-symbols-outlined text-gray-400 font-light">warning</span>
             ALERTA_CONTRASEÑA
         </h4>
