@@ -6,9 +6,9 @@
 
 {% block content %}
 <div class="max-w-5xl mx-auto py-4">
-    <div class="mb-12 border-l-4 border-accent pl-6">
+    <div class="mb-12 border-l-4 border-gray-900 pl-6">
         <h3 class="text-3xl font-display font-bold text-gray-900 uppercase tracking-tighter">
-            <span class="typewriter">TABLERO_DE_CONTROL // PORTAL_DE_PROCESOS</span>
+            <span class="typewriter">TABLERO DE CONTROL // PORTAL DE PROCESOS</span>
         </h3>
         <p class="text-gray-500 mt-2 font-mono text-xs uppercase tracking-widest">Seleccione un módulo principal para
             ejecutar operaciones.</p>
@@ -17,20 +17,17 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- App 1: Convertidor SNC -->
         <div class="premium-card p-10 relative overflow-hidden group h-full flex flex-col justify-between">
-            <div
-                class="absolute top-0 right-0 w-32 h-32 bg-accent opacity-5 -mr-16 -mt-16 transform rotate-45 group-hover:rotate-90 transition-transform duration-700">
-            </div>
             <div>
                 <div
-                    class="w-12 h-12 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center text-gray-900 mb-6 group-hover:bg-accent group-hover:text-primary transition-all font-light">
+                    class="w-12 h-12 bg-gray-50 border border-gray-100 rounded-none flex items-center justify-center text-gray-900 mb-6 group-hover:bg-gray-900 group-hover:text-white transition-all font-light">
                     <span class="material-symbols-outlined text-[28px]">data_object</span>
                 </div>
                 <div class="flex items-center gap-3 mb-4">
                     <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">
-                        MODULO_01 // CONVERTIDOR_SNC
+                        01 // CONVERTIDOR SNC
                     </h4>
                     <span
-                        class="px-2 py-0.5 text-[9px] font-mono font-bold bg-accent text-primary border border-accent">SIS_ESTABLE
+                        class="px-2 py-0.5 text-[9px] font-mono font-bold bg-functional-success text-primary border border-gray-900">ESTABLE
                         :: CORE</span>
                 </div>
                 <p class="text-xs font-mono text-gray-500 leading-relaxed mb-10 uppercase">
@@ -38,7 +35,7 @@
                 </p>
             </div>
             <a href="/snc"
-                class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
+                class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98] rounded-none">
                 Abrir Herramienta
                 <span class="material-symbols-outlined text-[16px] font-light">arrow_forward</span>
             </a>
@@ -46,17 +43,14 @@
 
         <!-- App 2: Análisis Avalúos -->
         <div class="premium-card p-10 relative overflow-hidden group h-full flex flex-col justify-between">
-            <div
-                class="absolute top-0 right-0 w-32 h-32 bg-accent opacity-5 -mr-16 -mt-16 transform rotate-45 group-hover:rotate-90 transition-transform duration-700">
-            </div>
             <div>
                 <div
-                    class="w-12 h-12 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center text-gray-900 mb-6 group-hover:bg-accent group-hover:text-primary transition-all font-light">
+                    class="w-12 h-12 bg-gray-50 border border-gray-100 rounded-none flex items-center justify-center text-gray-900 mb-6 group-hover:bg-gray-900 group-hover:text-white transition-all font-light">
                     <span class="material-symbols-outlined text-[28px]">analytics</span>
                 </div>
                 <div class="flex items-center gap-3 mb-4">
                     <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">
-                        MODULO_02 // ANALISIS_AVALUOS
+                        02 // ANALISIS AVALUOS
                     </h4>
                     <span class="px-2 py-0.5 text-[9px] font-mono font-bold border border-gray-900">VERIFICACIÓN ::
                         DELTA</span>
@@ -66,7 +60,7 @@
                 </p>
             </div>
             <a href="/avaluos"
-                class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
+                class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98] rounded-none">
                 Abrir Herramienta
                 <span class="material-symbols-outlined text-[16px] font-light">arrow_forward</span>
             </a>
@@ -74,26 +68,24 @@
 
         <!-- App 3: Auditoría de Cierre -->
         <div class="premium-card p-10 relative overflow-hidden group h-full flex flex-col justify-between">
-            <div
-                class="absolute top-0 right-0 w-32 h-32 bg-accent opacity-5 -mr-16 -mt-16 transform rotate-45 group-hover:rotate-90 transition-transform duration-700">
-            </div>
             <div>
                 <div
-                    class="w-12 h-12 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center text-gray-900 mb-6 group-hover:bg-accent group-hover:text-primary transition-all font-light">
+                    class="w-12 h-12 bg-gray-50 border border-gray-100 rounded-none flex items-center justify-center text-gray-900 mb-6 group-hover:bg-gray-900 group-hover:text-white transition-all font-light">
                     <span class="material-symbols-outlined text-[28px]">verified</span>
                 </div>
                 <div class="flex items-center gap-3 mb-4">
                     <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">
-                        MODULO_03 // AUDITORIA_CIERRE
+                        03 // AUDITORIA CIERRE
                     </h4>
-                    <span class="px-2 py-0.5 text-[9px] font-mono font-bold border border-gray-900">OBLIGATORIO</span>
+                    <span
+                        class="px-2 py-0.5 text-[9px] font-mono font-bold border border-gray-900 bg-functional-error">OBLIGATORIO</span>
                 </div>
                 <p class="text-xs font-mono text-gray-500 leading-relaxed mb-10 uppercase">
                     Generación de reportes PDF oficiales y detección de alertas en los valores de los predios.
                 </p>
             </div>
             <a href="/auditoria"
-                class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
+                class="flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98] rounded-none">
                 Abrir Herramienta
                 <span class="material-symbols-outlined text-[16px] font-light">arrow_forward</span>
             </a>
@@ -101,68 +93,62 @@
 
         <!-- App 4: Auditoría de Renumeración -->
         <div class="premium-card p-10 relative overflow-hidden group h-full flex flex-col justify-between">
-            <div
-                class="absolute top-0 right-0 w-32 h-32 bg-accent opacity-5 -mr-16 -mt-16 transform rotate-45 group-hover:rotate-90 transition-transform duration-700">
-            </div>
             <div>
                 <div
-                    class="w-12 h-12 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center text-gray-900 mb-6 group-hover:bg-accent group-hover:text-primary transition-all font-light">
+                    class="w-12 h-12 bg-gray-50 border border-gray-100 rounded-none flex items-center justify-center text-gray-900 mb-6 group-hover:bg-gray-900 group-hover:text-white transition-all font-light">
                     <span class="material-symbols-outlined text-[28px]">rule_folder</span>
                 </div>
                 <div class="flex items-center gap-3 mb-4">
                     <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">
-                        MODULO_04 // RENUMERACION_AUDITORIA
+                        04 // RENUMERACION AUDITORIA
                     </h4>
                     <span
-                        class="px-2 py-0.5 text-[9px] font-mono font-bold border border-gray-100 rounded bg-gray-50/50">VALIDACIÓN</span>
+                        class="px-2 py-0.5 text-[9px] font-mono font-bold border border-gray-900 bg-gray-50">VALIDACIÓN</span>
                 </div>
                 <p class="text-xs font-mono text-gray-500 leading-relaxed mb-10 uppercase">
                     Verificación de nuevos números prediales y permanencia de la información histórica.
                 </p>
             </div>
             <a href="/renumeracion"
-                class="w-full bg-gray-900 text-white font-mono font-bold py-4 px-6 rounded-lg transition-all flex items-center justify-center gap-3 hover:bg-accent hover:text-primary active:scale-[0.98] uppercase tracking-widest text-[10px] shadow-sm hover:shadow-lg">
-                <span class="material-symbols-outlined text-[18px]">launch</span>
+                class="w-full bg-gray-900 text-white font-mono font-bold py-4 px-6 rounded-none transition-all flex items-center justify-center gap-3 hover:bg-white hover:text-gray-900 border border-gray-900 active:scale-[0.98] uppercase tracking-widest text-[10px]">
+                <span class="material-symbols-outlined text-[18px] font-light">launch</span>
                 Abrir Herramienta
             </a>
         </div>
 
         <!-- App 5: Renumeración Predios Informales -->
         <div class="premium-card p-10 relative overflow-hidden group h-full flex flex-col justify-between">
-            <div
-                class="absolute top-0 right-0 w-32 h-32 bg-accent opacity-5 -mr-16 -mt-16 transform rotate-45 group-hover:rotate-90 transition-transform duration-700">
-            </div>
             <div>
                 <div
-                    class="w-12 h-12 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center text-gray-900 mb-6 group-hover:bg-accent group-hover:text-primary transition-all font-light">
+                    class="w-12 h-12 bg-gray-50 border border-gray-100 rounded-none flex items-center justify-center text-gray-900 mb-6 group-hover:bg-gray-900 group-hover:text-white transition-all font-light">
                     <span class="material-symbols-outlined text-[28px]">location_searching</span>
                 </div>
                 <div class="flex items-center gap-3 mb-4">
                     <h4 class="text-lg font-display font-bold text-gray-900 uppercase tracking-tight">
-                        MODULO_05 // PREDIOS_INFORMALES
+                        05 // PREDIOS INFORMALES
                     </h4>
                     <span
-                        class="px-2 py-0.5 text-[9px] font-mono font-bold bg-accent text-primary border border-accent rounded">MAPAS</span>
+                        class="px-2 py-0.5 text-[9px] font-mono font-bold bg-functional-warning text-primary border border-gray-900 rounded-none">MAPAS</span>
                 </div>
                 <p class="text-xs font-mono text-gray-500 leading-relaxed mb-10 uppercase">
                     Asignación automática de números prediales usando capas geográficas y cruce de áreas.
                 </p>
             </div>
             <a href="/renumeracion-informales"
-                class="w-full bg-gray-900 text-white font-mono font-bold py-4 px-6 rounded-lg transition-all flex items-center justify-center gap-3 hover:bg-accent hover:text-primary active:scale-[0.98] uppercase tracking-widest text-[10px] shadow-sm hover:shadow-lg">
-                <span class="material-symbols-outlined text-[18px]">launch</span>
+                class="w-full bg-gray-900 text-white font-mono font-bold py-4 px-6 rounded-none transition-all flex items-center justify-center gap-3 hover:bg-white hover:text-gray-900 border border-gray-900 active:scale-[0.98] uppercase tracking-widest text-[10px]">
+                <span class="material-symbols-outlined text-[18px] font-light">launch</span>
                 Abrir Herramienta
             </a>
         </div>
 
         <!-- App 7: Proximamente -->
         <div
-            class="bg-white/30 p-8 border border-dashed border-gray-100 rounded-xl flex flex-col items-center justify-center text-center">
+            class="bg-white/30 p-8 border border-dashed border-gray-100 rounded-none flex flex-col items-center justify-center text-center">
             <div
-                class="w-12 h-12 border border-dashed border-gray-200 rounded-lg flex items-center justify-center text-gray-300 mb-6 font-light">
+                class="w-12 h-12 border border-dashed border-gray-200 rounded-none flex items-center justify-center text-gray-300 mb-6 font-light">
                 <span class="material-symbols-outlined text-[28px]">add</span>
             </div>
-            <h4 class="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest">PROXIMO_MODULO</h4>
+            <h4 class="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest">PROXIMO MODULO</h4>
         </div>
         <p class="text-[10px] font-mono text-gray-400 mt-2 uppercase">Nuevas herramientas en desarrollo.</p>
     </div>
@@ -179,8 +165,8 @@
             Sobre el Portal
         </h4>
         <p class="text-xs font-mono uppercase leading-relaxed text-gray-900">
-            System engineered by <b class="bg-accent text-primary px-1">CASABERO.COM</b> for high-precision cadastral
-            data processing.
+            Sistema desarrollado por <b class="bg-gray-900 text-white px-1">CASABERO</b> de alta precisión para el
+            procesamiento de datos catastrales.
         </p>
     </section>
 

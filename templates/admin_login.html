@@ -7,16 +7,16 @@
 {% block content %}
 <div class="max-w-md mx-auto py-12">
     <div class="premium-card p-10 mt-4 relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-accent opacity-5 -mr-16 -mt-16 transform rotate-45"></div>
         <div class="text-center mb-10 border-b border-gray-100 pb-6">
             <div
-                class="w-16 h-16 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group:hover:bg-accent transition-all">
+                class="w-16 h-16 bg-gray-50 border border-gray-100 rounded-none flex items-center justify-center mx-auto mb-4 transition-all">
                 <span class="material-symbols-outlined text-[40px] font-light">admin_panel_settings</span>
             </div>
-            <h3 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">PANEL_CONTROL // ACCESO
+            <h3 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">PANEL DE CONTROL //
+                ACCESO
             </h3>
-            <p class="text-[10px] font-mono text-gray-500 mt-2 uppercase tracking-widest">AUTENTICACIÓN ::
-                CREDENCIALES_ROOT</p>
+            <p class="text-[10px] font-mono text-gray-500 mt-2 uppercase tracking-widest">AUTENTICACIÓN // CREDENCIALES
+                ROOT</p>
         </div>
 
         <form method="POST" class="space-y-8 uppercase font-mono">
@@ -45,8 +45,8 @@
             </div>
 
             <button type="submit"
-                class="w-full py-5 bg-gray-900 text-white rounded-lg font-bold text-xs tracking-[0.3em] hover:bg-accent hover:text-primary transition-all active:scale-[0.98] flex items-center justify-center gap-3 shadow-lg shadow-gray-200">
-                AUTENTICAR_SESIÓN
+                class="w-full py-5 bg-gray-900 text-white rounded-none font-bold text-xs tracking-[0.3em] hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98] flex items-center justify-center gap-3">
+                AUTENTICAR SESIÓN
                 <span class="material-symbols-outlined text-[20px] font-light">login</span>
             </button>
         </form>
@@ -56,7 +56,7 @@
         <a href="/"
             class="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors flex items-center justify-center gap-3 tracking-widest">
             <span class="material-symbols-outlined text-[18px] font-light">arrow_back</span>
-            VOLVER_AL_PORTAL_RAÍZ
+            VOLVER AL PORTAL RAIZ
         </a>
     </div>
 </div>

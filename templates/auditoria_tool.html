@@ -44,7 +44,7 @@
                             class="block text-[10px] font-mono font-bold text-gray-900 mb-3 uppercase tracking-tight">Datos
                             Propietarios (Excel)</label>
                         <input type="file" name="file_prop" accept=".xlsx"
-                            class="block w-full text-[10px] font-mono text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-100 file:rounded-lg file:text-[10px] file:font-bold file:bg-gray-50 file:text-gray-900 hover:file:bg-accent hover:file:text-primary transition-all cursor-pointer"
+                            class="block w-full text-[10px] font-mono text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-100 file:rounded-none file:text-[10px] file:font-bold file:bg-gray-50 file:text-gray-900 hover:file:bg-gray-900 hover:file:text-white transition-all cursor-pointer"
                             required>
                     </div>
                     <div>
@@ -52,7 +52,7 @@
                             class="block text-[10px] font-mono font-bold text-gray-900 mb-3 uppercase tracking-tight">Listado
                             Auditoría (Excel)</label>
                         <input type="file" name="file_calc" accept=".xlsx"
-                            class="block w-full text-[10px] font-mono text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-100 file:rounded-lg file:text-[10px] file:font-bold file:bg-gray-50 file:text-gray-900 hover:file:bg-accent hover:file:text-primary transition-all cursor-pointer"
+                            class="block w-full text-[10px] font-mono text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-100 file:rounded-none file:text-[10px] file:font-bold file:bg-gray-50 file:text-gray-900 hover:file:bg-gray-900 hover:file:text-white transition-all cursor-pointer"
                             required>
                     </div>
                 </div>
@@ -64,7 +64,7 @@
                             (%)</label>
                         <input type="number" step="0.01" name="incremento"
                             value="{{ resultados.pct_incremento|default(3) }}"
-                            class="w-full bg-gray-50/50 border border-gray-100 rounded-lg text-xs font-mono px-4 py-3 focus:ring-accent focus:border-accent shadow-sm"
+                            class="w-full bg-gray-50/50 border border-gray-100 rounded-none text-xs font-mono px-4 py-3 focus:ring-gray-900 focus:border-gray-900"
                             required>
                     </div>
 
@@ -72,7 +72,7 @@
                         <label
                             class="block text-[10px] font-mono font-bold text-gray-500 uppercase mb-3">UMBRAL_ZONA</label>
                         <select name="zona"
-                            class="w-full bg-gray-50/50 border border-gray-100 rounded-lg text-xs font-mono px-4 py-3 focus:ring-accent focus:border-accent uppercase shadow-sm">
+                            class="w-full bg-gray-50/50 border border-gray-100 rounded-none text-xs font-mono px-4 py-3 focus:ring-gray-900 focus:border-gray-900 uppercase">
                             <option value="General" {% if resultados.zona_filtro=='General' %}selected{% endif %}>
                                 POOL_GENERAL</option>
                             <option value="Urbana" {% if resultados.zona_filtro=='Urbana' %}selected{% endif %}>
@@ -87,7 +87,7 @@
                     </div>
 
                     <button type="submit"
-                        class="w-full bg-gray-900 text-white font-mono font-bold py-4 px-4 rounded-lg transition-all flex items-center justify-center gap-3 hover:bg-accent hover:text-primary active:scale-[0.98] uppercase tracking-widest text-xs shadow-lg shadow-gray-200">
+                        class="w-full bg-gray-900 text-white font-mono font-bold py-4 px-4 rounded-none transition-all flex items-center justify-center gap-3 hover:bg-white hover:text-gray-900 border border-gray-900 active:scale-[0.98] uppercase tracking-widest text-xs">
                         <span class="material-symbols-outlined text-[20px] font-light">verified_user</span>
                         Ejecutar Auditoría
                     </button>
@@ -96,17 +96,17 @@
         </div>
 
         {% if resultados %}
-        <div class="bg-gray-900 p-8 rounded-xl border border-gray-900 text-white shadow-xl">
+        <div class="bg-gray-900 p-8 rounded-none border border-gray-900 text-white">
             <h2
                 class="text-[10px] font-mono font-bold mb-5 text-gray-400 uppercase tracking-widest border-b border-gray-700 pb-2">
-                EXPORTACIÓN_DATOS</h2>
+                Exportación de Datos</h2>
             <a href="/auditoria/pdf" target="_blank"
-                class="w-full flex items-center justify-center gap-3 px-4 py-4 bg-white hover:bg-accent hover:text-primary rounded-lg text-[10px] font-mono font-bold text-gray-900 transition-all uppercase tracking-widest shadow-lg">
+                class="w-full flex items-center justify-center gap-3 px-4 py-4 bg-white hover:bg-gray-100 rounded-none text-[10px] font-mono font-bold text-gray-900 transition-all uppercase tracking-widest">
                 <span class="material-symbols-outlined text-[20px] text-red-600 font-light">picture_as_pdf</span>
-                OBTENER_REPORTE_OFICIAL
+                Obtener Reporte Oficial
             </a>
-            <p class="text-[9px] font-mono text-gray-500 mt-4 text-center uppercase tracking-tighter">estatus_sis:
-                pdf_encriptado_listo // autorizado: CASABERO_ARCH_V1</p>
+            <p class="text-[9px] font-mono text-gray-500 mt-4 text-center uppercase tracking-tighter">estatus: listo //
+                id: CASABERO_ARCH_V1</p>
         </div>
         {% endif %}
     </div>
@@ -120,21 +120,21 @@
             <p class="text-[10px] font-mono font-bold uppercase tracking-[0.3em]">esperando_flujo_datos...</p>
         </div>
         {% else %}
-        <div class="flex items-center justify-between border-l-4 border-accent pl-6 mb-4">
+        <div class="flex items-center justify-between border-l-4 border-gray-900 pl-6 mb-4">
             <h2
                 class="text-2xl font-display font-bold text-gray-900 flex items-center gap-4 uppercase tracking-tighter">
                 <span class="material-symbols-outlined text-gray-900 font-light">location_city</span>
-                LOC_DATA: {{ resultados.municipio }}
+                Datos: {{ resultados.municipio }}
             </h2>
             <div class="flex items-center gap-6">
                 <a href="/clear_auditoria"
-                    class="bg-white border border-gray-100 rounded-lg text-gray-900 px-6 py-2 text-[10px] font-mono font-bold hover:bg-gray-50 shadow-sm transition-all flex items-center gap-3 uppercase tracking-widest">
+                    class="bg-white border border-gray-100 rounded-none text-gray-900 px-6 py-2 text-[10px] font-mono font-bold hover:bg-gray-50 transition-all flex items-center gap-3 uppercase tracking-widest">
                     <span class="material-symbols-outlined text-[18px] font-light">refresh</span>
                     Reiniciar Auditoría
                 </a>
                 <div class="flex items-center gap-3">
-                    <span class="w-2 h-2 bg-accent rounded-full animate-pulse"></span>
-                    <span class="text-[10px] font-mono font-bold text-gray-900 uppercase tracking-widest">SIS_CORE ::
+                    <span class="w-2 h-2 bg-gray-900 rounded-full animate-pulse"></span>
+                    <span class="text-[10px] font-mono font-bold text-gray-900 uppercase tracking-widest">SISTEMA ::
                         ACTIVO</span>
                 </div>
             </div>
@@ -147,10 +147,10 @@
                     REGISTROS_AUDITADOS</p>
                 <p class="text-3xl font-display font-bold text-gray-900 uppercase">{{ resultados.total_predios }}</p>
             </div>
-            <div class="premium-card p-8 border-l-4 border-l-accent">
-                <p class="text-[9px] font-mono text-accent uppercase font-bold mb-2 tracking-widest">
+            <div class="premium-card p-8 border-l-4 border-l-gray-900">
+                <p class="text-[9px] font-mono text-gray-900 uppercase font-bold mb-2 tracking-widest">
                     CRIT_AVALÚO_NULO</p>
-                <p class="text-3xl font-display font-bold text-accent uppercase">{{
+                <p class="text-3xl font-display font-bold text-gray-900 uppercase">{{
                     resultados.totales.conteo_zero_critico }}</p>
             </div>
             <div class="premium-card p-8">
@@ -158,7 +158,7 @@
                 <p class="text-3xl font-display font-bold text-gray-900 uppercase tracking-tighter">{{
                     resultados.totales.conteo_zero_ph }}</p>
             </div>
-            <div class="bg-gray-900 p-8 rounded-xl border border-gray-900 text-white shadow-lg">
+            <div class="bg-gray-900 p-8 rounded-none border border-gray-900 text-white">
                 <p class="text-[9px] font-mono text-gray-500 uppercase font-bold mb-2 tracking-widest">Alertas Totales
                 </p>
                 <p class="text-3xl font-display font-bold text-white uppercase">{{ resultados.total_predios -
@@ -170,13 +170,13 @@
         <div class="premium-card overflow-hidden flex flex-col">
             <div class="p-8 border-b border-gray-100 flex flex-wrap justify-between items-center gap-6 bg-gray-50/30">
                 <h3
-                    class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-accent pl-4">
-                    LIBRO_TÉCNICO_AUDITORÍA</h3>
+                    class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-gray-900 pl-4">
+                    Auditoría de Registros</h3>
                 <div class="relative w-full sm:w-96">
                     <span
                         class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[18px] text-gray-400 font-light">terminal</span>
-                    <input type="text" id="tableSearch" placeholder="BUSCAR_POR_ID_O_ESTADO..."
-                        class="w-full pl-12 pr-4 py-3 bg-white border border-gray-100 rounded-lg text-xs font-mono uppercase focus:ring-accent focus:border-accent outline-none transition-all placeholder:text-gray-300 shadow-sm">
+                    <input type="text" id="tableSearch" placeholder="BUSCAR POR ID O ESTADO..."
+                        class="w-full pl-12 pr-4 py-3 bg-white border border-gray-100 rounded-none text-xs font-mono uppercase focus:ring-gray-900 focus:border-gray-900 outline-none transition-all placeholder:text-gray-300">
                 </div>
             </div>
 
@@ -196,12 +196,12 @@
 
             <div
                 class="px-8 py-6 border-t border-gray-100 flex items-center justify-between text-[10px] font-mono font-bold text-gray-400 bg-gray-50/10">
-                <div id="paginationInfo">CASCADA_DATOS ...</div>
+                <div id="paginationInfo">CONTEO DE DATOS ...</div>
                 <div class="flex gap-4">
                     <button id="prevPage"
-                        class="px-6 py-3 bg-white border border-gray-100 rounded-lg text-gray-900 font-bold hover:bg-gray-50 disabled:opacity-30 transition-all uppercase tracking-widest shadow-sm">cuadro_ant</button>
+                        class="px-6 py-3 bg-white border border-gray-100 rounded-none text-gray-900 font-bold hover:bg-gray-50 disabled:opacity-30 transition-all uppercase tracking-widest">Anterior</button>
                     <button id="nextPage"
-                        class="px-6 py-3 bg-white border border-gray-100 rounded-lg text-gray-900 font-bold hover:bg-gray-50 disabled:opacity-30 transition-all uppercase tracking-widest shadow-sm">cuadro_sig</button>
+                        class="px-6 py-3 bg-white border border-gray-100 rounded-none text-gray-900 font-bold hover:bg-gray-50 disabled:opacity-30 transition-all uppercase tracking-widest">Siguiente</button>
                 </div>
             </div>
         </div>
@@ -228,19 +228,20 @@
         </h4>
         <div class="space-y-6">
             <div class="flex gap-4">
-                <span class="px-3 py-1 bg-red-50 text-red-600 border border-red-100 rounded font-bold h-fit">Alerta
+                <span
+                    class="px-3 py-1 bg-functional-error text-gray-900 border border-gray-900 rounded-none font-bold h-fit">Alerta
                     Máxima</span>
                 <p class="text-[10px] text-gray-500">Se detectó un predio activo pero con avalúo de $0 o campos vacíos.
                     Requiere revisión urgente.</p>
             </div>
             <div class="flex gap-4">
-                <span class="px-3 py-1 bg-gray-900 text-white rounded font-bold h-fit">Nota de PH</span>
+                <span class="px-3 py-1 bg-gray-900 text-white rounded-none font-bold h-fit">Nota de PH</span>
                 <p class="text-[10px] text-gray-500">Predio identificado como parte de una Propiedad Horizontal.</p>
             </div>
         </div>
     </section>
 
-    <section class="bg-gray-900 p-8 border border-gray-900 rounded-xl text-white shadow-lg">
+    <section class="bg-gray-900 p-8 border border-gray-900 rounded-none text-white shadow-none">
         <h4
             class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
             <span class="material-symbols-outlined text-gray-400 font-light">verified</span>
@@ -282,11 +283,11 @@
                 <td class="px-8 py-5 text-right font-bold text-gray-900 font-mono">$${(item.Valor_Cierre_Listado || 0).toLocaleString('es-CO')}</td>
                 <td class="px-8 py-5 text-right text-gray-900 font-bold font-mono">$${(item.Cierre_Calculado || 0).toLocaleString('es-CO')}</td>
                 <td class="px-8 py-5">
-                    <span class="px-3 py-1 border rounded text-[9px] font-bold tracking-widest
-                        ${item.Estado === 'OK' ? 'border-gray-100 text-gray-500 bg-gray-50' : 'border-red-100 text-red-600 bg-red-50'}">
+                    <span class="px-3 py-1 border rounded-none text-[9px] font-bold tracking-widest
+                        ${item.Estado === 'OK' ? 'border-gray-100 text-gray-500 bg-gray-50' : 'border-gray-900 text-gray-900 bg-functional-error'}">
                         ${item.Estado}
                     </span>
-                    <div class="text-[9px] text-gray-400 mt-2 font-mono">${(item.Pct_Variacion || 0).toFixed(2)}%_VAR</div>
+                    <div class="text-[9px] text-gray-400 mt-2 font-mono">${(item.Pct_Variacion || 0).toFixed(2)}% VAR</div>
                 </td>
             </tr>
         `).join('');

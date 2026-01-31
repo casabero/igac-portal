@@ -8,22 +8,22 @@
 <div class="space-y-8">
     <!-- Header Actions -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div class="border-l-4 border-accent pl-6">
-            <h2 class="text-3xl font-display font-bold text-gray-900 uppercase tracking-tighter">MODULO_SISTEMA //
-                ANALISIS_DASHBOARD</h2>
-            <p class="text-[10px] font-mono text-gray-500 mt-2 uppercase tracking-widest">MONITOREO ::
-                TRÁFICO_NÚCLEO_DATOS</p>
+        <div class="border-l-4 border-gray-900 pl-6">
+            <h2 class="text-3xl font-display font-bold text-gray-900 uppercase tracking-tighter">04 // DASHBOARD CENTRAL
+            </h2>
+            <p class="text-[10px] font-mono text-gray-500 mt-2 uppercase tracking-widest">MONITOREO // TRÁFICO DEL
+                SISTEMA</p>
         </div>
         <div class="flex gap-4 uppercase font-mono">
             <a href="/admin/export-csv?inicio={{ fecha_inicio }}&fin={{ fecha_fin }}"
-                class="flex items-center gap-3 px-6 py-3 bg-white border border-gray-100 rounded-lg text-gray-900 font-bold text-[10px] hover:bg-gray-50 hover:shadow-sm transition-all tracking-widest">
+                class="flex items-center gap-3 px-6 py-3 bg-white border border-gray-100 rounded-none text-gray-900 font-bold text-[10px] hover:bg-gray-50 transition-all tracking-widest">
                 <span class="material-symbols-outlined text-[18px] font-light">download</span>
-                EXPORT_CSV_RAW
+                EXPORTAR CSV
             </a>
             <a href="/admin/logout"
-                class="flex items-center gap-3 px-6 py-3 bg-red-50 text-red-600 rounded-lg font-bold text-[10px] hover:bg-red-100 transition-all tracking-widest">
+                class="flex items-center gap-3 px-6 py-3 bg-functional-error text-gray-900 rounded-none font-bold text-[10px] hover:bg-white hover:border-gray-900 border border-transparent transition-all tracking-widest">
                 <span class="material-symbols-outlined text-[18px] font-light">logout</span>
-                LOGOUT_SECURE
+                CERRAR SESIÓN
             </a>
         </div>
     </div>
@@ -35,16 +35,16 @@
             <div class="flex items-center gap-3">
                 <label class="text-gray-400">DESDE:</label>
                 <input type="date" name="inicio" value="{{ fecha_inicio }}"
-                    class="border-b border-gray-200 focus:border-accent outline-none bg-transparent py-1 font-bold text-gray-900">
+                    class="border-b border-gray-200 focus:border-gray-900 outline-none bg-transparent py-1 font-bold text-gray-900">
             </div>
             <div class="flex items-center gap-3">
                 <label class="text-gray-400">HASTA:</label>
                 <input type="date" name="fin" value="{{ fecha_fin }}"
-                    class="border-b border-gray-200 focus:border-accent outline-none bg-transparent py-1 font-bold text-gray-900">
+                    class="border-b border-gray-200 focus:border-gray-900 outline-none bg-transparent py-1 font-bold text-gray-900">
             </div>
             <button type="submit"
-                class="bg-gray-900 text-white px-8 py-2 rounded-lg hover:bg-accent hover:text-primary transition-all tracking-[0.2em] shadow-lg shadow-gray-200">
-                FILTRAR_DATOS
+                class="bg-gray-900 text-white px-8 py-2 rounded-none hover:bg-white hover:text-gray-900 border border-gray-900 transition-all tracking-[0.2em]">
+                FILTRAR DATOS
             </button>
         </form>
     </div>
@@ -52,7 +52,8 @@
     <!-- Top Stats -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="premium-card p-6 flex items-center gap-4">
-            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+            <div
+                class="w-12 h-12 bg-gray-50 text-gray-900 border border-gray-100 rounded-none flex items-center justify-center">
                 <span class="material-symbols-outlined text-[28px] font-light">ads_click</span>
             </div>
             <div>
@@ -62,7 +63,8 @@
         </div>
 
         <div class="premium-card p-6 flex items-center gap-4">
-            <div class="w-12 h-12 bg-green-50 text-green-600 rounded-lg flex items-center justify-center shadow-sm">
+            <div
+                class="w-12 h-12 bg-gray-50 text-gray-900 border border-gray-100 rounded-none flex items-center justify-center">
                 <span class="material-symbols-outlined text-[28px] font-light">group</span>
             </div>
             <div>
@@ -72,7 +74,8 @@
         </div>
 
         <div class="premium-card p-6 flex items-center gap-4">
-            <div class="w-12 h-12 bg-accent/10 text-accent rounded-lg flex items-center justify-center shadow-sm">
+            <div
+                class="w-12 h-12 bg-gray-900 text-white border border-gray-900 rounded-none flex items-center justify-center">
                 <span class="material-symbols-outlined text-[28px] font-light">query_stats</span>
             </div>
             <div>
@@ -87,7 +90,7 @@
         <div class="premium-card p-8">
             <div class="flex items-center justify-between mb-8">
                 <h4
-                    class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-accent pl-4">
+                    class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-gray-900 pl-4">
                     Uso por Módulos</h4>
                 <span class="material-symbols-outlined text-gray-300 font-light">pie_chart</span>
             </div>
@@ -100,7 +103,7 @@
         <div class="premium-card p-8">
             <div class="flex items-center justify-between mb-8">
                 <h4
-                    class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-accent pl-4">
+                    class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-gray-900 pl-4">
                     Actividad Reciente</h4>
                 <span class="material-symbols-outlined text-gray-300 font-light">history</span>
             </div>
@@ -108,7 +111,7 @@
                 {% for log in logs %}
                 <div class="flex items-start gap-4 pb-4 border-b border-gray-50 last:border-0 uppercase font-mono">
                     <div
-                        class="mt-1 w-2 h-2 rounded-full {% if log.modulo == 'SNC' %}bg-blue-400{% elif log.modulo == 'AVALUOS' %}bg-green-400{% else %}bg-accent{% endif %}">
+                        class="mt-1 w-2 h-2 rounded-none {% if log.modulo == 'SNC' %}bg-gray-400{% elif log.modulo == 'AVALUOS' %}bg-gray-900{% else %}bg-gray-200{% endif %}">
                     </div>
                     <div class="flex-1">
                         <div class="flex justify-between items-center mb-1">
@@ -126,8 +129,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div id="dashboardData" data-chart='{{ chart_data | tojson | safe }}' class="hidden"></div>
 <script>
-    const chartData = {{ chart_data | tojson }};
+    const dataElem = document.getElementById('dashboardData');
+    const chartData = JSON.parse(dataElem.dataset.chart);
     const ctx = document.getElementById('moduloChart').getContext('2d');
 
     if (chartData && Object.keys(chartData).length > 0) {
@@ -137,9 +142,9 @@
                 labels: Object.keys(chartData),
                 datasets: [{
                     data: Object.values(chartData),
-                    backgroundColor: ['#111111', '#e7d192', '#333333', '#E5E5E5', '#666666'],
+                    backgroundColor: ['#111111', '#333333', '#666666', '#999999', '#E5E5E5'],
                     borderWidth: 0,
-                    hoverOffset: 20
+                    hoverOffset: 10
                 }]
             },
             options: {
@@ -178,7 +183,7 @@
             granular del tráfico incluso tras multiplexación de IP pública.</p>
     </section>
 
-    <section class="bg-gray-900 p-8 border border-gray-900 rounded-xl text-white">
+    <section class="bg-gray-900 p-8 border border-gray-900 rounded-none text-white">
         <h4
             class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
             <span class="material-symbols-outlined text-gray-400 font-light">dns</span>

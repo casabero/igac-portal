@@ -7,11 +7,10 @@
 {% block content %}
 <div class="max-w-3xl mx-auto py-4">
     <div class="premium-card p-10 mt-4 relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-48 h-48 bg-accent opacity-5 -mr-24 -mt-24 transform rotate-45"></div>
-        <div class="mb-10 border-l-4 border-accent pl-6">
-            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">MODULO_01 //
-                CONVERTIDOR_SNC</h2>
-            <p class="text-xs font-mono text-gray-500 mt-2 uppercase tracking-widest">EJECUCIÓN :: FLUJO_EXCEL_PARSING
+        <div class="mb-10 border-l-4 border-gray-900 pl-6">
+            <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">01 // CONVERTIDOR SNC
+            </h2>
+            <p class="text-xs font-mono text-gray-500 mt-2 uppercase tracking-widest">EJECUCIÓN // FLUJO EXCEL PARSING
             </p>
         </div>
 
@@ -21,7 +20,7 @@
                 <label class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">01.
                     Seleccione el tipo de registro</label>
                 <select name="opcion"
-                    class="block w-full border-gray-100 rounded-lg text-xs font-mono focus:ring-accent focus:border-accent bg-gray-50/50 py-3 px-4 uppercase shadow-sm"
+                    class="block w-full border-gray-100 rounded-none text-xs font-mono focus:ring-gray-900 focus:border-gray-900 bg-gray-50/50 py-3 px-4 uppercase"
                     required>
                     <option value="" selected disabled>Seleccionar...</option>
                     <option value="1">Datos Básicos de Predios (R1)</option>
@@ -40,7 +39,7 @@
                 <div class="relative group">
                     <input type="file" name="archivo" id="archivo" class="hidden" required>
                     <label for="archivo"
-                        class="flex flex-col items-center justify-center w-full h-48 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 hover:bg-white hover:border-accent transition-all cursor-pointer shadow-sm">
+                        class="flex flex-col items-center justify-center w-full h-48 border border-dashed border-gray-200 rounded-none bg-gray-50/30 hover:bg-white hover:border-gray-900 transition-all cursor-pointer">
                         <span
                             class="material-symbols-outlined text-4xl text-gray-300 mb-3 group-hover:text-gray-900 transition-colors font-light">terminal</span>
                         <span class="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest"
@@ -54,7 +53,7 @@
             <!-- 3. Acción -->
             <div class="pt-6">
                 <button type="submit"
-                    class="w-full flex justify-center items-center gap-3 py-5 bg-gray-900 text-white rounded-lg font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-accent hover:text-primary transition-all active:scale-[0.98] shadow-lg shadow-gray-200">
+                    class="w-full flex justify-center items-center gap-3 py-5 bg-gray-900 text-white rounded-none font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
                     <span class="material-symbols-outlined text-[20px] font-light">download</span>
                     Convertir y Descargar Excel
                 </button>
@@ -96,24 +95,24 @@
             02_VERSIONES_SOPORTADAS
         </h4>
         <div class="grid grid-cols-1 gap-4">
-            <div class="border border-gray-100 rounded-lg p-4 font-mono shadow-sm">
+            <div class="border border-gray-100 rounded-none p-4 font-mono">
                 <p class="font-bold mb-1 underline">Datos Básicos (R1)</p>
                 <p class="text-gray-500">Contiene información de los propietarios, direcciones y valores de avalúo. Es
                     el archivo más importante.</p>
             </div>
-            <div class="border border-gray-100 rounded-lg p-4 font-mono shadow-sm">
+            <div class="border border-gray-100 rounded-none p-4 font-mono">
                 <p class="font-bold mb-1 underline">Morfología y Construcción (R2)</p>
                 <p class="text-gray-500">Detalles sobre las áreas de los predios, tipos de construcción, número de pisos
                     y servicios.</p>
             </div>
-            <div class="border border-gray-100 rounded-lg p-4 font-mono shadow-sm">
+            <div class="border border-gray-100 rounded-none p-4 font-mono">
                 <p class="font-bold mb-1 underline">Registros de Procesos (T1, T2, T3)</p>
                 <p class="text-gray-500">Archivos que registran los cambios y trámites realizados sobre los predios.</p>
             </div>
         </div>
     </section>
 
-    <section class="bg-gray-900 p-8 border border-gray-900 rounded-xl text-white shadow-lg">
+    <section class="bg-gray-900 p-8 border border-gray-900 rounded-none text-white shadow-none">
         <h4
             class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
             <span class="material-symbols-outlined text-gray-400 font-light">tips_and_updates</span>
@@ -146,7 +145,7 @@
     if (fileInput) {
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
-                fileLabel.innerHTML = '<b class="text-accent">✓ ' + e.target.files[0].name.toUpperCase() + '</b>';
+                fileLabel.innerHTML = '<b class="text-gray-900">✓ ' + e.target.files[0].name.toUpperCase() + '</b>';
             }
         });
 
@@ -154,13 +153,13 @@
         const dropzone = fileInput.parentElement;
         ['dragenter', 'dragover'].forEach(eventName => {
             dropzone.addEventListener(eventName, () => {
-                dropzone.classList.add('border-accent', 'bg-accent/5');
+                dropzone.classList.add('border-gray-900', 'bg-gray-100');
             }, false);
         });
 
         ['dragleave', 'drop'].forEach(eventName => {
             dropzone.addEventListener(eventName, () => {
-                dropzone.classList.remove('border-accent', 'bg-accent/5');
+                dropzone.classList.remove('border-gray-900', 'bg-gray-100');
             }, false);
         });
     }
