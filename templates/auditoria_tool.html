@@ -250,9 +250,10 @@
 {% endblock %}
 
 {% block help_content %}
-<div class="space-y-10 font-sans text-[11px] text-gray-900 uppercase">
+<div class="space-y-10 font-sans text-[11px] text-gray-900 dark:text-white uppercase">
     <section>
-        <h4 class="border-b border-gray-100 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
             <span class="material-symbols-outlined font-light">checklist</span>
             01_PROTOCOLO_AUDITORIA
         </h4>
@@ -261,33 +262,39 @@
     </section>
 
     <section>
-        <h4 class="border-b border-gray-100 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
             <span class="material-symbols-outlined font-light">notifications_active</span>
             02_GLOSARIO_ALERTAS
         </h4>
         <div class="space-y-6">
             <div class="flex gap-4">
                 <span
-                    class="px-3 py-1 bg-functional-error text-gray-900 border border-gray-200 rounded-2xl font-bold h-fit">Alerta
+                    class="px-3 py-1 bg-functional-error text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-2xl font-bold h-fit">Alerta
                     Máxima</span>
-                <p class="text-[10px] text-gray-500">Se detectó un predio activo pero con avalúo de $0 o campos vacíos.
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">Se detectó un predio activo pero con avalúo de
+                    $0 o campos vacíos.
                     Requiere revisión urgente.</p>
             </div>
             <div class="flex gap-4">
-                <span class="px-3 py-1 bg-gray-50 text-gray-900 border border-gray-100 rounded-2xl font-bold h-fit">Nota
+                <span
+                    class="px-3 py-1 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-600 rounded-2xl font-bold h-fit">Nota
                     de PH</span>
-                <p class="text-[10px] text-gray-500">Predio identificado como parte de una Propiedad Horizontal.</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">Predio identificado como parte de una Propiedad
+                    Horizontal.</p>
             </div>
         </div>
     </section>
 
-    <section class="bg-gray-50 p-8 border border-gray-200 rounded-2xl text-gray-900 shadow-none">
+    <section
+        class="bg-gray-50 dark:bg-gray-800 p-8 border border-gray-200 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white shadow-none">
         <h4
-            class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
+            class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 dark:border-gray-600 pb-2">
             <span class="material-symbols-outlined text-gray-400 font-light">verified</span>
             REPORTES_OFICIALES
         </h4>
-        <p class="text-[10px] text-gray-400 italic">Al finalizar, puede descargar un PDF oficial que sirve como soporte
+        <p class="text-[10px] text-gray-400 dark:text-gray-500 italic">Al finalizar, puede descargar un PDF oficial que
+            sirve como soporte
             técnico de la auditoría realizada.</p>
     </section>
 </div>

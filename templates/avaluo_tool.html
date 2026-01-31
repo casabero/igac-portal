@@ -294,9 +294,10 @@
 {% endblock %}
 
 {% block help_content %}
-<div class="space-y-10 font-sans text-[11px] text-gray-900 uppercase">
+<div class="space-y-10 font-sans text-[11px] text-gray-900 dark:text-white uppercase">
     <section>
-        <h4 class="border-b border-gray-100 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
             <span class="material-symbols-outlined font-light">analytics</span>
             01_PROTOCOLO_ANALISIS
         </h4>
@@ -305,45 +306,52 @@
     </section>
 
     <section>
-        <h4 class="border-b border-gray-100 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
             <span class="material-symbols-outlined font-light">rule</span>
             02_GLOSARIO_ESTADOS
         </h4>
         <div class="space-y-6">
             <div class="flex gap-4">
                 <span
-                    class="px-3 py-1 border border-gray-100 rounded-2xl text-gray-500 bg-gray-50 font-bold h-fit">Correcto</span>
-                <p class="text-[10px] text-gray-500">El predio está en ambos archivos y su valor cambió según lo
+                    class="px-3 py-1 border border-gray-100 dark:border-gray-600 rounded-2xl text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 font-bold h-fit">Correcto</span>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">El predio está en ambos archivos y su valor
+                    cambió según lo
                     esperado.</p>
             </div>
             <div class="flex gap-4">
                 <span
-                    class="px-3 py-1 border border-gray-200 rounded-2xl text-gray-900 bg-functional-success font-bold h-fit">Nuevo</span>
-                <p class="text-[10px] text-gray-500">Es un predio que no existía antes y ahora aparece en el sistema.
+                    class="px-3 py-1 border border-gray-200 dark:border-green-800 rounded-2xl text-gray-900 dark:text-white bg-functional-success dark:bg-green-900/30 font-bold h-fit">Nuevo</span>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">Es un predio que no existía antes y ahora
+                    aparece en el sistema.
                 </p>
             </div>
             <div class="flex gap-4">
                 <span
-                    class="px-3 py-1 border border-gray-200 rounded-2xl text-gray-400 font-bold h-fit">Desaparecido</span>
-                <p class="text-[10px] text-gray-400">Es un predio que estaba antes pero ya no se encuentra en el nuevo
+                    class="px-3 py-1 border border-gray-200 dark:border-gray-600 rounded-2xl text-gray-400 dark:text-gray-500 font-bold h-fit">Desaparecido</span>
+                <p class="text-[10px] text-gray-400 dark:text-gray-500">Es un predio que estaba antes pero ya no se
+                    encuentra en el nuevo
                     sistema.</p>
             </div>
             <div class="flex gap-4">
                 <span
-                    class="px-3 py-1 border border-gray-200 rounded-2xl text-gray-900 bg-functional-error font-bold h-fit">Inconsistente</span>
-                <p class="text-[10px] text-gray-500">El valor del predio cambió de una forma inesperada o incorrecta.
+                    class="px-3 py-1 border border-gray-200 dark:border-red-800 rounded-2xl text-gray-900 dark:text-white bg-functional-error dark:bg-red-900/30 font-bold h-fit">Inconsistente</span>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">El valor del predio cambió de una forma
+                    inesperada o incorrecta.
                 </p>
             </div>
         </div>
     </section>
 
-    <section class="bg-gray-50 p-8 border border-gray-200 rounded-2xl text-gray-900">
+    <section
+        class="bg-gray-50 dark:bg-gray-800 p-8 border border-gray-200 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white">
         <h4
-            class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
+            class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 dark:border-gray-600 pb-2">
             <span class="material-symbols-outlined text-gray-400 font-light">calculate</span>
             LOGICA_CALCULO :: REDONDEO
         </h4>
-        <p class="text-[10px] text-gray-400 italic">Los valores se multiplican por el incremento y se redondean al
+        <p class="text-[10px] text-gray-400 dark:text-gray-500 italic">Los valores se multiplican por el incremento y se
+            redondean al
             millar más cercano, siguiendo las normas del IGAC.</p>
     </section>
 </div>

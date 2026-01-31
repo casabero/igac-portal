@@ -95,10 +95,10 @@
 {% endblock %}
 
 {% block help_content %}
-<div class="space-y-10 font-sans text-[11px] text-gray-900 uppercase">
+<div class="space-y-10 font-sans text-[11px] text-gray-900 dark:text-gray-200 uppercase">
     <section>
         <h4
-            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
             <span class="material-symbols-outlined font-light">description</span>
             01_PROPOSITO_HERRAMIENTA
         </h4>
@@ -107,30 +107,34 @@
     </section>
 
     <section>
-        <h4 class="border-b border-gray-100 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
             <span class="material-symbols-outlined font-light">layers</span>
             02_VERSIONES_SOPORTADAS
         </h4>
         <div class="grid grid-cols-1 gap-4">
-            <div class="border border-gray-100 rounded-2xl p-4 font-sans">
+            <div class="border border-gray-100 dark:border-gray-700 rounded-2xl p-4 font-sans">
                 <p class="font-bold mb-1 underline">Datos Básicos (R1)</p>
-                <p class="text-gray-500">Contiene información de los propietarios, direcciones y valores de avalúo. Es
+                <p class="text-gray-500 dark:text-gray-400">Contiene información de los propietarios, direcciones y
+                    valores de avalúo. Es
                     el archivo más importante.</p>
             </div>
-            <div class="border border-gray-100 rounded-2xl p-4 font-sans">
+            <div class="border border-gray-100 dark:border-gray-700 rounded-2xl p-4 font-sans">
                 <p class="font-bold mb-1 underline">Morfología y Construcción (R2)</p>
-                <p class="text-gray-500">Detalles sobre las áreas de los predios, tipos de construcción, número de pisos
+                <p class="text-gray-500 dark:text-gray-400">Detalles sobre las áreas de los predios, tipos de
+                    construcción, número de pisos
                     y servicios.</p>
             </div>
-            <div class="border border-gray-100 rounded-2xl p-4 font-sans">
+            <div class="border border-gray-100 dark:border-gray-700 rounded-2xl p-4 font-sans">
                 <p class="font-bold mb-1 underline">Registros de Procesos (T1, T2, T3)</p>
-                <p class="text-gray-500">Archivos que registran los cambios y trámites realizados sobre los predios.</p>
+                <p class="text-gray-500 dark:text-gray-400">Archivos que registran los cambios y trámites realizados
+                    sobre los predios.</p>
             </div>
         </div>
     </section>
 
     <section
-        class="bg-gray-50 dark:bg-gray-800 p-8 border border-gray-200 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-gray-200 shadow-none">
+        class="bg-gray-50 dark:bg-gray-800 p-8 border border-gray-200 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white shadow-none">
         <h4
             class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 dark:border-gray-600 pb-2">
             <span class="material-symbols-outlined text-gray-400 font-light">tips_and_updates</span>

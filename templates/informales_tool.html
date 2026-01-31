@@ -167,9 +167,10 @@
 {% endblock %}
 
 {% block help_content %}
-<div class="space-y-10 font-sans text-[11px] text-gray-900 uppercase">
+<div class="space-y-10 font-sans text-[11px] text-gray-900 dark:text-white uppercase">
     <section>
-        <h4 class="border-b border-gray-100 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
             <span class="material-symbols-outlined font-light">map</span>
             01_RENUMERACION_GEO
         </h4>
@@ -179,31 +180,36 @@
     </section>
 
     <section>
-        <h4 class="border-b border-gray-100 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
             <span class="material-symbols-outlined font-light">info</span>
             02_REQUISITOS_GDB
         </h4>
         <div class="grid grid-cols-1 gap-4">
-            <div class="border border-gray-100 rounded-2xl p-4 font-sans">
+            <div class="border border-gray-100 dark:border-gray-700 rounded-2xl p-4 font-sans">
                 <p class="font-bold mb-1 underline">Capa Informal</p>
-                <p class="text-gray-500">Un archivo .zip que contiene la Geodatabase con los polígonos de los predios a
+                <p class="text-gray-500 dark:text-gray-400">Un archivo .zip que contiene la Geodatabase con los
+                    polígonos de los predios a
                     los que se les quiere asignar un número.</p>
             </div>
-            <div class="border border-gray-100 rounded-2xl p-4 font-sans">
+            <div class="border border-gray-100 dark:border-gray-700 rounded-2xl p-4 font-sans">
                 <p class="font-bold mb-1 underline">Capa Formal (CTM12)</p>
-                <p class="text-gray-500">La capa del mapa oficial que ya tiene los sectores y manzanas definidos por el
+                <p class="text-gray-500 dark:text-gray-400">La capa del mapa oficial que ya tiene los sectores y
+                    manzanas definidos por el
                     IGAC.</p>
             </div>
         </div>
     </section>
 
-    <section class="bg-gray-50 p-8 border border-gray-200 rounded-2xl text-gray-900 shadow-none">
+    <section
+        class="bg-gray-50 dark:bg-gray-800 p-8 border border-gray-200 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white shadow-none">
         <h4
-            class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
+            class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 dark:border-gray-600 pb-2">
             <span class="material-symbols-outlined text-gray-400 font-light">public</span>
             PRECISION_ESPACIAL
         </h4>
-        <p class="text-[10px] text-gray-400 italic">El sistema utiliza coordenadas precisas para asegurar que el predio
+        <p class="text-[10px] text-gray-400 dark:text-gray-500 italic">El sistema utiliza coordenadas precisas para
+            asegurar que el predio
             quede ubicado en la manzana correcta.</p>
     </section>
 </div>
