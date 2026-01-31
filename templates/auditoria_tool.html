@@ -43,17 +43,33 @@
                         <label
                             class="block text-[10px] font-sans font-bold text-gray-900 mb-3 uppercase tracking-tight">Datos
                             Propietarios (Excel)</label>
-                        <input type="file" name="file_prop" accept=".xlsx"
-                            class="block w-full text-[10px] font-sans text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-100 file:rounded-2xl file:text-[10px] file:font-bold file:bg-gray-50 file:text-gray-900 hover:file:bg-gray-50 hover:file:text-gray-900 transition-all cursor-pointer"
-                            required>
+                        <input type="file" name="file_prop" id="file_prop" class="hidden" accept=".xlsx" required>
+                        <label for="file_prop"
+                            class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30 hover:bg-white hover:border-gray-900 transition-all cursor-pointer group">
+                            <span
+                                class="material-symbols-outlined text-3xl text-gray-300 mb-2 group-hover:text-gray-900 transition-colors font-light">table_view</span>
+                            <span
+                                class="text-[9px] font-mono font-bold text-gray-400 text-center px-4 uppercase leading-tight"
+                                id="label_prop">
+                                Cargar_Propietarios.xlsx
+                            </span>
+                        </label>
                     </div>
                     <div>
                         <label
                             class="block text-[10px] font-sans font-bold text-gray-900 mb-3 uppercase tracking-tight">Listado
                             Auditoría (Excel)</label>
-                        <input type="file" name="file_calc" accept=".xlsx"
-                            class="block w-full text-[10px] font-sans text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-100 file:rounded-2xl file:text-[10px] file:font-bold file:bg-gray-50 file:text-gray-900 hover:file:bg-gray-50 hover:file:text-gray-900 transition-all cursor-pointer"
-                            required>
+                        <input type="file" name="file_calc" id="file_calc" class="hidden" accept=".xlsx" required>
+                        <label for="file_calc"
+                            class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30 hover:bg-white hover:border-gray-900 transition-all cursor-pointer group">
+                            <span
+                                class="material-symbols-outlined text-3xl text-gray-300 mb-2 group-hover:text-gray-900 transition-colors font-light">list_alt</span>
+                            <span
+                                class="text-[9px] font-mono font-bold text-gray-400 text-center px-4 uppercase leading-tight"
+                                id="label_calc">
+                                Cargar_Listado.xlsx
+                            </span>
+                        </label>
                     </div>
                 </div>
 
@@ -82,7 +98,7 @@
                     </div>
 
                     <button type="submit"
-                        class="w-full bg-gray-50 text-gray-900 border border-gray-100 font-sans font-bold py-4 px-4 rounded-2xl transition-all flex items-center justify-center gap-3 hover:bg-white hover:text-gray-900 border border-gray-200 active:scale-[0.98] uppercase tracking-widest text-xs">
+                        class="w-full bg-gray-900 text-white border border-gray-900 font-sans font-bold py-4 px-4 rounded-2xl transition-all flex items-center justify-center gap-3 hover:bg-white hover:text-gray-900 active:scale-[0.98] uppercase tracking-widest text-xs">
                         <span class="material-symbols-outlined text-[20px] font-light">verified_user</span>
                         Ejecutar Auditoría
                     </button>
@@ -242,7 +258,8 @@
                     Requiere revisión urgente.</p>
             </div>
             <div class="flex gap-4">
-                <span class="px-3 py-1 bg-gray-50 text-gray-900 border border-gray-100 rounded-2xl font-bold h-fit">Nota de PH</span>
+                <span class="px-3 py-1 bg-gray-50 text-gray-900 border border-gray-100 rounded-2xl font-bold h-fit">Nota
+                    de PH</span>
                 <p class="text-[10px] text-gray-500">Predio identificado como parte de una Propiedad Horizontal.</p>
             </div>
         </div>
@@ -262,6 +279,23 @@
 
 
 {% block scripts %}
+<script>
+    // File Input Handling
+    const setupFileInput = (id, labelId) => {
+        const input = document.getElementById(id);
+        const label = document.getElementById(labelId);
+        if (input && label) {
+            input.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    label.innerHTML = '<b class="text-gray-900">✓ ' + e.target.files[0].name.toUpperCase() + '</b>';
+                    label.parentElement.classList.add('border-gray-900', 'bg-white');
+                }
+            });
+        }
+    };
+    setupFileInput('file_prop', 'label_prop');
+    setupFileInput('file_calc', 'label_calc');
+</script>
 {% if resultados %}
 <div id="auditData" data-audit='{{ resultados.full_data | tojson | safe }}' class="hidden"></div>
 <script>
