@@ -16,207 +16,152 @@
         </div>
         <div class="flex gap-4 uppercase font-mono">
             <a href="/admin/export-csv?inicio={{ fecha_inicio }}&fin={{ fecha_fin }}"
-                class="flex items-center gap-3 px-6 py-3 bg-white border border-gray-900 text-gray-900 font-bold text-[10px] hover:bg-gray-900 hover:text-white transition-all tracking-widest">
+                class="flex items-center gap-3 px-6 py-3 bg-white border border-gray-100 rounded-lg text-gray-900 font-bold text-[10px] hover:bg-gray-50 hover:shadow-sm transition-all tracking-widest">
                 <span class="material-symbols-outlined text-[18px] font-light">download</span>
                 EXPORT_CSV_RAW
             </a>
             <a href="/admin/logout"
-                class="flex items-center gap-3 px-6 py-3 bg-gray-900 text-white font-bold text-[10px] hover:bg-white hover:text-gray-900 border border-gray-900 transition-all tracking-widest">
+                class="flex items-center gap-3 px-6 py-3 bg-red-50 text-red-600 rounded-lg font-bold text-[10px] hover:bg-red-100 transition-all tracking-widest">
                 <span class="material-symbols-outlined text-[18px] font-light">logout</span>
-                TERMINAR_SESIÓN
+                LOGOUT_SECURE
             </a>
         </div>
     </div>
 
-    <!-- Filtros -->
-    <div class="bg-white p-8 border border-gray-900 font-mono">
-        <form method="GET" class="flex flex-wrap items-end gap-8">
-            <div class="flex-1 min-w-[200px]">
-                <label
-                    class="block text-[10px] font-bold text-gray-500 uppercase mb-3 tracking-widest">MARCADOR_INICIO</label>
+    <!-- Filters Section -->
+    <div
+        class="premium-card p-4 border-dashed border-gray-200 flex flex-col md:flex-row items-center justify-center gap-8">
+        <form class="flex flex-wrap items-center justify-center gap-6 font-mono text-[10px] uppercase font-bold">
+            <div class="flex items-center gap-3">
+                <label class="text-gray-400">DESDE:</label>
                 <input type="date" name="inicio" value="{{ fecha_inicio }}"
-                    class="w-full bg-gray-50/30 border-gray-900 text-xs font-bold focus:ring-0 focus:border-gray-900 py-3 uppercase">
+                    class="border-b border-gray-200 focus:border-accent outline-none bg-transparent py-1 font-bold text-gray-900">
             </div>
-            <div class="flex-1 min-w-[200px]">
-                <label
-                    class="block text-[10px] font-bold text-gray-500 uppercase mb-3 tracking-widest">MARCADOR_FINAL</label>
+            <div class="flex items-center gap-3">
+                <label class="text-gray-400">HASTA:</label>
                 <input type="date" name="fin" value="{{ fecha_fin }}"
-                    class="w-full bg-gray-50/30 border-gray-900 text-xs font-bold focus:ring-0 focus:border-gray-900 py-3 uppercase">
+                    class="border-b border-gray-200 focus:border-accent outline-none bg-transparent py-1 font-bold text-gray-900">
             </div>
-            <div class="flex gap-4">
-                <button type="submit"
-                    class="px-8 py-3 bg-gray-900 text-white border border-gray-900 font-bold text-[10px] hover:bg-white hover:text-gray-900 transition-all tracking-widest uppercase">
-                    FILTRAR_LOG
-                </button>
-                <a href="/admin/dashboard"
-                    class="px-8 py-3 bg-white text-gray-400 border border-gray-200 font-bold text-[10px] hover:border-accent hover:text-gray-900 transition-all tracking-widest uppercase text-center">
-                    REINICIAR_FILTROS
-                </a>
-            </div>
+            <button type="submit"
+                class="bg-gray-900 text-white px-8 py-2 rounded-lg hover:bg-accent hover:text-primary transition-all tracking-[0.2em] shadow-lg shadow-gray-200">
+                FILTRAR_DATOS
+            </button>
         </form>
     </div>
 
-    <!-- KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 font-mono">
-        <div class="bg-white p-8 border border-gray-900">
-            <p class="text-[9px] font-bold text-gray-500 uppercase mb-2 tracking-widest">FLUJO_VISITAS</p>
-            <h3 class="text-3xl font-display font-bold text-gray-900">{{ total_visitas }}</h3>
-        </div>
-        <div class="bg-white p-8 border border-gray-900 border-l-8 border-l-gray-900">
-            <p class="text-[9px] font-bold text-gray-900 uppercase mb-2 tracking-widest">AGENTES_ÚNICOS</p>
-            <h3 class="text-3xl font-display font-bold text-gray-900">{{ visitantes_unicos }}</h3>
-        </div>
-        <div class="bg-white p-8 border border-gray-900">
-            <p class="text-[9px] font-bold text-gray-500 uppercase mb-2 tracking-widest">NODOS_GEOGRÁFICOS</p>
-            <h3 class="text-3xl font-display font-bold text-gray-900">{{ stats_pais|length }}</h3>
-        </div>
-        <div class="bg-gray-900 p-8 border border-gray-900 text-white">
-            <p class="text-[9px] font-bold text-gray-500 uppercase mb-2 tracking-widest">APLICATIVOS_ACTIVOS</p>
-            <h3 class="text-3xl font-display font-bold text-white">{{ top_apps|length }}</h3>
-        </div>
-    </div>
-
-    <!-- Charts Row -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 font-mono">
-        <div class="bg-white p-10 border border-gray-900">
-            <h4
-                class="text-[10px] font-bold text-gray-900 mb-8 flex items-center gap-3 uppercase tracking-widest border-b border-gray-900 pb-4">
-                <span class="material-symbols-outlined text-gray-900 font-light text-[20px]">bar_chart</span>
-                USO_POR_APLICATIVO_SISTEMA
-            </h4>
-            <div class="h-[300px] relative">
-                <canvas id="appsChart"></canvas>
+    <!-- Top Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="premium-card p-6 flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+                <span class="material-symbols-outlined text-[28px] font-light">ads_click</span>
+            </div>
+            <div>
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Total Operaciones</p>
+                <h4 class="text-2xl font-display font-bold text-gray-900">{{ total_logs }}</h4>
             </div>
         </div>
 
-        <div class="bg-white p-10 border border-gray-900">
-            <h4
-                class="text-[10px] font-bold text-gray-900 mb-8 flex items-center gap-3 uppercase tracking-widest border-b border-gray-900 pb-4">
-                <span class="material-symbols-outlined text-gray-900 font-light text-[20px]">public</span>
-                DISTRIBUCIÓN_GLOBAL_TRAFFICO
-            </h4>
-            <div class="h-[300px] relative">
-                <canvas id="geoChart"></canvas>
+        <div class="premium-card p-6 flex items-center gap-4">
+            <div class="w-12 h-12 bg-green-50 text-green-600 rounded-lg flex items-center justify-center shadow-sm">
+                <span class="material-symbols-outlined text-[28px] font-light">group</span>
+            </div>
+            <div>
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Usuarios Únicos</p>
+                <h4 class="text-2xl font-display font-bold text-gray-900">{{ usuarios_unicos }}</h4>
+            </div>
+        </div>
+
+        <div class="premium-card p-6 flex items-center gap-4">
+            <div class="w-12 h-12 bg-accent/10 text-accent rounded-lg flex items-center justify-center shadow-sm">
+                <span class="material-symbols-outlined text-[28px] font-light">query_stats</span>
+            </div>
+            <div>
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Módulo Más Usado</p>
+                <h4 class="text-2xl font-display font-bold text-gray-900">{{ modulo_top }}</h4>
             </div>
         </div>
     </div>
 
-    <!-- Recent Logs Table -->
-    <div class="bg-white border border-gray-900 overflow-hidden font-mono">
-        <div class="p-8 border-b border-gray-900 flex justify-between items-center bg-gray-50/30">
-            <h4 class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-accent pl-4">
-                HISTORIAL_DETALLADO_LOG (ÚLTIMOS_100)</h4>
-            <span
-                class="px-4 py-2 border border-accent text-gray-900 text-[9px] font-bold uppercase tracking-widest">DATOS_ESTÁNDAR_SISTEMA</span>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Usage Chart -->
+        <div class="premium-card p-8">
+            <div class="flex items-center justify-between mb-8">
+                <h4
+                    class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-accent pl-4">
+                    Uso por Módulos</h4>
+                <span class="material-symbols-outlined text-gray-300 font-light">pie_chart</span>
+            </div>
+            <div class="h-64">
+                <canvas id="moduloChart"></canvas>
+            </div>
         </div>
-        <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-left text-[10px] uppercase">
-                <thead class="bg-gray-900 text-gray-400 font-bold tracking-widest border-b border-gray-900">
-                    <tr>
-                        <th class="px-8 py-5">TIMESTAMP</th>
-                        <th class="px-8 py-5">IP // LOC</th>
-                        <th class="px-8 py-5">HW // OS</th>
-                        <th class="px-8 py-5">ENDPOINT</th>
-                        <th class="px-8 py-5">BROWSER_STR</th>
-                        <th class="px-8 py-5">RES</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    {% for log in ultimos_logs %}
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-8 py-5 text-gray-400 font-mono text-[9px]">
-                            {{ log.timestamp }}
-                        </td>
-                        <td class="px-8 py-5">
-                            <div class="flex flex-col gap-1">
-                                <span class="font-bold text-gray-900">{{ log.ip_publica }}</span>
-                                <span class="text-[9px] text-gray-400 font-normal">{{ log.pais }} - {{ log.ciudad
-                                    }}</span>
-                            </div>
-                        </td>
-                        <td class="px-8 py-5">
-                            <div class="flex flex-col gap-1">
-                                <span class="font-bold text-gray-900 flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-[14px] font-light">{% if log.dispositivo
-                                        == 'PC'
-                                        %}laptop{% elif log.dispositivo == 'Móvil' %}smartphone{% else %}devices{% endif
-                                        %}</span>
-                                    {{ log.dispositivo }}
-                                </span>
-                                <span class="text-[9px] text-gray-400 font-normal">{{ log.os }}</span>
-                            </div>
-                        </td>
-                        <td class="px-8 py-5">
-                            <span
-                                class="px-3 py-1 border border-gray-900 text-gray-900 text-[9px] font-bold tracking-widest">
-                                {{ log.ruta }}
-                            </span>
-                        </td>
-                        <td class="px-8 py-5 text-[9px] text-gray-500 font-normal">
-                            {{ log.navegador }}
-                        </td>
-                        <td class="px-8 py-5 text-[9px] text-gray-400 font-mono">
-                            {{ log.resolucion }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+        <!-- Activity Timeline -->
+        <div class="premium-card p-8">
+            <div class="flex items-center justify-between mb-8">
+                <h4
+                    class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-accent pl-4">
+                    Actividad Reciente</h4>
+                <span class="material-symbols-outlined text-gray-300 font-light">history</span>
+            </div>
+            <div class="space-y-6 max-h-[256px] overflow-y-auto custom-scrollbar pr-4">
+                {% for log in logs %}
+                <div class="flex items-start gap-4 pb-4 border-b border-gray-50 last:border-0 uppercase font-mono">
+                    <div
+                        class="mt-1 w-2 h-2 rounded-full {% if log.modulo == 'SNC' %}bg-blue-400{% elif log.modulo == 'AVALUOS' %}bg-green-400{% else %}bg-accent{% endif %}">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] font-bold text-gray-900">{{ log.modulo }} // {{ log.accion
+                                }}</span>
+                            <span class="text-[8px] text-gray-400">{{ log.timestamp }}</span>
+                        </div>
+                        <p class="text-[9px] text-gray-500 lowercase">{{ log.ip }} :: {{ log.user_agent[:60] }}...</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Datos procesados desde Jinja2
-    const labelsApps = {{ top_apps| map(attribute = 'ruta') | list | tojson | safe }};
-    const dataApps = {{ top_apps| map(attribute = 'count') | list | tojson | safe }};
+    const chartData = {{ chart_data | tojson }};
+    const ctx = document.getElementById('moduloChart').getContext('2d');
 
-    const labelsGeo = {{ stats_pais| map(attribute = 'pais') | list | tojson | safe }};
-    const dataGeo = {{ stats_pais| map(attribute = 'count') | list | tojson | safe }};
-
-    // Configuración Common
-    const chartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { position: 'bottom' }
-        }
-    };
-
-    // Apps Chart
-    const ctxApps = document.getElementById('appsChart');
-    if (ctxApps) {
-        new Chart(ctxApps, {
-            type: 'bar',
-            data: {
-                labels: labelsApps,
-                datasets: [{
-                    label: 'Visitas',
-                    data: dataApps,
-                    backgroundColor: '#3b82f6',
-                    borderRadius: 8
-                }]
-            },
-            options: chartOptions
-        });
-    }
-
-    // Geo Chart
-    const ctxGeo = document.getElementById('geoChart');
-    if (ctxGeo) {
-        new Chart(ctxGeo, {
+    if (chartData && Object.keys(chartData).length > 0) {
+        new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: labelsGeo,
+                labels: Object.keys(chartData),
                 datasets: [{
-                    data: dataGeo,
-                    backgroundColor: ['#10b981', '#fbbf24', '#3b82f6', '#ef4444', '#8b5cf6'],
-                    hoverOffset: 4
+                    data: Object.values(chartData),
+                    backgroundColor: ['#111111', '#e7d192', '#333333', '#E5E5E5', '#666666'],
+                    borderWidth: 0,
+                    hoverOffset: 20
                 }]
             },
-            options: chartOptions
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            font: { family: 'Fira Code', size: 10 },
+                            usePointStyle: true,
+                            padding: 20,
+                            color: '#111111'
+                        }
+                    }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            }
         });
     }
 </script>
@@ -225,7 +170,7 @@
 {% block help_content %}
 <div class="space-y-10 font-mono text-[11px] text-gray-900 uppercase">
     <section>
-        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+        <h4 class="border-b border-gray-100 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
             <span class="material-symbols-outlined font-light">monitoring</span>
             01_PROTOCOLO_MONITOREO
         </h4>
@@ -233,16 +178,14 @@
             granular del tráfico incluso tras multiplexación de IP pública.</p>
     </section>
 
-    <section class="bg-gray-900 p-8 border border-gray-900 text-white">
+    <section class="bg-gray-900 p-8 border border-gray-900 rounded-xl text-white">
         <h4
             class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
             <span class="material-symbols-outlined text-gray-400 font-light">dns</span>
-            02_FLUJO_DATOS_CLOUDFLARE
+            02_FLUJO_DATOS_CLOUD
         </h4>
-        <p class="text-[10px] text-gray-400 leading-relaxed italic">
-            info_stack: La metadata geográfica depende estrictamente de los encabezados CF-IPCountry y CF-IPCity.
-            Verifique la propagación en el núcleo de red si detecta valores N/A.
-        </p>
+        <p class="text-[10px] text-gray-400 italic">Los logs capturan la metadata de la petición pero anonimizan datos
+            sensibles de los predios para cumplir con normativas de privacidad.</p>
     </section>
 </div>
 {% endblock %}

@@ -231,7 +231,7 @@ import matplotlib.pyplot as plt
 
 class AuditoriaRenumeracionPDF(FPDF):
     def header(self):
-        self.set_fill_color(17, 17, 17); self.rect(0, 0, 216, 35, 'F'); self.set_y(12); self.set_font('Helvetica', 'B', 16); self.set_text_color(255, 255, 255); self.cell(0, 10, 'REPORTE_RENUMERACIÓN // IGAC', 0, 1, 'C')
+        self.set_fill_color(249, 250, 251); self.rect(0, 0, 216, 35, 'F'); self.set_y(12); self.set_font('Helvetica', 'B', 16); self.set_text_color(17, 17, 17); self.cell(0, 10, 'REPORTE_RENUMERACIÓN // IGAC', 0, 1, 'C')
         self.set_font('Helvetica', '', 8); self.set_text_color(156, 163, 175); self.cell(0, 5, 'SIS_AUDITORÍA_CATASTRAL :: MULTIPROPÓSITO', 0, 1, 'C'); self.ln(15)
 
     def footer(self):

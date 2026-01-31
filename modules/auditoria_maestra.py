@@ -298,11 +298,11 @@ def procesar_auditoria(files_dict, pct_incremento, zona_filtro='General'):
 
 class AuditoriaPDF(FPDF):
     def header(self):
-        self.set_fill_color(17, 17, 17)
+        self.set_fill_color(249, 250, 251) # Gray-50
         self.rect(0, 0, 216, 35, 'F') 
         self.set_y(12)
         self.set_font('Helvetica', 'B', 16)
-        self.set_text_color(255, 255, 255)
+        self.set_text_color(17, 17, 17) # Black
         self.cell(0, 10, 'REPORTE_AUDITORÍA_CIERRE // IGAC', 0, 1, 'C')
         self.set_font('Helvetica', '', 8); self.set_text_color(156, 163, 175)
         self.cell(0, 5, 'SIS_GESTIÓN_CATASTRAL :: AVANZADO', 0, 1, 'C')

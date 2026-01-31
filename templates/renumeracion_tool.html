@@ -8,7 +8,8 @@
 <div class="max-w-[1400px] mx-auto">
     <!-- FORMULARIO DE CARGA (SI NO HAY RESULTADOS) -->
     {% if not resultados %}
-    <div class="max-w-2xl mx-auto bg-white p-10 border border-gray-900 mt-4">
+    <div class="max-w-2xl mx-auto premium-card p-10 mt-4 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-48 h-48 bg-accent opacity-5 -mr-24 -mt-24 transform rotate-45"></div>
         <div class="mb-10 border-l-4 border-accent pl-6">
             <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">MODULO_04 //
                 RENUMERACION_AUDITORIA</h2>
@@ -23,7 +24,7 @@
                     del Reporte</label>
                 <div class="grid grid-cols-2 gap-6">
                     <label
-                        class="relative flex flex-col p-6 border cursor-pointer hover:bg-gray-50 transition-all border-gray-900"
+                        class="relative flex flex-col p-6 border border-gray-100 rounded-xl cursor-pointer hover:bg-gray-50 transition-all shadow-sm"
                         id="label_tipo_1">
                         <input type="radio" name="tipo" value="1"
                             class="absolute top-4 right-4 text-gray-900 focus:ring-0" checked
@@ -33,7 +34,7 @@
                             IGAC</span>
                     </label>
                     <label
-                        class="relative flex flex-col p-6 border cursor-pointer hover:bg-gray-50 transition-all border-gray-200"
+                        class="relative flex flex-col p-6 border border-gray-100 rounded-xl cursor-pointer hover:bg-gray-50 transition-all shadow-sm"
                         id="label_tipo_2">
                         <input type="radio" name="tipo" value="2"
                             class="absolute top-4 right-4 text-gray-900 focus:ring-0" onchange="updateRadioSelection()">
@@ -53,7 +54,7 @@
                         <input type="radio" name="fase" value="1" class="hidden peer" checked
                             onchange="toggleFase(this.value)">
                         <div
-                            class="border border-gray-900 p-4 bg-white peer-checked:bg-gray-900 peer-checked:text-white transition-all text-center">
+                            class="border border-gray-100 rounded-lg p-4 bg-gray-50/50 peer-checked:bg-gray-900 peer-checked:text-white transition-all text-center shadow-sm">
                             <p class="text-[10px] font-bold uppercase">Validación Alfanumérica</p>
                             <p class="text-[8px] mt-1 font-mono opacity-60">Revisión de Números</p>
                         </div>
@@ -61,7 +62,7 @@
                     <label class="cursor-pointer group">
                         <input type="radio" name="fase" value="2" class="hidden peer" onchange="toggleFase(this.value)">
                         <div
-                            class="border border-gray-900 p-4 bg-white peer-checked:bg-gray-900 peer-checked:text-white transition-all text-center">
+                            class="border border-gray-100 rounded-lg p-4 bg-gray-50/50 peer-checked:bg-gray-900 peer-checked:text-white transition-all text-center shadow-sm">
                             <p class="text-[10px] font-bold uppercase">Validación Geográfica</p>
                             <p class="text-[8px] mt-1 font-mono opacity-60">Cruce de Mapas</p>
                         </div>
@@ -71,8 +72,8 @@
 
             <!-- ADVERTENCIA FASE 2 -->
             <div id="warning_fase2" class="hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                <div class="p-6 bg-gray-900 border border-gray-900 flex gap-4 text-white">
-                    <span class="material-symbols-outlined text-gray-400 font-light">info</span>
+                <div class="p-6 bg-gray-900 border border-gray-900 rounded-xl flex gap-4 text-white shadow-lg">
+                    <span class="material-symbols-outlined text-accent font-light">info</span>
                     <p class="text-[10px] font-mono leading-relaxed uppercase tracking-tight">
                         Nota: La fase geográfica requiere que los números prediales ya hayan sido validados en la fase
                         alfanumérica.
@@ -89,7 +90,7 @@
                         <input type="file" name="file_excel" id="file_excel" class="hidden" accept=".xlsx,.xls"
                             required>
                         <label for="file_excel"
-                            class="flex flex-col items-center justify-center w-full h-32 border border-dashed border-gray-400 bg-gray-50/30 hover:bg-white hover:border-gray-900 transition-all cursor-pointer group">
+                            class="flex flex-col items-center justify-center w-full h-32 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 hover:bg-white hover:border-accent transition-all cursor-pointer group shadow-sm">
                             <span id="name_excel"
                                 class="text-[10px] font-bold text-gray-400 text-center px-4 uppercase tracking-widest group-hover:text-gray-900 transition-colors">
                                 Seleccione el archivo .xlsx
@@ -97,7 +98,7 @@
                         </label>
                     </div>
                     <button type="button" id="btn_preanalizar" onclick="preanalizarExcel()"
-                        class="bg-gray-100 border border-gray-900 text-gray-900 px-6 font-bold text-[10px] tracking-widest uppercase hover:bg-gray-900 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                        class="bg-gray-50 border border-gray-100 rounded-lg text-gray-900 px-6 font-bold text-[10px] tracking-widest uppercase hover:bg-gray-900 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
                         disabled>
                         Pre-analizar
                     </button>
@@ -106,7 +107,7 @@
 
             <!-- PANEL DE MAPEO DE COLUMNAS -->
             <div id="mapping_panel"
-                class="hidden space-y-6 p-8 border-2 border-gray-900 bg-gray-50 animate-in zoom-in duration-300">
+                class="hidden space-y-6 p-8 border border-gray-100 rounded-xl bg-gray-50/50 animate-in zoom-in duration-300 shadow-inner">
                 <label
                     class="block text-[10px] font-mono font-bold text-gray-900 uppercase tracking-[0.2em] mb-4 underline">Mapeo
                     Manual de Columnas</label>
@@ -116,7 +117,7 @@
                         <label class="block text-[9px] font-bold text-gray-500 uppercase italic">Columna Número Anterior
                             (CICA/LC)</label>
                         <select name="col_ant" id="col_ant"
-                            class="w-full bg-white border border-gray-900 p-3 text-[11px] font-mono focus:ring-1 focus:ring-gray-900 outline-none">
+                            class="w-full bg-white border border-gray-100 rounded-lg p-3 text-[11px] font-mono focus:ring-accent focus:border-accent outline-none shadow-sm">
                             <option value="">Detectando...</option>
                         </select>
                     </div>
@@ -124,14 +125,14 @@
                         <label class="block text-[9px] font-bold text-gray-500 uppercase italic">Columna Número Nuevo
                             (SNC)</label>
                         <select name="col_snc" id="col_snc"
-                            class="w-full bg-white border border-gray-900 p-3 text-[11px] font-mono focus:ring-1 focus:ring-gray-900 outline-none">
+                            class="w-full bg-white border border-gray-100 rounded-lg p-3 text-[11px] font-mono focus:ring-accent focus:border-accent outline-none shadow-sm">
                             <option value="">Detectando...</option>
                         </select>
                     </div>
                     <div class="space-y-3">
                         <label class="block text-[9px] font-bold text-gray-500 uppercase italic">Columna Estado</label>
                         <select name="col_estado" id="col_estado"
-                            class="w-full bg-white border border-gray-900 p-3 text-[11px] font-mono focus:ring-1 focus:ring-gray-900 outline-none">
+                            class="w-full bg-white border border-gray-100 rounded-lg p-3 text-[11px] font-mono focus:ring-accent focus:border-accent outline-none shadow-sm">
                             <option value="">Detectando...</option>
                         </select>
                     </div>
@@ -148,7 +149,7 @@
                             Formal</label>
                         <input type="file" name="archivo_gdb_formal" id="gdb_f" class="hidden" accept=".zip">
                         <label for="gdb_f"
-                            class="flex flex-col items-center justify-center h-20 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 hover:bg-white hover:border-accent transition-all cursor-pointer">
+                            class="flex flex-col items-center justify-center h-20 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 hover:bg-white hover:border-accent transition-all cursor-pointer shadow-sm">
                             <span class="material-symbols-outlined text-gray-300">map</span>
                             <span class="text-[10px] text-gray-400 mt-1" id="label_gdb_f">ZIP Capas Normal</span>
                         </label>
@@ -158,7 +159,7 @@
                             Informal</label>
                         <input type="file" name="archivo_gdb_informal" id="gdb_i" class="hidden" accept=".zip">
                         <label for="gdb_i"
-                            class="flex flex-col items-center justify-center h-20 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 hover:bg-white hover:border-accent transition-all cursor-pointer">
+                            class="flex flex-col items-center justify-center h-20 border border-dashed border-gray-200 rounded-xl bg-gray-50/30 hover:bg-white hover:border-accent transition-all cursor-pointer shadow-sm">
                             <span class="material-symbols-outlined text-gray-300">location_on</span>
                             <span class="text-[10px] text-gray-400 mt-1" id="label_gdb_i">ZIP Capas Informal</span>
                         </label>
@@ -167,7 +168,7 @@
             </div>
 
             <button type="submit" id="btn_submit"
-                class="w-full bg-gray-900 text-white py-5 border border-gray-900 hover:bg-white hover:text-gray-900 transition-all font-mono font-bold text-[10px] tracking-[0.3em] flex justify-center items-center gap-4 uppercase active:scale-[0.98]">
+                class="w-full bg-gray-900 text-white py-5 rounded-lg hover:bg-accent hover:text-primary transition-all font-mono font-bold text-[10px] tracking-[0.3em] flex justify-center items-center gap-4 uppercase active:scale-[0.98] shadow-lg shadow-gray-200">
                 <span class="material-symbols-outlined font-light">verified_user</span> Ejecutar Validación
             </button>
         </form>
@@ -178,9 +179,10 @@
     <!-- RESULTADOS (SI EXISTEN) -->
     {% if resultados %}
     <div id="resultado_renum" class="space-y-10 uppercase font-mono">
-        <div class="flex items-center justify-between bg-white p-10 border border-gray-900">
+        <div class="premium-card p-10 flex items-center justify-between">
             <div class="flex items-center gap-6">
-                <div class="w-14 h-14 bg-gray-900 flex items-center justify-center text-white">
+                <div
+                    class="w-14 h-14 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-center text-gray-900 shadow-sm">
                     <span class="material-symbols-outlined text-3xl font-light">fact_check</span>
                 </div>
                 <div>
@@ -195,15 +197,15 @@
             </div>
             <div class="flex gap-4">
                 <a href="/renumeracion/excel"
-                    class="bg-white border border-gray-900 text-gray-900 px-6 py-3 text-[10px] font-bold hover:bg-gray-900 hover:text-white transition-all flex items-center gap-3 tracking-widest">
+                    class="bg-white border border-gray-100 rounded-lg text-gray-900 px-6 py-3 text-[10px] font-bold hover:bg-gray-50 shadow-sm transition-all flex items-center gap-3 tracking-widest">
                     <span class="material-symbols-outlined text-[18px] font-light">table_view</span> Descargar Excel
                 </a>
                 <a href="/renumeracion/pdf"
-                    class="bg-white border border-red-600 text-red-600 px-6 py-3 text-[10px] font-bold hover:bg-red-600 hover:text-white transition-all flex items-center gap-3 tracking-widest">
+                    class="bg-white border border-red-100 rounded-lg text-red-600 px-6 py-3 text-[10px] font-bold hover:bg-red-50 shadow-sm transition-all flex items-center gap-3 tracking-widest">
                     <span class="material-symbols-outlined text-[18px] font-light">picture_as_pdf</span> Descargar PDF
                 </a>
                 <a href="/clear_renumeracion"
-                    class="bg-gray-900 text-white px-6 py-3 text-[10px] font-bold hover:bg-white hover:text-gray-900 border border-gray-900 transition-all flex items-center gap-3 tracking-widest">
+                    class="bg-gray-900 text-white px-6 py-3 rounded-lg font-bold text-[10px] hover:bg-accent hover:text-primary transition-all flex items-center gap-3 tracking-widest shadow-lg shadow-gray-200">
                     <span class="material-symbols-outlined text-[18px] font-light">refresh</span> Reiniciar
                 </a>
             </div>
@@ -219,16 +221,17 @@
 
 
             <div
-                class="bg-white border border-gray-900 overflow-hidden mt-6 {% if resultados.fase_ejecutada == 2 and not resultados.errores %}hidden{% endif %}">
-                <div class="p-8 border-b border-gray-900 bg-gray-50/30">
+                class="premium-card overflow-hidden mt-6 {% if resultados.fase_ejecutada == 2 and not resultados.errores %}hidden{% endif %}">
+                <div class="p-8 border-b border-gray-100 bg-gray-50/30">
                     <h4
-                        class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-gray-900 pl-4">
+                        class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-accent pl-4">
                         Errores Detectados ({{ resultados.errores|length }})</h4>
                 </div>
                 <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
                     {% if resultados.errores %}
                     <table class="w-full text-left border-collapse text-[11px]">
-                        <thead class="sticky top-0 bg-white border-b border-gray-100 text-gray-400 font-bold uppercase">
+                        <thead
+                            class="sticky top-0 bg-gray-900 border-b border-gray-900 text-gray-400 font-bold uppercase">
                             <tr>
                                 <th class="px-6 py-3">Validación</th>
                                 <th class="px-6 py-3">Detalle del Error</th>
@@ -238,7 +241,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-50">
                             {% for err in resultados.errores %}
-                            <tr class="hover:bg-red-50/30 transition-colors uppercase">
+                            <tr class="hover:bg-red-50/50 transition-colors uppercase">
                                 <td class="px-8 py-5"><span class="font-bold text-red-600 text-xs">{{ err.REGLA
                                         }}</span>
                                 </td>
@@ -251,7 +254,7 @@
                     </table>
                     {% else %}
                     <div class="p-12 text-center">
-                        <span class="material-symbols-outlined text-5xl text-green-200 mb-2">verified</span>
+                        <span class="material-symbols-outlined text-5xl text-accent mb-2 font-light">verified</span>
                         <h5 class="text-sm font-bold text-gray-900">Alfanumérico impecable</h5>
                         <p class="text-[11px] text-gray-400">No se detectaron errores de secuencia o lógica en los
                             códigos.</p>
@@ -263,10 +266,11 @@
 
         <div class="grid grid-cols-4 gap-4">
             {% for counter in resultados.dashboard_counters %}
-            <div class="bg-white border border-gray-900 p-6 flex flex-col items-center justify-center space-y-2">
-                <span class="material-symbols-outlined text-4xl text-gray-900">{{ counter.icon }}</span>
-                <p class="text-xs font-bold text-gray-900 uppercase tracking-widest text-center">{{ counter.label }}</p>
-                <p class="text-3xl font-bold text-gray-900">{{ counter.value }}</p>
+            <div class="premium-card p-6 flex flex-col items-center justify-center space-y-2">
+                <span class="material-symbols-outlined text-4xl text-gray-900/10">{{ counter.icon }}</span>
+                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-widest text-center">{{ counter.label }}
+                </p>
+                <p class="text-2xl font-bold text-gray-900">{{ counter.value }}</p>
             </div>
             {% endfor %}
         </div>
@@ -279,10 +283,10 @@
                 (GDB)
             </h4>
 
-            <div class="bg-white border border-gray-900 overflow-hidden">
-                <div class="p-8 border-b border-gray-900 bg-gray-50/30 flex justify-between items-center">
+            <div class="premium-card overflow-hidden">
+                <div class="p-8 border-b border-gray-100 bg-gray-50/30 flex justify-between items-center">
                     <h4
-                        class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-gray-900 pl-4">
+                        class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-accent pl-4">
                         GEOSPATIAL_EXCEPTION_LEDGER ({{ resultados.errores_geo|length }})</h4>
                 </div>
                 <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
@@ -297,9 +301,9 @@
                                 <th class="px-8 py-5">RECOM_ACTION</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200">
+                        <tbody class="divide-y divide-gray-50">
                             {% for err in resultados.errores_geo %}
-                            <tr class="hover:bg-gray-50 transition-colors">
+                            <tr class="hover:bg-gray-50/50 transition-colors">
                                 <td class="px-8 py-5">
                                     <div class="flex flex-col gap-1">
                                         <span class="text-gray-900 font-bold">{{ err.TIPO }}</span>
@@ -309,7 +313,7 @@
                                 <td class="px-8 py-5 font-bold text-gray-900">{{ err.CODIGO }}</td>
                                 <td class="px-8 py-5">
                                     <span
-                                        class="px-3 py-1 border {% if err.ESTADO_BD == 'ACTIVO' %}border-gray-900 text-gray-900{% elif err.ESTADO_BD == 'NO EXISTE EN BD' %}border-red-600 text-red-600{% else %}border-gray-400 text-gray-400{% endif %} font-bold text-[9px] tracking-widest">
+                                        class="px-3 py-1 border rounded {% if err.ESTADO_BD == 'ACTIVO' %}border-accent text-primary bg-accent/10{% elif err.ESTADO_BD == 'NO EXISTE EN BD' %}border-red-100 text-red-600 bg-red-50{% else %}border-gray-100 text-gray-400 bg-gray-50{% endif %} font-bold text-[9px] tracking-widest">
                                         {{ err.ESTADO_BD }}
                                     </span>
                                 </td>
@@ -321,7 +325,7 @@
                     </table>
                     {% else %}
                     <div class="p-16 text-center">
-                        <span class="material-symbols-outlined text-5xl text-gray-200 mb-4 font-light">public</span>
+                        <span class="material-symbols-outlined text-5xl text-accent mb-4 font-light">public</span>
                         <h5 class="text-xs font-bold text-gray-900 tracking-widest">GEOSPATIAL_INTEGRITY_VERIFIED</h5>
                         <p class="text-[10px] text-gray-400 mt-2">All GDB vectors align with renumbering report
                             signatures.</p>
@@ -339,30 +343,30 @@
 {% block help_content %}
 <div class="space-y-10 font-mono text-[11px] text-gray-900 uppercase">
     <section>
-        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+        <h4 class="border-b border-gray-100 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
             <span class="material-symbols-outlined font-light">verified</span>
-            01. Objetivo de la Auditoría
+            01_PROTOCOLO_AUDITORIA
         </h4>
         <p>Asegura que el cambio de los números prediales antiguos a los nuevos siga las reglas técnicas del IGAC. Evita
             que se pierda la historia de los predios durante la migración.</p>
     </section>
 
     <section>
-        <h4 class="border-b border-gray-900 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+        <h4 class="border-b border-gray-100 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
             <span class="material-symbols-outlined font-light">rule</span>
-            02. Reglas de Validación
+            02_REGLAS_NEGOCIO
         </h4>
         <div class="space-y-4">
-            <div class="border border-gray-200 p-4">
+            <div class="border border-gray-100 rounded-lg p-4 shadow-sm">
                 <p class="font-bold mb-1 underline">Unicidad</p>
                 <p class="text-gray-500">Un número nuevo no puede estar repetido en dos predios diferentes.</p>
             </div>
-            <div class="border border-gray-200 p-4">
+            <div class="border border-gray-100 rounded-lg p-4 shadow-sm">
                 <p class="font-bold mb-1 underline">Permanencia</p>
                 <p class="text-gray-500">Si un predio ya tenía un número oficial, este no debería cambiar
                     injustificadamente.</p>
             </div>
-            <div class="border border-gray-200 p-4">
+            <div class="border border-gray-100 rounded-lg p-4 shadow-sm">
                 <p class="font-bold mb-1 underline">Geografía (Fase 2)</p>
                 <p class="text-gray-500">El número predial debe corresponder exactamente con su ubicación en el mapa.
                 </p>
@@ -370,11 +374,11 @@
         </div>
     </section>
 
-    <section class="bg-gray-900 p-8 border border-gray-900 text-white">
+    <section class="bg-gray-900 p-8 border border-gray-900 rounded-xl text-white">
         <h4
             class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
             <span class="material-symbols-outlined text-gray-400 font-light">info</span>
-            Importante
+            SEGURIDAD_DATOS
         </h4>
         <p class="text-[10px] text-gray-400 italic">Esta herramienta ayuda a detectar errores antes de que la base de
             datos oficial se vea afectada por malas numeraciones.</p>
@@ -388,10 +392,16 @@
         const r1 = document.querySelector('input[name="tipo"][value="1"]');
         const r2 = document.querySelector('input[name="tipo"][value="2"]');
 
-        if (document.getElementById('label_tipo_1')) document.getElementById('label_tipo_1').classList.toggle('border-gray-900', r1.checked);
-        if (document.getElementById('label_tipo_1')) document.getElementById('label_tipo_1').classList.toggle('bg-gray-50', r1.checked);
-        if (document.getElementById('label_tipo_2')) document.getElementById('label_tipo_2').classList.toggle('border-gray-900', r2.checked);
-        if (document.getElementById('label_tipo_2')) document.getElementById('label_tipo_2').classList.toggle('bg-gray-50', r2.checked);
+        if (document.getElementById('label_tipo_1')) {
+            document.getElementById('label_tipo_1').classList.toggle('border-accent', r1.checked);
+            document.getElementById('label_tipo_1').classList.toggle('bg-accent/5', r1.checked);
+            document.getElementById('label_tipo_1').classList.toggle('border-gray-100', !r1.checked);
+        }
+        if (document.getElementById('label_tipo_2')) {
+            document.getElementById('label_tipo_2').classList.toggle('border-accent', r2.checked);
+            document.getElementById('label_tipo_2').classList.toggle('bg-accent/5', r2.checked);
+            document.getElementById('label_tipo_2').classList.toggle('border-gray-100', !r2.checked);
+        }
     }
 
     function toggleFase(val) {
@@ -413,7 +423,7 @@
         const panel = document.getElementById('mapping_panel');
         const selAnt = document.getElementById('col_ant');
         const selSnc = document.getElementById('col_snc');
-        const selEstado = document.getElementById('col_estado'); // Added for col_estado
+        const selEstado = document.getElementById('col_estado');
 
         if (!fileInput.files.length) return;
 
@@ -436,7 +446,7 @@
                 // Limpiar y poblar
                 selAnt.innerHTML = "";
                 selSnc.innerHTML = "";
-                selEstado.innerHTML = ""; // Clear for col_estado
+                selEstado.innerHTML = "";
 
                 data.columnas.forEach(col => {
                     const opt1 = document.createElement('option');
@@ -447,7 +457,7 @@
                     opt2.value = col; opt2.textContent = col;
                     selSnc.appendChild(opt2);
 
-                    const opt3 = document.createElement('option'); // Option for col_estado
+                    const opt3 = document.createElement('option');
                     opt3.value = col; opt3.textContent = col;
                     selEstado.appendChild(opt3);
                 });
@@ -455,11 +465,11 @@
                 // Auto-detectar
                 const colAntMatch = data.columnas.find(c => c.toUpperCase().includes('CICA') || c.toUpperCase().includes('ANTERIOR') || c.toUpperCase().includes('LC'));
                 const colSncMatch = data.columnas.find(c => c.toUpperCase().includes('SNC') || c.toUpperCase().includes('NUEVO'));
-                const colEstadoMatch = data.columnas.find(c => c.toUpperCase().includes('ESTADO') || c.toUpperCase().includes('STATUS')); // Auto-detect for col_estado
+                const colEstadoMatch = data.columnas.find(c => c.toUpperCase().includes('ESTADO') || c.toUpperCase().includes('STATUS'));
 
                 if (colAntMatch) selAnt.value = colAntMatch;
                 if (colSncMatch) selSnc.value = colSncMatch;
-                if (colEstadoMatch) selEstado.value = colEstadoMatch; // Set value for col_estado
+                if (colEstadoMatch) selEstado.value = colEstadoMatch;
 
                 panel.classList.remove('hidden');
             }
@@ -471,35 +481,36 @@
         }
     }
 
-    {% if not resultados %}
-    document.getElementById('file_excel').addEventListener('change', (e) => {
-        const btnPre = document.getElementById('btn_preanalizar');
-        const nameDisplay = document.getElementById('name_excel');
-        if (e.target.files.length > 0) {
-            nameDisplay.innerHTML = '<span class="text-gray-900 font-bold uppercase tracking-tight">✓ ' + e.target.files[0].name.toUpperCase() + '</span>';
-            btnPre.disabled = false;
-            // Reset panel if file changes
-            document.getElementById('mapping_panel').classList.add('hidden');
-        } else {
-            btnPre.disabled = true;
-        }
-    });
+    const hasResultsR = {{ 'true' if resultados else 'false' }};
+    if (hasResultsR === false) {
+        document.getElementById('file_excel').addEventListener('change', (e) => {
+            const btnPre = document.getElementById('btn_preanalizar');
+            const nameDisplay = document.getElementById('name_excel');
+            if (e.target.files.length > 0) {
+                nameDisplay.innerHTML = '<span class="text-gray-900 font-bold uppercase tracking-tight">✓ ' + e.target.files[0].name.toUpperCase() + '</span>';
+                btnPre.disabled = false;
+                // Reset panel if file changes
+                document.getElementById('mapping_panel').classList.add('hidden');
+            } else {
+                btnPre.disabled = true;
+            }
+        });
 
-    const setupFileLabel = (inputId, labelId) => {
-        const el = document.getElementById(inputId);
-        if (el) {
-            el.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    document.getElementById(labelId).innerHTML = '<span class="text-gray-900 font-bold uppercase text-[9px]">✓ ' + e.target.files[0].name.toUpperCase() + '</span>';
-                }
-            });
-        }
-    };
+        const setupFileLabel = (inputId, labelId) => {
+            const el = document.getElementById(inputId);
+            if (el) {
+                el.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        document.getElementById(labelId).innerHTML = '<span class="text-gray-900 font-bold uppercase text-[9px]">✓ ' + e.target.files[0].name.toUpperCase() + '</span>';
+                    }
+                });
+            }
+        };
 
-    setupFileLabel('gdb_f', 'label_gdb_f');
-    setupFileLabel('gdb_i', 'label_gdb_i');
+        setupFileLabel('gdb_f', 'label_gdb_f');
+        setupFileLabel('gdb_i', 'label_gdb_i');
 
-    updateRadioSelection();
-    {% endif %}
+        updateRadioSelection();
+    }
 </script>
 {% endblock %}

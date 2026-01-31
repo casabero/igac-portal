@@ -6,7 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>{% block title %}IGAC Portal{% endblock %}</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;700&family=Fira+Code:wght@400;500&display=swap"
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL,GRAD@200,0,0&display=swap"
         rel="stylesheet" />
@@ -17,7 +17,7 @@
                 extend: {
                     fontFamily: {
                         "sans": ["Inter", "sans-serif"],
-                        "display": ["Inter", "sans-serif"],
+                        "display": ["Outfit", "sans-serif"],
                         "mono": ["Fira Code", "monospace"],
                     },
                     colors: {
@@ -57,8 +57,51 @@
         }
 
         .grid-bg {
-            background-image: radial-gradient(#11111122 0.5px, transparent 0.5px);
+            background-image: radial-gradient(#11111108 0.5px, transparent 0.5px);
             background-size: 40px 40px;
+        }
+
+        .premium-card {
+            background: white;
+            border: 1px solid rgb(243, 244, 246);
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            border-radius: 0.75rem;
+            /* rounded-xl */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .premium-card:hover {
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        @keyframes node-pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+        }
+
+        .logo-node {
+            animation: node-pulse 2s infinite ease-in-out;
+        }
+
+        .logo-node-2 {
+            animation-delay: 0.5s;
+        }
+
+        .logo-node-3 {
+            animation-delay: 1s;
+        }
+
+        .logo-node-4 {
+            animation-delay: 1.5s;
         }
 
         @keyframes typing {
@@ -97,13 +140,27 @@
 <body class="bg-[#F8FAFC] text-gray-900 font-sans antialiased min-h-screen flex">
 
     <!-- SIDEBAR -->
-    <aside class="w-64 bg-white border-r border-gray-900 flex flex-col fixed h-full z-40">
-        <div class="p-6 border-b border-gray-900">
-            <a href="/" class="flex items-center gap-3 group">
-                <div class="p-2 bg-primary text-white transition-colors">
-                    <span class="material-symbols-outlined font-light">terminal</span>
+    <aside class="w-64 bg-white border-r border-gray-100 flex flex-col fixed h-full z-40 transition-all duration-300">
+        <div class="p-6 border-b border-gray-100">
+            <a href="/" class="flex items-center gap-4 group">
+                <div class="relative w-10 h-10 flex items-center justify-center">
+                    <!-- Official Casabero "C" Icon -->
+                    <svg viewBox="0 0 24 24" class="w-8 h-8 fill-none stroke-gray-900 stroke-[1.5]">
+                        <path d="M18 6C18 6 12 4 8 4C4 4 4 8 4 12C4 16 4 20 8 20C12 20 18 18 18 18" />
+                        <rect x="17" y="5" width="2" height="2" class="fill-accent stroke-none logo-node" />
+                        <rect x="3" y="11" width="2" height="2" class="fill-accent stroke-none logo-node logo-node-2" />
+                        <rect x="7" y="3" width="2" height="2" class="fill-accent stroke-none logo-node logo-node-3" />
+                        <rect x="7" y="19" width="2" height="2" class="fill-accent stroke-none logo-node logo-node-4" />
+                    </svg>
                 </div>
-                <span class="font-display font-bold text-lg tracking-tight uppercase">CASABERO_IGAC</span>
+                <div class="flex flex-col">
+                    <span
+                        class="text-xl font-display font-medium text-gray-900 uppercase tracking-widest transition-all duration-300 group-hover:tracking-[0.25em]">
+                        CASABERO
+                    </span>
+                    <span
+                        class="text-[8px] font-mono text-gray-400 uppercase tracking-[0.3em] -mt-1">CIVIL_HACKER</span>
+                </div>
             </a>
         </div>
 
@@ -139,9 +196,9 @@
             </div>
         </nav>
 
-        <div class="p-4 border-t border-gray-900">
+        <div class="p-4 border-t border-gray-100">
             <button onclick="toggleHelpModal()"
-                class="w-full flex items-center justify-center gap-2 py-2 bg-white border border-gray-900 text-[10px] font-mono font-bold text-gray-900 hover:bg-gray-900 hover:text-white transition-all">
+                class="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-50/50 rounded-lg text-[10px] font-mono font-bold text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all uppercase tracking-widest">
                 <span class="material-symbols-outlined text-[16px] font-light">help_center</span>
                 CENTRO_AYUDA
             </button>
@@ -151,7 +208,8 @@
     <!-- MAIN CONTENT AREA -->
     <div class="flex-1 ml-64 flex flex-col min-h-screen grid-bg">
         <!-- TOPBAR -->
-        <header class="h-16 bg-white border-b border-gray-900 flex items-center justify-between px-8 sticky top-0 z-30">
+        <header
+            class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-30">
             <div class="flex items-center gap-4">
                 <h2 class="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest">
                     > {% block page_title %}PANEL_CONTROL{% endblock %}
@@ -159,7 +217,8 @@
             </div>
             <div class="flex items-center gap-4">
                 <span class="text-[10px] font-mono bg-accent text-primary px-2 py-1 font-bold">V_2.0_SIS_ESTABLE</span>
-                <div class="h-8 w-8 bg-white border border-gray-900 flex items-center justify-center text-gray-900">
+                <div
+                    class="h-9 w-9 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center text-gray-900">
                     <span class="material-symbols-outlined text-[20px] font-light">terminal</span>
                 </div>
             </div>
