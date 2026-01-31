@@ -218,6 +218,11 @@
                     <span class="material-symbols-outlined text-[20px] font-light">location_searching</span>
                     <span class="text-[11px] uppercase tracking-wider font-bold">RENUM_INFORMALES</span>
                 </a>
+                <a href="/gis/gdb-gpkg"
+                    class="flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group {% if request.path == '/gis/gdb-gpkg' %} bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-bold border border-gray-100 dark:border-gray-700 shadow-sm {% else %} text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white {% endif %}">
+                    <span class="material-symbols-outlined text-[20px] font-light">layers</span>
+                    <span class="text-[11px] uppercase tracking-wider font-bold">CONVERSOR_GIS</span>
+                </a>
             </div>
         </nav>
 
@@ -247,9 +252,10 @@
             </div>
             <div class="flex items-center gap-4">
                 <span
-                    class="text-[10px] bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-full font-bold">V_2.5
-                    //
-                    DARK_MODE_READY</span>
+                    class="text-[10px] bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-full font-bold"
+                    id="mode-badge">
+                    V_2.5 // DARK_MODE_READY
+                </span>
                 <div class="h-9 w-9 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
                     onclick="toggleTheme()" id="theme-toggle">
                     <span class="material-symbols-outlined text-[20px] font-light" id="theme-icon">dark_mode</span>
@@ -358,11 +364,15 @@
         const rebootText = document.getElementById('reboot-text');
         const themeIcon = document.getElementById('theme-icon');
 
+        const modeBadge = document.getElementById('mode-badge');
+
         function updateIcon() {
             if (document.documentElement.classList.contains('dark')) {
                 themeIcon.textContent = 'light_mode';
+                modeBadge.textContent = 'V_2.5 // BRIGHT-WHITE_MODE_READY';
             } else {
                 themeIcon.textContent = 'dark_mode';
+                modeBadge.textContent = 'V_2.5 // DARK_MODE_READY';
             }
         }
         updateIcon();
