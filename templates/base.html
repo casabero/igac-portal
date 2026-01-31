@@ -76,6 +76,12 @@
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
 
+        .dark .premium-card {
+            background: #1a1a1a;
+            border-color: #333333;
+            color: white;
+        }
+
         @keyframes node-pulse {
 
             0%,
@@ -283,24 +289,27 @@
             </div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <div
-                class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-100">
-                <div class="bg-gray-50 px-8 py-6 flex justify-between items-center text-gray-900">
+                class="inline-block align-bottom bg-white dark:bg-[#1a1a1a] rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-100 dark:border-gray-800">
+                <div
+                    class="bg-gray-50 dark:bg-[#111111] px-8 py-6 flex justify-between items-center text-gray-900 dark:text-white">
                     <h3
-                        class="text-[10px] font-mono font-bold flex items-center gap-3 uppercase tracking-widest text-gray-500">
+                        class="text-[10px] font-mono font-bold flex items-center gap-3 uppercase tracking-widest text-gray-500 dark:text-gray-400">
                         <span class="material-symbols-outlined font-light">terminal</span>
                         SISTEMA_AYUDA // DOCUMENTACIÓN_USUARIO
                     </h3>
                     <button onclick="toggleHelpModal()"
-                        class="hover:bg-gray-100 p-2 rounded-full transition-colors flex items-center justify-center">
+                        class="hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-full transition-colors flex items-center justify-center text-gray-900 dark:text-gray-400 dark:hover:text-white">
                         <span class="material-symbols-outlined font-light">close</span>
                     </button>
                 </div>
-                <div class="px-8 py-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                <div class="px-8 py-8 max-h-[60vh] overflow-y-auto custom-scrollbar bg-white dark:bg-[#1a1a1a]">
                     <div id="helpContent"
-                        class="prose prose-sm max-w-none text-gray-600 font-sans text-xs leading-relaxed">
+                        class="prose prose-sm max-w-none text-gray-600 dark:text-gray-300 font-sans text-xs leading-relaxed">
                         {% block help_content %}
-                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-100 mb-6">
-                            <p class="font-mono text-[10px] text-blue-600 mb-2 font-bold uppercase tracking-tight">
+                        <div
+                            class="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 mb-6">
+                            <p
+                                class="font-mono text-[10px] text-blue-600 dark:text-blue-400 mb-2 font-bold uppercase tracking-tight">
                                 [MENSAJE_SISTEMA]:</p>
                             <p>Bienvenido al Centro de Documentación. Seleccione un módulo en el menú lateral para ver
                                 instrucciones específicas de operación.</p>
@@ -308,9 +317,10 @@
                         {% endblock %}
                     </div>
                 </div>
-                <div class="bg-gray-50 border-t border-gray-100 px-8 py-6 flex justify-end">
+                <div
+                    class="bg-gray-50 dark:bg-[#111111] border-t border-gray-100 dark:border-gray-800 px-8 py-6 flex justify-end">
                     <button onclick="toggleHelpModal()"
-                        class="bg-white text-gray-900 border border-gray-200 px-8 py-2 rounded-xl text-[10px] font-bold hover:bg-gray-50 transition-all uppercase tracking-widest">
+                        class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 px-8 py-2 rounded-xl text-[10px] font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all uppercase tracking-widest">
                         Cerrar Guía
                     </button>
                 </div>
@@ -370,7 +380,7 @@
 
             // 2. Typewriter Effect
             rebootText.textContent = "";
-            const msg = "[SYSTEM] :: RELOADING_VIEWPORT...";
+            const msg = "[SISTEMA] :: REINICIANDO_INTERFAZ...";
             rebootText.textContent = msg;
 
             // 3. Wait for effect and Switch
