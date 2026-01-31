@@ -271,7 +271,22 @@ def generar_pdf_renumeracion(resultados):
     ]
     
     for r_title, r_text in rules_desc:
-        pdf.set_font('Helvetica', 'B', 9); pdf.cell(35, 5, r_title + ":", 0, 0); pdf.set_font('Helvetica', '', 9); pdf.multi_cell(0, 5, r_text); pdf.ln(1)
+        pdf.set_font('Helvetica', 'B', 9)
+        # Calcular ancho del titulo para alineacion
+        title_w = pdf.get_string_width(r_title + ":") + 5
+        pdf.cell(title_w, 5, r_title + ":", 0, 0)
+        
+        # Guardar posicion X para indentar el bloque de texto
+        start_x = pdf.get_x()
+        
+        # Ajustar margen izquierdo temporalmente para que el multi_cell se alinee
+        pdf.set_left_margin(start_x)
+        pdf.set_font('Helvetica', '', 9)
+        pdf.multi_cell(0, 5, r_text)
+        
+        # Restaurar margen original
+        pdf.set_left_margin(20)
+        pdf.ln(1)
 
     if f == 2:
         l_g = resultados.get('logs_geo', {}); s_g = l_g.get('stats_geo', {}) if isinstance(l_g, dict) else {}
