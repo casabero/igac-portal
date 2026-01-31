@@ -26,23 +26,23 @@
 <div class="max-w-[1400px] mx-auto">
     <!-- FORMULARIO DE CARGA (SI NO HAY RESULTADOS) -->
     {% if not resultados %}
-    <div class="max-w-2xl mx-auto premium-card p-10 mt-4 relative overflow-hidden">
-        <div class="mb-10 border-l-4 border-gray-900 pl-6">
+    <div class="premium-card p-10 mt-4 relative overflow-hidden">
+        <div class="mb-10 border-l-4 border-gray-200 pl-6">
             <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">02 // ANALISIS AVALUOS
             </h2>
-            <p class="text-xs font-mono text-gray-500 mt-2 uppercase tracking-widest">EJECUCIÓN // DELTA PRECIERRE VS
-                POSTCIERRE</p>
+            <p class="text-xs text-gray-400 mt-2 uppercase tracking-widest font-bold">MONITOREO DE VARIACIÓN CATASTRAL
+            </p>
         </div>
 
         <form method="POST" enctype="multipart/form-data" class="space-y-10">
             <div class="grid grid-cols-2 gap-8">
-                <div class="space-y-4 font-mono">
+                <div class="space-y-4 font-sans">
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">01. Archivo Base
                         (Pre-cierre)</label>
                     <input type="file" name="file_pre" id="file_pre" class="hidden" accept=".xlsx,.xls,.csv,.txt" {% if
                         not session_data.name_pre %}required{% endif %}>
                     <label for="file_pre"
-                        class="flex flex-col items-center justify-center w-full h-40 border border-dashed border-gray-200 rounded-none bg-gray-50/30 hover:bg-white hover:border-gray-900 transition-all cursor-pointer group">
+                        class="flex flex-col items-center justify-center w-full h-40 border border-dashed border-gray-200 rounded-2xl bg-gray-50/30 hover:bg-white hover:border-gray-200 transition-all cursor-pointer group">
                         <span
                             class="material-symbols-outlined text-3xl text-gray-300 mb-3 group-hover:text-gray-900 transition-colors font-light">terminal</span>
                         <span
@@ -54,13 +54,13 @@
                         </span>
                     </label>
                 </div>
-                <div class="space-y-4 font-mono">
+                <div class="space-y-4 font-sans">
                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">02. Archivo
                         Sistema (Post-cierre)</label>
                     <input type="file" name="file_post" id="file_post" class="hidden" accept=".xlsx,.xls,.csv,.txt" {%
                         if not session_data.name_post %}required{% endif %}>
                     <label for="file_post"
-                        class="flex flex-col items-center justify-center w-full h-40 border border-dashed border-gray-200 rounded-none bg-gray-50/30 hover:bg-white hover:border-gray-900 transition-all cursor-pointer group">
+                        class="flex flex-col items-center justify-center w-full h-40 border border-dashed border-gray-200 rounded-2xl bg-gray-50/30 hover:bg-white hover:border-gray-200 transition-all cursor-pointer group">
                         <span
                             class="material-symbols-outlined text-3xl text-gray-300 mb-3 group-hover:text-gray-900 transition-colors font-light">terminal</span>
                         <span
@@ -74,12 +74,22 @@
                 </div>
             </div>
 
-            <div class="space-y-8 border-t border-gray-100 pt-8 font-mono">
+            <div class="space-y-8 border-t border-gray-100 pt-8 font-sans">
+                <div class="flex-1 space-y-4">
+                    <label
+                        class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-2">Configuración
+                        de Análisis</label>
+                    <select name="config_analisis"
+                        class="w-full text-xs border border-gray-100 rounded-xl bg-gray-50/50 focus:ring-gray-400 focus:border-gray-400 py-4 px-6 uppercase font-bold transition-all">
+                        <option value="VARIACION_GLOBAL">Variación Global de Avalúos</option>
+                        <option value="DETALLE_PREDIAL">Análisis Detallado por Predio</option>
+                    </select>
+                </div>
                 <div>
                     <label class="block text-[10px] font-bold text-gray-500 mb-4 uppercase tracking-widest">Seleccionar
                         Zona de Predios</label>
                     <select name="zona_filter" id="zona_filter"
-                        class="w-full text-xs border border-gray-100 rounded-none bg-gray-50/50 focus:ring-gray-900 focus:border-gray-900 py-4 px-4 uppercase font-bold">
+                        class="w-full text-xs border border-gray-100 rounded-2xl bg-gray-50/50 focus:ring-gray-900 focus:border-gray-200 py-4 px-4 uppercase font-bold">
                         <option value="TODOS">Todos los Predios</option>
                         <option value="URBANO">Solo Urbana (01)</option>
                         <option value="RURAL">Solo Rural (00)</option>
@@ -87,19 +97,19 @@
                     </select>
                 </div>
 
-                <div class="bg-gray-50/30 p-8 border border-gray-100 rounded-none grid grid-cols-2 gap-8">
+                <div class="bg-gray-50/30 p-8 border border-gray-100 rounded-2xl grid grid-cols-2 gap-8">
                     <div id="div_urbano">
                         <label class="block text-[10px] font-bold text-gray-500 uppercase mb-3">Incremento Esperado
                             Urbano (%)</label>
                         <input type="number" step="0.01" name="pct_urbano"
-                            class="w-full border border-gray-100 rounded-none bg-white text-xs py-3 px-4 focus:border-gray-900 focus:ring-gray-900"
+                            class="w-full border border-gray-100 rounded-2xl bg-white text-xs py-3 px-4 focus:border-gray-200 focus:ring-gray-900"
                             value="0.00">
                     </div>
                     <div id="div_rural">
                         <label class="block text-[10px] font-bold text-gray-500 uppercase mb-3">Incremento Esperado
                             Rural (%)</label>
                         <input type="number" step="0.01" name="pct_rural"
-                            class="w-full border border-gray-100 rounded-none bg-white text-xs py-3 px-4 focus:border-gray-900 focus:ring-gray-900"
+                            class="w-full border border-gray-100 rounded-2xl bg-white text-xs py-3 px-4 focus:border-gray-200 focus:ring-gray-900"
                             value="0.00">
                     </div>
                 </div>
@@ -111,14 +121,14 @@
                         <span id="lblPct" class="text-xs font-bold text-gray-900">100%</span>
                     </div>
                     <input type="range" name="sample_pct" id="sample_pct" min="1" max="100" value="100"
-                        class="w-full h-1 bg-gray-200 appearance-none cursor-pointer accent-gray-900 rounded-none"
+                        class="w-full h-1 bg-gray-200 appearance-none cursor-pointer accent-gray-900 rounded-2xl"
                         oninput="document.getElementById('lblPct').textContent = this.value + '%'">
                 </div>
             </div>
 
             <button type="submit"
-                class="w-full bg-gray-900 text-white py-5 rounded-none hover:bg-white hover:text-gray-900 border border-gray-900 transition-all font-mono font-bold text-xs tracking-[0.3em] flex justify-center items-center gap-4 uppercase active:scale-[0.98]">
-                <span class="material-symbols-outlined font-light">analytics</span> Iniciar Análisis de Cambios
+                class="w-full bg-gray-50 border border-gray-200 text-gray-900 py-5 rounded-2xl hover:bg-white hover:border-gray-200 transition-all font-bold text-[11px] tracking-[0.3em] flex justify-center items-center gap-4 uppercase active:scale-[0.98]">
+                <span class="material-symbols-outlined font-light">analytics</span> Ejecutar Análisis de Avalúos
             </button>
         </form>
     </div>
@@ -126,8 +136,8 @@
 
     <!-- RESULTADOS (SI EXISTEN) -->
     {% if resultados %}
-    <div id="dashboard" class="space-y-8 uppercase font-mono">
-        <div class="flex items-center justify-between border-l-4 border-gray-900 pl-6 mb-4">
+    <div id="dashboard" class="space-y-8 uppercase font-sans">
+        <div class="flex items-center justify-between border-l-4 border-gray-200 pl-6 mb-4">
             <h3
                 class="text-2xl font-display font-bold text-gray-900 flex items-center gap-4 uppercase tracking-tighter">
                 <span class="material-symbols-outlined text-gray-900 font-light">analytics</span>
@@ -135,17 +145,22 @@
             </h3>
             <div class="flex gap-4">
                 <a href="/clear_analysis"
-                    class="bg-white border border-gray-100 rounded-none text-gray-900 px-6 py-2 text-[10px] font-bold hover:bg-gray-50 transition-all flex items-center gap-3 tracking-widest">
+                    class="bg-white border border-gray-100 rounded-2xl text-gray-900 px-6 py-2 text-[10px] font-bold hover:bg-gray-50 transition-all flex items-center gap-3 tracking-widest">
                     <span class="material-symbols-outlined text-[18px] font-light">refresh</span> Limpiar Datos
                 </a>
             </div>
         </div>
 
         {% if resultados.stats.sample_mode %}
-        <div class="bg-gray-900 border border-gray-900 rounded-none p-6 flex items-center gap-4 text-white">
-            <span class="material-symbols-outlined text-gray-400 font-light">speed</span>
-            <p class="text-[10px] font-bold tracking-[0.2em]">Modo Optimizado Activo: Se están analizando 5,000 predios
-                para mayor rapidez.</p>
+        <div class="bg-gray-50 border border-gray-100 rounded-2xl p-6 flex items-center gap-6">
+            <div
+                class="w-12 h-12 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-400">
+                <span class="material-symbols-outlined text-2xl">info</span>
+            </div>
+            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-relaxed">
+                El algoritmo compara los avalúos actuales contra los del año anterior para identificar inconsistencias
+                masivas o variaciones fuera de rango.
+            </p>
         </div>
         {% endif %}
 
@@ -183,9 +198,15 @@
                 <p class="text-[9px] text-gray-500 font-bold uppercase mb-3 tracking-widest">Avalúo Intermedio</p>
                 <p class="text-xl font-bold text-gray-900">$ {{ "{:,.0f}".format(resultados.stats.median) }}</p>
             </div>
-            <div class="border-r border-gray-100">
-                <p class="text-[9px] text-gray-500 font-bold uppercase mb-3 tracking-widest">Valor más Común</p>
-                <p class="text-xl font-bold text-gray-900">$ {{ "{:,.0f}".format(resultados.stats.mode) }}</p>
+            <div class="premium-card p-6 flex items-center gap-6 border-l-4 border-l-gray-300">
+                <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-900 shadow-sm">
+                    <span class="material-symbols-outlined text-3xl font-light">request_quote</span>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Monto Total Analizado
+                    </p>
+                    <h4 class="text-2xl font-display font-bold text-gray-900">${{ "{:,.2f}".format(total_monto) }}</h4>
+                </div>
             </div>
             <div>
                 <p class="text-[9px] text-gray-500 font-bold uppercase mb-3 tracking-widest">Desviación de Valores</p>
@@ -197,13 +218,13 @@
         <div class="premium-card overflow-hidden">
             <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/30">
                 <h4
-                    class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-gray-900 pl-4">
+                    class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-gray-200 pl-4">
                     Detalle de los Predios Analizados</h4>
             </div>
             <div class="overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar">
-                <table class="w-full text-left border-collapse text-[10px] uppercase font-mono">
+                <table class="w-full text-left border-collapse text-[10px] uppercase font-sans">
                     <thead
-                        class="sticky top-0 bg-gray-900 border-b border-gray-900 text-gray-400 font-bold tracking-widest">
+                        class="sticky top-0 bg-gray-50 border-b border-gray-200 text-gray-400 font-bold tracking-widest">
                         <tr>
                             <th class="px-8 py-5">Número Predial</th>
                             <th class="px-8 py-5">Propietario</th>
@@ -215,23 +236,23 @@
                     </thead>
                     <tbody class="divide-y divide-gray-50">
                         {% for item in resultados.data %}
-                        <tr class="hover:bg-gray-50/50 transition-colors">
-                            <td class="px-8 py-5 text-gray-400 font-mono">{{ item.Predial_Nacional }}</td>
-                            <td class="px-8 py-5 font-bold text-gray-900 max-w-[200px] truncate">{{ item.Nombre }}
+                        <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                            <td class="px-6 py-4 text-[11px] font-bold text-gray-900 uppercase tracking-tight">{{
+                                item.Predial_Nacional }}
                             </td>
-                            <td class="px-8 py-5 text-right text-gray-500">$ {{ "{:,.0f}".format(item.Base) }}</td>
-                            <td class="px-8 py-5 text-right font-bold text-gray-900">$ {{ "{:,.0f}".format(item.Sistema)
-                                }}</td>
-                            <td
-                                class="px-8 py-5 text-center font-bold {% if item.Estado == 'OK' %}text-gray-900{% else %}text-red-600{% endif %}">
-                                {{ "%.2f"|format(item.Pct_Real * 100) }}%
+                            <td class="px-6 py-4 text-[10px] text-gray-600">${{ "{:,.0f}".format(item.Base) }}</td>
+                            <td class="px-6 py-4 text-[11px] font-bold text-gray-900">${{ "{:,.0f}".format(item.Sistema)
+                                }}
                             </td>
-                            <td class="px-8 py-5">
-                                <span class="px-3 py-1 border rounded-none text-[9px] font-bold tracking-widest 
-                                    {% if item.Estado == 'OK' %}border-gray-100 text-gray-500 bg-gray-50
-                                    {% elif item.Estado == 'NUEVO' %}border-gray-900 text-gray-900 bg-functional-success
-                                    {% elif item.Estado == 'DESAPARECIDO' %}border-gray-200 text-gray-400
-                                    {% else %}border-gray-900 text-gray-900 bg-functional-error uppercase{% endif %}">
+                            <td class="px-6 py-4">
+                                <span
+                                    class="px-3 py-1 text-[9px] font-bold rounded-full {{ 'bg-red-50 text-red-600' if item.Pct_Real * 100 > 10 else 'bg-green-50 text-green-600' }}">
+                                    {{ "%.2f"|format(item.Pct_Real * 100) }}%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span
+                                    class="px-3 py-1 text-[10px] font-bold rounded-full {{ 'bg-green-50 text-green-600' if item.Estado == 'OK' else 'bg-red-50 text-red-600 border border-red-100 shadow-sm' }}">
                                     {{ item.Estado }}
                                 </span>
                             </td>
@@ -247,7 +268,7 @@
 {% endblock %}
 
 {% block help_content %}
-<div class="space-y-10 font-mono text-[11px] text-gray-900 uppercase">
+<div class="space-y-10 font-sans text-[11px] text-gray-900 uppercase">
     <section>
         <h4 class="border-b border-gray-100 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
             <span class="material-symbols-outlined font-light">analytics</span>
@@ -265,32 +286,32 @@
         <div class="space-y-6">
             <div class="flex gap-4">
                 <span
-                    class="px-3 py-1 border border-gray-100 rounded-none text-gray-500 bg-gray-50 font-bold h-fit">Correcto</span>
+                    class="px-3 py-1 border border-gray-100 rounded-2xl text-gray-500 bg-gray-50 font-bold h-fit">Correcto</span>
                 <p class="text-[10px] text-gray-500">El predio está en ambos archivos y su valor cambió según lo
                     esperado.</p>
             </div>
             <div class="flex gap-4">
                 <span
-                    class="px-3 py-1 border border-gray-900 rounded-none text-gray-900 bg-functional-success font-bold h-fit">Nuevo</span>
+                    class="px-3 py-1 border border-gray-200 rounded-2xl text-gray-900 bg-functional-success font-bold h-fit">Nuevo</span>
                 <p class="text-[10px] text-gray-500">Es un predio que no existía antes y ahora aparece en el sistema.
                 </p>
             </div>
             <div class="flex gap-4">
                 <span
-                    class="px-3 py-1 border border-gray-200 rounded-none text-gray-400 font-bold h-fit">Desaparecido</span>
+                    class="px-3 py-1 border border-gray-200 rounded-2xl text-gray-400 font-bold h-fit">Desaparecido</span>
                 <p class="text-[10px] text-gray-400">Es un predio que estaba antes pero ya no se encuentra en el nuevo
                     sistema.</p>
             </div>
             <div class="flex gap-4">
                 <span
-                    class="px-3 py-1 border border-gray-900 rounded-none text-gray-900 bg-functional-error font-bold h-fit">Inconsistente</span>
+                    class="px-3 py-1 border border-gray-200 rounded-2xl text-gray-900 bg-functional-error font-bold h-fit">Inconsistente</span>
                 <p class="text-[10px] text-gray-500">El valor del predio cambió de una forma inesperada o incorrecta.
                 </p>
             </div>
         </div>
     </section>
 
-    <section class="bg-gray-900 p-8 border border-gray-900 rounded-none text-white">
+    <section class="bg-gray-50 p-8 border border-gray-200 rounded-2xl text-gray-900">
         <h4
             class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
             <span class="material-symbols-outlined text-gray-400 font-light">calculate</span>

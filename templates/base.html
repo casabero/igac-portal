@@ -16,7 +16,7 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        "sans": ["Inter", "sans-serif"],
+                        "sans": ["Outfit", "sans-serif"],
                         "display": ["Outfit", "sans-serif"],
                         "mono": ["Fira Code", "monospace"],
                     },
@@ -25,11 +25,8 @@
                             900: "#111111", 700: "#333333", 500: "#666666", 200: "#E5E5E5", 50: "#F9FAFB"
                         },
                         primary: "#111111",
-                        functional: {
-                            success: "#d1fae5",
-                            error: "#fee2e2",
-                            warning: "#fef3c7"
-                        }
+                        secondary: "#333333",
+                        accent: "#666666",
                     }
                 }
             }
@@ -55,26 +52,27 @@
         }
 
         .nav-item-active {
-            background-color: #111111;
-            color: #FFFFFF;
-            border-right: 3px solid #111111;
+            background-color: #F8FAFC;
+            color: #111111;
+            border: 1px solid #E5E5E5;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
         }
 
         .grid-bg {
-            background-image: radial-gradient(#11111108 0.5px, transparent 0.5px);
-            background-size: 40px 40px;
+            background-color: #FFFFFF;
         }
 
         .premium-card {
             background: white;
             border: 1px solid #E5E5E5;
-            box-shadow: none;
-            border-radius: 0px;
-            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border-radius: 1.25rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .premium-card:hover {
-            border-color: #111111;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
 
         @keyframes node-pulse {
@@ -144,71 +142,52 @@
 
     <!-- SIDEBAR -->
     <aside class="w-64 bg-white border-r border-gray-100 flex flex-col fixed h-full z-40 transition-all duration-300">
-        <div class="p-6 border-b border-gray-100">
-            <a href="/" class="flex items-center gap-4 group">
-                <div class="relative w-10 h-10 flex items-center justify-center">
-                    <!-- Official Casabero "C" Icon -->
-                    <svg viewBox="0 0 24 24" class="w-8 h-8 fill-none stroke-gray-900 stroke-[1.5]">
-                        <path d="M18 6C18 6 12 4 8 4C4 4 4 8 4 12C4 16 4 20 8 20C12 20 18 18 18 18" />
-                        <rect x="17" y="5" width="2" height="2" class="fill-gray-900 stroke-none logo-node" />
-                        <rect x="3" y="11" width="2" height="2"
-                            class="fill-gray-900 stroke-none logo-node logo-node-2" />
-                        <rect x="7" y="3" width="2" height="2"
-                            class="fill-gray-900 stroke-none logo-node logo-node-3" />
-                        <rect x="7" y="19" width="2" height="2"
-                            class="fill-gray-900 stroke-none logo-node logo-node-4" />
-                    </svg>
-                </div>
-                <div class="flex flex-col">
-                    <span
-                        class="text-xl font-display font-medium text-gray-900 uppercase tracking-widest transition-all duration-300 group-hover:tracking-[0.25em]">
-                        CASABERO
-                    </span>
-                    <span
-                        class="text-[8px] font-mono text-gray-400 uppercase tracking-[0.3em] -mt-1">CIVIL_HACKER</span>
-                </div>
+        <div class="p-8 border-b border-gray-100">
+            <a href="/" class="flex flex-col gap-1">
+                <span class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">
+                    Portal IGAC
+                </span>
+                <span class="text-[8px] font-sans text-gray-400 uppercase tracking-[0.3em]">Gestión Catastral
+                    2026</span>
             </a>
         </div>
 
         <nav class="flex-1 py-4 overflow-y-auto custom-scrollbar">
-            <div class="px-3 mb-2">
-                <p class="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest px-3 mb-4">
+            <!-- Sidebar Header: Simplified -->
+            <div class="px-6 mb-2">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">
                     PANEL DE HERRAMIENTAS</p>
+            </div>
+            <div class="px-3 mb-2">
                 <a href="/snc"
-                    class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/snc' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
-                    <span class="material-symbols-outlined text-[18px] font-light">data_object</span>
-                    <span class="text-xs font-mono font-medium uppercase">CONVERTIDOR_SNC</span>
+                    class="flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group {% if request.path == '/snc' %} bg-gray-50 text-gray-900 font-bold border border-gray-100 shadow-sm {% else %} text-gray-500 hover:bg-gray-50 hover:text-gray-900 {% endif %}">
+                    <span class="material-symbols-outlined text-[20px] font-light">data_object</span>
+                    <span class="text-[11px] uppercase tracking-wider font-bold">CONVERTIDOR_SNC</span>
                 </a>
                 <a href="/avaluos"
-                    class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/avaluos' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
-                    <span class="material-symbols-outlined text-[18px] font-light">analytics</span>
-                    <span class="text-xs font-mono font-medium uppercase">ANALISIS_AVALUOS</span>
+                    class="flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group {% if request.path == '/avaluos' %} bg-gray-50 text-gray-900 font-bold border border-gray-100 shadow-sm {% else %} text-gray-500 hover:bg-gray-50 hover:text-gray-900 {% endif %}">
+                    <span class="material-symbols-outlined text-[20px] font-light">analytics</span>
+                    <span class="text-[11px] uppercase tracking-wider font-bold">ANALISIS_AVALUOS</span>
                 </a>
                 <a href="/auditoria"
-                    class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/auditoria' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
-                    <span class="material-symbols-outlined text-[18px] font-light">verified</span>
-                    <span class="text-xs font-mono font-medium uppercase">AUDITORIA_CIERRE</span>
+                    class="flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group {% if request.path == '/auditoria' %} bg-gray-50 text-gray-900 font-bold border border-gray-100 shadow-sm {% else %} text-gray-500 hover:bg-gray-50 hover:text-gray-900 {% endif %}">
+                    <span class="material-symbols-outlined text-[20px] font-light">verified</span>
+                    <span class="text-[11px] uppercase tracking-wider font-bold">AUDITORIA_CIERRE</span>
                 </a>
                 <a href="/renumeracion"
-                    class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/renumeracion' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
-                    <span class="material-symbols-outlined text-[18px] font-light">rule_folder</span>
-                    <span class="text-xs font-mono font-medium uppercase">RENUM_AUDITORIA</span>
+                    class="flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group {% if request.path == '/renumeracion' %} bg-gray-50 text-gray-900 font-bold border border-gray-100 shadow-sm {% else %} text-gray-500 hover:bg-gray-50 hover:text-gray-900 {% endif %}">
+                    <span class="material-symbols-outlined text-[20px] font-light">rule_folder</span>
+                    <span class="text-[11px] uppercase tracking-wider font-bold">RENUM_AUDITORIA</span>
                 </a>
                 <a href="/renumeracion-informales"
-                    class="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-gray-900 hover:text-white transition-all group {% if request.path == '/renumeracion-informales' %}nav-item-active{% endif %} border border-transparent hover:border-gray-900">
-                    <span class="material-symbols-outlined text-[18px] font-light">location_searching</span>
-                    <span class="text-xs font-mono font-medium uppercase">RENUM_INFORMALES</span>
+                    class="flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group {% if request.path == '/renumeracion-informales' %} bg-gray-50 text-gray-900 font-bold border border-gray-100 shadow-sm {% else %} text-gray-500 hover:bg-gray-50 hover:text-gray-900 {% endif %}">
+                    <span class="material-symbols-outlined text-[20px] font-light">location_searching</span>
+                    <span class="text-[11px] uppercase tracking-wider font-bold">RENUM_INFORMALES</span>
                 </a>
             </div>
         </nav>
 
-        <div class="p-4 border-t border-gray-100">
-            <button onclick="toggleHelpModal()"
-                class="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-50/50 rounded-none text-[10px] font-mono font-bold text-gray-500 hover:bg-gray-900 hover:text-white transition-all uppercase tracking-widest">
-                <span class="material-symbols-outlined text-[16px] font-light">help_center</span>
-                CENTRO DE AYUDA
-            </button>
-        </div>
+        <!-- Espacio inferior reservado para limpieza visual -->
     </aside>
 
     <!-- MAIN CONTENT AREA -->
@@ -217,16 +196,16 @@
         <header
             class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-30">
             <div class="flex items-center gap-4">
-                <h2 class="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest">
-                    > {% block page_title %}PANEL_CONTROL{% endblock %}
+                <h2 class="text-[10px] font-sans font-bold text-gray-400 uppercase tracking-[0.2em]">
+                    {% block page_title %}PANEL_CONTROL{% endblock %}
                 </h2>
             </div>
             <div class="flex items-center gap-4">
-                <span class="text-[10px] font-mono bg-functional-success text-primary px-2 py-1 font-bold">V_2.0 //
+                <span class="text-[10px] bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-bold">V_2.0 //
                     ESTABLE</span>
                 <div
-                    class="h-9 w-9 bg-gray-50 border border-gray-100 rounded-none flex items-center justify-center text-gray-900">
-                    <span class="material-symbols-outlined text-[20px] font-light">terminal</span>
+                    class="h-9 w-9 bg-gray-50 border border-gray-100 rounded-full flex items-center justify-center text-gray-400">
+                    <span class="material-symbols-outlined text-[20px] font-light">account_circle</span>
                 </div>
             </div>
         </header>
@@ -236,7 +215,7 @@
             {% if messages %}
             {% for message in messages %}
             <div
-                class="mb-6 p-4 {% if 'Error' in message or 'Faltan' in message %}bg-functional-error border-gray-900 text-gray-900{% else %}bg-functional-success border-gray-900 text-gray-900{% endif %} border text-[10px] font-mono flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+                class="mb-6 p-4 {% if 'Error' in message or 'Faltan' in message %}bg-red-50 border-red-200 text-red-700{% else %}bg-green-50 border-green-200 text-green-700{% endif %} border rounded-xl text-[10px] font-sans flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
                 <span class="material-symbols-outlined text-[18px] font-light">info</span>
                 <span class="font-bold uppercase tracking-tight">REPORTE :: {{ message }}</span>
             </div>
@@ -247,81 +226,31 @@
             {% block content %}{% endblock %}
         </main>
 
-        <footer class="p-8 border-t border-gray-900 bg-white flex flex-col items-center gap-2">
-            <p class="text-[10px] font-mono text-gray-900 uppercase tracking-[0.2em] font-bold">
-                Autor: CASABERO
-            </p>
-            <p class="text-[8px] font-mono text-gray-400 uppercase tracking-[0.2em] font-medium">
-                Información del Sistema: portal_igac_v2.0 | arch: x64 | loc: latam
-                <a href="/admin/dashboard" class="opacity-0 hover:opacity-10 transition-opacity cursor-default"
-                    title="Admin">.</a>
+        <footer class="p-12 border-t border-gray-50 bg-white flex flex-col items-center">
+            <p class="text-[11px] text-gray-300 uppercase tracking-[0.4em] font-bold">
+                PORTAL IGAC 2026
             </p>
         </footer>
     </div>
 
-    <!-- HELP MODAL -->
-    <div id="helpModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
-        aria-modal="true">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-900/40 transition-opacity" aria-hidden="true" onclick="toggleHelpModal()">
-            </div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div
-                class="inline-block align-bottom bg-white text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-900">
-                <div class="bg-gray-900 px-8 py-6 flex justify-between items-center text-white">
-                    <h3 class="text-sm font-mono font-bold flex items-center gap-3 uppercase tracking-widest">
-                        <span class="material-symbols-outlined font-light">terminal</span>
-                        manual_v1.2 // execute --help
-                    </h3>
-                    <button onclick="toggleHelpModal()"
-                        class="hover:bg-white/10 p-2 transition-colors flex items-center justify-center">
-                        <span class="material-symbols-outlined font-light">close</span>
-                    </button>
-                </div>
-                <div class="px-8 py-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                    <div id="helpContent" class="prose prose-sm max-w-none text-gray-900 font-mono text-[11px]">
-                        {% block help_content %}
-                        <p>> [MENSAJE_SISTEMA]: Seleccione un módulo en la barra lateral para desplegar la documentación
-                            técnica específica.
-                        </p>
-                        {% endblock %}
-                    </div>
-                </div>
-                <div class="bg-white border-t border-gray-900 px-8 py-4 flex justify-end">
-                    <button onclick="toggleHelpModal()"
-                        class="bg-gray-900 text-white px-6 py-2 border border-gray-900 text-xs font-mono font-bold hover:bg-white hover:text-gray-900 transition-all active:scale-95">
-                        SALIR_MANUAL
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Eliminado Centro de Ayuda Lateral para mayor limpieza visual -->
 
     <script>
-        function toggleHelpModal() {
-            const modal = document.getElementById('helpModal');
-            modal.classList.toggle('hidden');
-            if (!modal.classList.contains('hidden')) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = 'auto';
-            }
-        }
-
-        // Hardware Sensing (Resolution)
-        (function () {
-            const res = window.screen.width + "x" + window.screen.height;
-            const url = new URL(window.location.href);
-            if (!url.searchParams.has('res')) {
-                // Solo si no estamos en una redirección infinita de res
-                // En realidad, mejor inyectarlo en las peticiones AJAX o simplemente capturarlo una vez
-                // Por simplicidad en este entorno, lo dejamos listo para que el logger lo tome si se envía via GET
-                // o lo guardamos en una cookie que Flask puede leer.
-                document.cookie = "screen_res=" + res + "; path=/; max-age=31536000";
-            }
-        })();
+            // Hardware Sensing (Resolution)
+            (function () {
+                const res = window.screen.width + "x" + window.screen.height;
+                const url = new URL(window.location.href);
+                if (!url.searchParams.has('res')) {
+                    // Solo si no estamos en una redirección infinita de res
+                    // En realidad, mejor inyectarlo en las peticiones AJAX o simplemente capturarlo una vez
+                    // Por simplicidad en este entorno, lo dejamos listo para que el logger lo tome si se envía via GET
+                    // o lo guardamos en una cookie que Flask puede leer.
+                    document.cookie = "screen_res=" + res + "; path=/; max-age=31536000";
+                }
+            })();
     </script>
     {% block scripts %}{% endblock %}
 </body>
 
 </html>
+```

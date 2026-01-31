@@ -6,56 +6,58 @@
 
 {% block content %}
 <div class="max-w-3xl mx-auto py-4">
+    <div id="loading-overlay"
+        class="hidden fixed inset-0 bg-white/90 backdrop-blur-md z-[100] flex flex-col items-center justify-center">
+        <div class="w-20 h-20 border-4 border-gray-100 border-t-blue-600 rounded-full animate-spin mb-8"></div>
+        <div class="text-center space-y-4">
+            <h3 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">Procesando Información
+            </h3>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] animate-pulse">Optimizando
+                registros y generando Excel...</p>
+        </div>
+    </div>
     <div class="premium-card p-10 mt-4 relative overflow-hidden">
-        <div class="mb-10 border-l-4 border-gray-900 pl-6">
+        <div class="mb-10 border-l-4 border-blue-600 pl-6">
             <h2 class="text-xl font-display font-bold text-gray-900 uppercase tracking-tighter">01 // CONVERTIDOR SNC
             </h2>
-            <p class="text-xs font-mono text-gray-500 mt-2 uppercase tracking-widest">EJECUCIÓN // FLUJO EXCEL PARSING
+            <p class="text-xs font-sans text-gray-500 mt-2 uppercase tracking-widest">EJECUCIÓN // FLUJO EXCEL PARSING
             </p>
         </div>
 
         <form method="POST" enctype="multipart/form-data" class="space-y-8">
             <!-- 1. Selección de Registro -->
-            <div>
-                <label class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">01.
-                    Seleccione el tipo de registro</label>
-                <select name="opcion"
-                    class="block w-full border-gray-100 rounded-none text-xs font-mono focus:ring-gray-900 focus:border-gray-900 bg-gray-50/50 py-3 px-4 uppercase"
-                    required>
-                    <option value="" selected disabled>Seleccionar...</option>
-                    <option value="1">Datos Básicos de Predios (R1)</option>
-                    <option value="2">Detalles de Construcción (R2)</option>
-                    <option value="3">Procedimientos Generales (T1)</option>
-                    <option value="4">Detalles Físicos (T2)</option>
-                    <option value="5">Decretos Legales (T3)</option>
+            <div class="flex-1 space-y-4">
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-2">01. Selección de
+                    Parámetros</label>
+                <select name="config"
+                    class="w-full text-xs border border-gray-100 rounded-xl bg-gray-50/50 focus:ring-blue-500 focus:border-blue-500 py-4 px-6 uppercase font-bold transition-all">
+                    <option value="SNC_STANDARD">SNC_STANDARD // BASE_GENERAL</option>
+                    <option value="SNC_PH">SNC_PH // PROPIEDAD_HORIZONTAL</option>
+                    <option value="SNC_FULL">SNC_COMPLETO // TODOS_LOS_CAMPOS</option>
                 </select>
             </div>
 
             <!-- 2. Archivo -->
-            <div>
-                <label class="block text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">02.
-                    Cargue el archivo original
-                    (.txt / .prn)</label>
-                <div class="relative group">
-                    <input type="file" name="archivo" id="archivo" class="hidden" required>
-                    <label for="archivo"
-                        class="flex flex-col items-center justify-center w-full h-48 border border-dashed border-gray-200 rounded-none bg-gray-50/30 hover:bg-white hover:border-gray-900 transition-all cursor-pointer">
-                        <span
-                            class="material-symbols-outlined text-4xl text-gray-300 mb-3 group-hover:text-gray-900 transition-colors font-light">terminal</span>
-                        <span class="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest"
-                            id="file_label">Seleccione un archivo</span>
-                        <span class="mt-2 text-[9px] font-mono text-gray-400 uppercase tracking-tight">Lectura de datos
-                            optimizada</span>
-                    </label>
-                </div>
+            <div class="flex-1 space-y-4">
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-2">02. Carga de
+                    Insumo (.txt/.prn)</label>
+                <input type="file" name="file" id="file" class="hidden" accept=".txt,.prn" required>
+                <label for="file" id="drop-zone"
+                    class="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/30 hover:bg-blue-50/30 hover:border-blue-300 transition-all cursor-pointer group">
+                    <span
+                        class="material-symbols-outlined text-4xl text-gray-300 mb-3 group-hover:text-blue-500 transition-colors font-light">cloud_upload</span>
+                    <span class="text-[10px] font-bold text-gray-500 text-center px-6 leading-relaxed uppercase"
+                        id="file-name">
+                        Arrastra el archivo aquí o haz clic para seleccionar
+                    </span>
+                </label>
             </div>
 
             <!-- 3. Acción -->
             <div class="pt-6">
                 <button type="submit"
-                    class="w-full flex justify-center items-center gap-3 py-5 bg-gray-900 text-white rounded-none font-mono font-bold text-[10px] uppercase tracking-widest hover:bg-white hover:text-gray-900 border border-gray-900 transition-all active:scale-[0.98]">
-                    <span class="material-symbols-outlined text-[20px] font-light">download</span>
-                    Convertir y Descargar Excel
+                    class="w-full bg-blue-600 text-gray-900 py-5 rounded-2xl hover:bg-blue-700 transition-all font-bold text-[11px] tracking-[0.3em] flex justify-center items-center gap-4 uppercase shadow-lg shadow-blue-100 active:scale-[0.98]">
+                    <span class="material-symbols-outlined font-light">bolt</span> Procesar y Convertir a Excel
                 </button>
             </div>
         </form>
@@ -67,9 +69,9 @@
             <span class="material-symbols-outlined font-light">info</span>
         </div>
         <div>
-            <h4 class="text-[10px] font-mono font-bold text-gray-900 uppercase tracking-widest mb-2">Nota del Sistema
+            <h4 class="text-[10px] font-sans font-bold text-gray-900 uppercase tracking-widest mb-2">Nota del Sistema
             </h4>
-            <p class="text-[11px] font-mono text-gray-500 leading-relaxed uppercase">
+            <p class="text-[11px] font-sans text-gray-500 leading-relaxed uppercase">
                 Esta herramienta organiza la información de los predios exactamente como viene en el archivo original,
                 asegurando que no se pierda ningún dato durante la conversión a Excel.
             </p>
@@ -79,7 +81,7 @@
 {% endblock %}
 
 {% block help_content %}
-<div class="space-y-10 font-mono text-[11px] text-gray-900 uppercase">
+<div class="space-y-10 font-sans text-[11px] text-gray-900 uppercase">
     <section>
         <h4 class="border-b border-gray-100 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
             <span class="material-symbols-outlined font-light">description</span>
@@ -95,24 +97,24 @@
             02_VERSIONES_SOPORTADAS
         </h4>
         <div class="grid grid-cols-1 gap-4">
-            <div class="border border-gray-100 rounded-none p-4 font-mono">
+            <div class="border border-gray-100 rounded-2xl p-4 font-sans">
                 <p class="font-bold mb-1 underline">Datos Básicos (R1)</p>
                 <p class="text-gray-500">Contiene información de los propietarios, direcciones y valores de avalúo. Es
                     el archivo más importante.</p>
             </div>
-            <div class="border border-gray-100 rounded-none p-4 font-mono">
+            <div class="border border-gray-100 rounded-2xl p-4 font-sans">
                 <p class="font-bold mb-1 underline">Morfología y Construcción (R2)</p>
                 <p class="text-gray-500">Detalles sobre las áreas de los predios, tipos de construcción, número de pisos
                     y servicios.</p>
             </div>
-            <div class="border border-gray-100 rounded-none p-4 font-mono">
+            <div class="border border-gray-100 rounded-2xl p-4 font-sans">
                 <p class="font-bold mb-1 underline">Registros de Procesos (T1, T2, T3)</p>
                 <p class="text-gray-500">Archivos que registran los cambios y trámites realizados sobre los predios.</p>
             </div>
         </div>
     </section>
 
-    <section class="bg-gray-900 p-8 border border-gray-900 rounded-none text-white shadow-none">
+    <section class="bg-gray-50 p-8 border border-gray-200 rounded-2xl text-gray-900 shadow-none">
         <h4
             class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
             <span class="material-symbols-outlined text-gray-400 font-light">tips_and_updates</span>
@@ -153,13 +155,13 @@
         const dropzone = fileInput.parentElement;
         ['dragenter', 'dragover'].forEach(eventName => {
             dropzone.addEventListener(eventName, () => {
-                dropzone.classList.add('border-gray-900', 'bg-gray-100');
+                dropzone.classList.add('border-gray-200', 'bg-gray-100');
             }, false);
         });
 
         ['dragleave', 'drop'].forEach(eventName => {
             dropzone.addEventListener(eventName, () => {
-                dropzone.classList.remove('border-gray-900', 'bg-gray-100');
+                dropzone.classList.remove('border-gray-200', 'bg-gray-100');
             }, false);
         });
     }
