@@ -120,9 +120,16 @@ def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant
     # --- [5] REINICIO EN MANZANAS NUEVAS ---
     mask_mza_nueva = es_provisional(df_ant['MANZANA']) & ~es_provisional(df_ant['SECTOR'])
     try:
-        e_mza = df_audit[mask_mza_nueva & (df_nue['TERRENO'].astype(int) > 50)]
-        for _, row in e_mza.iterrows():
-            todos_errores.append({'REGLA': '5. MANZANA NUEVA', 'DETALLE': 'Terreno > 50 en manzana nueva', 'ANTERIOR': row[col_anterior], 'NUEVO': row[col_nuevo]})
+        # Agrupar por manzana nueva y verificar el minimo
+        df_mza_check = df_audit[mask_mza_nueva].copy()
+        df_mza_check['GRUPO_MZA'] = df_nue.loc[mask_mza_nueva, 'GRUPO_GEO']
+        df_mza_check['T_VAL'] = df_nue.loc[mask_mza_nueva, 'TERRENO'].astype(int)
+        
+        for mza, datos in df_mza_check.groupby('GRUPO_MZA'):
+            min_val = datos['T_VAL'].min()
+            if min_val > 1:
+                for _, row in datos.iterrows():
+                    todos_errores.append({'REGLA': '5. MANZANA NUEVA', 'DETALLE': f'Numeración inicia en {min_val:04d} (debe ser 0001)', 'ANTERIOR': row[col_anterior], 'NUEVO': row[col_nuevo]})
     except: pass
 
     # --- [6] REINICIO EN SECTORES NUEVOS ---
@@ -266,7 +273,7 @@ def generar_pdf_renumeracion(resultados):
         ("2. Permanencia", "Asegura que los predios 'viejos' (ya definitivos en CICA/LC) no hayan cambiado su código base sin justificación."),
         ("3. Limpieza", "Valida que los códigos definitivos en SNC no contengan caracteres provisionales (letras o números de serie 9000)."),
         ("4. Consecutivos", "Controla que los nuevos predios dentro de una manzana sigan un orden numérico superior al último existente."),
-        ("5. Manzana Nueva (Reinicio)", "Detecta manzanas nuevas (antes provisionales) donde la numeración de predios no se reinició desde 0001 (encontrando valores > 50)."),
+        ("5. Manzana Nueva (Reinicio)", "Detecta manzanas nuevas (antes provisionales) donde la numeración de predios no se reinició desde 0001 (el primer predio debe ser el 0001)."),
         ("6. Sector Nuevo (Reinicio)", "Detecta sectores nuevos donde la numeración de manzanas no se reinició desde 0001 (encontrando valores > 20).")
     ]
     
