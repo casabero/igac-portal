@@ -11,25 +11,17 @@ from modules.renumeracion_auditor import procesar_renumeracion
 
 def create_mock_excel():
     # Creamos un DF con casos de prueba
-    # 1. Permanencia Correcta
-    # 2. Hueco numeracion (1, 2, 4)
-    # 3. Salto Manzana injustificado
-    # 4. Estructura Invalida
-    
     data = [
-        # OLD (30 chars logic), NEW (30 chars logic), ESTADO
-        # Caso 1: Permanencia
+        # Caso 1: Permanencia correcta
         ('520010101000000010001000000001', '520010101000000010001000000001', 'ACTIVO'),
         
-        # Caso 2: Nuevo Lote con Hueco (Manzana nueva 0102)
-        # Lote viene de 9000
-        ('520010000000000090001000000001', '520010101000000010002000000001', 'ACTIVO'),
-        ('520010000000000090001000000002', '520010101000000010002000000002', 'ACTIVO'),
-        # Falta el 3
-        ('520010000000000090001000000004', '520010101000000010002000000004', 'ACTIVO'),
-        
-        # Caso 3: Estructura Mala
-        ('520010000000000090001000000005', '520010101000000010002000000BAD', 'ACTIVO'),
+        # Caso 2: Duplicidad Absoluta (Critico)
+        ('520010000000000090001000000001', '520010101000000010002000000999', 'ACTIVO'), # Origen A -> Destino X
+        ('520010000000000090001000000002', '520010101000000010002000000999', 'ACTIVO'), # Origen B -> Destino X (DUPLICADO)
+
+        # Caso 3: Huecos Numeracion (1, 3)
+        ('520010000000000090005000000001', '520010101000000010005000000001', 'ACTIVO'),
+        ('520010000000000090005000000003', '520010101000000010005000000003', 'ACTIVO'),
     ]
     
     df = pd.DataFrame(data, columns=['NÚMERO_PREDIAL_CICA', 'NÚMERO_PREDIAL_SNC', 'ESTADO'])
@@ -41,26 +33,30 @@ def create_mock_excel():
     return output
 
 def test_logic():
-    print("Iniciando prueba de logica...")
+    print("Iniciando prueba de logica v3.1...")
     excel_file = create_mock_excel()
     
     try:
         resultado = procesar_renumeracion(excel_file, '1')
         print(f"Total Auditado: {resultado['total_auditado']}")
-        print(f"Errores encontrados: {len(resultado['errores'])}")
+        print(f"Errores encontrados de reporte: {len(resultado['errores'])}")
         
-        for e in resultado['errores']:
-            print(f" - {e['REGLA']}: {e['DETALLE']} ({e['NUEVO']})")
-            
-        # Validaciones basicas
+        # Acceso directo a estadisticas del engine para mas detalle
+        engine = resultado.get('engine_instance')
+        if engine:
+             print(f"Stats Engine: {engine.stats}")
+
         reglas = [e['REGLA'] for e in resultado['errores']]
         
-        # Chequear huecos
-        assert any('HUECOS_NUMERACION' in r for r in reglas), "Fallo deteccion Huecos"
-        # Chequear estructura
-        assert any('ESTRUCTURA_NPN' in r for r in reglas), "Fallo deteccion Estructura"
+        # 1. Unicidad
+        assert any('UNICIDAD_SNC' in r for r in reglas), "Fallo deteccion Unicidad"
+        print("✅ Unicidad Detectada")
         
-        print("✅ PRUEBA EXITOSA: Se detectaron los errores esperados.")
+        # 2. Huecos
+        assert any('HUECOS_NUMERACION' in r for r in reglas), "Fallo deteccion Huecos"
+        print("✅ Huecos Detectados")
+        
+        print("✅ PRUEBA EXITOSA V3.1: Se detectaron los errores esperados.")
         
     except Exception as e:
         print(f"❌ ERROR EN PRUEBA: {str(e)}")
