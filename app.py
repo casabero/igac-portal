@@ -323,7 +323,7 @@ def renumeracion_tool():
             except:
                 session.pop('renum_audit_id', None)
     if request.method == 'POST':
-        file = request.files.get('file_excel')
+        file = request.files.get('archivo_excel')
         tipo = request.form.get('tipo', '1')
         fase = request.form.get('fase', '1')
         col_snc = request.form.get('col_snc')

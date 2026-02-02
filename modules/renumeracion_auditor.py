@@ -57,11 +57,11 @@ class AuditoriaSNC:
     # =========================================================================
     # 1. CARGA DE DATOS (Adaptado para WEB)
     # =========================================================================
-    def cargar_datos(self, file_stream, tipo_config):
-        # Mapeo de columnas segun config
-        self.col_ant = 'NÚMERO_PREDIAL_CICA' if tipo_config == "1" else 'NÚMERO_PREDIAL_LC PREDIO'
-        self.col_new = 'NÚMERO_PREDIAL_SNC'
-        self.col_estado = 'ESTADO'
+    def cargar_datos(self, file_stream, tipo_config, col_snc_manual=None, col_ant_manual=None, col_estado_manual=None):
+        # Mapeo inicial
+        self.col_ant = col_ant_manual or ('NÚMERO_PREDIAL_CICA' if tipo_config == "1" else 'NÚMERO_PREDIAL_LC PREDIO')
+        self.col_new = col_snc_manual or 'NÚMERO_PREDIAL_SNC'
+        self.col_estado = col_estado_manual or 'ESTADO'
 
         try:
             # Cargar como string para preservar ceros a la izquierda
@@ -69,27 +69,29 @@ class AuditoriaSNC:
             
             # Normalización de cabeceras (Trim + Upper)
             self.df.columns = [c.strip().upper() for c in self.df.columns]
-            
-            # Ajuste de nombres si el Excel trae variaciones
             col_map = {c: c for c in self.df.columns}
-            
-            # Busqueda fuzzy para col_ant si no match exacto
-            if self.col_ant not in col_map:
-                possible = [c for c in col_map if self.col_ant.replace('_',' ') in c.replace('_',' ')]
-                if possible: self.col_ant = possible[0]
-                elif len(self.df.columns) > 1 and tipo_config == "2": # Fallback posicional operadores
-                     self.col_ant = self.df.columns[1]
 
-            if self.col_new not in col_map:
-                possible = [c for c in col_map if 'SNC' in c]
-                if possible: self.col_new = possible[0]
-                elif len(self.df.columns) > 0:
-                     self.col_new = self.df.columns[0]
+            # Si no hay manuales, aplicamos logica fuzzy/auto
+            if not col_ant_manual:
+                if self.col_ant not in col_map:
+                    possible = [c for c in col_map if self.col_ant.replace('_',' ') in c.replace('_',' ')]
+                    if possible: self.col_ant = possible[0]
+                    elif len(self.df.columns) > 1 and tipo_config == "2":
+                         self.col_ant = self.df.columns[1]
+
+            if not col_snc_manual:
+                if self.col_new not in col_map:
+                    possible = [c for c in col_map if 'SNC' in c]
+                    if possible: self.col_new = possible[0]
+                    elif len(self.df.columns) > 0:
+                         self.col_new = self.df.columns[0]
             
             # Filtro de activos (Solo procesamos lo vigente)
-            col_est_real = next((c for c in self.df.columns if 'ESTADO' in c), None)
-            if col_est_real:
-                self.col_estado = col_est_real
+            if not col_estado_manual:
+                col_est_real = next((c for c in self.df.columns if 'ESTADO' in c), None)
+                if col_est_real: self.col_estado = col_est_real
+            
+            if self.col_estado in self.df.columns:
                 self.df = self.df[self.df[self.col_estado].astype(str).str.upper().str.contains('ACTIVO', na=False)].copy()
             
             self.stats['total_filas'] = len(self.df)
@@ -383,7 +385,7 @@ def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant
     engine = AuditoriaSNC()
     
     # 1. Cargar
-    if not engine.cargar_datos(file_stream, tipo_config):
+    if not engine.cargar_datos(file_stream, tipo_config, col_snc_manual, col_ant_manual, col_estado_manual):
         raise ValueError("Error leyendo el archivo. Verifique formato Excel.")
     
     # 2. Procesar Pipeline
