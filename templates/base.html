@@ -158,6 +158,17 @@
             overflow: hidden;
             animation: typing 2s steps(40, end), blink-caret 0.75s step-end infinite;
         }
+
+        /* Sidebar Responsive Transitions */
+        @media (max-width: 768px) {
+            .sidebar-closed {
+                transform: translateX(-100%);
+            }
+
+            .sidebar-open {
+                transform: translateX(0);
+            }
+        }
     </style>
     <script>
         // Immediate Theme Check to prevent flicker
@@ -173,10 +184,14 @@
 <body
     class="bg-[#F8FAFC] dark:bg-[#111111] text-gray-900 dark:text-gray-100 font-sans antialiased min-h-screen flex theme-transition">
 
+    <!-- MOBILE OVERLAY -->
+    <div id="sidebarOverlay" onclick="toggleSidebar()"
+        class="fixed inset-0 bg-black/50 z-30 hidden backdrop-blur-sm transition-opacity duration-300 opacity-0"></div>
+
     <!-- SIDEBAR -->
-    <aside
-        class="w-64 bg-white dark:bg-[#111111] border-r border-gray-100 dark:border-gray-800 flex flex-col fixed h-full z-40 transition-all duration-300">
-        <div class="p-8 border-b border-gray-100 dark:border-gray-800">
+    <aside id="sidebar"
+        class="w-64 bg-white dark:bg-[#111111] border-r border-gray-100 dark:border-gray-800 flex flex-col fixed h-full z-40 transition-transform duration-300 sidebar-closed md:translate-x-0">
+        <div class="p-8 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
             <a href="/" class="flex flex-col gap-1">
                 <span class="text-xl font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">
                     Portal IGAC
@@ -184,6 +199,9 @@
                 <span class="text-[8px] font-sans text-gray-400 uppercase tracking-[0.3em]">Gestión Catastral
                     2026</span>
             </a>
+            <button onclick="toggleSidebar()" class="md:hidden text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                <span class="material-symbols-outlined">close</span>
+            </button>
         </div>
 
         <nav class="flex-1 py-4 overflow-y-auto custom-scrollbar">
@@ -241,18 +259,23 @@
     </aside>
 
     <!-- MAIN CONTENT AREA -->
-    <div class="flex-1 ml-64 flex flex-col min-h-screen grid-bg dark:bg-[#111111] transition-colors duration-300">
+    <div
+        class="flex-1 md:ml-64 flex flex-col min-h-screen grid-bg dark:bg-[#111111] transition-colors duration-300 w-full">
         <!-- TOPBAR -->
         <header
-            class="h-16 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-8 sticky top-0 z-30 transition-colors duration-300">
+            class="h-16 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30 transition-colors duration-300">
             <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()"
+                    class="md:hidden p-2 -ml-2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
                 <h2 class="text-[10px] font-sans font-bold text-gray-400 uppercase tracking-[0.2em]">
                     {% block page_title %}PANEL_CONTROL{% endblock %}
                 </h2>
             </div>
             <div class="flex items-center gap-4">
                 <span
-                    class="text-[10px] bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-full font-bold"
+                    class="hidden sm:inline-block text-[10px] bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-full font-bold"
                     id="mode-badge">
                     V_2.5 // DARK_MODE_READY
                 </span>
@@ -263,7 +286,7 @@
             </div>
         </header>
 
-        <main class="p-8 flex-1">
+        <main class="p-4 md:p-8 flex-1">
             {% with messages = get_flashed_messages() %}
             {% if messages %}
             {% for message in messages %}
@@ -280,7 +303,7 @@
         </main>
 
         <footer
-            class="p-12 border-t border-gray-50 dark:border-gray-900 bg-white dark:bg-[#111111] flex flex-col items-center">
+            class="p-8 md:p-12 border-t border-gray-50 dark:border-gray-900 bg-white dark:bg-[#111111] flex flex-col items-center">
             <p class="text-[11px] text-gray-300 uppercase tracking-[0.4em] font-bold">
                 PORTAL IGAC 2026
             </p>
@@ -343,6 +366,31 @@
     </div>
 
     <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            if (sidebar.classList.contains('sidebar-closed')) {
+                sidebar.classList.remove('sidebar-closed');
+                sidebar.classList.add('sidebar-open');
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    overlay.classList.add('opacity-100');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            } else {
+                sidebar.classList.remove('sidebar-open');
+                sidebar.classList.add('sidebar-closed');
+                overlay.classList.remove('opacity-100');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300);
+                document.body.style.overflow = 'auto';
+            }
+        }
+
         function toggleHelpModal() {
             const modal = document.getElementById('helpModal');
             modal.classList.toggle('hidden');
@@ -369,10 +417,10 @@
         function updateIcon() {
             if (document.documentElement.classList.contains('dark')) {
                 themeIcon.textContent = 'light_mode';
-                modeBadge.textContent = 'V_2.5 // BRIGHT-WHITE_MODE_READY';
+                if (modeBadge) modeBadge.textContent = 'V_2.5 // BRIGHT-WHITE_MODE_READY';
             } else {
                 themeIcon.textContent = 'dark_mode';
-                modeBadge.textContent = 'V_2.5 // DARK_MODE_READY';
+                if (modeBadge) modeBadge.textContent = 'V_2.5 // DARK_MODE_READY';
             }
         }
         updateIcon();
@@ -419,6 +467,11 @@
         }
     </script>
     {% block scripts %}{% endblock %}
+</body>
+
+</html>
+
+{% block scripts %}{% endblock %}
 </body>
 
 </html>
