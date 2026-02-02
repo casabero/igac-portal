@@ -291,7 +291,7 @@
             {% if messages %}
             {% for message in messages %}
             <div
-                class="mb-6 p-4 {% if 'Error' in message or 'Faltan' in message %}bg-red-50 border-red-200 text-red-700{% else %}bg-green-50 border-green-200 text-green-700{% endif %} border rounded-xl text-[10px] font-sans flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+                class="mb-6 p-4 {% if 'Error' in message or 'Faltan' in message %}bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400{% else %}bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900/50 text-green-700 dark:text-green-400{% endif %} border rounded-xl text-[10px] font-sans flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
                 <span class="material-symbols-outlined text-[18px] font-light">info</span>
                 <span class="font-bold uppercase tracking-tight">REPORTE :: {{ message }}</span>
             </div>
@@ -337,9 +337,9 @@
                         {% block help_content %}
                         <div
                             class="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 mb-6">
-                            <p
-                                class="font-mono text-[10px] text-blue-600 dark:text-blue-400 mb-2 font-bold uppercase tracking-tight">
-                                [MENSAJE_SISTEMA]:</p>
+                            <h4
+                                class="font-bold text-[11px] text-gray-900 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 dark:border-gray-600 pb-2">
+                                [MENSAJE_SISTEMA]:</h4>
                             <p>Bienvenido al Centro de Documentación. Seleccione un módulo en el menú lateral para ver
                                 instrucciones específicas de operación.</p>
                         </div>
