@@ -88,7 +88,8 @@
                     <div>
                         <h4 class="text-xs font-black text-gray-900 uppercase tracking-wide mb-1">VALIDACIÓN
                             ALFANUMÉRICA</h4>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase">Revisión automática de 6 Reglas</p>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">Revisión automática de Reglas
+                            Especiales</p>
                     </div>
                 </div>
                 <!-- DISABLED PHASE -->
@@ -132,24 +133,24 @@
                 <span class="w-2 h-2 bg-gray-900 rounded-full"></span>
                 04. CONFIGURACIÓN DE COLUMNAS
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-8 bg-gray-900 rounded-2xl">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-8 bg-gray-50 border border-gray-100 rounded-2xl">
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Predio
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-widest">Predio
                         Anterior / CICA</label>
                     <select name="col_ant" id="col_ant"
-                        class="w-full bg-gray-800 border border-gray-700 rounded-lg text-white text-xs p-3 focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                        class="w-full bg-white border border-gray-200 rounded-xl text-gray-900 text-xs p-4 focus:ring-2 focus:ring-gray-900 outline-none shadow-sm transition-all"></select>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Predio Nuevo
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-widest">Predio Nuevo
                         (SNC)</label>
                     <select name="col_snc" id="col_snc"
-                        class="w-full bg-gray-800 border border-gray-700 rounded-lg text-white text-xs p-3 focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                        class="w-full bg-white border border-gray-200 rounded-xl text-gray-900 text-xs p-4 focus:ring-2 focus:ring-gray-900 outline-none shadow-sm transition-all"></select>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Estado
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-widest">Estado
                         (Activos)</label>
                     <select name="col_estado" id="col_estado"
-                        class="w-full bg-gray-800 border border-gray-700 rounded-lg text-white text-xs p-3 focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                        class="w-full bg-white border border-gray-200 rounded-xl text-gray-900 text-xs p-4 focus:ring-2 focus:ring-gray-900 outline-none shadow-sm transition-all"></select>
                 </div>
             </div>
         </section>
@@ -166,7 +167,7 @@
     </form>
     {% endif %}
 
-    <!-- RESULTADOS (MANTENER LOGICA PERO ADAPTAR ESTILO SI ES NECESARIO) -->
+    <!-- RESULTADOS -->
     {% if resultados %}
     <div id="resultado_renum" class="space-y-8 animate-in slide-in-from-bottom-8 duration-500">
 
@@ -178,36 +179,82 @@
                 </p>
             </div>
             <div class="flex gap-3">
+                <a href="/renumeracion/pdf"
+                    class="bg-red-600 text-white px-6 py-3 rounded-lg text-[10px] font-bold tracking-wider uppercase hover:bg-red-700 transition-all flex items-center gap-2 shadow-lg">
+                    <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span> PDF OFICIAL
+                </a>
                 <a href="/renumeracion/excel"
                     class="bg-gray-900 text-white px-6 py-3 rounded-lg text-[10px] font-bold tracking-wider uppercase hover:bg-black transition-all flex items-center gap-2 shadow-lg">
-                    <span class="material-symbols-outlined text-[16px]">download</span> DESCARGAR REPORTE
+                    <span class="material-symbols-outlined text-[16px]">download</span> EXCEL DETALLADO
                 </a>
                 <a href="/clear_renumeracion"
                     class="bg-white border border-gray-200 text-red-600 px-6 py-3 rounded-lg text-[10px] font-bold tracking-wider uppercase hover:bg-red-50 hover:border-red-200 transition-all flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[16px]">refresh</span> NUEVA AUDITORÍA
+                    <span class="material-symbols-outlined text-[16px]">refresh</span> REINICIAR
                 </a>
             </div>
         </div>
 
-        <!-- KPI Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-            {% for i in range(1, 7) %}
-            {% set rule_key = i ~ ". " %}
-            {% set count = 0 %}
-            {% for k, v in resultados.stats.items() %}
-            {% if rule_key in k %}{% set count = v %}{% endif %}
-            {% endfor %}
+        <!-- KPI Grid (Logic Fix for v3.1) -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <!-- Unicidad -->
+            {% set c_uni = 0 %}
+            {% for e in resultados.errores %}{% if 'UNICIDAD' in e.REGLA %}{% set c_uni = c_uni + 1 %}{% endif %}{%
+            endfor %}
             <div
                 class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 hover:border-gray-300 transition-all">
-                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">REGLA 0{{ i }}</p>
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">UNICIDAD SNC</p>
                 <div>
                     <p
-                        class="text-3xl font-black {% if count > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
-                        {{ count }}</p>
-                    <p class="text-[9px] text-gray-300 font-bold uppercase mt-1">ERRORES</p>
+                        class="text-3xl font-black {% if c_uni > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
+                        {{ c_uni }}</p>
+                    <p class="text-[9px] text-gray-300 font-bold uppercase mt-1">DUPLICADOS</p>
                 </div>
             </div>
-            {% endfor %}
+
+            <!-- Estructura -->
+            {% set c_est = 0 %}
+            {% for e in resultados.errores %}{% if 'ESTRUCTURA' in e.REGLA %}{% set c_est = c_est + 1 %}{% endif %}{%
+            endfor %}
+            <div
+                class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 hover:border-gray-300 transition-all">
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">ESTRUCTURA LADM</p>
+                <div>
+                    <p
+                        class="text-3xl font-black {% if c_est > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
+                        {{ c_est }}</p>
+                    <p class="text-[9px] text-gray-300 font-bold uppercase mt-1">FORMATO INVÁLIDO</p>
+                </div>
+            </div>
+
+            <!-- Consecutividad -->
+            {% set c_con = 0 %}
+            {% for e in resultados.errores %}{% if 'CONSECUTIVIDAD' in e.REGLA or 'INICIO' in e.REGLA or 'NORMA' in
+            e.REGLA %}{% set c_con = c_con + 1 %}{% endif %}{% endfor %}
+            <div
+                class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 hover:border-gray-300 transition-all">
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">CONSECUTIVIDAD</p>
+                <div>
+                    <p
+                        class="text-3xl font-black {% if c_con > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
+                        {{ c_con }}</p>
+                    <p class="text-[9px] text-gray-300 font-bold uppercase mt-1">SALTOS/ERRORES INICIO</p>
+                </div>
+            </div>
+
+            <!-- Huecos -->
+            {% set c_hue = 0 %}
+            {% for e in resultados.errores %}{% if 'HUECOS' in e.REGLA %}{% set c_hue = c_hue + 1 %}{% endif %}{% endfor
+            %}
+            <div
+                class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 hover:border-gray-300 transition-all">
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">HUECOS / GAPS</p>
+                <div>
+                    <p
+                        class="text-3xl font-black {% if c_hue > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
+                        {{ c_hue }}</p>
+                    <p class="text-[9px] text-gray-300 font-bold uppercase mt-1">FALTANTES EN LOTE</p>
+                </div>
+            </div>
         </div>
 
         <!-- Table -->
