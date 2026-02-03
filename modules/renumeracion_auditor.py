@@ -599,8 +599,9 @@ def generar_pdf_renumeracion(resultados):
     # --- DETALLE DE ALERTAS (MUESTRA) ---
     pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Detalle de Alertas Lógicas (Muestra)', 0, 1); pdf.ln(2)
     
-    # Definición de Colunas (Ancho total ~176 para Letter con margen 20)
-    w_reg = 35; w_det = 60; w_cica = 40; w_snc = 41
+    # Definición de Columnas (Ancho total ~176)
+    w_reg = 38; w_det = 62; w_cica = 38; w_snc = 38
+    lh = 3.5 # Altura de cada línea (interlineado)
     
     # Header
     pdf.set_font('Helvetica', 'B', 8); pdf.set_fill_color(243, 244, 246)
@@ -609,51 +610,58 @@ def generar_pdf_renumeracion(resultados):
     pdf.cell(w_cica, 8, f'{l_ant}', 1, 0, 'C', 1)
     pdf.cell(w_snc, 8, 'Nuevo (SNC)', 1, 1, 'C', 1)
     
-    pdf.set_font('Helvetica', '', 6)
-    
-    # Usamos la lista combinada legacy o iteramos engine
+    # Usamos la lista combinada
     lista_final = resultados.get('errores', []) 
-    # Limitamos a 200 items
     for e in lista_final[:200]:
-        # Calcular altura requerida para la celda de detalle (estimada)
-        detalle_texto = str(e.get('DETALLE', ''))
-        # Una forma simple de aproximar el wrap es ver cuantas lineas ocuparia
-        # Con font 6 y ancho 60, mas o menos 60-70 caracteres por linea
-        num_lineas = max(1, (len(detalle_texto) // 55) + 1)
-        h = 5 * num_lineas if num_lineas > 1 else 6
+        # Calculamos número de líneas aproximado por columna
+        t_reg = str(e.get('REGLA', ''))
+        t_det = str(e.get('DETALLE', ''))
+        t_ant = str(e.get('ANTERIOR', ''))
+        t_snc = str(e.get('NUEVO', ''))
         
-        if pdf.get_y() + h > 260: 
+        # Estimación de líneas (basado en caracteres aprox por ancho)
+        n_reg = max(1, (len(t_reg) // 22) + 1)
+        n_det = max(1, (len(t_det) // 50) + 1)
+        n_ant = max(1, (len(t_ant) // 28) + 1)
+        n_snc = max(1, (len(t_snc) // 28) + 1)
+        
+        max_n = max(n_reg, n_det, n_ant, n_snc)
+        h_row = max_n * lh + 2 # Altura total de la fila con pequeño padding
+        
+        # Salto de página si no cabe
+        if pdf.get_y() + h_row > 260: 
             pdf.add_page(); 
             pdf.set_font('Helvetica', 'B', 8); pdf.set_fill_color(243, 244, 246)
             pdf.cell(w_reg, 8, 'Regla', 1, 0, 'C', 1)
             pdf.cell(w_det, 8, 'Detalle', 1, 0, 'C', 1)
             pdf.cell(w_cica, 8, f'{l_ant}', 1, 0, 'C', 1)
             pdf.cell(w_snc, 8, 'Nuevo (SNC)', 1, 1, 'C', 1)
-            pdf.set_font('Helvetica', '', 6)
         
-        # Dibujar fila
-        x_start = pdf.get_x()
-        y_start = pdf.get_y()
+        # Dibujar fila celda por celda
+        x, y = pdf.get_x(), pdf.get_y()
         
-        # Regla (con rect para el borde si es multi-linea)
-        pdf.multi_cell(w_reg, h, str(e.get('REGLA', ''))[:40], border=1, align='L')
-        
-        # Detalle (Multi-línea real)
-        pdf.set_xy(x_start + w_reg, y_start)
-        pdf.multi_cell(w_det, h/num_lineas, detalle_texto, border=1, align='L')
-        
-        # CICA (Fuente más pequeña para que quepa el NPN de 30)
-        pdf.set_xy(x_start + w_reg + w_det, y_start)
-        pdf.set_font('Helvetica', '', 5.5)
-        pdf.multi_cell(w_cica, h, str(e.get('ANTERIOR', '')), border=1, align='C')
-        
-        # SNC
-        pdf.set_xy(x_start + w_reg + w_det + w_cica, y_start)
-        pdf.set_font('Helvetica', '', 5.5)
-        pdf.multi_cell(w_snc, h, str(e.get('NUEVO', '')), border=1, align='C')
-        
+        # 1. REGLA
         pdf.set_font('Helvetica', '', 6)
-        pdf.set_xy(x_start, y_start + h)
+        pdf.multi_cell(w_reg, lh, t_reg, border=0, align='L')
+        pdf.rect(x, y, w_reg, h_row) # Borde manual para que todas midan h_row
+        
+        # 2. DETALLE
+        pdf.set_xy(x + w_reg, y)
+        pdf.multi_cell(w_det, lh, t_det, border=0, align='L')
+        pdf.rect(x + w_reg, y, w_det, h_row)
+        
+        # 3. ANTERIOR (CICA)
+        pdf.set_xy(x + w_reg + w_det, y)
+        pdf.set_font('Helvetica', '', 5.5)
+        pdf.multi_cell(w_cica, h_row if n_ant == 1 else lh, t_ant, border=0, align='C')
+        pdf.rect(x + w_reg + w_det, y, w_cica, h_row)
+        
+        # 4. NUEVO (SNC)
+        pdf.set_xy(x + w_reg + w_det + w_cica, y)
+        pdf.multi_cell(w_snc, h_row if n_snc == 1 else lh, t_snc, border=0, align='C')
+        pdf.rect(x + w_reg + w_det + w_cica, y, w_snc, h_row)
+        
+        pdf.set_xy(x, y + h_row)
 
     return bytes(pdf.output())
 
