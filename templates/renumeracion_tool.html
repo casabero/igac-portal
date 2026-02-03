@@ -862,6 +862,7 @@
         </button>
         {% endif %}
     </div>
+    {% endif %}
     {% endblock %}
 
     {% block help_content %}
@@ -922,259 +923,256 @@
             </div>
         </section>
     </div>
-    {% endif %}
+    {% endblock %}
 
-</div>
-{% endblock %}
+    {% block scripts %}
+    <script>
+        {% if not resultados %}
+        const fileInput = document.getElementById('archivo_excel');
+        const label = document.getElementById('file_label');
+        const dropZone = document.getElementById('drop-zone');
+        const mappingSection = document.getElementById('mapping_section');
+        const btnText = document.getElementById('btn_text');
+        const selects = ['col_ant', 'col_snc', 'col_estado'];
 
-{% block scripts %}
-<script>
-    {% if not resultados %}
-    const fileInput = document.getElementById('archivo_excel');
-    const label = document.getElementById('file_label');
-    const dropZone = document.getElementById('drop-zone');
-    const mappingSection = document.getElementById('mapping_section');
-    const btnText = document.getElementById('btn_text');
-    const selects = ['col_ant', 'col_snc', 'col_estado'];
+        fileInput.addEventListener('change', async (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                label.innerHTML = `<span class="text-gray-900 dark:text-white border-b-2 border-gray-900 dark:border-white pb-1">${file.name}</span>`;
+                dropZone.classList.add('bg-gray-100', 'dark:bg-gray-700', 'border-gray-400', 'dark:border-gray-500');
 
-    fileInput.addEventListener('change', async (e) => {
-        if (e.target.files.length > 0) {
-            const file = e.target.files[0];
-            label.innerHTML = `<span class="text-gray-900 dark:text-white border-b-2 border-gray-900 dark:border-white pb-1">${file.name}</span>`;
-            dropZone.classList.add('bg-gray-100', 'dark:bg-gray-700', 'border-gray-400', 'dark:border-gray-500');
+                // PRE-ANALISIS AJAX
+                btnText.innerText = "DETECTANDO COLUMNAS...";
+                const formData = new FormData();
+                formData.append('file', file);
 
-            // PRE-ANALISIS AJAX
-            btnText.innerText = "DETECTANDO COLUMNAS...";
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const response = await fetch('/renumeracion/detectar-columnas', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-
-                if (data.columnas) {
-                    mappingSection.classList.remove('hidden');
-                    btnText.innerText = "EJECUTAR AUDITORÍA";
-
-                    selects.forEach(s_id => {
-                        const select = document.getElementById(s_id);
-                        select.innerHTML = data.columnas.map(c =>
-                            `<option value="${c}">${c}</option>`
-                        ).join('');
-
-                        // Auto-select smart
-                        const c_upper = data.columnas.map(x => x.toUpperCase());
-                        if (s_id === 'col_snc') {
-                            const idx = c_upper.findIndex(x => x.includes('SNC') || x.includes('NUEVO'));
-                            if (idx !== -1) select.selectedIndex = idx;
-                        } else if (s_id === 'col_ant') {
-                            const idx = c_upper.findIndex(x => x.includes('CICA') || x.includes('ANTERIOR') || x.includes('LC'));
-                            if (idx !== -1) select.selectedIndex = idx;
-                        } else if (s_id === 'col_estado') {
-                            const idx = c_upper.findIndex(x => x.includes('ESTADO'));
-                            if (idx !== -1) select.selectedIndex = idx;
-                        }
+                try {
+                    const response = await fetch('/renumeracion/detectar-columnas', {
+                        method: 'POST',
+                        body: formData
                     });
+                    const data = await response.json();
+
+                    if (data.columnas) {
+                        mappingSection.classList.remove('hidden');
+                        btnText.innerText = "EJECUTAR AUDITORÍA";
+
+                        selects.forEach(s_id => {
+                            const select = document.getElementById(s_id);
+                            select.innerHTML = data.columnas.map(c =>
+                                `<option value="${c}">${c}</option>`
+                            ).join('');
+
+                            // Auto-select smart
+                            const c_upper = data.columnas.map(x => x.toUpperCase());
+                            if (s_id === 'col_snc') {
+                                const idx = c_upper.findIndex(x => x.includes('SNC') || x.includes('NUEVO'));
+                                if (idx !== -1) select.selectedIndex = idx;
+                            } else if (s_id === 'col_ant') {
+                                const idx = c_upper.findIndex(x => x.includes('CICA') || x.includes('ANTERIOR') || x.includes('LC'));
+                                if (idx !== -1) select.selectedIndex = idx;
+                            } else if (s_id === 'col_estado') {
+                                const idx = c_upper.findIndex(x => x.includes('ESTADO'));
+                                if (idx !== -1) select.selectedIndex = idx;
+                            }
+                        });
+                    }
+                } catch (err) {
+                    console.error("Error detectando columnas:", err);
+                    btnText.innerText = "ERROR AL ANALIZAR";
                 }
-            } catch (err) {
-                console.error("Error detectando columnas:", err);
-                btnText.innerText = "ERROR AL ANALIZAR";
             }
-        }
-    });
-
-    function updateUI() {
-        // Reset mapping if source changes drastically?
-    }
-    {% endif %}
-
-    {% if resultados and resultados.errores %}
-    // ==========================================================================
-    // INSPECTOR INTERACTIVO DE ERRORES v1.0
-    // ==========================================================================
-
-    // Diccionario de explicaciones de reglas
-    const REGLAS_INFO = {
-        'UNICIDAD_SNC': {
-            titulo: 'Unicidad del Código SNC',
-            descripcion: 'Cada predio en el sistema debe tener un código SNC único e irrepetible. Se detectó que el mismo código fue asignado a múltiples predios.',
-            solucion: 'Revisar el mapeo CICA→SNC y asegurar que cada predio origen tenga una asignación 1:1 única.',
-            icono: 'fingerprint'
-        },
-        'ESTRUCTURA_NPN': {
-            titulo: 'Estructura del NPN',
-            descripcion: 'El Número Predial Nacional (NPN) debe tener exactamente 30 dígitos numéricos sin letras ni caracteres especiales.',
-            solucion: 'Corregir el formato del código: verificar longitud (30 chars) y asegurar solo números.',
-            icono: 'format_list_numbered'
-        },
-        'CONSECUTIVIDAD_SECTOR': {
-            titulo: 'Consecutividad de Sector',
-            descripcion: 'Los sectores nuevos deben seguir la secuencia del último sector existente en la zona (+1).',
-            solucion: 'Verificar el último sector asignado en la zona y asegurar que los nuevos continúen la secuencia.',
-            icono: 'linear_scale'
-        },
-        'CONSECUTIVIDAD_MANZANA': {
-            titulo: 'Consecutividad de Manzana',
-            descripcion: 'Las manzanas nuevas deben seguir la secuencia de la última manzana existente en el sector.',
-            solucion: 'Revisar las manzanas existentes en el sector y asignar la siguiente consecutiva.',
-            icono: 'linear_scale'
-        },
-        'HUECOS_NUMERACION': {
-            titulo: 'Huecos en Numeración',
-            descripcion: 'Se detectaron saltos en la secuencia de terrenos dentro de una manzana. La numeración debe ser continua.',
-            solucion: 'Identificar los números faltantes y reasignar o agregar los predios correspondientes.',
-            icono: 'format_line_spacing'
-        },
-        'INICIO_SECUENCIA': {
-            titulo: 'Inicio de Secuencia',
-            descripcion: 'Los terrenos en manzanas nuevas deben iniciar desde 0001, o continuar desde el último existente si la manzana ya tenía predios.',
-            solucion: 'Si es manzana nueva: iniciar en 0001. Si es manzana existente: continuar desde el último terreno +1.',
-            icono: 'first_page'
-        },
-        'NORMA_CP_SECTOR_00': {
-            titulo: 'Sector en Centro Poblado Nuevo',
-            descripcion: 'El primer sector de una zona nueva (centro poblado) debe ser 00 según la norma LADM.',
-            solucion: 'Renumerar para que el primer sector del centro poblado nuevo sea 00.',
-            icono: 'location_city'
-        },
-        'NORMA_CP_MANZANA_01': {
-            titulo: 'Manzana en Centro Poblado Nuevo',
-            descripcion: 'La primera manzana de una zona nueva debe ser 0001.',
-            solucion: 'Asegurar que la numeración de manzanas inicie en 0001 para la nueva zona.',
-            icono: 'location_city'
-        },
-        'INICIO_MANZANA_SECTOR': {
-            titulo: 'Inicio de Manzana en Sector Nuevo',
-            descripcion: 'Al crear un sector nuevo, las manzanas deben iniciar desde 0001.',
-            solucion: 'Renumerar las manzanas del sector nuevo iniciando desde 0001.',
-            icono: 'restart_alt'
-        },
-        'DISPERSION_LOTE': {
-            titulo: 'Dispersión de Lote',
-            descripcion: 'Predios que originalmente pertenecían a un mismo lote temporal fueron distribuidos en múltiples manzanas definitivas distintas.',
-            solucion: 'Revisar la lógica de asignación para mantener coherencia geográfica del lote original.',
-            icono: 'scatter_plot'
-        }
-    };
-
-    // Función auxiliar para obtener info de regla
-    function getReglaInfo(reglaStr) {
-        // Limpiar prefijo [ADVERTENCIA] si existe
-        const cleanRegla = reglaStr.replace('[ADVERTENCIA] ', '');
-
-        // Buscar match parcial
-        for (const [key, info] of Object.entries(REGLAS_INFO)) {
-            if (cleanRegla.includes(key)) {
-                return { key, ...info };
-            }
-        }
-
-        // Default
-        return {
-            key: 'OTRO',
-            titulo: cleanRegla,
-            descripcion: 'Regla de validación detectada en el proceso de auditoría.',
-            solucion: 'Revisar el detalle específico del hallazgo para determinar la corrección necesaria.',
-            icono: 'warning'
-        };
-    }
-
-    // Datos de la auditoría (pasados desde Jinja2)
-    const allHallazgos = {{ resultados.errores | tojson | safe }};
-
-    // Estado del inspector
-    const state = {
-        filteredData: [...allHallazgos],
-        currentPage: 1,
-        rowsPerPage: 50,
-        selectedIndex: null,
-        filters: {
-            types: ['ERROR', 'WARNING'],
-            regla: 'ALL',
-            zona: 'ALL',
-            sector: 'ALL',
-            search: ''
-        }
-    };
-
-    // Referencias DOM
-    const tbody = document.getElementById('hallazgos-tbody');
-    const paginationInfo = document.getElementById('pagination-info');
-    const prevBtn = document.getElementById('prev-page');
-    const nextBtn = document.getElementById('next-page');
-    const searchInput = document.getElementById('search-hallazgos');
-    const donutChart = document.getElementById('donut-chart');
-    const statErrores = document.getElementById('stat-errores');
-    const statWarnings = document.getElementById('stat-warnings');
-    const filterStatus = document.getElementById('filter-status');
-    const detailEmpty = document.getElementById('detail-empty');
-    const detailContent = document.getElementById('detail-content');
-    const filterZona = document.getElementById('filter-zona');
-    const filterSector = document.getElementById('filter-sector');
-
-    // Poblar filtros geográficos
-    const uniqueZonas = [...new Set(allHallazgos.map(e => e.ZONA).filter(z => z && z !== 'nan'))].sort();
-    uniqueZonas.forEach(z => {
-        filterZona.innerHTML += `<option value="${z}">Zona ${z}</option>`;
-    });
-
-    // ===== FUNCIONES DE RENDERIZADO =====
-
-    function applyFilters() {
-        let data = [...allHallazgos];
-
-        // Filtro por tipo (ERROR/WARNING)
-        data = data.filter(e => {
-            const isWarning = e.REGLA && e.REGLA.includes('[ADVERTENCIA]');
-            const tipo = isWarning ? 'WARNING' : 'ERROR';
-            return state.filters.types.includes(tipo);
         });
 
-        // Filtro por regla
-        if (state.filters.regla !== 'ALL') {
-            data = data.filter(e => e.REGLA && e.REGLA.toUpperCase().includes(state.filters.regla));
+        function updateUI() {
+            // Reset mapping if source changes drastically?
+        }
+        {% endif %}
+
+        {% if resultados and resultados.errores %}
+        // ==========================================================================
+        // INSPECTOR INTERACTIVO DE ERRORES v1.0
+        // ==========================================================================
+
+        // Diccionario de explicaciones de reglas
+        const REGLAS_INFO = {
+            'UNICIDAD_SNC': {
+                titulo: 'Unicidad del Código SNC',
+                descripcion: 'Cada predio en el sistema debe tener un código SNC único e irrepetible. Se detectó que el mismo código fue asignado a múltiples predios.',
+                solucion: 'Revisar el mapeo CICA→SNC y asegurar que cada predio origen tenga una asignación 1:1 única.',
+                icono: 'fingerprint'
+            },
+            'ESTRUCTURA_NPN': {
+                titulo: 'Estructura del NPN',
+                descripcion: 'El Número Predial Nacional (NPN) debe tener exactamente 30 dígitos numéricos sin letras ni caracteres especiales.',
+                solucion: 'Corregir el formato del código: verificar longitud (30 chars) y asegurar solo números.',
+                icono: 'format_list_numbered'
+            },
+            'CONSECUTIVIDAD_SECTOR': {
+                titulo: 'Consecutividad de Sector',
+                descripcion: 'Los sectores nuevos deben seguir la secuencia del último sector existente en la zona (+1).',
+                solucion: 'Verificar el último sector asignado en la zona y asegurar que los nuevos continúen la secuencia.',
+                icono: 'linear_scale'
+            },
+            'CONSECUTIVIDAD_MANZANA': {
+                titulo: 'Consecutividad de Manzana',
+                descripcion: 'Las manzanas nuevas deben seguir la secuencia de la última manzana existente en el sector.',
+                solucion: 'Revisar las manzanas existentes en el sector y asignar la siguiente consecutiva.',
+                icono: 'linear_scale'
+            },
+            'HUECOS_NUMERACION': {
+                titulo: 'Huecos en Numeración',
+                descripcion: 'Se detectaron saltos en la secuencia de terrenos dentro de una manzana. La numeración debe ser continua.',
+                solucion: 'Identificar los números faltantes y reasignar o agregar los predios correspondientes.',
+                icono: 'format_line_spacing'
+            },
+            'INICIO_SECUENCIA': {
+                titulo: 'Inicio de Secuencia',
+                descripcion: 'Los terrenos en manzanas nuevas deben iniciar desde 0001, o continuar desde el último existente si la manzana ya tenía predios.',
+                solucion: 'Si es manzana nueva: iniciar en 0001. Si es manzana existente: continuar desde el último terreno +1.',
+                icono: 'first_page'
+            },
+            'NORMA_CP_SECTOR_00': {
+                titulo: 'Sector en Centro Poblado Nuevo',
+                descripcion: 'El primer sector de una zona nueva (centro poblado) debe ser 00 según la norma LADM.',
+                solucion: 'Renumerar para que el primer sector del centro poblado nuevo sea 00.',
+                icono: 'location_city'
+            },
+            'NORMA_CP_MANZANA_01': {
+                titulo: 'Manzana en Centro Poblado Nuevo',
+                descripcion: 'La primera manzana de una zona nueva debe ser 0001.',
+                solucion: 'Asegurar que la numeración de manzanas inicie en 0001 para la nueva zona.',
+                icono: 'location_city'
+            },
+            'INICIO_MANZANA_SECTOR': {
+                titulo: 'Inicio de Manzana en Sector Nuevo',
+                descripcion: 'Al crear un sector nuevo, las manzanas deben iniciar desde 0001.',
+                solucion: 'Renumerar las manzanas del sector nuevo iniciando desde 0001.',
+                icono: 'restart_alt'
+            },
+            'DISPERSION_LOTE': {
+                titulo: 'Dispersión de Lote',
+                descripcion: 'Predios que originalmente pertenecían a un mismo lote temporal fueron distribuidos en múltiples manzanas definitivas distintas.',
+                solucion: 'Revisar la lógica de asignación para mantener coherencia geográfica del lote original.',
+                icono: 'scatter_plot'
+            }
+        };
+
+        // Función auxiliar para obtener info de regla
+        function getReglaInfo(reglaStr) {
+            // Limpiar prefijo [ADVERTENCIA] si existe
+            const cleanRegla = reglaStr.replace('[ADVERTENCIA] ', '');
+
+            // Buscar match parcial
+            for (const [key, info] of Object.entries(REGLAS_INFO)) {
+                if (cleanRegla.includes(key)) {
+                    return { key, ...info };
+                }
+            }
+
+            // Default
+            return {
+                key: 'OTRO',
+                titulo: cleanRegla,
+                descripcion: 'Regla de validación detectada en el proceso de auditoría.',
+                solucion: 'Revisar el detalle específico del hallazgo para determinar la corrección necesaria.',
+                icono: 'warning'
+            };
         }
 
-        // Filtro por zona
-        if (state.filters.zona !== 'ALL') {
-            data = data.filter(e => e.ZONA === state.filters.zona);
+        // Datos de la auditoría (pasados desde Jinja2)
+        const allHallazgos = {{ resultados.errores | tojson | safe }};
+
+        // Estado del inspector
+        const state = {
+            filteredData: [...allHallazgos],
+            currentPage: 1,
+            rowsPerPage: 50,
+            selectedIndex: null,
+            filters: {
+                types: ['ERROR', 'WARNING'],
+                regla: 'ALL',
+                zona: 'ALL',
+                sector: 'ALL',
+                search: ''
+            }
+        };
+
+        // Referencias DOM
+        const tbody = document.getElementById('hallazgos-tbody');
+        const paginationInfo = document.getElementById('pagination-info');
+        const prevBtn = document.getElementById('prev-page');
+        const nextBtn = document.getElementById('next-page');
+        const searchInput = document.getElementById('search-hallazgos');
+        const donutChart = document.getElementById('donut-chart');
+        const statErrores = document.getElementById('stat-errores');
+        const statWarnings = document.getElementById('stat-warnings');
+        const filterStatus = document.getElementById('filter-status');
+        const detailEmpty = document.getElementById('detail-empty');
+        const detailContent = document.getElementById('detail-content');
+        const filterZona = document.getElementById('filter-zona');
+        const filterSector = document.getElementById('filter-sector');
+
+        // Poblar filtros geográficos
+        const uniqueZonas = [...new Set(allHallazgos.map(e => e.ZONA).filter(z => z && z !== 'nan'))].sort();
+        uniqueZonas.forEach(z => {
+            filterZona.innerHTML += `<option value="${z}">Zona ${z}</option>`;
+        });
+
+        // ===== FUNCIONES DE RENDERIZADO =====
+
+        function applyFilters() {
+            let data = [...allHallazgos];
+
+            // Filtro por tipo (ERROR/WARNING)
+            data = data.filter(e => {
+                const isWarning = e.REGLA && e.REGLA.includes('[ADVERTENCIA]');
+                const tipo = isWarning ? 'WARNING' : 'ERROR';
+                return state.filters.types.includes(tipo);
+            });
+
+            // Filtro por regla
+            if (state.filters.regla !== 'ALL') {
+                data = data.filter(e => e.REGLA && e.REGLA.toUpperCase().includes(state.filters.regla));
+            }
+
+            // Filtro por zona
+            if (state.filters.zona !== 'ALL') {
+                data = data.filter(e => e.ZONA === state.filters.zona);
+            }
+
+            // Filtro por sector
+            if (state.filters.sector !== 'ALL') {
+                data = data.filter(e => e.SECTOR === state.filters.sector);
+            }
+
+            // Filtro por búsqueda
+            if (state.filters.search) {
+                const term = state.filters.search.toLowerCase();
+                data = data.filter(e =>
+                    (e.REGLA && e.REGLA.toLowerCase().includes(term)) ||
+                    (e.DETALLE && e.DETALLE.toLowerCase().includes(term)) ||
+                    (e.NUEVO && e.NUEVO.toLowerCase().includes(term)) ||
+                    (e.ANTERIOR && e.ANTERIOR.toLowerCase().includes(term))
+                );
+            }
+
+            state.filteredData = data;
+            state.currentPage = 1;
+            state.selectedIndex = null;
+
+            renderTable();
+            renderStats();
+            hideDetail();
         }
 
-        // Filtro por sector
-        if (state.filters.sector !== 'ALL') {
-            data = data.filter(e => e.SECTOR === state.filters.sector);
-        }
+        function renderTable() {
+            const start = (state.currentPage - 1) * state.rowsPerPage;
+            const end = start + state.rowsPerPage;
+            const slice = state.filteredData.slice(start, end);
 
-        // Filtro por búsqueda
-        if (state.filters.search) {
-            const term = state.filters.search.toLowerCase();
-            data = data.filter(e =>
-                (e.REGLA && e.REGLA.toLowerCase().includes(term)) ||
-                (e.DETALLE && e.DETALLE.toLowerCase().includes(term)) ||
-                (e.NUEVO && e.NUEVO.toLowerCase().includes(term)) ||
-                (e.ANTERIOR && e.ANTERIOR.toLowerCase().includes(term))
-            );
-        }
-
-        state.filteredData = data;
-        state.currentPage = 1;
-        state.selectedIndex = null;
-
-        renderTable();
-        renderStats();
-        hideDetail();
-    }
-
-    function renderTable() {
-        const start = (state.currentPage - 1) * state.rowsPerPage;
-        const end = start + state.rowsPerPage;
-        const slice = state.filteredData.slice(start, end);
-
-        if (slice.length === 0) {
-            tbody.innerHTML = `
+            if (slice.length === 0) {
+                tbody.innerHTML = `
                 <tr>
                     <td colspan="3" class="px-4 py-12 text-center text-gray-400">
                         <span class="material-symbols-outlined text-3xl mb-2 block">search_off</span>
@@ -1182,14 +1180,14 @@
                     </td>
                 </tr>
             `;
-        } else {
-            tbody.innerHTML = slice.map((item, idx) => {
-                const globalIdx = start + idx;
-                const isWarning = item.REGLA && item.REGLA.includes('[ADVERTENCIA]');
-                const reglaClean = item.REGLA ? item.REGLA.replace('[ADVERTENCIA] ', '') : 'N/A';
-                const isSelected = state.selectedIndex === globalIdx;
+            } else {
+                tbody.innerHTML = slice.map((item, idx) => {
+                    const globalIdx = start + idx;
+                    const isWarning = item.REGLA && item.REGLA.includes('[ADVERTENCIA]');
+                    const reglaClean = item.REGLA ? item.REGLA.replace('[ADVERTENCIA] ', '') : 'N/A';
+                    const isSelected = state.selectedIndex === globalIdx;
 
-                return `
+                    return `
                     <tr data-index="${globalIdx}" 
                         class="hallazgo-row cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50 ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20 border-l-2 border-l-blue-500' : ''}">
                         <td class="px-4 py-3">
@@ -1206,64 +1204,64 @@
                         </td>
                     </tr>
                 `;
-            }).join('');
+                }).join('');
 
-            // Agregar event listeners a las filas
-            document.querySelectorAll('.hallazgo-row').forEach(row => {
-                row.addEventListener('click', () => {
-                    const idx = parseInt(row.dataset.index);
-                    selectRow(idx);
+                // Agregar event listeners a las filas
+                document.querySelectorAll('.hallazgo-row').forEach(row => {
+                    row.addEventListener('click', () => {
+                        const idx = parseInt(row.dataset.index);
+                        selectRow(idx);
+                    });
                 });
-            });
+            }
+
+            // Actualizar paginación
+            const total = state.filteredData.length;
+            paginationInfo.textContent = total > 0
+                ? `${start + 1}-${Math.min(end, total)} de ${total}`
+                : 'Sin resultados';
+            prevBtn.disabled = state.currentPage === 1;
+            nextBtn.disabled = end >= total;
         }
 
-        // Actualizar paginación
-        const total = state.filteredData.length;
-        paginationInfo.textContent = total > 0
-            ? `${start + 1}-${Math.min(end, total)} de ${total}`
-            : 'Sin resultados';
-        prevBtn.disabled = state.currentPage === 1;
-        nextBtn.disabled = end >= total;
-    }
+        function renderStats() {
+            const errors = state.filteredData.filter(e => !e.REGLA || !e.REGLA.includes('[ADVERTENCIA]')).length;
+            const warnings = state.filteredData.filter(e => e.REGLA && e.REGLA.includes('[ADVERTENCIA]')).length;
 
-    function renderStats() {
-        const errors = state.filteredData.filter(e => !e.REGLA || !e.REGLA.includes('[ADVERTENCIA]')).length;
-        const warnings = state.filteredData.filter(e => e.REGLA && e.REGLA.includes('[ADVERTENCIA]')).length;
+            statErrores.textContent = errors;
+            statWarnings.textContent = warnings;
 
-        statErrores.textContent = errors;
-        statWarnings.textContent = warnings;
+            // Actualizar estado del filtro
+            const activeFilters = [];
+            if (state.filters.regla !== 'ALL') activeFilters.push(state.filters.regla);
+            if (state.filters.zona !== 'ALL') activeFilters.push(`Z${state.filters.zona}`);
+            if (state.filters.search) activeFilters.push(`"${state.filters.search}"`);
 
-        // Actualizar estado del filtro
-        const activeFilters = [];
-        if (state.filters.regla !== 'ALL') activeFilters.push(state.filters.regla);
-        if (state.filters.zona !== 'ALL') activeFilters.push(`Z${state.filters.zona}`);
-        if (state.filters.search) activeFilters.push(`"${state.filters.search}"`);
+            filterStatus.textContent = activeFilters.length > 0
+                ? `Filtros: ${activeFilters.join(', ')}`
+                : `Mostrando ${state.filteredData.length} de ${allHallazgos.length}`;
 
-        filterStatus.textContent = activeFilters.length > 0
-            ? `Filtros: ${activeFilters.join(', ')}`
-            : `Mostrando ${state.filteredData.length} de ${allHallazgos.length}`;
+            // Renderizar donut chart
+            renderDonutChart(errors, warnings);
+        }
 
-        // Renderizar donut chart
-        renderDonutChart(errors, warnings);
-    }
-
-    function renderDonutChart(errors, warnings) {
-        const total = errors + warnings;
-        if (total === 0) {
-            donutChart.innerHTML = `
+        function renderDonutChart(errors, warnings) {
+            const total = errors + warnings;
+            if (total === 0) {
+                donutChart.innerHTML = `
                 <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" stroke-width="12"/>
                 <text x="50" y="55" text-anchor="middle" class="text-[12px] font-bold fill-gray-400">0</text>
             `;
-            return;
-        }
+                return;
+            }
 
-        const errPct = (errors / total) * 100;
-        const warnPct = (warnings / total) * 100;
-        const circumference = 2 * Math.PI * 40;
-        const errDash = (errPct / 100) * circumference;
-        const warnDash = (warnPct / 100) * circumference;
+            const errPct = (errors / total) * 100;
+            const warnPct = (warnings / total) * 100;
+            const circumference = 2 * Math.PI * 40;
+            const errDash = (errPct / 100) * circumference;
+            const warnDash = (warnPct / 100) * circumference;
 
-        donutChart.innerHTML = `
+            donutChart.innerHTML = `
             <!-- Background -->
             <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" stroke-width="12"/>
             <!-- Warnings (amber) -->
@@ -1279,50 +1277,50 @@
             <!-- Center text -->
             <text x="50" y="55" text-anchor="middle" class="text-[14px] font-black" fill="currentColor">${total}</text>
         `;
-    }
+        }
 
-    function selectRow(index) {
-        state.selectedIndex = index;
-        renderTable(); // Re-render para actualizar highlight
-        showDetail(state.filteredData[index]);
-    }
+        function selectRow(index) {
+            state.selectedIndex = index;
+            renderTable(); // Re-render para actualizar highlight
+            showDetail(state.filteredData[index]);
+        }
 
-    function showDetail(item) {
-        if (!item) return;
+        function showDetail(item) {
+            if (!item) return;
 
-        detailEmpty.classList.add('hidden');
-        detailContent.classList.remove('hidden');
+            detailEmpty.classList.add('hidden');
+            detailContent.classList.remove('hidden');
 
-        const isWarning = item.REGLA && item.REGLA.includes('[ADVERTENCIA]');
-        const reglaInfo = getReglaInfo(item.REGLA || '');
+            const isWarning = item.REGLA && item.REGLA.includes('[ADVERTENCIA]');
+            const reglaInfo = getReglaInfo(item.REGLA || '');
 
-        // Badge de tipo
-        const badge = document.getElementById('detail-tipo-badge');
-        badge.textContent = isWarning ? 'ADVERTENCIA' : 'ERROR';
-        badge.className = `inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase mb-2 ${isWarning
-            ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
-            : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-            }`;
+            // Badge de tipo
+            const badge = document.getElementById('detail-tipo-badge');
+            badge.textContent = isWarning ? 'ADVERTENCIA' : 'ERROR';
+            badge.className = `inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase mb-2 ${isWarning
+                ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                }`;
 
-        // Título de la regla
-        document.getElementById('detail-regla-titulo').textContent = reglaInfo.titulo;
+            // Título de la regla
+            document.getElementById('detail-regla-titulo').textContent = reglaInfo.titulo;
 
-        // Explicación
-        document.getElementById('detail-explicacion').textContent = reglaInfo.descripcion;
+            // Explicación
+            document.getElementById('detail-explicacion').textContent = reglaInfo.descripcion;
 
-        // Hallazgo específico
-        document.getElementById('detail-hallazgo').textContent = item.DETALLE || 'Sin detalle adicional';
+            // Hallazgo específico
+            document.getElementById('detail-hallazgo').textContent = item.DETALLE || 'Sin detalle adicional';
 
-        // Comparativa
-        document.getElementById('detail-anterior').textContent = item.ANTERIOR || 'N/A';
-        document.getElementById('detail-nuevo').textContent = item.NUEVO || 'N/A';
+            // Comparativa
+            document.getElementById('detail-anterior').textContent = item.ANTERIOR || 'N/A';
+            document.getElementById('detail-nuevo').textContent = item.NUEVO || 'N/A';
 
-        // Breadcrumb geográfico
-        const breadcrumb = document.getElementById('detail-breadcrumb');
-        const zona = item.ZONA || '?';
-        const sector = item.SECTOR || '?';
-        const manzana = item.MANZANA || '?';
-        breadcrumb.innerHTML = `
+            // Breadcrumb geográfico
+            const breadcrumb = document.getElementById('detail-breadcrumb');
+            const zona = item.ZONA || '?';
+            const sector = item.SECTOR || '?';
+            const manzana = item.MANZANA || '?';
+            breadcrumb.innerHTML = `
             <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">📍 Zona ${zona}</span>
             <span class="text-gray-300 dark:text-gray-600">→</span>
             <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">Sector ${sector}</span>
@@ -1330,407 +1328,407 @@
             <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">Mz ${manzana}</span>
         `;
 
-        // Solución
-        document.getElementById('detail-solucion').textContent = reglaInfo.solucion;
-    }
+            // Solución
+            document.getElementById('detail-solucion').textContent = reglaInfo.solucion;
+        }
 
-    function hideDetail() {
-        detailEmpty.classList.remove('hidden');
-        detailContent.classList.add('hidden');
-    }
+        function hideDetail() {
+            detailEmpty.classList.remove('hidden');
+            detailContent.classList.add('hidden');
+        }
 
-    // ===== EVENT LISTENERS =====
+        // ===== EVENT LISTENERS =====
 
-    // Chips de tipo (ERROR/WARNING)
-    document.querySelectorAll('.filter-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-            chip.classList.toggle('active');
-            const tipo = chip.dataset.filterType;
+        // Chips de tipo (ERROR/WARNING)
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                chip.classList.toggle('active');
+                const tipo = chip.dataset.filterType;
 
-            if (chip.classList.contains('active')) {
-                if (!state.filters.types.includes(tipo)) {
-                    state.filters.types.push(tipo);
+                if (chip.classList.contains('active')) {
+                    if (!state.filters.types.includes(tipo)) {
+                        state.filters.types.push(tipo);
+                    }
+                    chip.classList.remove('opacity-40');
+                } else {
+                    state.filters.types = state.filters.types.filter(t => t !== tipo);
+                    chip.classList.add('opacity-40');
                 }
-                chip.classList.remove('opacity-40');
-            } else {
-                state.filters.types = state.filters.types.filter(t => t !== tipo);
-                chip.classList.add('opacity-40');
+
+                applyFilters();
+            });
+        });
+
+        // Botones de regla
+        document.querySelectorAll('.filter-regla').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Desactivar todos
+                document.querySelectorAll('.filter-regla').forEach(b => {
+                    b.classList.remove('active', 'bg-gray-100', 'dark:bg-gray-700', 'font-bold');
+                    b.classList.add('bg-white', 'dark:bg-gray-800', 'font-medium');
+                    b.innerHTML = b.innerHTML.replace('◉', '○');
+                });
+
+                // Activar el seleccionado
+                btn.classList.add('active', 'bg-gray-100', 'dark:bg-gray-700', 'font-bold');
+                btn.classList.remove('bg-white', 'dark:bg-gray-800', 'font-medium');
+                btn.innerHTML = btn.innerHTML.replace('○', '◉');
+
+                state.filters.regla = btn.dataset.filterRegla;
+                applyFilters();
+            });
+        });
+
+        // Filtro de zona
+        filterZona.addEventListener('change', () => {
+            state.filters.zona = filterZona.value;
+
+            // Actualizar opciones de sector basado en zona
+            filterSector.innerHTML = '<option value="ALL">Todos los Sectores</option>';
+            if (filterZona.value !== 'ALL') {
+                const sectoresEnZona = [...new Set(
+                    allHallazgos
+                        .filter(e => e.ZONA === filterZona.value)
+                        .map(e => e.SECTOR)
+                        .filter(s => s && s !== 'nan')
+                )].sort();
+                sectoresEnZona.forEach(s => {
+                    filterSector.innerHTML += `<option value="${s}">Sector ${s}</option>`;
+                });
             }
 
+            state.filters.sector = 'ALL';
             applyFilters();
         });
-    });
 
-    // Botones de regla
-    document.querySelectorAll('.filter-regla').forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Desactivar todos
-            document.querySelectorAll('.filter-regla').forEach(b => {
-                b.classList.remove('active', 'bg-gray-100', 'dark:bg-gray-700', 'font-bold');
-                b.classList.add('bg-white', 'dark:bg-gray-800', 'font-medium');
-                b.innerHTML = b.innerHTML.replace('◉', '○');
-            });
-
-            // Activar el seleccionado
-            btn.classList.add('active', 'bg-gray-100', 'dark:bg-gray-700', 'font-bold');
-            btn.classList.remove('bg-white', 'dark:bg-gray-800', 'font-medium');
-            btn.innerHTML = btn.innerHTML.replace('○', '◉');
-
-            state.filters.regla = btn.dataset.filterRegla;
+        // Filtro de sector
+        filterSector.addEventListener('change', () => {
+            state.filters.sector = filterSector.value;
             applyFilters();
         });
-    });
 
-    // Filtro de zona
-    filterZona.addEventListener('change', () => {
-        state.filters.zona = filterZona.value;
+        // Búsqueda
+        searchInput.addEventListener('input', (e) => {
+            state.filters.search = e.target.value;
+            applyFilters();
+        });
 
-        // Actualizar opciones de sector basado en zona
-        filterSector.innerHTML = '<option value="ALL">Todos los Sectores</option>';
-        if (filterZona.value !== 'ALL') {
-            const sectoresEnZona = [...new Set(
-                allHallazgos
-                    .filter(e => e.ZONA === filterZona.value)
-                    .map(e => e.SECTOR)
-                    .filter(s => s && s !== 'nan')
-            )].sort();
-            sectoresEnZona.forEach(s => {
-                filterSector.innerHTML += `<option value="${s}">Sector ${s}</option>`;
-            });
-        }
+        // Paginación
+        prevBtn.addEventListener('click', () => {
+            if (state.currentPage > 1) {
+                state.currentPage--;
+                renderTable();
+            }
+        });
 
-        state.filters.sector = 'ALL';
-        applyFilters();
-    });
+        nextBtn.addEventListener('click', () => {
+            const maxPage = Math.ceil(state.filteredData.length / state.rowsPerPage);
+            if (state.currentPage < maxPage) {
+                state.currentPage++;
+                renderTable();
+            }
+        });
 
-    // Filtro de sector
-    filterSector.addEventListener('change', () => {
-        state.filters.sector = filterSector.value;
-        applyFilters();
-    });
-
-    // Búsqueda
-    searchInput.addEventListener('input', (e) => {
-        state.filters.search = e.target.value;
-        applyFilters();
-    });
-
-    // Paginación
-    prevBtn.addEventListener('click', () => {
-        if (state.currentPage > 1) {
-            state.currentPage--;
+        // Cerrar detalle
+        document.getElementById('close-detail').addEventListener('click', () => {
+            state.selectedIndex = null;
             renderTable();
-        }
-    });
+            hideDetail();
+        });
 
-    nextBtn.addEventListener('click', () => {
-        const maxPage = Math.ceil(state.filteredData.length / state.rowsPerPage);
-        if (state.currentPage < maxPage) {
-            state.currentPage++;
-            renderTable();
-        }
-    });
+        // Inicialización
+        applyFilters();
 
-    // Cerrar detalle
-    document.getElementById('close-detail').addEventListener('click', () => {
-        state.selectedIndex = null;
-        renderTable();
-        hideDetail();
-    });
+        // ==========================================================================
+        // TERMINAL MODE EASTER EGG LOGIC
+        // ==========================================================================
 
-    // Inicialización
-    applyFilters();
+        const terminalMode = document.getElementById('terminal-mode');
+        const terminalBtn = document.getElementById('terminal-mode-btn');
+        const bootSequence = document.getElementById('boot-sequence');
+        const terminalUI = document.getElementById('terminal-ui');
+        const termContent = document.getElementById('terminal-content');
 
-    // ==========================================================================
-    // TERMINAL MODE EASTER EGG LOGIC
-    // ==========================================================================
+        // Terminal State
+        const termState = {
+            active: false,
+            booted: false,
+            currentTheme: 'theme-green',
+            selectedRow: 0,
+            filteredData: [...allHallazgos],
+            filters: {
+                types: ['ERROR', 'WARNING'],
+                regla: 'ALL'
+            }
+        };
 
-    const terminalMode = document.getElementById('terminal-mode');
-    const terminalBtn = document.getElementById('terminal-mode-btn');
-    const bootSequence = document.getElementById('boot-sequence');
-    const terminalUI = document.getElementById('terminal-ui');
-    const termContent = document.getElementById('terminal-content');
+        // Activate Terminal Mode
+        function activateTerminal() {
+            terminalMode.classList.remove('hidden');
+            termState.active = true;
+            termContent.classList.add(termState.currentTheme);
 
-    // Terminal State
-    const termState = {
-        active: false,
-        booted: false,
-        currentTheme: 'theme-green',
-        selectedRow: 0,
-        filteredData: [...allHallazgos],
-        filters: {
-            types: ['ERROR', 'WARNING'],
-            regla: 'ALL'
-        }
-    };
-
-    // Activate Terminal Mode
-    function activateTerminal() {
-        terminalMode.classList.remove('hidden');
-        termState.active = true;
-        termContent.classList.add(termState.currentTheme);
-
-        if (!termState.booted) {
-            // Boot sequence
-            setTimeout(() => {
-                animateBootProgress();
-            }, 3000);
-        } else {
-            // Skip boot, go straight to UI
-            bootSequence.classList.add('hidden');
-            terminalUI.classList.remove('hidden');
-            termApplyFilters();
-        }
-    }
-
-    // Animate Boot Progress Bar
-    function animateBootProgress() {
-        const progress = document.getElementById('boot-progress');
-        let filled = 0;
-        const interval = setInterval(() => {
-            filled++;
-            const bar = '█'.repeat(filled) + ' '.repeat(10 - filled);
-            progress.textContent = `[${bar}]`;
-
-            if (filled >= 10) {
-                clearInterval(interval);
+            if (!termState.booted) {
+                // Boot sequence
                 setTimeout(() => {
-                    bootSequence.classList.add('hidden');
-                    terminalUI.classList.remove('hidden');
-                    termState.booted = true;
-                    termApplyFilters();
-                }, 500);
+                    animateBootProgress();
+                }, 3000);
+            } else {
+                // Skip boot, go straight to UI
+                bootSequence.classList.add('hidden');
+                terminalUI.classList.remove('hidden');
+                termApplyFilters();
             }
-        }, 100);
-    }
-
-    // Deactivate Terminal Mode
-    function deactivateTerminal() {
-        terminalMode.classList.add('hidden');
-        termState.active = false;
-    }
-
-    // Apply Terminal Filters
-    function termApplyFilters() {
-        let data = [...allHallazgos];
-
-        // Filter by type
-        data = data.filter(e => {
-            const isWarning = e.REGLA && e.REGLA.includes('[ADVERTENCIA]');
-            const tipo = isWarning ? 'WARNING' : 'ERROR';
-            return termState.filters.types.includes(tipo);
-        });
-
-        // Filter by rule
-        if (termState.filters.regla !== 'ALL') {
-            data = data.filter(e => e.REGLA && e.REGLA.toUpperCase().includes(termState.filters.regla));
         }
 
-        termState.filteredData = data;
-        termState.selectedRow = 0;
+        // Animate Boot Progress Bar
+        function animateBootProgress() {
+            const progress = document.getElementById('boot-progress');
+            let filled = 0;
+            const interval = setInterval(() => {
+                filled++;
+                const bar = '█'.repeat(filled) + ' '.repeat(10 - filled);
+                progress.textContent = `[${bar}]`;
 
-        termRenderTable();
-        termRenderStats();
-    }
-
-    // Render Terminal Table
-    function termRenderTable() {
-        const table = document.getElementById('term-table');
-        const slice = termState.filteredData.slice(0, 50); // First 50
-
-        if (slice.length === 0) {
-            table.innerHTML = '<div class="text-center opacity-50 py-8">NO RESULTS</div>';
-            return;
+                if (filled >= 10) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        bootSequence.classList.add('hidden');
+                        terminalUI.classList.remove('hidden');
+                        termState.booted = true;
+                        termApplyFilters();
+                    }, 500);
+                }
+            }, 100);
         }
 
-        table.innerHTML = slice.map((item, idx) => {
-            const isWarning = item.REGLA && item.REGLA.includes('[ADVERTENCIA]');
-            const reglaClean = item.REGLA ? item.REGLA.replace('[ADVERTENCIA] ', '').substring(0, 15) : 'N/A';
-            const snc = (item.NUEVO || '').substring(0, 18);
-            const selected = idx === termState.selectedRow ? 'selected' : '';
+        // Deactivate Terminal Mode
+        function deactivateTerminal() {
+            terminalMode.classList.add('hidden');
+            termState.active = false;
+        }
 
-            return `
+        // Apply Terminal Filters
+        function termApplyFilters() {
+            let data = [...allHallazgos];
+
+            // Filter by type
+            data = data.filter(e => {
+                const isWarning = e.REGLA && e.REGLA.includes('[ADVERTENCIA]');
+                const tipo = isWarning ? 'WARNING' : 'ERROR';
+                return termState.filters.types.includes(tipo);
+            });
+
+            // Filter by rule
+            if (termState.filters.regla !== 'ALL') {
+                data = data.filter(e => e.REGLA && e.REGLA.toUpperCase().includes(termState.filters.regla));
+            }
+
+            termState.filteredData = data;
+            termState.selectedRow = 0;
+
+            termRenderTable();
+            termRenderStats();
+        }
+
+        // Render Terminal Table
+        function termRenderTable() {
+            const table = document.getElementById('term-table');
+            const slice = termState.filteredData.slice(0, 50); // First 50
+
+            if (slice.length === 0) {
+                table.innerHTML = '<div class="text-center opacity-50 py-8">NO RESULTS</div>';
+                return;
+            }
+
+            table.innerHTML = slice.map((item, idx) => {
+                const isWarning = item.REGLA && item.REGLA.includes('[ADVERTENCIA]');
+                const reglaClean = item.REGLA ? item.REGLA.replace('[ADVERTENCIA] ', '').substring(0, 15) : 'N/A';
+                const snc = (item.NUEVO || '').substring(0, 18);
+                const selected = idx === termState.selectedRow ? 'selected' : '';
+
+                return `
                 <div class="term-row ${selected}" data-idx="${idx}">
                     ${idx === termState.selectedRow ? '►' : ' '} ${reglaClean.padEnd(16)} ${snc}
                 </div>
             `;
-        }).join('');
+            }).join('');
 
-        // Update pagination
-        document.getElementById('term-pagination').textContent = `1-${slice.length}/${termState.filteredData.length}`;
+            // Update pagination
+            document.getElementById('term-pagination').textContent = `1-${slice.length}/${termState.filteredData.length}`;
 
-        // Show detail for selected row
-        if (termState.filteredData.length > 0) {
-            termShowDetail(termState.filteredData[termState.selectedRow]);
-        }
-    }
-
-    // Render Terminal Stats
-    function termRenderStats() {
-        const errors = termState.filteredData.filter(e => !e.REGLA || !e.REGLA.includes('[ADVERTENCIA]')).length;
-        const warnings = termState.filteredData.filter(e => e.REGLA && e.REGLA.includes('[ADVERTENCIA]')).length;
-        const total = allHallazgos.length;
-
-        document.getElementById('term-total').textContent = total;
-        document.getElementById('term-errors').textContent = errors;
-        document.getElementById('term-warnings').textContent = warnings;
-        document.getElementById('term-filtered').textContent = termState.filteredData.length;
-        document.getElementById('term-donut-total').textContent = termState.filteredData.length;
-    }
-
-    // Show Terminal Detail
-    function termShowDetail(item) {
-        if (!item) return;
-
-        document.getElementById('term-detail-empty').classList.add('hidden');
-        document.getElementById('term-detail-content').classList.remove('hidden');
-
-        const reglaInfo = getReglaInfo(item.REGLA || '');
-
-        document.getElementById('term-detail-title').textContent = reglaInfo.titulo;
-        document.getElementById('term-detail-desc').textContent = reglaInfo.descripcion;
-        document.getElementById('term-detail-hallazgo').textContent = item.DETALLE || 'N/A';
-        document.getElementById('term-detail-antes').textContent = item.ANTERIOR || 'N/A';
-        document.getElementById('term-detail-ahora').textContent = item.NUEVO || 'N/A';
-        document.getElementById('term-detail-ubicacion').textContent =
-            `📍 Zona ${item.ZONA || '?'} → Sector ${item.SECTOR || '?'} → Mz ${item.MANZANA || '?'}`;
-        document.getElementById('term-detail-solucion').textContent = reglaInfo.solucion;
-    }
-
-    // Change Terminal Color Theme
-    function changeTerminalTheme() {
-        const themes = ['theme-green', 'theme-amber', 'theme-white', 'theme-cyan'];
-        const currentIdx = themes.indexOf(termState.currentTheme);
-        const nextIdx = (currentIdx + 1) % themes.length;
-
-        termContent.classList.remove(termState.currentTheme);
-        termState.currentTheme = themes[nextIdx];
-        termContent.classList.add(termState.currentTheme);
-    }
-
-    // Event Listeners
-
-    // Activation Button
-    if (terminalBtn) {
-        terminalBtn.addEventListener('click', activateTerminal);
-    }
-
-    // Keyboard Navigation
-    document.addEventListener('keydown', (e) => {
-        if (!termState.active) return;
-
-        // ESC - Exit terminal
-        if (e.key === 'Escape') {
-            e.preventDefault();
-            deactivateTerminal();
-            return;
-        }
-
-        // Skip if boot not complete
-        if (!termState.booted) {
-            // Any key continues from boot
-            if (!bootSequence.classList.contains('hidden')) {
-                bootSequence.classList.add('hidden');
-                terminalUI.classList.remove('hidden');
-                termState.booted = true;
-                termApplyFilters();
-            }
-            return;
-        }
-
-        // Arrow Down - Next row
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            if (termState.selectedRow < termState.filteredData.length - 1) {
-                termState.selectedRow++;
-                termRenderTable();
+            // Show detail for selected row
+            if (termState.filteredData.length > 0) {
+                termShowDetail(termState.filteredData[termState.selectedRow]);
             }
         }
 
-        // Arrow Up - Previous row
-        if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            if (termState.selectedRow > 0) {
-                termState.selectedRow--;
-                termRenderTable();
+        // Render Terminal Stats
+        function termRenderStats() {
+            const errors = termState.filteredData.filter(e => !e.REGLA || !e.REGLA.includes('[ADVERTENCIA]')).length;
+            const warnings = termState.filteredData.filter(e => e.REGLA && e.REGLA.includes('[ADVERTENCIA]')).length;
+            const total = allHallazgos.length;
+
+            document.getElementById('term-total').textContent = total;
+            document.getElementById('term-errors').textContent = errors;
+            document.getElementById('term-warnings').textContent = warnings;
+            document.getElementById('term-filtered').textContent = termState.filteredData.length;
+            document.getElementById('term-donut-total').textContent = termState.filteredData.length;
+        }
+
+        // Show Terminal Detail
+        function termShowDetail(item) {
+            if (!item) return;
+
+            document.getElementById('term-detail-empty').classList.add('hidden');
+            document.getElementById('term-detail-content').classList.remove('hidden');
+
+            const reglaInfo = getReglaInfo(item.REGLA || '');
+
+            document.getElementById('term-detail-title').textContent = reglaInfo.titulo;
+            document.getElementById('term-detail-desc').textContent = reglaInfo.descripcion;
+            document.getElementById('term-detail-hallazgo').textContent = item.DETALLE || 'N/A';
+            document.getElementById('term-detail-antes').textContent = item.ANTERIOR || 'N/A';
+            document.getElementById('term-detail-ahora').textContent = item.NUEVO || 'N/A';
+            document.getElementById('term-detail-ubicacion').textContent =
+                `📍 Zona ${item.ZONA || '?'} → Sector ${item.SECTOR || '?'} → Mz ${item.MANZANA || '?'}`;
+            document.getElementById('term-detail-solucion').textContent = reglaInfo.solucion;
+        }
+
+        // Change Terminal Color Theme
+        function changeTerminalTheme() {
+            const themes = ['theme-green', 'theme-amber', 'theme-white', 'theme-cyan'];
+            const currentIdx = themes.indexOf(termState.currentTheme);
+            const nextIdx = (currentIdx + 1) % themes.length;
+
+            termContent.classList.remove(termState.currentTheme);
+            termState.currentTheme = themes[nextIdx];
+            termContent.classList.add(termState.currentTheme);
+        }
+
+        // Event Listeners
+
+        // Activation Button
+        if (terminalBtn) {
+            terminalBtn.addEventListener('click', activateTerminal);
+        }
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (!termState.active) return;
+
+            // ESC - Exit terminal
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                deactivateTerminal();
+                return;
             }
-        }
 
-        // Enter - Show detail (already shown, just visual feedback)
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            // Could add a flash effect or sound
-        }
-
-        // C - Change color theme
-        if (e.key === 'c' || e.key === 'C') {
-            e.preventDefault();
-            changeTerminalTheme();
-        }
-
-        // ? - Show help
-        if (e.key === '?') {
-            e.preventDefault();
-            alert('TERMINAL COMMANDS:\n\n[ESC] Exit\n[↑↓] Navigate\n[C] Change Color\n[?] Help');
-        }
-    });
-
-    // Filter Type Clicks
-    document.querySelectorAll('.term-filter-type').forEach(filter => {
-        filter.addEventListener('click', () => {
-            const tipo = filter.dataset.type;
-            filter.classList.toggle('active');
-
-            if (filter.classList.contains('active')) {
-                if (!termState.filters.types.includes(tipo)) {
-                    termState.filters.types.push(tipo);
+            // Skip if boot not complete
+            if (!termState.booted) {
+                // Any key continues from boot
+                if (!bootSequence.classList.contains('hidden')) {
+                    bootSequence.classList.add('hidden');
+                    terminalUI.classList.remove('hidden');
+                    termState.booted = true;
+                    termApplyFilters();
                 }
-            } else {
-                termState.filters.types = termState.filters.types.filter(t => t !== tipo);
+                return;
             }
 
-            termApplyFilters();
-        });
-    });
+            // Arrow Down - Next row
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (termState.selectedRow < termState.filteredData.length - 1) {
+                    termState.selectedRow++;
+                    termRenderTable();
+                }
+            }
 
-    // Filter Regla Clicks
-    document.querySelectorAll('.term-filter-regla').forEach(filter => {
-        filter.addEventListener('click', () => {
-            // Deactivate all
-            document.querySelectorAll('.term-filter-regla').forEach(f => f.classList.remove('active'));
+            // Arrow Up - Previous row
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (termState.selectedRow > 0) {
+                    termState.selectedRow--;
+                    termRenderTable();
+                }
+            }
 
-            // Activate clicked
-            filter.classList.add('active');
-            termState.filters.regla = filter.dataset.regla;
-
-            termApplyFilters();
-        });
-    });
-
-    // Command Input (basic)
-    const termCmd = document.getElementById('term-cmd');
-    if (termCmd) {
-        termCmd.addEventListener('keydown', (e) => {
+            // Enter - Show detail (already shown, just visual feedback)
             if (e.key === 'Enter') {
-                const cmd = termCmd.value.trim().toLowerCase();
+                e.preventDefault();
+                // Could add a flash effect or sound
+            }
 
-                if (cmd === '/help') {
-                    alert('AVAILABLE COMMANDS:\n\n/help - Show this help\n/clear - Clear command\n/exit - Exit terminal mode\n/theme - Change color theme');
-                } else if (cmd === '/exit') {
-                    deactivateTerminal();
-                } else if (cmd === '/theme') {
-                    changeTerminalTheme();
-                } else if (cmd === '/clear') {
-                    // Do nothing, just clear
-                } else if (cmd) {
-                    alert(`UNKNOWN COMMAND: ${cmd}\nType /help for available commands.`);
-                }
+            // C - Change color theme
+            if (e.key === 'c' || e.key === 'C') {
+                e.preventDefault();
+                changeTerminalTheme();
+            }
 
-                termCmd.value = '';
+            // ? - Show help
+            if (e.key === '?') {
+                e.preventDefault();
+                alert('TERMINAL COMMANDS:\n\n[ESC] Exit\n[↑↓] Navigate\n[C] Change Color\n[?] Help');
             }
         });
-    }
 
-    {% endif %}
-</script>
-{% endblock %}
+        // Filter Type Clicks
+        document.querySelectorAll('.term-filter-type').forEach(filter => {
+            filter.addEventListener('click', () => {
+                const tipo = filter.dataset.type;
+                filter.classList.toggle('active');
+
+                if (filter.classList.contains('active')) {
+                    if (!termState.filters.types.includes(tipo)) {
+                        termState.filters.types.push(tipo);
+                    }
+                } else {
+                    termState.filters.types = termState.filters.types.filter(t => t !== tipo);
+                }
+
+                termApplyFilters();
+            });
+        });
+
+        // Filter Regla Clicks
+        document.querySelectorAll('.term-filter-regla').forEach(filter => {
+            filter.addEventListener('click', () => {
+                // Deactivate all
+                document.querySelectorAll('.term-filter-regla').forEach(f => f.classList.remove('active'));
+
+                // Activate clicked
+                filter.classList.add('active');
+                termState.filters.regla = filter.dataset.regla;
+
+                termApplyFilters();
+            });
+        });
+
+        // Command Input (basic)
+        const termCmd = document.getElementById('term-cmd');
+        if (termCmd) {
+            termCmd.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const cmd = termCmd.value.trim().toLowerCase();
+
+                    if (cmd === '/help') {
+                        alert('AVAILABLE COMMANDS:\n\n/help - Show this help\n/clear - Clear command\n/exit - Exit terminal mode\n/theme - Change color theme');
+                    } else if (cmd === '/exit') {
+                        deactivateTerminal();
+                    } else if (cmd === '/theme') {
+                        changeTerminalTheme();
+                    } else if (cmd === '/clear') {
+                        // Do nothing, just clear
+                    } else if (cmd) {
+                        alert(`UNKNOWN COMMAND: ${cmd}\nType /help for available commands.`);
+                    }
+
+                    termCmd.value = '';
+                }
+            });
+        }
+
+        {% endif %}
+    </script>
+    {% endblock %}
