@@ -679,247 +679,250 @@
         </div>
         {% endif %}
 
+        <!-- ============================================================================ -->
+        <!-- TERMINAL MODE EASTER EGG -->
+        <!-- ============================================================================ -->
+        {% if resultados and resultados.errores %}
+        <div id="terminal-mode" class="hidden fixed inset-0 z-[9999] bg-black overflow-hidden">
+            <!-- Scanlines CRT Effect -->
+            <div class="scanlines absolute inset-0 pointer-events-none"></div>
+
+            <!-- Terminal Content -->
+            <div id="terminal-content"
+                class="relative h-full w-full p-8 overflow-auto font-mono text-sm leading-relaxed terminal-text">
+                <!-- Boot Sequence (shown initially) -->
+                <div id="boot-sequence" class="space-y-2">
+                    <div class="typing-effect">IGAC TERMINAL SYSTEM v1.0</div>
+                    <div class="typing-effect delay-1">INITIALIZING AUDIT MODULE...</div>
+                    <div class="typing-effect delay-2">LOADING DATA... <span id="boot-progress">[ ]</span></div>
+                    <div class="typing-effect delay-3">READY.</div>
+                    <div class="typing-effect delay-4 mt-4">Press any key to continue_<span
+                            class="cursor-blink">█</span></div>
+                </div>
+
+                <!-- Main Terminal UI (hidden initially) -->
+                <div id="terminal-ui" class="hidden">
+                    <!-- Header -->
+                    <div class="border-ascii mb-4">
+                        <div class="flex justify-between items-center px-4 py-2">
+                            <div>
+                                <div class="font-bold">IGAC // TERMINAL v1.0</div>
+                                <div class="text-xs opacity-75">04 // AUDITORIA_RENUMERACION</div>
+                            </div>
+                            <div class="text-xs opacity-75">[ESC] EXIT | [C] COLOR | [?] HELP</div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Bar -->
+                    <div class="border-ascii mb-4 px-4 py-2">
+                        <div class="flex gap-8 text-xs">
+                            <span>TOTAL: <span id="term-total">0</span></span>
+                            <span>ERRORES: <span id="term-errors" class="font-bold">0</span></span>
+                            <span>WARNINGS: <span id="term-warnings" class="font-bold">0</span></span>
+                            <span class="ml-auto">FILTRADOS: <span id="term-filtered">0</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Main 3-Column Layout -->
+                    <div class="grid grid-cols-12 gap-4 h-[calc(100vh-280px)]">
+                        <!-- Left: Filters -->
+                        <div class="col-span-3 border-ascii p-3 overflow-auto">
+                            <div class="text-xs font-bold mb-3 border-b-ascii pb-1">FILTROS</div>
+
+                            <div class="space-y-3 text-xs">
+                                <div>
+                                    <div class="opacity-75 mb-1">TIPO:</div>
+                                    <div class="space-y-1 ml-2">
+                                        <div class="term-filter-type active cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                            data-type="ERROR">
+                                            <span class="checkbox">[✓]</span> ERROR
+                                        </div>
+                                        <div class="term-filter-type active cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                            data-type="WARNING">
+                                            <span class="checkbox">[✓]</span> WARNING
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="opacity-75 mb-1">REGLA:</div>
+                                    <div class="space-y-1 ml-2">
+                                        <div class="term-filter-regla active cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                            data-regla="ALL">
+                                            <span class="radio">●</span> TODOS
+                                        </div>
+                                        <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                            data-regla="UNICIDAD">
+                                            <span class="radio">○</span> R1: UNICIDAD
+                                        </div>
+                                        <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                            data-regla="ESTRUCTURA">
+                                            <span class="radio">○</span> R2: ESTRUCTURA
+                                        </div>
+                                        <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                            data-regla="CONSECUTIVIDAD">
+                                            <span class="radio">○</span> R3: CONSECUTIVIDAD
+                                        </div>
+                                        <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                            data-regla="HUECOS">
+                                            <span class="radio">○</span> R4: HUECOS
+                                        </div>
+                                        <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                            data-regla="INICIO">
+                                            <span class="radio">○</span> R5: INICIO
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="border-t-ascii pt-2 mt-3">
+                                    <div class="opacity-75 text-center text-[10px]">STATS</div>
+                                    <div class="mt-2 text-center">
+                                        <div class="text-2xl font-bold" id="term-donut-total">0</div>
+                                        <div class="text-[10px] opacity-75">HALLAZGOS</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Center: Table -->
+                        <div class="col-span-5 border-ascii flex flex-col">
+                            <div class="border-b-ascii px-3 py-2 flex justify-between items-center">
+                                <span class="text-xs font-bold">HALLAZGOS</span>
+                                <span class="text-xs opacity-75" id="term-pagination">1-50/0</span>
+                            </div>
+                            <div class="flex-1 overflow-auto p-3">
+                                <div class="space-y-1 text-xs" id="term-table">
+                                    <!-- Rows rendered by JS -->
+                                </div>
+                            </div>
+                            <div class="border-t-ascii px-3 py-2 text-xs opacity-75">
+                                ↑↓ NAVEGAR | ENTER VER DETALLE | PgUp/PgDn PAGINAR
+                            </div>
+                        </div>
+
+                        <!-- Right: Detail -->
+                        <div class="col-span-4 border-ascii p-3 overflow-auto">
+                            <div id="term-detail-empty"
+                                class="flex flex-col items-center justify-center h-full opacity-50">
+                                <div class="text-4xl mb-4">[ ]</div>
+                                <div class="text-xs text-center">SELECCIONE UN<br>HALLAZGO</div>
+                            </div>
+
+                            <div id="term-detail-content" class="hidden space-y-3 text-xs">
+                                <div class="border-ascii p-2">
+                                    <div class="font-bold mb-1" id="term-detail-title">REGLA</div>
+                                    <div class="opacity-75 text-[11px]" id="term-detail-desc">Descripción</div>
+                                </div>
+
+                                <div>
+                                    <div class="opacity-75 mb-1">HALLAZGO:</div>
+                                    <div class="border-ascii p-2 text-[11px]" id="term-detail-hallazgo">-</div>
+                                </div>
+
+                                <div>
+                                    <div class="opacity-75 mb-1">COMPARATIVA:</div>
+                                    <div class="border-ascii p-2 space-y-1 text-[11px]">
+                                        <div>ANTES: <span id="term-detail-antes">-</span></div>
+                                        <div class="text-center">↓</div>
+                                        <div>AHORA: <span id="term-detail-ahora" class="font-bold">-</span></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="opacity-75 mb-1">UBICACIÓN:</div>
+                                    <div class="border-ascii p-2 text-[11px]" id="term-detail-ubicacion">
+                                        📍 Zona ? → Sector ? → Mz ?
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="opacity-75 mb-1">SOLUCIÓN:</div>
+                                    <div class="border-ascii p-2 text-[11px]" id="term-detail-solucion">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Command Line -->
+                    <div class="border-ascii mt-4 px-4 py-2 flex items-center gap-2 text-xs">
+                        <span class="opacity-75">CMD&gt;</span>
+                        <input type="text" id="term-cmd" class="flex-1 bg-transparent outline-none"
+                            placeholder="type /help for commands">
+                        <span class="cursor-blink">█</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal Mode Activation Button (Subtle Footer) -->
+        <button id="terminal-mode-btn"
+            class="fixed bottom-4 right-4 w-6 h-6 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 rounded flex items-center justify-center font-mono text-[10px] hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 transition-all opacity-40 hover:opacity-100 z-40"
+            title="Modo Terminal">
+            [█]
+        </button>
+        {% endif %}
+    </div>
+    {% endblock %}
+
+    {% block help_content %}
+    <div class="space-y-8 text-gray-600 font-sans">
+        <section>
+            <h4 class="text-gray-900 font-black text-xs uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">
+                01 // ALCANCE
+            </h4>
+            <p class="text-xs font-medium leading-relaxed">
+                Esta herramienta realiza la validación técnica alfanumérica para procesos de RENUMERACIÓN CATASTRAL.
+                Verifica la integridad de la migración de códigos CICA (9xxx) o de Gestores (ANT) al nuevo estándar SNC,
+                asegurando unicidad y consistencia territorial.
+            </p>
+        </section>
+
+        <section>
+            <h4 class="text-gray-900 font-black text-xs uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">
+                02 // REGLAS DE VALIDACIÓN
+            </h4>
+            <div class="grid grid-cols-1 gap-3">
+                <div class="flex gap-4 p-3 bg-gray-50 rounded-lg">
+                    <span class="font-bold text-xs text-gray-900 min-w-[30px]">R1</span>
+                    <p class="text-[11px]"><b>UNICIDAD:</b> No pueden existir códigos SNC duplicados en el entregable.
+                    </p>
+                </div>
+                <div class="flex gap-4 p-3 bg-gray-50 rounded-lg">
+                    <span class="font-bold text-xs text-gray-900 min-w-[30px]">R2</span>
+                    <p class="text-[11px]"><b>PERMANENCIA:</b> Los predios antiguos (Definitivos) deben conservar su
+                        código.
+                    </p>
+                </div>
+                <div class="flex gap-4 p-3 bg-gray-50 rounded-lg">
+                    <span class="font-bold text-xs text-gray-900 min-w-[30px]">R3</span>
+                    <p class="text-[11px]"><b>LIMPIEZA:</b> El código final no puede contener caracteres alfabéticos ni
+                        iniciar por 9.</p>
+                </div>
+                <div class="flex gap-4 p-3 bg-gray-50 rounded-lg">
+                    <span class="font-bold text-xs text-gray-900 min-w-[30px]">R4</span>
+                    <p class="text-[11px]"><b>CONSECUTIVOS:</b> En manzana existente, los nuevos terrenos deben seguir
+                        el
+                        consecutivo del último existente.</p>
+                </div>
+                <div class="flex gap-4 p-3 bg-gray-50 rounded-lg border-l-2 border-red-500">
+                    <span class="font-bold text-xs text-gray-900 min-w-[30px]">R5</span>
+                    <div class="space-y-1">
+                        <p class="text-[11px]"><b>REINICIO MANZANA:</b> Si se crea una manzana nueva, sus terrenos deben
+                            iniciar estrictamente desde <b>0001</b>.</p>
+                        <p class="text-[9px] text-red-600 font-bold uppercase">* Error común: Iniciar en 0002 o heredar
+                            numeración vieja.</p>
+                    </div>
+                </div>
+                <div class="flex gap-4 p-3 bg-gray-50 rounded-lg">
+                    <span class="font-bold text-xs text-gray-900 min-w-[30px]">R6</span>
+                    <p class="text-[11px]"><b>REINICIO SECTOR:</b> Si se crea un sector nuevo, sus manzanas deben
+                        iniciar
+                        desde 01.</p>
+                </div>
+            </div>
+        </section>
     </div>
     {% endif %}
-
-</div>
-{% endblock %}
-
-{% block help_content %}
-<div class="space-y-8 text-gray-600 font-sans">
-    <section>
-        <h4 class="text-gray-900 font-black text-xs uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">
-            01 // ALCANCE
-        </h4>
-        <p class="text-xs font-medium leading-relaxed">
-            Esta herramienta realiza la validación técnica alfanumérica para procesos de RENUMERACIÓN CATASTRAL.
-            Verifica la integridad de la migración de códigos CICA (9xxx) o de Gestores (ANT) al nuevo estándar SNC,
-            asegurando unicidad y consistencia territorial.
-        </p>
-    </section>
-
-    <section>
-        <h4 class="text-gray-900 font-black text-xs uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">
-            02 // REGLAS DE VALIDACIÓN
-        </h4>
-        <div class="grid grid-cols-1 gap-3">
-            <div class="flex gap-4 p-3 bg-gray-50 rounded-lg">
-                <span class="font-bold text-xs text-gray-900 min-w-[30px]">R1</span>
-                <p class="text-[11px]"><b>UNICIDAD:</b> No pueden existir códigos SNC duplicados en el entregable.</p>
-            </div>
-            <div class="flex gap-4 p-3 bg-gray-50 rounded-lg">
-                <span class="font-bold text-xs text-gray-900 min-w-[30px]">R2</span>
-                <p class="text-[11px]"><b>PERMANENCIA:</b> Los predios antiguos (Definitivos) deben conservar su código.
-                </p>
-            </div>
-            <div class="flex gap-4 p-3 bg-gray-50 rounded-lg">
-                <span class="font-bold text-xs text-gray-900 min-w-[30px]">R3</span>
-                <p class="text-[11px]"><b>LIMPIEZA:</b> El código final no puede contener caracteres alfabéticos ni
-                    iniciar por 9.</p>
-            </div>
-            <div class="flex gap-4 p-3 bg-gray-50 rounded-lg">
-                <span class="font-bold text-xs text-gray-900 min-w-[30px]">R4</span>
-                <p class="text-[11px]"><b>CONSECUTIVOS:</b> En manzana existente, los nuevos terrenos deben seguir el
-                    consecutivo del último existente.</p>
-            </div>
-            <div class="flex gap-4 p-3 bg-gray-50 rounded-lg border-l-2 border-red-500">
-                <span class="font-bold text-xs text-gray-900 min-w-[30px]">R5</span>
-                <div class="space-y-1">
-                    <p class="text-[11px]"><b>REINICIO MANZANA:</b> Si se crea una manzana nueva, sus terrenos deben
-                        iniciar estrictamente desde <b>0001</b>.</p>
-                    <p class="text-[9px] text-red-600 font-bold uppercase">* Error común: Iniciar en 0002 o heredar
-                        numeración vieja.</p>
-                </div>
-            </div>
-            <div class="flex gap-4 p-3 bg-gray-50 rounded-lg">
-                <span class="font-bold text-xs text-gray-900 min-w-[30px]">R6</span>
-                <p class="text-[11px]"><b>REINICIO SECTOR:</b> Si se crea un sector nuevo, sus manzanas deben iniciar
-                    desde 01.</p>
-            </div>
-        </div>
-    </section>
-</div>
-
-<!-- ============================================================================ -->
-<!-- TERMINAL MODE EASTER EGG -->
-<!-- ============================================================================ -->
-{% if resultados and resultados.errores %}
-<div id="terminal-mode" class="hidden fixed inset-0 z-[9999] bg-black overflow-hidden">
-    <!-- Scanlines CRT Effect -->
-    <div class="scanlines absolute inset-0 pointer-events-none"></div>
-
-    <!-- Terminal Content -->
-    <div id="terminal-content"
-        class="relative h-full w-full p-8 overflow-auto font-mono text-sm leading-relaxed terminal-text">
-        <!-- Boot Sequence (shown initially) -->
-        <div id="boot-sequence" class="space-y-2">
-            <div class="typing-effect">IGAC TERMINAL SYSTEM v1.0</div>
-            <div class="typing-effect delay-1">INITIALIZING AUDIT MODULE...</div>
-            <div class="typing-effect delay-2">LOADING DATA... <span id="boot-progress">[ ]</span></div>
-            <div class="typing-effect delay-3">READY.</div>
-            <div class="typing-effect delay-4 mt-4">Press any key to continue_<span class="cursor-blink">█</span></div>
-        </div>
-
-        <!-- Main Terminal UI (hidden initially) -->
-        <div id="terminal-ui" class="hidden">
-            <!-- Header -->
-            <div class="border-ascii mb-4">
-                <div class="flex justify-between items-center px-4 py-2">
-                    <div>
-                        <div class="font-bold">IGAC // TERMINAL v1.0</div>
-                        <div class="text-xs opacity-75">04 // AUDITORIA_RENUMERACION</div>
-                    </div>
-                    <div class="text-xs opacity-75">[ESC] EXIT | [C] COLOR | [?] HELP</div>
-                </div>
-            </div>
-
-            <!-- Stats Bar -->
-            <div class="border-ascii mb-4 px-4 py-2">
-                <div class="flex gap-8 text-xs">
-                    <span>TOTAL: <span id="term-total">0</span></span>
-                    <span>ERRORES: <span id="term-errors" class="font-bold">0</span></span>
-                    <span>WARNINGS: <span id="term-warnings" class="font-bold">0</span></span>
-                    <span class="ml-auto">FILTRADOS: <span id="term-filtered">0</span></span>
-                </div>
-            </div>
-
-            <!-- Main 3-Column Layout -->
-            <div class="grid grid-cols-12 gap-4 h-[calc(100vh-280px)]">
-                <!-- Left: Filters -->
-                <div class="col-span-3 border-ascii p-3 overflow-auto">
-                    <div class="text-xs font-bold mb-3 border-b-ascii pb-1">FILTROS</div>
-
-                    <div class="space-y-3 text-xs">
-                        <div>
-                            <div class="opacity-75 mb-1">TIPO:</div>
-                            <div class="space-y-1 ml-2">
-                                <div class="term-filter-type active cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
-                                    data-type="ERROR">
-                                    <span class="checkbox">[✓]</span> ERROR
-                                </div>
-                                <div class="term-filter-type active cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
-                                    data-type="WARNING">
-                                    <span class="checkbox">[✓]</span> WARNING
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="opacity-75 mb-1">REGLA:</div>
-                            <div class="space-y-1 ml-2">
-                                <div class="term-filter-regla active cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
-                                    data-regla="ALL">
-                                    <span class="radio">●</span> TODOS
-                                </div>
-                                <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
-                                    data-regla="UNICIDAD">
-                                    <span class="radio">○</span> R1: UNICIDAD
-                                </div>
-                                <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
-                                    data-regla="ESTRUCTURA">
-                                    <span class="radio">○</span> R2: ESTRUCTURA
-                                </div>
-                                <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
-                                    data-regla="CONSECUTIVIDAD">
-                                    <span class="radio">○</span> R3: CONSECUTIVIDAD
-                                </div>
-                                <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
-                                    data-regla="HUECOS">
-                                    <span class="radio">○</span> R4: HUECOS
-                                </div>
-                                <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
-                                    data-regla="INICIO">
-                                    <span class="radio">○</span> R5: INICIO
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="border-t-ascii pt-2 mt-3">
-                            <div class="opacity-75 text-center text-[10px]">STATS</div>
-                            <div class="mt-2 text-center">
-                                <div class="text-2xl font-bold" id="term-donut-total">0</div>
-                                <div class="text-[10px] opacity-75">HALLAZGOS</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Center: Table -->
-                <div class="col-span-5 border-ascii flex flex-col">
-                    <div class="border-b-ascii px-3 py-2 flex justify-between items-center">
-                        <span class="text-xs font-bold">HALLAZGOS</span>
-                        <span class="text-xs opacity-75" id="term-pagination">1-50/0</span>
-                    </div>
-                    <div class="flex-1 overflow-auto p-3">
-                        <div class="space-y-1 text-xs" id="term-table">
-                            <!-- Rows rendered by JS -->
-                        </div>
-                    </div>
-                    <div class="border-t-ascii px-3 py-2 text-xs opacity-75">
-                        ↑↓ NAVEGAR | ENTER VER DETALLE | PgUp/PgDn PAGINAR
-                    </div>
-                </div>
-
-                <!-- Right: Detail -->
-                <div class="col-span-4 border-ascii p-3 overflow-auto">
-                    <div id="term-detail-empty" class="flex flex-col items-center justify-center h-full opacity-50">
-                        <div class="text-4xl mb-4">[ ]</div>
-                        <div class="text-xs text-center">SELECCIONE UN<br>HALLAZGO</div>
-                    </div>
-
-                    <div id="term-detail-content" class="hidden space-y-3 text-xs">
-                        <div class="border-ascii p-2">
-                            <div class="font-bold mb-1" id="term-detail-title">REGLA</div>
-                            <div class="opacity-75 text-[11px]" id="term-detail-desc">Descripción</div>
-                        </div>
-
-                        <div>
-                            <div class="opacity-75 mb-1">HALLAZGO:</div>
-                            <div class="border-ascii p-2 text-[11px]" id="term-detail-hallazgo">-</div>
-                        </div>
-
-                        <div>
-                            <div class="opacity-75 mb-1">COMPARATIVA:</div>
-                            <div class="border-ascii p-2 space-y-1 text-[11px]">
-                                <div>ANTES: <span id="term-detail-antes">-</span></div>
-                                <div class="text-center">↓</div>
-                                <div>AHORA: <span id="term-detail-ahora" class="font-bold">-</span></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="opacity-75 mb-1">UBICACIÓN:</div>
-                            <div class="border-ascii p-2 text-[11px]" id="term-detail-ubicacion">
-                                📍 Zona ? → Sector ? → Mz ?
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="opacity-75 mb-1">SOLUCIÓN:</div>
-                            <div class="border-ascii p-2 text-[11px]" id="term-detail-solucion">-</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Command Line -->
-            <div class="border-ascii mt-4 px-4 py-2 flex items-center gap-2 text-xs">
-                <span class="opacity-75">CMD&gt;</span>
-                <input type="text" id="term-cmd" class="flex-1 bg-transparent outline-none"
-                    placeholder="type /help for commands">
-                <span class="cursor-blink">█</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Terminal Mode Activation Button (Footer) -->
-<button id="terminal-mode-btn"
-    class="fixed bottom-6 right-6 w-10 h-10 bg-black border-2 border-green-500 text-green-500 rounded-lg flex items-center justify-center font-mono text-lg hover:bg-green-500 hover:text-black transition-all shadow-lg hover:shadow-green-500/50 z-40"
-    title="Terminal Mode (Easter Egg)">
-    [█]
-</button>
-{% endif %}
 
 </div>
 {% endblock %}
