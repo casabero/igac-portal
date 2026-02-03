@@ -7,6 +7,7 @@
 <!-- Terminal Mode Styles -->
 <style>
     /* ============================================================================ */
+    /* ============================================================================ */
     /* TERMINAL MODE CRT EFFECTS */
     /* ============================================================================ */
 
@@ -14,52 +15,54 @@
     :root {
         --term-bg: #000000;
         --term-text: #00FF00;
-        --term-glow: rgba(0, 255, 0, 0.5);
+        --term-glow: rgba(0, 255, 0, 0.6);
     }
 
-    .terminal-text {
-        color: var(--term-text);
-        text-shadow: 0 0 5px var(--term-glow);
+    #terminal-mode {
+        font-family: 'Fira Code', 'Courier New', monospace !important;
+        background-color: var(--term-bg) !important;
+        color: var(--term-text) !important;
+    }
+
+    .terminal-text,
+    #terminal-mode *,
+    #terminal-mode input {
+        color: var(--term-text) !important;
+        text-shadow: 0 0 8px var(--term-glow), 0 0 2px var(--term-text) !important;
+        font-family: inherit !important;
     }
 
     /* Scanlines Effect */
     .scanlines {
         background: repeating-linear-gradient(0deg,
-                rgba(0, 0, 0, 0.15),
-                rgba(0, 0, 0, 0.15) 1px,
+                rgba(0, 0, 0, 0.2),
+                rgba(0, 0, 0, 0.2) 1px,
                 transparent 1px,
                 transparent 2px);
         pointer-events: none;
-        animation: scanline-move 8s linear infinite;
-    }
-
-    @keyframes scanline-move {
-        0% {
-            transform: translateY(0);
-        }
-
-        100% {
-            transform: translateY(10px);
-        }
+        z-index: 10;
+        opacity: 0.6;
     }
 
     /* ASCII Borders */
     .border-ascii {
-        border: 1px solid var(--term-text);
-        box-shadow: 0 0 10px var(--term-glow);
+        border: 2px solid var(--term-text) !important;
+        box-shadow: 0 0 15px var(--term-glow), inset 0 0 10px var(--term-glow) !important;
     }
 
     .border-b-ascii {
-        border-bottom: 1px solid var(--term-text);
+        border-bottom: 2px solid var(--term-text) !important;
     }
 
     .border-t-ascii {
-        border-top: 1px solid var(--term-text);
+        border-top: 2px solid var(--term-text) !important;
     }
 
     /* Cursor Blink */
     .cursor-blink {
-        animation: blink 1s infinite;
+        animation: blink 0.8s infinite;
+        display: inline-block;
+        vertical-align: middle;
     }
 
     @keyframes blink {
@@ -78,23 +81,7 @@
     /* Typing Effect */
     .typing-effect {
         opacity: 0;
-        animation: type-in 0.5s forwards;
-    }
-
-    .typing-effect.delay-1 {
-        animation-delay: 0.5s;
-    }
-
-    .typing-effect.delay-2 {
-        animation-delay: 1s;
-    }
-
-    .typing-effect.delay-3 {
-        animation-delay: 2s;
-    }
-
-    .typing-effect.delay-4 {
-        animation-delay: 2.5s;
+        animation: type-in 0.4s forwards;
     }
 
     @keyframes type-in {
@@ -105,51 +92,64 @@
 
     /* Terminal Row Styles */
     .term-row {
-        padding: 4px 8px;
+        padding: 6px 10px;
         cursor: pointer;
-        transition: all 0.1s;
+        transition: all 0.1s ease;
+        border: 1px solid transparent;
     }
 
     .term-row:hover {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 0 8px var(--term-glow);
     }
 
     .term-row.selected {
-        background: rgba(0, 255, 0, 0.2);
-        border-left: 2px solid var(--term-text);
+        background: var(--term-text) !important;
+        color: var(--term-bg) !important;
+        text-shadow: none !important;
     }
 
-    /* Filter Active States */
-    .term-filter-type:not(.active) .checkbox::before {
-        content: '[ ]';
+    .term-row.selected * {
+        color: var(--term-bg) !important;
+        text-shadow: none !important;
     }
 
-    .term-filter-type.active .checkbox::before {
-        content: '[✓]';
-    }
-
-    .term-filter-regla:not(.active) .radio::before {
-        content: '○';
-    }
-
-    .term-filter-regla.active .radio::before {
-        content: '●';
-    }
-
-    /* Color Theme Classes */
+    /* Theme Classes */
     .theme-green {
-        --term-text: #00FF00;
-        --term-glow: rgba(0, 255, 0, 0.5);
+        --term-text: #00FF33;
+        --term-glow: rgba(0, 255, 51, 0.4);
     }
 
     .theme-amber {
         --term-text: #FFB000;
-        --term-glow: rgba(255, 176, 0, 0.5);
+        --term-glow: rgba(255, 176, 0, 0.4);
     }
 
     .theme-white {
-        --term-text: #FFFFFF;
-        --term-glow: rgba(255, 255, 255, 0.3);
+        --term-text: #E0E0E0;
+        --term-glow: rgba(224, 224, 224, 0.3);
+    }
+
+    .theme-cyan {
+        --term-text: #00FFFF;
+        --term-glow: rgba(0, 255, 255, 0.4);
+    }
+
+    /* Filter Active States */
+    .term-filter-type:not(.active) .checkbox::before {
+        content: '[ ] ';
+    }
+
+    .term-filter-type.active .checkbox::before {
+        content: '[✓] ';
+    }
+
+    .term-filter-regla:not(.active) .radio::before {
+        content: '○ ';
+    }
+
+    .term-filter-regla.active .radio::before {
+        content: '● ';
     }
 
     .theme-cyan {
@@ -707,9 +707,9 @@
                         <div class="flex justify-between items-center px-4 py-2">
                             <div>
                                 <div class="font-bold">IGAC // TERMINAL v1.0</div>
-                                <div class="text-xs opacity-75">04 // AUDITORIA_RENUMERACION</div>
+                                <div class="text-xs">04 // AUDITORIA_RENUMERACION</div>
                             </div>
-                            <div class="text-xs opacity-75">[ESC] EXIT | [C] COLOR | [?] HELP</div>
+                            <div class="text-xs">[ESC] EXIT | [C] COLOR | [?] HELP</div>
                         </div>
                     </div>
 
@@ -731,54 +731,54 @@
 
                             <div class="space-y-3 text-xs">
                                 <div>
-                                    <div class="opacity-75 mb-1">TIPO:</div>
+                                    <div class="mb-1">TIPO:</div>
                                     <div class="space-y-1 ml-2">
-                                        <div class="term-filter-type active cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                        <div class="term-filter-type active cursor-pointer hover:bg-white/10 px-1"
                                             data-type="ERROR">
-                                            <span class="checkbox">[✓]</span> ERROR
+                                            <span class="checkbox"></span> ERROR
                                         </div>
-                                        <div class="term-filter-type active cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                        <div class="term-filter-type active cursor-pointer hover:bg-white/10 px-1"
                                             data-type="WARNING">
-                                            <span class="checkbox">[✓]</span> WARNING
+                                            <span class="checkbox"></span> WARNING
                                         </div>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <div class="opacity-75 mb-1">REGLA:</div>
+                                    <div class="mb-1">REGLA:</div>
                                     <div class="space-y-1 ml-2">
-                                        <div class="term-filter-regla active cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                        <div class="term-filter-regla active cursor-pointer hover:bg-white/10 px-1"
                                             data-regla="ALL">
-                                            <span class="radio">●</span> TODOS
+                                            <span class="radio"></span> TODOS
                                         </div>
-                                        <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                        <div class="term-filter-regla cursor-pointer hover:bg-white/10 px-1"
                                             data-regla="UNICIDAD">
-                                            <span class="radio">○</span> R1: UNICIDAD
+                                            <span class="radio"></span> R1: UNICIDAD
                                         </div>
-                                        <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                        <div class="term-filter-regla cursor-pointer hover:bg-white/10 px-1"
                                             data-regla="ESTRUCTURA">
-                                            <span class="radio">○</span> R2: ESTRUCTURA
+                                            <span class="radio"></span> R2: ESTRUCTURA
                                         </div>
-                                        <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                        <div class="term-filter-regla cursor-pointer hover:bg-white/10 px-1"
                                             data-regla="CONSECUTIVIDAD">
-                                            <span class="radio">○</span> R3: CONSECUTIVIDAD
+                                            <span class="radio"></span> R3: CONSECUTIVIDAD
                                         </div>
-                                        <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                        <div class="term-filter-regla cursor-pointer hover:bg-white/10 px-1"
                                             data-regla="HUECOS">
-                                            <span class="radio">○</span> R4: HUECOS
+                                            <span class="radio"></span> R4: HUECOS
                                         </div>
-                                        <div class="term-filter-regla cursor-pointer hover:bg-white hover:bg-opacity-10 px-1"
+                                        <div class="term-filter-regla cursor-pointer hover:bg-white/10 px-1"
                                             data-regla="INICIO">
-                                            <span class="radio">○</span> R5: INICIO
+                                            <span class="radio"></span> R5: INICIO
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="border-t-ascii pt-2 mt-3">
-                                    <div class="opacity-75 text-center text-[10px]">STATS</div>
+                                    <div class="text-center text-[10px]">STATS</div>
                                     <div class="mt-2 text-center">
                                         <div class="text-2xl font-bold" id="term-donut-total">0</div>
-                                        <div class="text-[10px] opacity-75">HALLAZGOS</div>
+                                        <div class="text-[10px]">HALLAZGOS</div>
                                     </div>
                                 </div>
                             </div>
@@ -788,14 +788,14 @@
                         <div class="col-span-5 border-ascii flex flex-col">
                             <div class="border-b-ascii px-3 py-2 flex justify-between items-center">
                                 <span class="text-xs font-bold">HALLAZGOS</span>
-                                <span class="text-xs opacity-75" id="term-pagination">1-50/0</span>
+                                <span class="text-xs" id="term-pagination">1-50/0</span>
                             </div>
                             <div class="flex-1 overflow-auto p-3">
                                 <div class="space-y-1 text-xs" id="term-table">
                                     <!-- Rows rendered by JS -->
                                 </div>
                             </div>
-                            <div class="border-t-ascii px-3 py-2 text-xs opacity-75">
+                            <div class="border-t-ascii px-3 py-2 text-xs">
                                 ↑↓ NAVEGAR | ENTER VER DETALLE | PgUp/PgDn PAGINAR
                             </div>
                         </div>
@@ -811,16 +811,16 @@
                             <div id="term-detail-content" class="hidden space-y-3 text-xs">
                                 <div class="border-ascii p-2">
                                     <div class="font-bold mb-1" id="term-detail-title">REGLA</div>
-                                    <div class="opacity-75 text-[11px]" id="term-detail-desc">Descripción</div>
+                                    <div class="text-[11px]" id="term-detail-desc">Descripción</div>
                                 </div>
 
                                 <div>
-                                    <div class="opacity-75 mb-1">HALLAZGO:</div>
+                                    <div class="mb-1">HALLAZGO:</div>
                                     <div class="border-ascii p-2 text-[11px]" id="term-detail-hallazgo">-</div>
                                 </div>
 
                                 <div>
-                                    <div class="opacity-75 mb-1">COMPARATIVA:</div>
+                                    <div class="mb-1">COMPARATIVA:</div>
                                     <div class="border-ascii p-2 space-y-1 text-[11px]">
                                         <div>ANTES: <span id="term-detail-antes">-</span></div>
                                         <div class="text-center">↓</div>
@@ -829,14 +829,14 @@
                                 </div>
 
                                 <div>
-                                    <div class="opacity-75 mb-1">UBICACIÓN:</div>
+                                    <div class="mb-1">UBICACIÓN:</div>
                                     <div class="border-ascii p-2 text-[11px]" id="term-detail-ubicacion">
                                         📍 Zona ? → Sector ? → Mz ?
                                     </div>
                                 </div>
 
                                 <div>
-                                    <div class="opacity-75 mb-1">SOLUCIÓN:</div>
+                                    <div class="mb-1">SOLUCIÓN:</div>
                                     <div class="border-ascii p-2 text-[11px]" id="term-detail-solucion">-</div>
                                 </div>
                             </div>
@@ -845,8 +845,9 @@
 
                     <!-- Command Line -->
                     <div class="border-ascii mt-4 px-4 py-2 flex items-center gap-2 text-xs">
-                        <span class="opacity-75">CMD&gt;</span>
-                        <input type="text" id="term-cmd" class="flex-1 bg-transparent outline-none"
+                        <span>CMD&gt;</span>
+                        <input type="text" id="term-cmd"
+                            class="flex-1 bg-transparent outline-none border-none ring-0 focus:ring-0"
                             placeholder="type /help for commands">
                         <span class="cursor-blink">█</span>
                     </div>
