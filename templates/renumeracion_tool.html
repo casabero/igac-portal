@@ -169,118 +169,301 @@
 
     <!-- RESULTADOS -->
     {% if resultados %}
-    <div id="resultado_renum" class="space-y-8 animate-in slide-in-from-bottom-8 duration-500">
+    <div id="resultado_renum" class="animate-in slide-in-from-bottom-8 duration-500">
 
-        <div class="flex items-center justify-between border-b pb-6 border-gray-100">
+        <!-- Header con acciones -->
+        <div class="flex items-center justify-between border-b pb-6 border-gray-100 dark:border-gray-700 mb-6">
             <div>
-                <h2 class="text-2xl font-black text-gray-900 uppercase tracking-tighter">RESULTADOS DEL ANÁLISIS</h2>
+                <h2 class="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">INSPECTOR DE
+                    HALLAZGOS</h2>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">
-                    TOTAL AUDITADO: <span class="text-gray-900">{{ resultados.total_auditado }} PREDIOS</span>
+                    TOTAL AUDITADO: <span class="text-gray-900 dark:text-white">{{ resultados.total_auditado }}
+                        PREDIOS</span>
+                    <span class="mx-2 text-gray-300">|</span>
+                    <span class="text-red-600">{{ resultados.errores|length }} HALLAZGOS</span>
                 </p>
             </div>
             <div class="flex gap-3">
                 <a href="/renumeracion/pdf"
-                    class="bg-red-600 text-white px-6 py-3 rounded-lg text-[10px] font-bold tracking-wider uppercase hover:bg-red-700 transition-all flex items-center gap-2 shadow-lg">
-                    <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span> PDF OFICIAL
+                    class="bg-red-600 text-white px-5 py-2.5 rounded-lg text-[10px] font-bold tracking-wider uppercase hover:bg-red-700 transition-all flex items-center gap-2 shadow-lg">
+                    <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span> PDF
                 </a>
                 <a href="/renumeracion/excel"
-                    class="bg-gray-900 text-white px-6 py-3 rounded-lg text-[10px] font-bold tracking-wider uppercase hover:bg-black transition-all flex items-center gap-2 shadow-lg">
-                    <span class="material-symbols-outlined text-[16px]">download</span> EXCEL DETALLADO
+                    class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-lg text-[10px] font-bold tracking-wider uppercase hover:bg-black dark:hover:bg-gray-100 transition-all flex items-center gap-2 shadow-lg">
+                    <span class="material-symbols-outlined text-[16px]">download</span> EXCEL
                 </a>
                 <a href="/clear_renumeracion"
-                    class="bg-white border border-gray-200 text-red-600 px-6 py-3 rounded-lg text-[10px] font-bold tracking-wider uppercase hover:bg-red-50 hover:border-red-200 transition-all flex items-center gap-2">
+                    class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-red-600 px-5 py-2.5 rounded-lg text-[10px] font-bold tracking-wider uppercase hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-[16px]">refresh</span> REINICIAR
                 </a>
             </div>
         </div>
 
-        <!-- KPI Grid (Logic Fix for v3.1) -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <!-- Unicidad -->
-            <div
-                class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 hover:border-gray-300 transition-all">
-                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">UNICIDAD SNC</p>
-                <div>
-                    <p
-                        class="text-3xl font-black {% if resultados.counts.unicidad > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
-                        {{ resultados.counts.unicidad }}</p>
-                    <p class="text-[9px] text-gray-300 font-bold uppercase mt-1">DUPLICADOS</p>
-                </div>
-            </div>
-
-            <!-- Estructura -->
-            <div
-                class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 hover:border-gray-300 transition-all">
-                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">ESTRUCTURA LADM</p>
-                <div>
-                    <p
-                        class="text-3xl font-black {% if resultados.counts.estructura > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
-                        {{ resultados.counts.estructura }}</p>
-                    <p class="text-[9px] text-gray-300 font-bold uppercase mt-1">FORMATO INVÁLIDO</p>
-                </div>
-            </div>
-
-            <!-- Consecutividad -->
-            <div
-                class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 hover:border-gray-300 transition-all">
-                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">CONSECUTIVIDAD</p>
-                <div>
-                    <p
-                        class="text-3xl font-black {% if resultados.counts.consecutividad > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
-                        {{ resultados.counts.consecutividad }}</p>
-                    <p class="text-[9px] text-gray-300 font-bold uppercase mt-1">SALTOS/ERRORES INICIO</p>
-                </div>
-            </div>
-
-            <!-- Huecos -->
-            <div
-                class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 hover:border-gray-300 transition-all">
-                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">HUECOS / GAPS</p>
-                <div>
-                    <p
-                        class="text-3xl font-black {% if resultados.counts.huecos > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
-                        {{ resultados.counts.huecos }}</p>
-                    <p class="text-[9px] text-gray-300 font-bold uppercase mt-1">FALTANTES EN LOTE</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Table -->
         {% if resultados.errores %}
-        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-            <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
-                <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">DETALLE DE HALLAZGOS</h4>
+        <!-- LAYOUT 3 COLUMNAS: INSPECTOR -->
+        <div class="grid grid-cols-12 gap-6" id="inspector-container">
+
+            <!-- PANEL IZQUIERDO: FILTROS Y ESTADÍSTICAS (3 cols) -->
+            <div class="col-span-12 lg:col-span-3 space-y-6">
+
+                <!-- Filtros por Tipo -->
+                <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-5">
+                    <h4
+                        class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[14px]">filter_alt</span> TIPO
+                    </h4>
+                    <div class="flex flex-wrap gap-2">
+                        <button data-filter-type="ERROR"
+                            class="filter-chip active px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">
+                            <span class="inline-block w-2 h-2 bg-red-500 rounded-full mr-1.5"></span>Error
+                        </button>
+                        <button data-filter-type="WARNING"
+                            class="filter-chip active px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                            <span class="inline-block w-2 h-2 bg-amber-500 rounded-full mr-1.5"></span>Advertencia
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filtros por Regla -->
+                <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-5">
+                    <h4
+                        class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[14px]">rule</span> REGLA
+                    </h4>
+                    <div class="flex flex-col gap-2" id="regla-filters">
+                        <button data-filter-regla="ALL"
+                            class="filter-regla active text-left px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-all bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600">
+                            ◉ Todas las reglas
+                        </button>
+                        <button data-filter-regla="UNICIDAD"
+                            class="filter-regla text-left px-3 py-2 rounded-lg text-[10px] font-medium uppercase transition-all bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500">
+                            ○ R1: Unicidad SNC
+                        </button>
+                        <button data-filter-regla="ESTRUCTURA"
+                            class="filter-regla text-left px-3 py-2 rounded-lg text-[10px] font-medium uppercase transition-all bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500">
+                            ○ R2: Estructura NPN
+                        </button>
+                        <button data-filter-regla="CONSECUTIVIDAD"
+                            class="filter-regla text-left px-3 py-2 rounded-lg text-[10px] font-medium uppercase transition-all bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500">
+                            ○ R3: Consecutividad
+                        </button>
+                        <button data-filter-regla="HUECOS"
+                            class="filter-regla text-left px-3 py-2 rounded-lg text-[10px] font-medium uppercase transition-all bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500">
+                            ○ R4: Huecos/Gaps
+                        </button>
+                        <button data-filter-regla="INICIO"
+                            class="filter-regla text-left px-3 py-2 rounded-lg text-[10px] font-medium uppercase transition-all bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500">
+                            ○ R5: Inicio Secuencia
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filtros Geográficos -->
+                <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-5">
+                    <h4
+                        class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[14px]">location_on</span> UBICACIÓN
+                    </h4>
+                    <div class="space-y-3">
+                        <select id="filter-zona"
+                            class="w-full text-[11px] font-bold uppercase bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:ring-1 focus:ring-gray-900 dark:focus:ring-white outline-none">
+                            <option value="ALL">Todas las Zonas</option>
+                        </select>
+                        <select id="filter-sector"
+                            class="w-full text-[11px] font-bold uppercase bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:ring-1 focus:ring-gray-900 dark:focus:ring-white outline-none">
+                            <option value="ALL">Todos los Sectores</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Mini Estadísticas -->
+                <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-5">
+                    <h4
+                        class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[14px]">pie_chart</span> RESUMEN
+                    </h4>
+                    <div class="flex items-center justify-center">
+                        <svg id="donut-chart" viewBox="0 0 100 100" class="w-28 h-28">
+                            <!-- El gráfico se genera con JS -->
+                        </svg>
+                    </div>
+                    <div class="mt-4 grid grid-cols-2 gap-2 text-center">
+                        <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-2">
+                            <p class="text-lg font-black text-red-600" id="stat-errores">0</p>
+                            <p class="text-[8px] font-bold text-red-400 uppercase">Errores</p>
+                        </div>
+                        <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-2">
+                            <p class="text-lg font-black text-amber-600" id="stat-warnings">0</p>
+                            <p class="text-[8px] font-bold text-amber-400 uppercase">Advertencias</p>
+                        </div>
+                    </div>
+                    <p class="text-[9px] text-gray-400 text-center mt-3 font-mono" id="filter-status">Mostrando todos
+                    </p>
+                </div>
             </div>
-            <div class="overflow-auto max-h-[600px] custom-scrollbar">
-                <table class="w-full text-left border-collapse">
-                    <thead
-                        class="bg-white text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 sticky top-0 z-10">
-                        <tr>
-                            <th class="px-6 py-4 bg-white">REGLA VIOLADA</th>
-                            <th class="px-6 py-4 bg-white">DETALLE DEL HALLAZGO</th>
-                            <th class="px-6 py-4 bg-white">PREDIO ANTERIOR</th>
-                            <th class="px-6 py-4 bg-white">PREDIO NUEVO (SNC)</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-xs font-medium text-gray-600 divide-y divide-gray-50">
-                        {% for err in resultados.errores %}
-                        <tr class="hover:bg-red-50/10 transition-colors">
-                            <td class="px-6 py-4 text-red-600 font-bold">{{ err.REGLA }}</td>
-                            <td class="px-6 py-4">{{ err.DETALLE }}</td>
-                            <td class="px-6 py-4 font-mono text-gray-400">{{ err.ANTERIOR }}</td>
-                            <td class="px-6 py-4 font-mono font-bold text-gray-900">{{ err.NUEVO }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+
+            <!-- PANEL CENTRAL: TABLA INTERACTIVA (5 cols) -->
+            <div class="col-span-12 lg:col-span-5">
+                <div
+                    class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm h-full flex flex-col">
+                    <div
+                        class="bg-gray-50 dark:bg-gray-900 px-5 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                        <h4 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                            HALLAZGOS</h4>
+                        <div class="relative">
+                            <span
+                                class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[14px] text-gray-400">search</span>
+                            <input type="text" id="search-hallazgos" placeholder="Buscar..."
+                                class="pl-8 pr-3 py-1.5 text-[10px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg w-40 focus:w-52 transition-all outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-white text-gray-900 dark:text-white">
+                        </div>
+                    </div>
+                    <div class="overflow-auto flex-1 max-h-[600px] custom-scrollbar" id="hallazgos-table-container">
+                        <table class="w-full text-left border-collapse" id="hallazgos-table">
+                            <thead
+                                class="bg-white dark:bg-gray-800 text-[9px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-gray-700 sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-4 py-3 bg-white dark:bg-gray-800">Regla</th>
+                                    <th class="px-4 py-3 bg-white dark:bg-gray-800">Detalle</th>
+                                    <th class="px-4 py-3 bg-white dark:bg-gray-800">SNC</th>
+                                </tr>
+                            </thead>
+                            <tbody
+                                class="text-[10px] font-medium text-gray-600 dark:text-gray-400 divide-y divide-gray-50 dark:divide-gray-700"
+                                id="hallazgos-tbody">
+                                <!-- Rows generadas por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div
+                        class="px-5 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
+                        <p class="text-[9px] font-bold text-gray-400 uppercase" id="pagination-info">Cargando...</p>
+                        <div class="flex gap-2">
+                            <button id="prev-page"
+                                class="px-3 py-1 text-[9px] font-bold uppercase bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 transition-all text-gray-900 dark:text-white">Ant</button>
+                            <button id="next-page"
+                                class="px-3 py-1 text-[9px] font-bold uppercase bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 transition-all text-gray-900 dark:text-white">Sig</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL DERECHO: DETALLE (4 cols) -->
+            <div class="col-span-12 lg:col-span-4" id="detail-panel-wrapper">
+                <div id="detail-panel"
+                    class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm h-full transition-all">
+
+                    <!-- Estado vacío -->
+                    <div id="detail-empty"
+                        class="flex flex-col items-center justify-center h-full min-h-[400px] text-center p-8">
+                        <div
+                            class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center mb-4">
+                            <span
+                                class="material-symbols-outlined text-3xl text-gray-300 dark:text-gray-500">touch_app</span>
+                        </div>
+                        <h5 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Seleccione un
+                            Hallazgo</h5>
+                        <p class="text-[10px] text-gray-300 dark:text-gray-500 max-w-[200px]">Haga clic en una fila de
+                            la tabla para ver el detalle completo</p>
+                    </div>
+
+                    <!-- Contenido del detalle -->
+                    <div id="detail-content" class="hidden">
+                        <!-- Header del detalle -->
+                        <div
+                            class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span id="detail-tipo-badge"
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase mb-2">ERROR</span>
+                                    <h4 id="detail-regla-titulo"
+                                        class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                                        Regla</h4>
+                                </div>
+                                <button id="close-detail"
+                                    class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                    <span class="material-symbols-outlined text-[18px] text-gray-400">close</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Explicación de la regla -->
+                        <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                            <h5
+                                class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[12px]">help</span> ¿Qué significa?
+                            </h5>
+                            <p id="detail-explicacion"
+                                class="text-[11px] text-gray-600 dark:text-gray-300 leading-relaxed"></p>
+                        </div>
+
+                        <!-- Detalle del hallazgo -->
+                        <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                            <h5
+                                class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[12px]">description</span> Hallazgo
+                                Específico
+                            </h5>
+                            <p id="detail-hallazgo"
+                                class="text-[11px] text-gray-900 dark:text-white font-medium bg-gray-50 dark:bg-gray-900 rounded-lg px-3 py-2">
+                            </p>
+                        </div>
+
+                        <!-- Comparativa Visual -->
+                        <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                            <h5
+                                class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[12px]">compare_arrows</span> Comparativa
+                            </h5>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[8px] font-bold text-gray-400 uppercase w-16">Anterior:</span>
+                                    <code id="detail-anterior"
+                                        class="flex-1 text-[10px] font-mono bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 px-2 py-1 rounded break-all"></code>
+                                </div>
+                                <div class="flex items-center justify-center">
+                                    <span
+                                        class="material-symbols-outlined text-[14px] text-gray-300">arrow_downward</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[8px] font-bold text-gray-400 uppercase w-16">Nuevo:</span>
+                                    <code id="detail-nuevo"
+                                        class="flex-1 text-[10px] font-mono bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-2 py-1 rounded font-bold break-all"></code>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Breadcrumb Geográfico -->
+                        <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                            <h5
+                                class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[12px]">pin_drop</span> Ubicación
+                            </h5>
+                            <div class="flex items-center gap-1 text-[10px] font-mono" id="detail-breadcrumb">
+                                <!-- Breadcrumb generado por JS -->
+                            </div>
+                        </div>
+
+                        <!-- Sugerencia de corrección -->
+                        <div class="px-5 py-4">
+                            <h5
+                                class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[12px]">lightbulb</span> ¿Cómo Corregirlo?
+                            </h5>
+                            <p id="detail-solucion"
+                                class="text-[11px] text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-lg px-3 py-2 border border-green-100 dark:border-green-800">
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         {% else %}
+        <!-- Sin errores -->
         <div
-            class="p-16 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center text-center opacity-50">
-            <span class="material-symbols-outlined text-6xl text-gray-300 mb-4 h-16 w-16">check_circle</span>
-            <h5 class="text-sm font-bold text-gray-900 uppercase tracking-widest">SIN ERRORES</h5>
-            <p class="text-xs text-gray-400 font-bold uppercase mt-2">EL ARCHIVO CUMPLE CON TODAS LAS REGLAS TÉCNICAS
+            class="p-16 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl flex flex-col items-center justify-center text-center bg-green-50/30 dark:bg-green-900/10">
+            <span class="material-symbols-outlined text-6xl text-green-400 mb-4">verified</span>
+            <h5 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-widest">AUDITORÍA EXITOSA</h5>
+            <p class="text-xs text-gray-400 font-bold uppercase mt-2">El archivo cumple con todas las reglas técnicas
             </p>
         </div>
         {% endif %}
@@ -360,8 +543,8 @@
     fileInput.addEventListener('change', async (e) => {
         if (e.target.files.length > 0) {
             const file = e.target.files[0];
-            label.innerHTML = `<span class="text-gray-900 border-b-2 border-gray-900 pb-1">${file.name}</span>`;
-            dropZone.classList.add('bg-gray-100', 'border-gray-400');
+            label.innerHTML = `<span class="text-gray-900 dark:text-white border-b-2 border-gray-900 dark:border-white pb-1">${file.name}</span>`;
+            dropZone.classList.add('bg-gray-100', 'dark:bg-gray-700', 'border-gray-400', 'dark:border-gray-500');
 
             // PRE-ANALISIS AJAX
             btnText.innerText = "DETECTANDO COLUMNAS...";
@@ -409,6 +592,458 @@
     function updateUI() {
         // Reset mapping if source changes drastically?
     }
+    {% endif %}
+
+    {% if resultados and resultados.errores %}
+    // ==========================================================================
+    // INSPECTOR INTERACTIVO DE ERRORES v1.0
+    // ==========================================================================
+
+    // Diccionario de explicaciones de reglas
+    const REGLAS_INFO = {
+        'UNICIDAD_SNC': {
+            titulo: 'Unicidad del Código SNC',
+            descripcion: 'Cada predio en el sistema debe tener un código SNC único e irrepetible. Se detectó que el mismo código fue asignado a múltiples predios.',
+            solucion: 'Revisar el mapeo CICA→SNC y asegurar que cada predio origen tenga una asignación 1:1 única.',
+            icono: 'fingerprint'
+        },
+        'ESTRUCTURA_NPN': {
+            titulo: 'Estructura del NPN',
+            descripcion: 'El Número Predial Nacional (NPN) debe tener exactamente 30 dígitos numéricos sin letras ni caracteres especiales.',
+            solucion: 'Corregir el formato del código: verificar longitud (30 chars) y asegurar solo números.',
+            icono: 'format_list_numbered'
+        },
+        'CONSECUTIVIDAD_SECTOR': {
+            titulo: 'Consecutividad de Sector',
+            descripcion: 'Los sectores nuevos deben seguir la secuencia del último sector existente en la zona (+1).',
+            solucion: 'Verificar el último sector asignado en la zona y asegurar que los nuevos continúen la secuencia.',
+            icono: 'linear_scale'
+        },
+        'CONSECUTIVIDAD_MANZANA': {
+            titulo: 'Consecutividad de Manzana',
+            descripcion: 'Las manzanas nuevas deben seguir la secuencia de la última manzana existente en el sector.',
+            solucion: 'Revisar las manzanas existentes en el sector y asignar la siguiente consecutiva.',
+            icono: 'linear_scale'
+        },
+        'HUECOS_NUMERACION': {
+            titulo: 'Huecos en Numeración',
+            descripcion: 'Se detectaron saltos en la secuencia de terrenos dentro de una manzana. La numeración debe ser continua.',
+            solucion: 'Identificar los números faltantes y reasignar o agregar los predios correspondientes.',
+            icono: 'format_line_spacing'
+        },
+        'INICIO_SECUENCIA': {
+            titulo: 'Inicio de Secuencia',
+            descripcion: 'Los terrenos en manzanas nuevas deben iniciar desde 0001, o continuar desde el último existente si la manzana ya tenía predios.',
+            solucion: 'Si es manzana nueva: iniciar en 0001. Si es manzana existente: continuar desde el último terreno +1.',
+            icono: 'first_page'
+        },
+        'NORMA_CP_SECTOR_00': {
+            titulo: 'Sector en Centro Poblado Nuevo',
+            descripcion: 'El primer sector de una zona nueva (centro poblado) debe ser 00 según la norma LADM.',
+            solucion: 'Renumerar para que el primer sector del centro poblado nuevo sea 00.',
+            icono: 'location_city'
+        },
+        'NORMA_CP_MANZANA_01': {
+            titulo: 'Manzana en Centro Poblado Nuevo',
+            descripcion: 'La primera manzana de una zona nueva debe ser 0001.',
+            solucion: 'Asegurar que la numeración de manzanas inicie en 0001 para la nueva zona.',
+            icono: 'location_city'
+        },
+        'INICIO_MANZANA_SECTOR': {
+            titulo: 'Inicio de Manzana en Sector Nuevo',
+            descripcion: 'Al crear un sector nuevo, las manzanas deben iniciar desde 0001.',
+            solucion: 'Renumerar las manzanas del sector nuevo iniciando desde 0001.',
+            icono: 'restart_alt'
+        },
+        'DISPERSION_LOTE': {
+            titulo: 'Dispersión de Lote',
+            descripcion: 'Predios que originalmente pertenecían a un mismo lote temporal fueron distribuidos en múltiples manzanas definitivas distintas.',
+            solucion: 'Revisar la lógica de asignación para mantener coherencia geográfica del lote original.',
+            icono: 'scatter_plot'
+        }
+    };
+
+    // Función auxiliar para obtener info de regla
+    function getReglaInfo(reglaStr) {
+        // Limpiar prefijo [ADVERTENCIA] si existe
+        const cleanRegla = reglaStr.replace('[ADVERTENCIA] ', '');
+
+        // Buscar match parcial
+        for (const [key, info] of Object.entries(REGLAS_INFO)) {
+            if (cleanRegla.includes(key)) {
+                return { key, ...info };
+            }
+        }
+
+        // Default
+        return {
+            key: 'OTRO',
+            titulo: cleanRegla,
+            descripcion: 'Regla de validación detectada en el proceso de auditoría.',
+            solucion: 'Revisar el detalle específico del hallazgo para determinar la corrección necesaria.',
+            icono: 'warning'
+        };
+    }
+
+    // Datos de la auditoría (pasados desde Jinja2)
+    const allHallazgos = {{ resultados.errores | tojson | safe }};
+
+    // Estado del inspector
+    const state = {
+        filteredData: [...allHallazgos],
+        currentPage: 1,
+        rowsPerPage: 50,
+        selectedIndex: null,
+        filters: {
+            types: ['ERROR', 'WARNING'],
+            regla: 'ALL',
+            zona: 'ALL',
+            sector: 'ALL',
+            search: ''
+        }
+    };
+
+    // Referencias DOM
+    const tbody = document.getElementById('hallazgos-tbody');
+    const paginationInfo = document.getElementById('pagination-info');
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    const searchInput = document.getElementById('search-hallazgos');
+    const donutChart = document.getElementById('donut-chart');
+    const statErrores = document.getElementById('stat-errores');
+    const statWarnings = document.getElementById('stat-warnings');
+    const filterStatus = document.getElementById('filter-status');
+    const detailEmpty = document.getElementById('detail-empty');
+    const detailContent = document.getElementById('detail-content');
+    const filterZona = document.getElementById('filter-zona');
+    const filterSector = document.getElementById('filter-sector');
+
+    // Poblar filtros geográficos
+    const uniqueZonas = [...new Set(allHallazgos.map(e => e.ZONA).filter(z => z && z !== 'nan'))].sort();
+    uniqueZonas.forEach(z => {
+        filterZona.innerHTML += `<option value="${z}">Zona ${z}</option>`;
+    });
+
+    // ===== FUNCIONES DE RENDERIZADO =====
+
+    function applyFilters() {
+        let data = [...allHallazgos];
+
+        // Filtro por tipo (ERROR/WARNING)
+        data = data.filter(e => {
+            const isWarning = e.REGLA && e.REGLA.includes('[ADVERTENCIA]');
+            const tipo = isWarning ? 'WARNING' : 'ERROR';
+            return state.filters.types.includes(tipo);
+        });
+
+        // Filtro por regla
+        if (state.filters.regla !== 'ALL') {
+            data = data.filter(e => e.REGLA && e.REGLA.toUpperCase().includes(state.filters.regla));
+        }
+
+        // Filtro por zona
+        if (state.filters.zona !== 'ALL') {
+            data = data.filter(e => e.ZONA === state.filters.zona);
+        }
+
+        // Filtro por sector
+        if (state.filters.sector !== 'ALL') {
+            data = data.filter(e => e.SECTOR === state.filters.sector);
+        }
+
+        // Filtro por búsqueda
+        if (state.filters.search) {
+            const term = state.filters.search.toLowerCase();
+            data = data.filter(e =>
+                (e.REGLA && e.REGLA.toLowerCase().includes(term)) ||
+                (e.DETALLE && e.DETALLE.toLowerCase().includes(term)) ||
+                (e.NUEVO && e.NUEVO.toLowerCase().includes(term)) ||
+                (e.ANTERIOR && e.ANTERIOR.toLowerCase().includes(term))
+            );
+        }
+
+        state.filteredData = data;
+        state.currentPage = 1;
+        state.selectedIndex = null;
+
+        renderTable();
+        renderStats();
+        hideDetail();
+    }
+
+    function renderTable() {
+        const start = (state.currentPage - 1) * state.rowsPerPage;
+        const end = start + state.rowsPerPage;
+        const slice = state.filteredData.slice(start, end);
+
+        if (slice.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="px-4 py-12 text-center text-gray-400">
+                        <span class="material-symbols-outlined text-3xl mb-2 block">search_off</span>
+                        No se encontraron hallazgos con los filtros actuales
+                    </td>
+                </tr>
+            `;
+        } else {
+            tbody.innerHTML = slice.map((item, idx) => {
+                const globalIdx = start + idx;
+                const isWarning = item.REGLA && item.REGLA.includes('[ADVERTENCIA]');
+                const reglaClean = item.REGLA ? item.REGLA.replace('[ADVERTENCIA] ', '') : 'N/A';
+                const isSelected = state.selectedIndex === globalIdx;
+
+                return `
+                    <tr data-index="${globalIdx}" 
+                        class="hallazgo-row cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50 ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20 border-l-2 border-l-blue-500' : ''}">
+                        <td class="px-4 py-3">
+                            <span class="inline-flex items-center gap-1.5 ${isWarning ? 'text-amber-600' : 'text-red-600'} font-bold">
+                                <span class="w-1.5 h-1.5 rounded-full ${isWarning ? 'bg-amber-500' : 'bg-red-500'}"></span>
+                                ${reglaClean.substring(0, 18)}${reglaClean.length > 18 ? '...' : ''}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-600 dark:text-gray-400 max-w-[200px] truncate" title="${item.DETALLE || ''}">
+                            ${(item.DETALLE || '').substring(0, 40)}${(item.DETALLE || '').length > 40 ? '...' : ''}
+                        </td>
+                        <td class="px-4 py-3 font-mono text-gray-500 dark:text-gray-500 text-[9px]">
+                            ${(item.NUEVO || '').substring(0, 15)}...
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Agregar event listeners a las filas
+            document.querySelectorAll('.hallazgo-row').forEach(row => {
+                row.addEventListener('click', () => {
+                    const idx = parseInt(row.dataset.index);
+                    selectRow(idx);
+                });
+            });
+        }
+
+        // Actualizar paginación
+        const total = state.filteredData.length;
+        paginationInfo.textContent = total > 0
+            ? `${start + 1}-${Math.min(end, total)} de ${total}`
+            : 'Sin resultados';
+        prevBtn.disabled = state.currentPage === 1;
+        nextBtn.disabled = end >= total;
+    }
+
+    function renderStats() {
+        const errors = state.filteredData.filter(e => !e.REGLA || !e.REGLA.includes('[ADVERTENCIA]')).length;
+        const warnings = state.filteredData.filter(e => e.REGLA && e.REGLA.includes('[ADVERTENCIA]')).length;
+
+        statErrores.textContent = errors;
+        statWarnings.textContent = warnings;
+
+        // Actualizar estado del filtro
+        const activeFilters = [];
+        if (state.filters.regla !== 'ALL') activeFilters.push(state.filters.regla);
+        if (state.filters.zona !== 'ALL') activeFilters.push(`Z${state.filters.zona}`);
+        if (state.filters.search) activeFilters.push(`"${state.filters.search}"`);
+
+        filterStatus.textContent = activeFilters.length > 0
+            ? `Filtros: ${activeFilters.join(', ')}`
+            : `Mostrando ${state.filteredData.length} de ${allHallazgos.length}`;
+
+        // Renderizar donut chart
+        renderDonutChart(errors, warnings);
+    }
+
+    function renderDonutChart(errors, warnings) {
+        const total = errors + warnings;
+        if (total === 0) {
+            donutChart.innerHTML = `
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" stroke-width="12"/>
+                <text x="50" y="55" text-anchor="middle" class="text-[12px] font-bold fill-gray-400">0</text>
+            `;
+            return;
+        }
+
+        const errPct = (errors / total) * 100;
+        const warnPct = (warnings / total) * 100;
+        const circumference = 2 * Math.PI * 40;
+        const errDash = (errPct / 100) * circumference;
+        const warnDash = (warnPct / 100) * circumference;
+
+        donutChart.innerHTML = `
+            <!-- Background -->
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" stroke-width="12"/>
+            <!-- Warnings (amber) -->
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#f59e0b" stroke-width="12"
+                stroke-dasharray="${warnDash} ${circumference}" 
+                stroke-dashoffset="0"
+                transform="rotate(-90 50 50)" class="transition-all duration-500"/>
+            <!-- Errors (red) -->
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#dc2626" stroke-width="12"
+                stroke-dasharray="${errDash} ${circumference}" 
+                stroke-dashoffset="${-warnDash}"
+                transform="rotate(-90 50 50)" class="transition-all duration-500"/>
+            <!-- Center text -->
+            <text x="50" y="55" text-anchor="middle" class="text-[14px] font-black" fill="currentColor">${total}</text>
+        `;
+    }
+
+    function selectRow(index) {
+        state.selectedIndex = index;
+        renderTable(); // Re-render para actualizar highlight
+        showDetail(state.filteredData[index]);
+    }
+
+    function showDetail(item) {
+        if (!item) return;
+
+        detailEmpty.classList.add('hidden');
+        detailContent.classList.remove('hidden');
+
+        const isWarning = item.REGLA && item.REGLA.includes('[ADVERTENCIA]');
+        const reglaInfo = getReglaInfo(item.REGLA || '');
+
+        // Badge de tipo
+        const badge = document.getElementById('detail-tipo-badge');
+        badge.textContent = isWarning ? 'ADVERTENCIA' : 'ERROR';
+        badge.className = `inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase mb-2 ${isWarning
+                ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+            }`;
+
+        // Título de la regla
+        document.getElementById('detail-regla-titulo').textContent = reglaInfo.titulo;
+
+        // Explicación
+        document.getElementById('detail-explicacion').textContent = reglaInfo.descripcion;
+
+        // Hallazgo específico
+        document.getElementById('detail-hallazgo').textContent = item.DETALLE || 'Sin detalle adicional';
+
+        // Comparativa
+        document.getElementById('detail-anterior').textContent = item.ANTERIOR || 'N/A';
+        document.getElementById('detail-nuevo').textContent = item.NUEVO || 'N/A';
+
+        // Breadcrumb geográfico
+        const breadcrumb = document.getElementById('detail-breadcrumb');
+        const zona = item.ZONA || '?';
+        const sector = item.SECTOR || '?';
+        const manzana = item.MANZANA || '?';
+        breadcrumb.innerHTML = `
+            <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">📍 Zona ${zona}</span>
+            <span class="text-gray-300 dark:text-gray-600">→</span>
+            <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">Sector ${sector}</span>
+            <span class="text-gray-300 dark:text-gray-600">→</span>
+            <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">Mz ${manzana}</span>
+        `;
+
+        // Solución
+        document.getElementById('detail-solucion').textContent = reglaInfo.solucion;
+    }
+
+    function hideDetail() {
+        detailEmpty.classList.remove('hidden');
+        detailContent.classList.add('hidden');
+    }
+
+    // ===== EVENT LISTENERS =====
+
+    // Chips de tipo (ERROR/WARNING)
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            chip.classList.toggle('active');
+            const tipo = chip.dataset.filterType;
+
+            if (chip.classList.contains('active')) {
+                if (!state.filters.types.includes(tipo)) {
+                    state.filters.types.push(tipo);
+                }
+                chip.classList.remove('opacity-40');
+            } else {
+                state.filters.types = state.filters.types.filter(t => t !== tipo);
+                chip.classList.add('opacity-40');
+            }
+
+            applyFilters();
+        });
+    });
+
+    // Botones de regla
+    document.querySelectorAll('.filter-regla').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Desactivar todos
+            document.querySelectorAll('.filter-regla').forEach(b => {
+                b.classList.remove('active', 'bg-gray-100', 'dark:bg-gray-700', 'font-bold');
+                b.classList.add('bg-white', 'dark:bg-gray-800', 'font-medium');
+                b.innerHTML = b.innerHTML.replace('◉', '○');
+            });
+
+            // Activar el seleccionado
+            btn.classList.add('active', 'bg-gray-100', 'dark:bg-gray-700', 'font-bold');
+            btn.classList.remove('bg-white', 'dark:bg-gray-800', 'font-medium');
+            btn.innerHTML = btn.innerHTML.replace('○', '◉');
+
+            state.filters.regla = btn.dataset.filterRegla;
+            applyFilters();
+        });
+    });
+
+    // Filtro de zona
+    filterZona.addEventListener('change', () => {
+        state.filters.zona = filterZona.value;
+
+        // Actualizar opciones de sector basado en zona
+        filterSector.innerHTML = '<option value="ALL">Todos los Sectores</option>';
+        if (filterZona.value !== 'ALL') {
+            const sectoresEnZona = [...new Set(
+                allHallazgos
+                    .filter(e => e.ZONA === filterZona.value)
+                    .map(e => e.SECTOR)
+                    .filter(s => s && s !== 'nan')
+            )].sort();
+            sectoresEnZona.forEach(s => {
+                filterSector.innerHTML += `<option value="${s}">Sector ${s}</option>`;
+            });
+        }
+
+        state.filters.sector = 'ALL';
+        applyFilters();
+    });
+
+    // Filtro de sector
+    filterSector.addEventListener('change', () => {
+        state.filters.sector = filterSector.value;
+        applyFilters();
+    });
+
+    // Búsqueda
+    searchInput.addEventListener('input', (e) => {
+        state.filters.search = e.target.value;
+        applyFilters();
+    });
+
+    // Paginación
+    prevBtn.addEventListener('click', () => {
+        if (state.currentPage > 1) {
+            state.currentPage--;
+            renderTable();
+        }
+    });
+
+    nextBtn.addEventListener('click', () => {
+        const maxPage = Math.ceil(state.filteredData.length / state.rowsPerPage);
+        if (state.currentPage < maxPage) {
+            state.currentPage++;
+            renderTable();
+        }
+    });
+
+    // Cerrar detalle
+    document.getElementById('close-detail').addEventListener('click', () => {
+        state.selectedIndex = null;
+        renderTable();
+        hideDetail();
+    });
+
+    // Inicialización
+    applyFilters();
+
     {% endif %}
 </script>
 {% endblock %}
