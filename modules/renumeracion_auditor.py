@@ -446,7 +446,7 @@ def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant
     engine.inicializar_memoria()
     engine.validar_lotes()
     
-    # Adaptar para PDF antiguo
+    # Adaptar para PDF antiguo y Dashboard
     todos_errores = engine.errores + engine.warnings
     final_errors = []
     for e in todos_errores:
@@ -455,7 +455,11 @@ def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant
             'REGLA': f"{prefix}{e['REGLA']}",
             'DETALLE': f"{e['ESCENARIO']}: {e['DETALLE']}",
             'ANTERIOR': e['ANTERIOR'],
-            'NUEVO': e['NUEVO']
+            'NUEVO': e['NUEVO'],
+            'ZONA': e.get('ZONA'),
+            'SECTOR': e.get('SECTOR'),
+            'MANZANA': e.get('MANZANA'),
+            'TIPO_REAL': e['TIPO']
         })
         
     t_err = (len(engine.errores) / engine.stats['total_filas'] * 100) if engine.stats['total_filas'] > 0 else 0
@@ -467,17 +471,26 @@ def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant
         c_p[c].append(e['REGLA'])
     top_p = sorted([(c, len(r), ', '.join(set(r))) for c, r in c_p.items()], key=lambda x: x[1], reverse=True)[:10]
 
+    # Calcular contadores para el dashboard (Para evitar problemas de scope en Jinja2)
+    counts = {
+        'unicidad': len([e for e in final_errors if 'UNICIDAD' in e['REGLA']]),
+        'estructura': len([e for e in final_errors if 'ESTRUCTURA' in e['REGLA']]),
+        'consecutividad': len([e for e in final_errors if any(x in e['REGLA'] for x in ['CONSECUTIVIDAD', 'INICIO', 'NORMA'])]),
+        'huecos': len([e for e in final_errors if 'HUECOS' in e['REGLA']])
+    }
+
     return {
         'total_auditado': engine.stats['total_filas'],
         'errores': final_errors,
         'stats': engine.stats,
+        'counts': counts,
         'diccionario_estados': {},
         'success': True,
         'tipo_config': tipo_config,
         'timestamp': datetime.now(timezone(timedelta(hours=-5))).strftime('%Y-%m-%d %H:%M:%S'),
         'tasa_error': round(t_err, 2),
-        'top_problematicos': top_p,
-        'engine_instance': engine # Devolvemos instancia para acceder a generar_reporte_excel
+        'top_problematicos': top_p
+        # No enviamos engine_instance porque falla al serializar JSON
     }
 
 def generar_excel_renumeracion(errores_ad, errores_geo=None, fase=1):
@@ -530,39 +543,34 @@ def generar_pdf_renumeracion(resultados):
     def add_meta(l, v, c=(0,0,0)):
         pdf.set_font('Helvetica', '', 10); pdf.set_text_color(107, 114, 128); pdf.cell(70, 8, l, 0); pdf.set_font('Helvetica', 'B', 10); pdf.set_text_color(*c); pdf.cell(0, 8, v, 0, 1); pdf.set_text_color(0,0,0)
     
-    add_meta('Total Predios Auditados:', f"{resultados.get('total_auditado', 0):,} predios")
+    # Intentar obtener estadísticas
+    engine_stats = resultados.get('stats', {})
+    errores_list = resultados.get('errores', [])
     
-    engine = resultados.get('engine_instance')
-    errores = []
-    warnings = []
-    if engine:
-        errores = engine.errores
-        warnings = engine.warnings
-    else:
-        # Fallback if engine not returned (legacy compat)
-        errores = resultados.get('errores', []) # This might be the mixed list in legacy, but we try to use engine if avail
-    
-    count_err = engine.stats['errores_criticos'] if engine else len([e for e in errores if e.get('TIPO') == 'ERROR'])
-    count_warn = engine.stats['advertencias'] if engine else len([e for e in errores if e.get('TIPO') != 'ERROR'])
+    # Separar errores de advertencias si es posible
+    # Nota: errores_list ya tiene el prefijo [ADVERTENCIA] del wrapper procesar_renumeracion
+    count_err = engine_stats.get('errores_criticos', len([e for e in errores_list if '[ADVERTENCIA]' not in str(e.get('REGLA', ''))]))
+    count_warn = engine_stats.get('advertencias', len([e for e in errores_list if '[ADVERTENCIA]' in str(e.get('REGLA', ''))]))
     
     add_meta('Errores Críticos:', f"{count_err:,}", (220, 38, 38) if count_err > 0 else (22, 163, 74))
     add_meta('Advertencias:', f"{count_warn:,}", (202, 138, 4) if count_warn > 0 else (22, 163, 74))
     
     pdf.ln(5)
 
-    # --- DESGLOSE POR ZONA (NUEVO v3.2) ---
-    if engine and (errores or warnings):
+    # --- DESGLOSE POR ZONA (V3.2) ---
+    if errores_list:
         pdf.set_font('Helvetica', 'B', 12); pdf.set_text_color(17, 17, 17); pdf.cell(0, 10, 'Hallazgos por Zona', 0, 1); pdf.ln(2)
         
         # Agrupar hallazgos por zona
         hallazgos_zona = {} # Zona -> {'E': 0, 'W': 0}
-        all_findings = errores + warnings
-        for f in all_findings:
+        for f in errores_list:
             z = f.get('ZONA', 'UNK')
-            if z is None: z = 'UNK'
+            if z is None or str(z).lower() == 'nan': z = 'UNK'
             if z not in hallazgos_zona: hallazgos_zona[z] = {'E': 0, 'W': 0}
-            if f.get('TIPO') == 'ERROR': hallazgos_zona[z]['E'] += 1
-            else: hallazgos_zona[z]['W'] += 1
+            if '[ADVERTENCIA]' not in str(f.get('REGLA', '')):
+                hallazgos_zona[z]['E'] += 1
+            else:
+                hallazgos_zona[z]['W'] += 1
             
         # Tabla de Zonas
         pdf.set_font('Helvetica', 'B', 9); pdf.set_fill_color(243, 244, 246)
@@ -586,6 +594,7 @@ def generar_pdf_renumeracion(resultados):
             pdf.set_text_color(0, 0, 0)
         
         pdf.ln(5)
+
 
     # --- TOP PROBLEMATICOS ---
     top_p = resultados.get('top_problematicos', [])

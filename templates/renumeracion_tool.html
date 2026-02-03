@@ -197,61 +197,49 @@
         <!-- KPI Grid (Logic Fix for v3.1) -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <!-- Unicidad -->
-            {% set c_uni = 0 %}
-            {% for e in resultados.errores %}{% if 'UNICIDAD' in e.REGLA %}{% set c_uni = c_uni + 1 %}{% endif %}{%
-            endfor %}
             <div
                 class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 hover:border-gray-300 transition-all">
                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">UNICIDAD SNC</p>
                 <div>
                     <p
-                        class="text-3xl font-black {% if c_uni > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
-                        {{ c_uni }}</p>
+                        class="text-3xl font-black {% if resultados.counts.unicidad > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
+                        {{ resultados.counts.unicidad }}</p>
                     <p class="text-[9px] text-gray-300 font-bold uppercase mt-1">DUPLICADOS</p>
                 </div>
             </div>
 
             <!-- Estructura -->
-            {% set c_est = 0 %}
-            {% for e in resultados.errores %}{% if 'ESTRUCTURA' in e.REGLA %}{% set c_est = c_est + 1 %}{% endif %}{%
-            endfor %}
             <div
                 class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 hover:border-gray-300 transition-all">
                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">ESTRUCTURA LADM</p>
                 <div>
                     <p
-                        class="text-3xl font-black {% if c_est > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
-                        {{ c_est }}</p>
+                        class="text-3xl font-black {% if resultados.counts.estructura > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
+                        {{ resultados.counts.estructura }}</p>
                     <p class="text-[9px] text-gray-300 font-bold uppercase mt-1">FORMATO INVÁLIDO</p>
                 </div>
             </div>
 
             <!-- Consecutividad -->
-            {% set c_con = 0 %}
-            {% for e in resultados.errores %}{% if 'CONSECUTIVIDAD' in e.REGLA or 'INICIO' in e.REGLA or 'NORMA' in
-            e.REGLA %}{% set c_con = c_con + 1 %}{% endif %}{% endfor %}
             <div
                 class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 hover:border-gray-300 transition-all">
                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">CONSECUTIVIDAD</p>
                 <div>
                     <p
-                        class="text-3xl font-black {% if c_con > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
-                        {{ c_con }}</p>
+                        class="text-3xl font-black {% if resultados.counts.consecutividad > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
+                        {{ resultados.counts.consecutividad }}</p>
                     <p class="text-[9px] text-gray-300 font-bold uppercase mt-1">SALTOS/ERRORES INICIO</p>
                 </div>
             </div>
 
             <!-- Huecos -->
-            {% set c_hue = 0 %}
-            {% for e in resultados.errores %}{% if 'HUECOS' in e.REGLA %}{% set c_hue = c_hue + 1 %}{% endif %}{% endfor
-            %}
             <div
                 class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 hover:border-gray-300 transition-all">
                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">HUECOS / GAPS</p>
                 <div>
                     <p
-                        class="text-3xl font-black {% if c_hue > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
-                        {{ c_hue }}</p>
+                        class="text-3xl font-black {% if resultados.counts.huecos > 0 %}text-red-600{% else %}text-gray-900{% endif %} tracking-tighter">
+                        {{ resultados.counts.huecos }}</p>
                     <p class="text-[9px] text-gray-300 font-bold uppercase mt-1">FALTANTES EN LOTE</p>
                 </div>
             </div>
