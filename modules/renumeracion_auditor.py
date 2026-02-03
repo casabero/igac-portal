@@ -35,15 +35,18 @@ class AuditoriaSNC:
             'sector':  {}, # Key: Mpio-Zona           -> Val: Int (Último sector asignado)
         }
 
-    def log_error(self, regla, escenario, ubicacion, detalle, severidad='ERROR'):
-        """Registra hallazgos en las listas correspondientes"""
+    def log_error(self, regla, escenario, ubicacion, detalle, severidad='ERROR', zona=None, sector=None, manzana=None):
+        """Registra hallazgos en las listas correspondientes con jerarquía"""
         registro = {
             'TIPO': severidad,
             'REGLA': regla,
             'ESCENARIO': escenario,
             'UBICACION': ubicacion,
             'DETALLE': detalle,
-            # Campos extra para compatibilidad con reporte PDF legacy
+            'ZONA': zona,
+            'SECTOR': sector,
+            'MANZANA': manzana,
+            # Campos extra para compatibilidad
             'ANTERIOR': ubicacion.split('|')[0] if '|' in str(ubicacion) else ubicacion,
             'NUEVO': ubicacion.split('|')[1] if '|' in str(ubicacion) else ''
         }
@@ -115,8 +118,10 @@ class AuditoriaSNC:
             if len(s) != 30: 
                 return (False, None, f'LONGITUD INVALIDA ({len(s)} chars)')
             
-            # Descomposición LADM: Mpio(5), Zona(2), Sect(2), Manz(4), Terr(4)
-            return (True, [s[0:5], s[5:7], s[7:9], s[13:17], s[17:21]], 'OK')
+            # Descomposición LADM: Mpio(5), Zona(2), Sect(2), Manz(4), Terr(4), Tipo(1-char extracted from pos 21 usually or specific logic)
+            # En v3.2 se extrae s[21] como TIPO. El código original del usuario mostraba s[21] como el 6to elemento.
+            # Indices: 0-5 (M), 5-7 (Z), 7-9 (S), 13-17 (Mz), 17-21 (T), 21 (Tipo)
+            return (True, [s[0:5], s[5:7], s[7:9], s[13:17], s[17:21], s[21]], 'OK')
 
         temp_data = self.df[self.col_new].apply(validar_estructura_snc)
         
@@ -136,10 +141,11 @@ class AuditoriaSNC:
         if self.df_clean.empty: return
 
         # Generar columnas numéricas para validación matemática
-        cols_n = ['M_N', 'Z_N', 'S_N', 'MZ_N', 'T_N']
+        cols_n = ['M_N', 'Z_N', 'S_N', 'MZ_N', 'T_N', 'TIPO_PREDIO']
         self.df_clean[cols_n] = pd.DataFrame(self.df_clean['SNC_PARTS'].tolist(), index=self.df_clean.index)
-        for c in cols_n:
-            self.df_clean[f"{c}_INT"] = self.df_clean[c].astype(int)
+        for c in ['M_N_INT', 'Z_N_INT', 'S_N_INT', 'MZ_N_INT', 'T_N_INT']:
+            base_col = c[:-4] # Remove _INT
+            self.df_clean[c] = self.df_clean[base_col].astype(int)
 
         # B. Parsear columna ANTERIOR (Puede ser imperfecta/alfanumérica)
         def parse_ant(s):
@@ -248,6 +254,9 @@ class AuditoriaSNC:
             mpio_n, zona_n, sect_n = ref['M_N'], ref['Z_N'], ref['S_N']
             loc_ref = f"{ref[self.col_ant]}|{ref[self.col_new]}"
             
+            # Contexto Jerárquico para Logs
+            ctx = {'zona': zona_n, 'sector': sect_n, 'manzana': ref['MZ_N']}
+            
             # -----------------------------------------------------------------
             # A. VALIDACIONES DE PADRES (Zona / Sector / Manzana)
             # -----------------------------------------------------------------
@@ -257,12 +266,12 @@ class AuditoriaSNC:
                 # Instructivo: "El sector se inicia como 00"
                 if int(sect_n) != 0:
                     self.log_error('NORMA_CP_SECTOR_00', escenario, loc_ref, 
-                                   f"Primer sector de Zona Nueva debe ser 00. Se halló: {sect_n}")
+                                   f"Primer sector de Zona Nueva debe ser 00. Se halló: {sect_n}", **ctx)
                 
                 # Instructivo: Manzana inicia en 0001
                 if int(ref['MZ_N_INT']) != 1:
                     self.log_error('NORMA_CP_MANZANA_01', escenario, loc_ref, 
-                                   f"Primera manzana de Zona Nueva debe ser 0001. Se halló: {ref['MZ_N']}")
+                                   f"Primera manzana de Zona Nueva debe ser 0001. Se halló: {ref['MZ_N']}", **ctx)
 
             # REGLA: SECTOR NUEVO (En Zona Existente)
             elif escenario == 'NUEVO_SECTOR':
@@ -271,10 +280,9 @@ class AuditoriaSNC:
                 actual_sect = int(ref['S_N_INT'])
                 
                 # Validar Consecutividad (Last + 1)
-                # OJO: Si last_sect es -1, significa que no habia nada antes, entonces 00 o 01 es aceptable segun zona
                 if last_sect != -1 and actual_sect != last_sect + 1:
                     self.log_error('CONSECUTIVIDAD_SECTOR', escenario, loc_ref, 
-                                   f"Salto de sector indebido en Zona {zona_n}. Anterior: {last_sect}, Nuevo: {actual_sect}")
+                                   f"Salto de sector indebido en Zona {zona_n}. Anterior: {last_sect}, Nuevo: {actual_sect}", **ctx)
                 
                 # Actualizar Memoria
                 self.memoria['sector'][key_z] = max(last_sect, actual_sect)
@@ -282,7 +290,7 @@ class AuditoriaSNC:
                 # En sector nuevo, la manzana debería iniciar o reiniciar secuencia
                 if int(ref['MZ_N_INT']) != 1:
                      self.log_error('INICIO_MANZANA_SECTOR', escenario, loc_ref,
-                                    f"Manzana en sector nuevo inició en {ref['MZ_N']} (se esperaba 0001)", severidad='WARNING')
+                                    f"Manzana en sector nuevo inició en {ref['MZ_N']} (se esperaba 0001)", severidad='WARNING', **ctx)
 
             # REGLA: MANZANA NUEVA
             # Validamos salto de manzana dentro del sector
@@ -294,7 +302,7 @@ class AuditoriaSNC:
                 # Si es manzana nueva en sector viejo, debe ser Last + 1
                 if escenario == 'NUEVA_MANZANA' and actual_manz > last_manz + 1 and actual_manz != 1:
                     self.log_error('CONSECUTIVIDAD_MANZANA', escenario, loc_ref,
-                                   f"Salto de manzana. Anterior {last_manz}, Nueva {actual_manz}")
+                                   f"Salto de manzana. Anterior {last_manz}, Nueva {actual_manz}", **ctx)
                 
                 self.memoria['manzana'][key_s] = max(last_manz, actual_manz)
 
@@ -306,7 +314,7 @@ class AuditoriaSNC:
             destinos = lote[['M_N', 'Z_N', 'S_N', 'MZ_N']].drop_duplicates()
             if len(destinos) > 1:
                 self.log_error('DISPERSION_LOTE', escenario, loc_ref,
-                               f"Predios de un mismo lote temporal terminaron en {len(destinos)} manzanas definitivas distintas.", severidad='WARNING')
+                               f"Predios de un mismo lote temporal terminaron en {len(destinos)} manzanas definitivas distintas.", severidad='WARNING', **ctx)
 
             # Iterar cada manzana de destino para validar sus terrenos internos
             for _, dest in destinos.iterrows():
@@ -317,11 +325,14 @@ class AuditoriaSNC:
                 
                 sub_ref = sub_lote.iloc[0]
                 sub_loc = f"{sub_ref[self.col_ant]}|{sub_ref[self.col_new]}"
+                
+                # Update Context for sub-loop if needed (though usually same zone/sect)
+                sub_ctx = {'zona': dest['Z_N'], 'sector': dest['S_N'], 'manzana': dest['MZ_N']}
 
                 # 1. CHEQUEO DE HUECOS (GAPS)
                 if (max_t - min_t + 1) != count_t:
                     self.log_error('HUECOS_NUMERACION', escenario, sub_loc,
-                                   f"Mz {dest['MZ_N']}: Secuencia interrumpida. Rango {min_t}-{max_t} ({max_t-min_t+1} espacios) para {count_t} predios.")
+                                   f"Mz {dest['MZ_N']}: Secuencia interrumpida. Rango {min_t}-{max_t} ({max_t-min_t+1} espacios) para {count_t} predios.", **sub_ctx)
                 else:
                     self.stats['predios_ok'] += count_t
 
@@ -336,8 +347,11 @@ class AuditoriaSNC:
                     expected_start = 1
                 
                 if min_t != expected_start:
+                    salto = min_t - expected_start
+                    severidad = 'ERROR' if salto > 1000 else 'WARNING'
                     self.log_error('INICIO_SECUENCIA', escenario, sub_loc,
-                                   f"Mz {dest['MZ_N']}: Terrenos iniciaron en {min_t}, se esperaba {expected_start} (basado en historia {last_t})", severidad='WARNING')
+                                   f"Mz {dest['MZ_N']}: Terrenos iniciaron en {min_t}, se esperaba {expected_start} (basado en historia {last_t}). Salto: {salto}", 
+                                   severidad=severidad, **sub_ctx)
                 
                 # Actualizar Memoria Terreno
                 self.memoria['terreno'][key_m] = max(last_t, max_t)
@@ -345,8 +359,12 @@ class AuditoriaSNC:
     # =========================================================================
     # 6. REPORTES (Web Adapter)
     # =========================================================================
+    # =========================================================================
+    # 6. REPORTES (Web Adapter v3.2)
+    # =========================================================================
     def generar_reporte_excel(self):
         output = io.BytesIO()
+        # Usamos xlsxwriter que es robusto para escritura nueva
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             # Hoja 1: Dashboard
             dash = pd.DataFrame([
@@ -358,20 +376,54 @@ class AuditoriaSNC:
             ])
             dash.to_excel(writer, sheet_name='DASHBOARD', index=False)
             
-            # Hoja 2: Errores
+            # Hoja 2: Errores Globales
             if self.errores:
-                pd.DataFrame(self.errores).to_excel(writer, sheet_name='ERRORES', index=False)
+                pd.DataFrame(self.errores).to_excel(writer, sheet_name='ERRORES_GLOBAL', index=False)
             else:
-                pd.DataFrame({'ESTADO': ['SIN ERRORES']}).to_excel(writer, sheet_name='ERRORES', index=False)
+                pd.DataFrame({'ESTADO': ['SIN ERRORES']}).to_excel(writer, sheet_name='ERRORES_GLOBAL', index=False)
                 
-            # Hoja 3: Advertencias
+            # Hoja 3: Advertencias Globales
             if self.warnings:
-                pd.DataFrame(self.warnings).to_excel(writer, sheet_name='ADVERTENCIAS', index=False)
+                pd.DataFrame(self.warnings).to_excel(writer, sheet_name='ADVERTENCIAS_GLOBAL', index=False)
                 
-            # Hoja 4: Muestra de Datos (con escenario identificado)
+            # Hojas por ZONA (La gran mejora de v3.2)
+            if self.df_clean is not None and not self.df_clean.empty and 'Z_N' in self.df_clean.columns:
+                zonas_unicas = sorted(self.df_clean['Z_N'].unique())
+                for zona in zonas_unicas:
+                    # Logs de esta zona
+                    err_zona = [e for e in self.errores if e.get('ZONA') == zona]
+                    warn_zona = [w for w in self.warnings if w.get('ZONA') == zona]
+                    
+                    if not err_zona and not warn_zona:
+                        continue
+                        
+                    # Resumen por Sector/Manzana
+                    data_z = []
+                    
+                    # Convert log list to DF for aggregation
+                    if err_zona:
+                        df_ez = pd.DataFrame(err_zona)
+                        # Agregamos counts
+                        grp_e = df_ez.groupby(['SECTOR', 'MANZANA', 'REGLA']).size().reset_index(name='COUNT_ERR')
+                        data_z.append(grp_e)
+                        
+                    if warn_zona:
+                        df_wz = pd.DataFrame(warn_zona)
+                        grp_w = df_wz.groupby(['SECTOR', 'MANZANA', 'REGLA']).size().reset_index(name='COUNT_WARN')
+                        data_z.append(grp_w)
+                    
+                    if data_z:
+                         # Merge or concat? Concat is simpler for a summary list
+                         full_z = pd.concat(data_z, ignore_index=True)
+                         full_z.to_excel(writer, sheet_name=f'ZONA_{zona}_RESUMEN', index=False)
+
+            # Hoja Final: Data Tagged
             if self.df_clean is not None and not self.df_clean.empty:
-                cols = [self.col_ant, self.col_new, 'ESCENARIO']
-                self.df_clean[cols].head(3000).to_excel(writer, sheet_name='DATA_TAGGED', index=False)
+                cols = [self.col_ant, self.col_new, 'ESCENARIO', 'TIPO_PREDIO', 'Z_N', 'S_N', 'MZ_N']
+                # Filtrar cols que existen
+                cols = [c for c in cols if c in self.df_clean.columns]
+                self.df_clean[cols].head(5000).to_excel(writer, sheet_name='DATA_TAGGED', index=False)
+                
         output.seek(0)
         return output
 
@@ -464,48 +516,78 @@ class AuditoriaRenumeracionPDF(FPDF):
         self.cell(0, 10, 'SISTEMA DE GESTIÓN CATASTRAL - PORTAL IGAC 2026', 0, 0, 'L'); self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'R')
 
 def generar_pdf_renumeracion(resultados):
-    """Genera un reporte PDF detallado"""
+    """Genera un reporte PDF detallado v3.2 con desglose por Zona"""
     pdf = AuditoriaRenumeracionPDF(format='Letter'); pdf.set_margins(20, 20, 20); pdf.add_page()
     t_c = resultados.get('tipo_config', '1')
     l_comp, l_ant = ('CICA vs SNC', 'CICA') if t_c == '1' else ('Operadores vs SNC', 'Operadores')
+    
+    # Header Info
     pdf.ln(2); pdf.set_font('Helvetica', '', 10); pdf.set_text_color(107, 114, 128)
     pdf.cell(0, 6, f"Auditoría: {l_comp}  |  Fecha: {resultados.get('timestamp', 'N/A')}", 0, 1, 'L'); pdf.ln(5)
     
-    pdf.set_font('Helvetica', 'B', 14); pdf.cell(0, 10, 'Resumen Ejecutivo (V3.1)', 0, 1); pdf.ln(2)
+    # Resumen Ejecutivo
+    pdf.set_font('Helvetica', 'B', 14); pdf.set_text_color(17, 17, 17); pdf.cell(0, 10, 'Resumen Ejecutivo (V3.2)', 0, 1); pdf.ln(2)
     def add_meta(l, v, c=(0,0,0)):
-        pdf.set_font('Helvetica', '', 10); pdf.cell(70, 8, l, 0); pdf.set_font('Helvetica', 'B', 10); pdf.set_text_color(*c); pdf.cell(0, 8, v, 0, 1); pdf.set_text_color(0,0,0)
+        pdf.set_font('Helvetica', '', 10); pdf.set_text_color(107, 114, 128); pdf.cell(70, 8, l, 0); pdf.set_font('Helvetica', 'B', 10); pdf.set_text_color(*c); pdf.cell(0, 8, v, 0, 1); pdf.set_text_color(0,0,0)
     
     add_meta('Total Predios Auditados:', f"{resultados.get('total_auditado', 0):,} predios")
-    t_err_count = len(resultados.get('errores', []))
-    add_meta('Alertas Encontradas:', f"{t_err_count:,}", (220, 38, 38) if t_err_count > 0 else (22, 163, 74))
+    
+    engine = resultados.get('engine_instance')
+    errores = []
+    warnings = []
+    if engine:
+        errores = engine.errores
+        warnings = engine.warnings
+    else:
+        # Fallback if engine not returned (legacy compat)
+        errores = resultados.get('errores', []) # This might be the mixed list in legacy, but we try to use engine if avail
+    
+    count_err = engine.stats['errores_criticos'] if engine else len([e for e in errores if e.get('TIPO') == 'ERROR'])
+    count_warn = engine.stats['advertencias'] if engine else len([e for e in errores if e.get('TIPO') != 'ERROR'])
+    
+    add_meta('Errores Críticos:', f"{count_err:,}", (220, 38, 38) if count_err > 0 else (22, 163, 74))
+    add_meta('Advertencias:', f"{count_warn:,}", (202, 138, 4) if count_warn > 0 else (22, 163, 74))
     
     pdf.ln(5)
 
-    # --- EXPLICACIÓN DE REGLAS (Nueva sección solicitada) ---
-    pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Protocolo v3.1 (Validación LADM)', 0, 1); pdf.ln(1)
-    pdf.set_font('Helvetica', '', 9); pdf.multi_cell(0, 4, 'Reglas de lógica espacial y secuencial:'); pdf.ln(2)
-    
-    rules_desc = [
-        ("UNICIDAD_SNC", "Duplicidad absoluta de NPN nuevo. Crítico."),
-        ("NORMA_CP", "Violación de normas de creación de Centros Poblados (Sector 00, Manzana 0001)."),
-        ("CONSECUTIVIDAD_SECTOR", "Salto numérico injustificado en Sectores Nuevos."),
-        ("CONSECUTIVIDAD_MANZANA", "Salto numérico en Manzanas Nuevas."),
-        ("HUECOS_NUMERACION", "Existencia de predios faltantes (gaps) dentro de un lote."),
-        ("INICIO_SECUENCIA", "El lote nuevo no inicia en el consecutivo esperado."),
-        ("DISPERSION_LOTE", "Un lote de origen se dispersó en múltiples manzanas destino.")
-    ]
-    
-    for r_title, r_text in rules_desc:
-        pdf.set_font('Helvetica', 'B', 9)
-        title_w = pdf.get_string_width(r_title + ":") + 5
-        pdf.cell(title_w, 5, r_title + ":", 0, 0)
-        start_x = pdf.get_x()
-        pdf.set_left_margin(start_x)
-        pdf.set_font('Helvetica', '', 9)
-        pdf.multi_cell(0, 5, r_text)
-        pdf.set_left_margin(20)
-        pdf.ln(1)
+    # --- DESGLOSE POR ZONA (NUEVO v3.2) ---
+    if engine and (errores or warnings):
+        pdf.set_font('Helvetica', 'B', 12); pdf.set_text_color(17, 17, 17); pdf.cell(0, 10, 'Hallazgos por Zona', 0, 1); pdf.ln(2)
+        
+        # Agrupar hallazgos por zona
+        hallazgos_zona = {} # Zona -> {'E': 0, 'W': 0}
+        all_findings = errores + warnings
+        for f in all_findings:
+            z = f.get('ZONA', 'UNK')
+            if z is None: z = 'UNK'
+            if z not in hallazgos_zona: hallazgos_zona[z] = {'E': 0, 'W': 0}
+            if f.get('TIPO') == 'ERROR': hallazgos_zona[z]['E'] += 1
+            else: hallazgos_zona[z]['W'] += 1
+            
+        # Tabla de Zonas
+        pdf.set_font('Helvetica', 'B', 9); pdf.set_fill_color(243, 244, 246)
+        pdf.cell(40, 8, 'Zona', 1, 0, 'C', 1)
+        pdf.cell(50, 8, 'Errores Críticos', 1, 0, 'C', 1)
+        pdf.cell(50, 8, 'Advertencias', 1, 1, 'C', 1)
+        
+        pdf.set_font('Helvetica', '', 9); pdf.set_fill_color(255, 255, 255)
+        for z in sorted(hallazgos_zona.keys()):
+            e_c = hallazgos_zona[z]['E']
+            w_c = hallazgos_zona[z]['W']
+            pdf.cell(40, 7, f"ZONA {z}", 1, 0, 'C')
+            
+            # Color rojo si hay errores
+            if e_c > 0: pdf.set_text_color(220, 38, 38)
+            pdf.cell(50, 7, str(e_c), 1, 0, 'C')
+            pdf.set_text_color(0, 0, 0)
+            
+            if w_c > 0: pdf.set_text_color(202, 138, 4)
+            pdf.cell(50, 7, str(w_c), 1, 1, 'C')
+            pdf.set_text_color(0, 0, 0)
+        
+        pdf.ln(5)
 
+    # --- TOP PROBLEMATICOS ---
     top_p = resultados.get('top_problematicos', [])
     if top_p:
         pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Top 10 Códigos con Más Alertas', 0, 1); pdf.ln(2); pdf.set_font('Helvetica', 'B', 8); pdf.cell(10, 8, '#', 1, 0, 'C')
@@ -513,12 +595,23 @@ def generar_pdf_renumeracion(resultados):
         for idx, (cod, n, r) in enumerate(top_p, 1):
             pdf.cell(10, 6, str(idx), 1, 0, 'C'); pdf.cell(65, 6, str(cod), 1, 0, 'C'); pdf.set_text_color(220, 38, 38); pdf.cell(20, 6, str(n), 1, 0, 'C'); pdf.set_text_color(0, 0, 0); pdf.cell(80, 6, r[:65], 1, 1)
 
-    pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Detalle de Alertas Lógicas', 0, 1); pdf.ln(2); pdf.set_font('Helvetica', 'B', 8)
+    # --- DETALLE DE ALERTAS (MUESTRA) ---
+    pdf.add_page(); pdf.set_font('Helvetica', 'B', 12); pdf.cell(0, 10, 'Detalle de Alertas Lógicas (Muestra)', 0, 1); pdf.ln(2); pdf.set_font('Helvetica', 'B', 8)
     pdf.cell(50, 8, 'Regla', 1); pdf.cell(60, 8, 'Detalle', 1); pdf.cell(35, 8, f'{l_ant}', 1); pdf.cell(35, 8, 'Nuevo (SNC)', 1); pdf.ln()
     pdf.set_font('Helvetica', '', 6)
-    for e in resultados.get('errores', [])[:200]:
+    
+    # Usamos la lista combinada legacy o iteramos engine
+    lista_final = resultados.get('errores', []) 
+    # Limitamos a 200 items
+    for e in lista_final[:200]:
         if pdf.get_y() > 260: pdf.add_page(); pdf.set_font('Helvetica', 'B', 8); pdf.cell(50, 8, 'Regla', 1); pdf.cell(60, 8, 'Detalle', 1); pdf.cell(35, 8, f'{l_ant}', 1); pdf.cell(35, 8, 'Nuevo (SNC)', 1); pdf.ln(); pdf.set_font('Helvetica', '', 6)
-        pdf.cell(50, 6, str(e['REGLA'])[:48], 1); pdf.cell(60, 6, str(e['DETALLE'])[:55], 1); pdf.cell(35, 6, str(e['ANTERIOR']), 1); pdf.cell(35, 6, str(e['NUEVO']), 1); pdf.ln()
+        
+        regla = str(e.get('REGLA', ''))
+        detalle = str(e.get('DETALLE', ''))
+        ant = str(e.get('ANTERIOR', ''))
+        new = str(e.get('NUEVO', ''))
+        
+        pdf.cell(50, 6, regla[:48], 1); pdf.cell(60, 6, detalle[:55], 1); pdf.cell(35, 6, ant, 1); pdf.cell(35, 6, new, 1); pdf.ln()
 
     return bytes(pdf.output())
 
