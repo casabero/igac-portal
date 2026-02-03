@@ -172,7 +172,8 @@
     </style>
     <script>
         // Immediate Theme Check to prevent flicker
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        // Default to LIGHT mode (White Mode) explicitly requested
+        if (localStorage.theme === 'dark') {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
