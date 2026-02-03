@@ -37,7 +37,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
     <!-- Sidebar: Configuración Local -->
     <div class="lg:col-span-1 space-y-8">
-        <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-8">
+        <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-6">
             <h2
                 class="text-[10px] font-sans font-bold mb-6 text-gray-500 dark:text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-gray-700 pb-2">
                 CONFIG_SISTEMA</h2>
@@ -140,7 +140,7 @@
             <h2
                 class="text-2xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-4 uppercase tracking-tighter">
                 <span class="material-symbols-outlined text-gray-900 dark:text-white font-light">location_city</span>
-                Datos: {{ resultados.municipio }}
+                DATOS CONSOLIDADOS
             </h2>
             <div class="flex items-center gap-6">
                 <button type="submit"
@@ -156,9 +156,9 @@
         </div>
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div
-                class="premium-card p-6 flex items-center gap-6 border-l-4 border-l-gray-300 dark:border-l-gray-600 dark:bg-[#1a1a1a] dark:border-gray-800">
+                class="premium-card p-4 flex items-center gap-4 border-l-4 border-l-gray-300 dark:border-l-gray-600 dark:bg-[#1a1a1a] dark:border-gray-800">
                 <div
                     class="w-14 h-14 bg-gray-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
                     <span class="material-symbols-outlined text-3xl font-light">fact_check</span>
@@ -171,19 +171,19 @@
                 </div>
             </div>
             <div
-                class="premium-card p-8 border-l-4 border-l-gray-900 dark:border-l-white dark:bg-[#1a1a1a] dark:border-gray-800">
+                class="premium-card p-5 border-l-4 border-l-gray-900 dark:border-l-white dark:bg-[#1a1a1a] dark:border-gray-800">
                 <p class="text-[9px] font-sans text-gray-900 dark:text-white uppercase font-bold mb-2 tracking-widest">
                     CRIT_AVALÚO_NULO</p>
                 <p class="text-3xl font-display font-bold text-gray-900 dark:text-white uppercase">{{
                     resultados.totales.conteo_zero_critico }}</p>
             </div>
-            <div class="premium-card p-8 dark:bg-[#1a1a1a] dark:border-gray-800">
+            <div class="premium-card p-5 dark:bg-[#1a1a1a] dark:border-gray-800">
                 <p class="text-[9px] font-sans text-gray-400 uppercase font-bold mb-2 tracking-widest">Predios PH</p>
                 <p class="text-3xl font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">{{
                     resultados.totales.conteo_zero_ph }}</p>
             </div>
             <div
-                class="bg-gray-50 dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white">
+                class="bg-gray-50 dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white">
                 <p
                     class="text-[9px] font-sans text-gray-500 dark:text-gray-400 uppercase font-bold mb-2 tracking-widest">
                     Alertas Totales
@@ -195,7 +195,7 @@
         </div>
 
         <!-- Results Table -->
-        <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-10 mt-4 relative overflow-hidden">
+        <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-6 md:p-8 mt-4 relative overflow-hidden">
             <div class="mb-10 border-l-4 border-gray-200 dark:border-gray-700 pl-6">
                 <h2 class="text-xl font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">03
                     // AUDITORIA

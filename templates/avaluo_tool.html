@@ -26,12 +26,13 @@
 <div class="max-w-[1400px] mx-auto">
     <!-- FORMULARIO DE CARGA (SI NO HAY RESULTADOS) -->
     {% if not resultados %}
-    <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-10 mt-4 relative overflow-hidden">
+    <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-6 md:p-8 mt-4 relative overflow-hidden">
         <div class="mb-10 border-l-4 border-gray-200 dark:border-gray-700 pl-6">
-            <h2 class="text-xl font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">02 //
+            <h2 class="text-lg font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">02 //
                 ANALISIS AVALUOS
             </h2>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-2 uppercase tracking-widest font-bold">MONITOREO DE
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-widest font-bold">MONITOREO
+                DE
                 VARIACIÓN CATASTRAL
             </p>
         </div>
@@ -170,20 +171,20 @@
         {% endif %}
 
         <!-- KPIs -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-8 flex flex-col gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-5 flex flex-col gap-1">
                 <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Predios Revisados</p>
                 <p class="text-3xl font-display font-bold text-gray-900 dark:text-white uppercase">{{
                     resultados.stats.total_registros_muestra }}</p>
             </div>
             <div
-                class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-8 border-l-4 border-l-gray-900 dark:border-l-white flex flex-col gap-2">
+                class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-5 border-l-4 border-l-gray-900 dark:border-l-white flex flex-col gap-1">
                 <p class="text-[9px] text-gray-900 dark:text-white font-bold uppercase tracking-widest">Predios Nuevos
                 </p>
                 <p class="text-3xl font-display font-bold text-gray-900 dark:text-white uppercase">{{
                     resultados.stats.nuevos }}</p>
             </div>
-            <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-8 flex flex-col gap-2">
+            <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-5 flex flex-col gap-1">
                 <p class="text-[9px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Predios
                     Desaparecidos</p>
                 <p class="text-3xl font-display font-bold text-gray-900 dark:text-white uppercase">{{
@@ -191,7 +192,7 @@
                 </p>
             </div>
             <div
-                class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-8 border-l-4 border-l-functional-error flex flex-col gap-2">
+                class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-5 border-l-4 border-l-functional-error flex flex-col gap-1">
                 <p class="text-[9px] text-gray-900 dark:text-white font-bold uppercase tracking-widest">Diferencias de
                     Valor</p>
                 <p class="text-3xl font-display font-bold text-gray-900 dark:text-white uppercase">{{
