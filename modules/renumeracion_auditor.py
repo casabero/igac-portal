@@ -356,14 +356,15 @@ class AuditoriaSNC:
                 self.memoria['terreno'][key_m] = max(last_t, max_t)
 
     # =========================================================================
-    # 5.1. SUGERENCIA DE RENUMERACIÓN (NUEVO v3.3)
+    # 5.1. SUGERENCIA DE RENUMERACIÓN (NUEVO v3.3 - SOPORTE 9xxx)
     # =========================================================================
     def generar_sugerencias(self):
         """
         Genera una columna SUGGESTED_SNC corrigiendo la secuencia.
-        Maneja dos lógicas:
-        1. FORMAL: Secuencia por Manzana (Terreno 1..N)
-        2. INFORMAL (No Ley 14): Secuencia por Predio Matriz (Parent 21 chars + 200000 + xxx)
+        Maneja tres niveles:
+        1. FORMAL Mz: Si Manzana es 9xxx -> Asignar Siguiente Disponble en Sector.
+        2. FORMAL Terr: Secuencia por Manzana (Terreno 1..N).
+        3. INFORMAL (No Ley 14): Secuencia por Predio Matriz (Parent 21 chars + 200000 + xxx).
         """
         if self.df_clean.empty: return
 
@@ -371,154 +372,126 @@ class AuditoriaSNC:
         self.df_clean['SUGGESTED_SNC'] = ''
         self.df_clean['ES_INFORMAL'] = self.df_clean['COND_PROP'] == '2'
 
-        # Memoria temporal para sugerencias
-        # Formal: M-Z-S-Mz -> LastTerreno
-        mem_formal = {}
-        # Informal: Parent(21) -> LastSeq (0-999)
-        mem_informal = {}
+        # --- FASE 1: PRE-CALENTAMIENTO DE MEMORIA DE MANZANAS ---
+        # Necesitamos saber cuál es la última manzana REAL (no 9xxx) de cada sector
+        # para que si aparece una 9001, le asignemos la siguiente correcta (ej 0015).
+        
+        mem_manzana = {} # Key: M-Z-S -> MaxMz(int)
+        
+        # Filtramos solo las definitivas (< 9000)
+        definitivas = self.df_clean[self.df_clean['MZ_N_INT'] < 9000]
+        if not definitivas.empty:
+            # Agrupamos por Sector (M-Z-S) y buscamos el maximo
+            max_mz_per_sector = definitivas.groupby(['M_N', 'Z_N', 'S_N'])['MZ_N_INT'].max()
+            for idx, val in max_mz_per_sector.items():
+                key = f"{idx[0]}-{idx[1]}-{idx[2]}" # M-Z-S
+                mem_manzana[key] = int(val)
 
-        # Ordenar para procesar en orden lógico (por Predio Anterior para mantener orden de llegada)
-        # Usamos los mismos criterios que en validación por lotes
+        # Mapa para mantener consistencia: Si reasignamos la Mz 9001 a la 0015,
+        # todos los predios de la 9001 deben ir a la 0015.
+        map_manzana_temp = {} # Key: M-Z-S-MzOld -> MzNew(str)
+
+        # --- FASE 2: PROCESAMIENTO SECUENCIAL ---
+        
+        # Memoria para Terrenos (Formal) e Informales
+        mem_formal_terr = {} # Key: M-Z-S-Mz(Nueva) -> LastTerr(int)
+        mem_informal = {}    # Key: Parent21 -> LastSeq(int)
+
+        # Ordenar por Predio Anterior para respetar orden de llegada
         sort_cols = ['M_A', 'Z_A', 'S_A', 'MZ_A', 'T_A']
-        # Asegurar strings para sort
         for c in sort_cols:
-             if c not in self.df_clean.columns: continue # Should exist
+             if c not in self.df_clean.columns: continue
              self.df_clean[c] = self.df_clean[c].astype(str).replace('nan', '00')
         
-        # Procesamos TODO el dataframe, no solo cambios, para reconstruir la historia ideal
-        # Pero ojo: Si es permanencia, debemos RESPETAR el número actual como base
-        
-        # Estrategia: Iterar fila a fila (puede ser lento en pandas puro, pero seguro para logica secuencial compleja)
-        # Optimizacion: Iterar por grupos? No, porque informal mixing is complex.
-        # Vamos a iterar sobre el DF ordenado.
-        
         df_sorted = self.df_clean.sort_values(by=sort_cols)
-        
         suggested_list = []
         
         for idx, row in df_sorted.iterrows():
             suggested = ''
             
-            # 1. Recuperar contexto actual
+            # Contexto original
             mpio = row['M_N']
             zona = row['Z_N']
             sect = row['S_N']
-            manz = row['MZ_N']
-            terr = row['T_N']
+            manz_orig = row['MZ_N']
+            manz_int = row['MZ_N_INT']
             cond = row['COND_PROP']
-            
-            # Reconstruir Parent básico
-            # M(5)+Z(2)+S(2)+C(2)+B(2)+Mz(4)+T(4) -> Total 21
-            # Ojo: row['SNC_PARTS'] tiene [M, Z, S, Mz, T, Cond]
-            # Nos faltan Comuna(2) y Barrio(2) que están entre Sector y Manzana?
-            # Revisando estructura SNC parseada:
-            # 0-5(M), 5-7(Z), 7-9(S), 9-11(Comuna??), 11-13(Barrio??), 13-17(Mz)
-            # El parser original saltaba de 7-9 a 13-17.
-            # Necesitamos los caracteres 9-13 para reconstruir el full string 30 chars.
             full_snc = str(row[self.col_new])
-            gap_chunk = full_snc[9:13] # Comuna + Barrio
-            rest_chunk = full_snc[22:] # Despues de CondProp (Edif, Piso, Unidad)
             
-            parent_formal_prefix = f"{mpio}{zona}{sect}{gap_chunk}{manz}" # 5+2+2+4+4 = 17 chars
+            # --- LÓGICA DE MANZANA (NIVEL 1) ---
+            target_mz_str = manz_orig
+            key_sector = f"{mpio}-{zona}-{sect}"
             
+            # Solo aplicamos renumeracion de manzana si es NO INFORMAL (Formal)
+            # o si el usuario quiere que la geografia informal tambien se corrija.
+            # Asumiremos que la correccion de Manzana aplica a TODOS (Formales e Informales)
+            # porque la ubicacion geografica es la base.
+            
+            if manz_int >= 9000:
+                key_temp = f"{key_sector}-{manz_orig}"
+                if key_temp in map_manzana_temp:
+                    target_mz_str = map_manzana_temp[key_temp]
+                else:
+                    # Asignar nueva manzana
+                    last_mz = mem_manzana.get(key_sector, 0)
+                    new_mz = last_mz + 1
+                    mem_manzana[key_sector] = new_mz # Actualizar max global
+                    target_mz_str = str(new_mz).zfill(4)
+                    map_manzana_temp[key_temp] = target_mz_str
+            
+            # --- CONSTRUCCION DE LA SUGERENCIA ---
+            
+            # Recuperar partes "ocultas" del string original (Comuna/Barrio)
+            # 0-5(M), 5-7(Z), 7-9(S), 9-13(Gap: Comuna+Barrio), 13-17(Mz)
+            gap_chunk = full_snc[9:13] 
+            
+            # Nuevo Prefijo con Manzana Corregida
+            # M(5)+Z(2)+S(2)+Gap(4)+MzNueva(4) = 17 chars
+            prefix_geo = f"{mpio}{zona}{sect}{gap_chunk}{target_mz_str}"
+
             # --- CASO INFORMAL (NO LEY 14) ---
             if cond == '2':
-                # La logica es: El 'Padre' son los primeros 21 caracteres.
-                # Si cond es 2, esto YA ES un informal. Si queremos sugerir, asumimos que
-                # la geografia (hasta terreno) es correcta y solo validamos el contador.
-                # O ¿el usuario quiere que renumeremos informales sobre un formal?
-                # Asumimos: Mantenemos la geografia Base.
+                # Parent = M(5)+Z(2)+S(2)+Gap(4)+Mz(4)+Terr(4). Total 21.
+                # Usamos el target_mz_str corregido, pero mantenemos el Terreno original?
+                # Si la manzana cambió (era 9000 -> 0015), el terreno original (ej 0001) se mantiene
+                # pero ahora bajo la nueva manzana.
                 
-                # Parent = M(5)+Z(2)+S(2)+...T(4). Total 21. 
-                # El '2' de la pos 22 viene fijo en el sufijo '200000'.
+                # OJO: Si es informal, el 'Parent' incluye el Terreno.
+                # Debemos usar el terreno original row['T_N']?
+                # Si estamos renumerando Manzana, el Parent ID cambia (porque la Mz cambia).
                 
-                parent_id = full_snc[:21] 
+                terr_orig = row['T_N']
+                parent_id = f"{prefix_geo}{terr_orig}" # 17 + 4 = 21 chars
                 
-                # Buscar siguiente en secuencia
+                # Secuencia Informal
                 last_seq = mem_informal.get(parent_id, 0)
                 next_seq = last_seq + 1
                 mem_informal[parent_id] = next_seq
                 
-                # Armar sugerido: Parent + '2' + '00000' + seq(3)?
-                # El usuario dijo: "Parent(21) + 200000 + Counter(3)" NO. 
-                # Dijo: "posicion 22 tienen un 2". 
-                # Resolucion 1040 y ejemplo usuario:
-                # 22='2'. Resto ceros?
-                # Estructura 30 chars: 21 (Geo) + 1 (Cond) + 8 (Construccion/Unidad)
-                # Informal pattern usual: Cond='2', Edif/Piso/Unidad = Consecutivo?
-                # El usuario dijo "Renumerated per Parent Property... Sequence = Informal Counter".
-                # Y "200000" como sufijo de ejemplo. 2 es Cond. quedan 7 digitos.
-                # Si "200000" + 3 digits = 9 digits? Too many.
-                # Total 30. Llevamos 21. Faltan 9.
-                # Pos 22 es Cond (1 char). Faltan 8.
-                # Si sufijo es '200000' + 'xxx' -> '2' + '00000' + 'xxx' = 9 chars. OK.
-                
-                sufijo = f"200000{str(next_seq).zfill(2)}" # Ojo con longitud.
-                # Si seq es 1 -> 20000001 (8 chars) + Cond(1) = 9 ??
-                # Vamos a usar formato riguroso:
-                # Cond = '2'
-                # Resto (23-30) = 8 ceros/numeros. 
-                # Sugerencia standar: 2 + 00000 + seq(2)? O 2 + 0000 + seq(3)?
-                # El usuario menciono "200000" y counter.
-                # Asumiremos: 2 (Cond) + 00000 (Edif/Piso) + Seq(2)?
-                # Ojo: user dijo "Parent(21) + '200000' + Counter".
-                # Si Counter es 3 digitos: 2 + 00000 + 001 = 9 digitos. 21+9 = 30. CORRECTO.
-                
-                suggested = f"{parent_id}200000{str(next_seq).zfill(2)}" # Wait, 2+5+2 = 8? 
-                # Necesitamos 9 chars al final.
-                # 2 + 00000 + 001 (3 chars) = 9 chars.
-                suggested = f"{parent_id}200000{str(next_seq).zfill(2)}" # Esto da 8 chars sufijo? No.
-                # String '200000' tiene 6 chars. + 2 chars seq = 8 chars.
-                # 21 + 8 = 29. FALTA 1.
-                # Ajuste: '2000000' + seq(2)?
-                # Mejor standar: Cond '2' + 7 ceros + 1 seq? 
-                # Voy a usar: 2 + 00000 + seq(3). 
-                # '200000' + seq(3) -> 9 chars. 21+9=30.
-                
-                suggested = f"{parent_id}200000{str(next_seq).zfill(2)}" # Mierda, la longitud.
-                # Probemos con lo que dijo el usuario "200000" explicitamente.
-                # Si es un string literal: "200000" (6 chars) + counter.
-                # Si counter 3 chars -> 6+3=9. PERFECTO.
-                
+                # Sufijo: '200000' + seq(3) -> 9 chars
                 suggested = f"{parent_id}200000{str(next_seq).zfill(3)}"
 
             # --- CASO FORMAL ---
             else:
-                # Agrupacion: Manzana (M-Z-S-Mz) (17 chars first part logic)
-                # Parent Formal = primeros 17 chars (sin Terreno)
-                key_manzana = parent_formal_prefix 
+                # Renumeracion de Terrenos dentro de la (Nueva) Manzana
+                # Key para memoria de terrenos: Prefijo Geo (hasta Manzana)
+                key_manzana_terr = prefix_geo # 17 chars
                 
-                # Si es permanencia, respetamos su terreno actual para no cambiarlo inecesariamente?
-                # NO, el usuario quiere sugerencia 'CORRECTA'. Si hay huecos, los llenamos.
-                # Pero si el predio 'ESTA BIEN', deberia coincidir.
-                # Sin embargo, re-generar secuencia garantiza 0 huecos.
-                
-                last_terr = mem_formal.get(key_manzana, 0)
+                last_terr = mem_formal_terr.get(key_manzana_terr, 0)
                 next_terr = last_terr + 1
-                mem_formal[key_manzana] = next_terr
+                mem_formal_terr[key_manzana_terr] = next_terr
                 
-                # Reconstruir: Prefix(17) + Terreno(4) + Cond(1) + Resto(8)
-                # Asumimos Condicion y Resto se mantienen del original si es formal (PHs, etc)
-                # OJO: Si re-numeramos terreno, PHs pueden romperse si no las agrupamos. 
-                # SIMPLIFICACION: Solo sugerimos renumeracion de TERRENOS (Predios matriz o NPH).
-                # Si es PH (Cond=9), cambiar el terreno rompe la relacion con los otros PH.
-                # Riesgo alto.
-                # Solucion segura: Solo sugerir cambios en Terrenos? 
-                # O asumir que el input son Lotes/Terrenos NPH mayoritariamente.
-                # Dado el contexto de "Auditoría Renumeración", suele ser asignacion de terreno.
-                
-                # Mantenemos Condicion y Resto originales.
                 terr_str = str(next_terr).zfill(4)
                 
-                # Prefix(17) + Terr(4) + Cond(1) + Resto(8)
-                # Cond y Resto vienen de full_snc[21:]
-                suffix_original = full_snc[21:] 
-                suggested = f"{parent_formal_prefix}{terr_str}{suffix_original}"
+                # Sufijo original (Cond + Resto) -> Desde char 21
+                suffix_original = full_snc[21:]
+                
+                # Sugerencia: Geo(17) + Terr(4) + SuffixOrig
+                suggested = f"{prefix_geo}{terr_str}{suffix_original}"
 
             suggested_list.append(suggested)
             
-        
-        # Asignar al DF principal (usando el indice del sorted)
+        # Asignar al DF principal
         self.df_clean.loc[df_sorted.index, 'SUGGESTED_SNC'] = suggested_list
         
         # Flag de match
