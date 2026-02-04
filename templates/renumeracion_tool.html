@@ -20,28 +20,40 @@
 
     #terminal-mode {
         font-family: 'Fira Code', 'Courier New', monospace !important;
-        background-color: var(--term-bg) !important;
+        background-color: #000000 !important;
         color: var(--term-text) !important;
+        z-index: 9999 !important;
     }
 
     .terminal-text,
-    #terminal-mode *,
-    #terminal-mode input {
+    #terminal-mode * {
         color: var(--term-text) !important;
-        text-shadow: 0 0 8px var(--term-glow), 0 0 2px var(--term-text) !important;
+        text-shadow: 0 0 2px var(--term-text), 0 0 10px var(--term-glow) !important;
         font-family: inherit !important;
+        caret-color: var(--term-text) !important;
+    }
+
+    #terminal-mode ::selection {
+        background: var(--term-text) !important;
+        color: #000000 !important;
+        text-shadow: none !important;
     }
 
     /* Scanlines Effect */
+    /* Scanlines Effect */
     .scanlines {
-        background: repeating-linear-gradient(0deg,
-                rgba(0, 0, 0, 0.2),
-                rgba(0, 0, 0, 0.2) 1px,
-                transparent 1px,
-                transparent 2px);
+        background: linear-gradient(to bottom,
+                rgba(255, 255, 255, 0),
+                rgba(255, 255, 255, 0) 50%,
+                rgba(0, 0, 0, 0.2) 50%,
+                rgba(0, 0, 0, 0.2));
+        background-size: 100% 4px;
         pointer-events: none;
-        z-index: 10;
-        opacity: 0.6;
+        z-index: 50;
+        /* Lower than text */
+        opacity: 0.3;
+        position: absolute;
+        inset: 0;
     }
 
     /* ASCII Borders */
@@ -688,8 +700,9 @@
             <div class="scanlines absolute inset-0 pointer-events-none"></div>
 
             <!-- Terminal Content -->
+            <!-- Terminal Content -->
             <div id="terminal-content"
-                class="relative h-full w-full p-8 overflow-auto font-mono text-sm leading-relaxed terminal-text">
+                class="relative h-full w-full p-8 overflow-auto font-mono text-sm leading-relaxed terminal-text z-[60]">
                 <!-- Boot Sequence (shown initially) -->
                 <div id="boot-sequence" class="space-y-2">
                     <div class="typing-effect">IGAC TERMINAL SYSTEM v1.0</div>
