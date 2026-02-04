@@ -547,7 +547,8 @@
                                 <tr>
                                     <th class="px-4 py-3 bg-white dark:bg-gray-800">Regla</th>
                                     <th class="px-4 py-3 bg-white dark:bg-gray-800">Detalle</th>
-                                    <th class="px-4 py-3 bg-white dark:bg-gray-800">SNC</th>
+                                    <th class="px-4 py-3 bg-white dark:bg-gray-800">SNC Actual</th>
+                                    <th class="px-4 py-3 bg-white dark:bg-gray-800">Sugerencia (Beta)</th>
                                 </tr>
                             </thead>
                             <tbody
@@ -1216,6 +1217,9 @@
                         <td class="px-4 py-3 font-mono text-gray-500 dark:text-gray-500 text-[9px]">
                             ${(item.NUEVO || '').substring(0, 15)}...
                         </td>
+                        <td class="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400 font-bold text-[9px]">
+                            ${item.SUGGESTED ? item.SUGGESTED.substring(0, 15) + '...' : '-'}
+                        </td>
                     </tr>
                 `;
                 }).join('');
@@ -1343,7 +1347,20 @@
         `;
 
             // Solución
-            document.getElementById('detail-solucion').textContent = reglaInfo.solucion;
+            // Solución / Sugerencia Dinámica
+            const sugerencia = item.SUGGESTED && item.SUGGESTED !== 'N/A' && item.SUGGESTED !== ''
+                ? `RECOMENDACIÓN SISTEMA: Cambiar a <strong>${item.SUGGESTED}</strong>`
+                : reglaInfo.solucion;
+
+            const solContainer = document.getElementById('detail-solucion');
+            solContainer.innerHTML = sugerencia;
+
+            // Si hay sugerencia, destacarla más
+            if (item.SUGGESTED && item.SUGGESTED !== 'N/A') {
+                solContainer.className = "text-[11px] text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg px-3 py-2 border border-indigo-100 dark:border-indigo-800 font-medium";
+            } else {
+                solContainer.className = "text-[11px] text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-lg px-3 py-2 border border-green-100 dark:border-green-800";
+            }
         }
 
         function hideDetail() {

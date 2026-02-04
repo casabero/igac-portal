@@ -633,9 +633,18 @@ def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant
         
     t_err = (len(engine.errores) / engine.stats['total_filas'] * 100) if engine.stats['total_filas'] > 0 else 0
     
+    # Crear Mapa de Sugerencias para UI
+    suggestion_map = {}
+    if engine.df_clean is not None and not engine.df_clean.empty and 'SUGGESTED_SNC' in engine.df_clean.columns:
+        # Asegurarse de que las claves sean strings para el lookup
+        suggestion_map = dict(zip(engine.df_clean[engine.col_new].astype(str), engine.df_clean['SUGGESTED_SNC'].astype(str)))
+
     c_p = {}
     for e in final_errors:
         c = e['NUEVO']
+        # Attach suggestion if available
+        e['SUGGESTED'] = suggestion_map.get(str(c), 'N/A')
+        
         if c not in c_p: c_p[c] = []
         c_p[c].append(e['REGLA'])
     top_p = sorted([(c, len(r), ', '.join(set(r))) for c, r in c_p.items()], key=lambda x: x[1], reverse=True)[:10]
