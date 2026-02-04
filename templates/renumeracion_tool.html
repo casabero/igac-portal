@@ -547,6 +547,7 @@
                                 <tr>
                                     <th class="px-4 py-3 bg-white dark:bg-gray-800">Regla</th>
                                     <th class="px-4 py-3 bg-white dark:bg-gray-800">Detalle</th>
+                                    <th class="px-4 py-3 bg-white dark:bg-gray-800">Estado</th>
                                     <th class="px-4 py-3 bg-white dark:bg-gray-800">SNC Actual</th>
                                     <th class="px-4 py-3 bg-white dark:bg-gray-800">Sugerencia (Beta)</th>
                                 </tr>
@@ -1211,8 +1212,16 @@
                                 ${reglaClean.substring(0, 18)}${reglaClean.length > 18 ? '...' : ''}
                             </span>
                         </td>
-                        <td class="px-4 py-3 text-gray-600 dark:text-gray-400 max-w-[200px] truncate" title="${item.DETALLE || ''}">
-                            ${(item.DETALLE || '').substring(0, 40)}${(item.DETALLE || '').length > 40 ? '...' : ''}
+                        <td class="px-4 py-3 text-gray-600 dark:text-gray-400 max-w-[150px] truncate" title="${item.DETALLE || ''}">
+                            ${(item.DETALLE || '').substring(0, 30)}${(item.DETALLE || '').length > 30 ? '...' : ''}
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-0.5 rounded-full text-[8px] font-bold uppercase ${(item.ESTADO || '').toUpperCase().includes('ACTIVO')
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                            : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                        }">
+                                ${item.ESTADO || 'N/A'}
+                            </span>
                         </td>
                         <td class="px-4 py-3 font-mono text-gray-500 dark:text-gray-500 text-[9px]">
                             ${(item.NUEVO || '').substring(0, 15)}...
@@ -1344,6 +1353,10 @@
             <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">Sector ${sector}</span>
             <span class="text-gray-300 dark:text-gray-600">→</span>
             <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">Mz ${manzana}</span>
+            <span class="ml-2 px-2 py-0.5 ${(item.ESTADO || '').toUpperCase().includes('ACTIVO')
+                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                } rounded text-[8px] font-bold uppercase">${item.ESTADO || 'N/A'}</span>
         `;
 
             // Solución

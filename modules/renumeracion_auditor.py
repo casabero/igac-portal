@@ -35,7 +35,7 @@ class AuditoriaSNC:
             'sector':  {}, # Key: Mpio-Zona           -> Val: Int (Último sector asignado)
         }
 
-    def log_error(self, regla, escenario, ubicacion, detalle, severidad='ERROR', zona=None, sector=None, manzana=None):
+    def log_error(self, regla, escenario, ubicacion, detalle, severidad='ERROR', zona=None, sector=None, manzana=None, estado='N/A'):
         """Registra hallazgos en las listas correspondientes con jerarquía"""
         registro = {
             'TIPO': severidad,
@@ -46,6 +46,7 @@ class AuditoriaSNC:
             'ZONA': zona,
             'SECTOR': sector,
             'MANZANA': manzana,
+            'ESTADO': estado,
             # Campos extra para compatibilidad
             'ANTERIOR': ubicacion.split('|')[0] if '|' in str(ubicacion) else ubicacion,
             'NUEVO': ubicacion.split('|')[1] if '|' in str(ubicacion) else ''
@@ -89,13 +90,13 @@ class AuditoriaSNC:
                     elif len(self.df.columns) > 0:
                          self.col_new = self.df.columns[0]
             
-            # Filtro de activos (Solo procesamos lo vigente)
+            # Filtro de activos (COMENTADO: Ahora procesamos todo el universo de datos)
             if not col_estado_manual:
                 col_est_real = next((c for c in self.df.columns if 'ESTADO' in c), None)
                 if col_est_real: self.col_estado = col_est_real
             
-            if self.col_estado in self.df.columns:
-                self.df = self.df[self.df[self.col_estado].astype(str).str.upper().str.contains('ACTIVO', na=False)].copy()
+            # if self.col_estado in self.df.columns:
+            #     self.df = self.df[self.df[self.col_estado].astype(str).str.upper().str.contains('ACTIVO', na=False)].copy()
             
             self.stats['total_filas'] = len(self.df)
             return True
@@ -132,7 +133,8 @@ class AuditoriaSNC:
         for idx, r in invalidos.iterrows():
             msg = temp_data.loc[idx][2]
             loc = f"{r[self.col_ant]}|{r[self.col_new]}"
-            self.log_error('ESTRUCTURA_NPN', 'PRE-PROCESO', loc, msg)
+            st = str(r.get(self.col_estado, 'N/A'))
+            self.log_error('ESTRUCTURA_NPN', 'PRE-PROCESO', loc, msg, estado=st)
             
         # Filtrar solo válidos para la lógica de negocio
         self.df_clean = self.df[self.df['VALID_SNC']].copy()
@@ -173,11 +175,13 @@ class AuditoriaSNC:
             for npn, grupo in duplicados.groupby(self.col_new):
                 origenes = grupo[self.col_ant].unique().tolist()
                 loc = f"VARIOUS|{npn}"
+                st = ", ".join(grupo[self.col_estado].unique().astype(str))
                 self.log_error(
                     regla='UNICIDAD_SNC',
                     escenario='CRITICO',
                     ubicacion=loc,
-                    detalle=f"NPN Duplicado. Asignado a {len(grupo)} orígenes distintos: {origenes}"
+                    detalle=f"NPN Duplicado. Asignado a {len(grupo)} orígenes distintos: {origenes}",
+                    estado=st
                 )
 
     # =========================================================================
@@ -260,28 +264,28 @@ class AuditoriaSNC:
             # A. VALIDACIONES DE PADRES (Zona / Sector / Manzana)
             # -----------------------------------------------------------------
             
-            # REGLA: CENTRO POBLADO NUEVO (Zona Nueva)
             if escenario == 'NUEVO_CENTRO_POBLADO':
+                st_ref = str(ref.get(self.col_estado, 'N/A'))
                 # Instructivo: "El sector se inicia como 00"
                 if int(sect_n) != 0:
                     self.log_error('NORMA_CP_SECTOR_00', escenario, loc_ref, 
-                                   f"Primer sector de Zona Nueva debe ser 00. Se halló: {sect_n}", **ctx)
+                                   f"Primer sector de Zona Nueva debe ser 00. Se halló: {sect_n}", estado=st_ref, **ctx)
                 
                 # Instructivo: Manzana inicia en 0001
                 if int(ref['MZ_N_INT']) != 1:
                     self.log_error('NORMA_CP_MANZANA_01', escenario, loc_ref, 
-                                   f"Primera manzana de Zona Nueva debe ser 0001. Se halló: {ref['MZ_N']}", **ctx)
+                                   f"Primera manzana de Zona Nueva debe ser 0001. Se halló: {ref['MZ_N']}", estado=st_ref, **ctx)
 
-            # REGLA: SECTOR NUEVO (En Zona Existente)
             elif escenario == 'NUEVO_SECTOR':
                 key_z = f"{mpio_n}-{zona_n}"
                 last_sect = self.memoria['sector'].get(key_z, -1) # -1 = Sin histórico
                 actual_sect = int(ref['S_N_INT'])
+                st_ref = str(ref.get(self.col_estado, 'N/A'))
                 
                 # Validar Consecutividad (Last + 1)
                 if last_sect != -1 and actual_sect != last_sect + 1:
                     self.log_error('CONSECUTIVIDAD_SECTOR', escenario, loc_ref, 
-                                   f"Salto de sector indebido en Zona {zona_n}. Anterior: {last_sect}, Nuevo: {actual_sect}", **ctx)
+                                   f"Salto de sector indebido en Zona {zona_n}. Anterior: {last_sect}, Nuevo: {actual_sect}", estado=st_ref, **ctx)
                 
                 # Actualizar Memoria
                 self.memoria['sector'][key_z] = max(last_sect, actual_sect)
@@ -289,7 +293,7 @@ class AuditoriaSNC:
                 # En sector nuevo, la manzana debería iniciar o reiniciar secuencia
                 if int(ref['MZ_N_INT']) != 1:
                      self.log_error('INICIO_MANZANA_SECTOR', escenario, loc_ref,
-                                    f"Manzana en sector nuevo inició en {ref['MZ_N']} (se esperaba 0001)", severidad='WARNING', **ctx)
+                                    f"Manzana en sector nuevo inició en {ref['MZ_N']} (se esperaba 0001)", severidad='WARNING', estado=st_ref, **ctx)
 
             # REGLA: MANZANA NUEVA
             # Validamos salto de manzana dentro del sector
@@ -300,8 +304,9 @@ class AuditoriaSNC:
                 
                 # Si es manzana nueva en sector viejo, debe ser Last + 1
                 if escenario == 'NUEVA_MANZANA' and actual_manz > last_manz + 1 and actual_manz != 1:
+                    st_ref = str(ref.get(self.col_estado, 'N/A'))
                     self.log_error('CONSECUTIVIDAD_MANZANA', escenario, loc_ref,
-                                   f"Salto de manzana. Anterior {last_manz}, Nueva {actual_manz}", **ctx)
+                                   f"Salto de manzana. Anterior {last_manz}, Nueva {actual_manz}", estado=st_ref, **ctx)
                 
                 self.memoria['manzana'][key_s] = max(last_manz, actual_manz)
 
@@ -312,8 +317,9 @@ class AuditoriaSNC:
             # Detectar si la manzana temporal se dispersó en varias definitivas (Dispersión)
             destinos = lote[['M_N', 'Z_N', 'S_N', 'MZ_N']].drop_duplicates()
             if len(destinos) > 1:
+                st_ref = str(ref.get(self.col_estado, 'N/A'))
                 self.log_error('DISPERSION_LOTE', escenario, loc_ref,
-                               f"Predios de un mismo lote temporal terminaron en {len(destinos)} manzanas definitivas distintas.", severidad='WARNING', **ctx)
+                               f"Predios de un mismo lote temporal terminaron en {len(destinos)} manzanas definitivas distintas.", severidad='WARNING', estado=st_ref, **ctx)
 
             # Iterar cada manzana de destino para validar sus terrenos internos
             for _, dest in destinos.iterrows():
@@ -328,10 +334,11 @@ class AuditoriaSNC:
                 # Update Context for sub-loop if needed (though usually same zone/sect)
                 sub_ctx = {'zona': dest['Z_N'], 'sector': dest['S_N'], 'manzana': dest['MZ_N']}
 
+                sub_st = str(sub_ref.get(self.col_estado, 'N/A'))
                 # 1. CHEQUEO DE HUECOS (GAPS)
                 if (max_t - min_t + 1) != count_t:
                     self.log_error('HUECOS_NUMERACION', escenario, sub_loc,
-                                   f"Mz {dest['MZ_N']}: Secuencia interrumpida. Rango {min_t}-{max_t} ({max_t-min_t+1} espacios) para {count_t} predios.", **sub_ctx)
+                                   f"Mz {dest['MZ_N']}: Secuencia interrumpida. Rango {min_t}-{max_t} ({max_t-min_t+1} espacios) para {count_t} predios.", estado=sub_st, **sub_ctx)
                 else:
                     self.stats['predios_ok'] += count_t
 
@@ -350,7 +357,7 @@ class AuditoriaSNC:
                     severidad = 'ERROR' if salto > 1000 else 'WARNING'
                     self.log_error('INICIO_SECUENCIA', escenario, sub_loc,
                                    f"Mz {dest['MZ_N']}: Terrenos iniciaron en {min_t}, se esperaba {expected_start} (basado en historia {last_t}). Salto: {salto}", 
-                                   severidad=severidad, **sub_ctx)
+                                   severidad=severidad, estado=sub_st, **sub_ctx)
                 
                 # Actualizar Memoria Terreno
                 self.memoria['terreno'][key_m] = max(last_t, max_t)
@@ -560,7 +567,7 @@ class AuditoriaSNC:
 
             # Hoja Final: Data Tagged
             if self.df_clean is not None and not self.df_clean.empty:
-                cols = [self.col_ant, self.col_new, 'SUGGESTED_SNC', 'MATCH_SUGGESTION', 'COND_PROP', 'ESCENARIO', 'TIPO_PREDIO', 'Z_N', 'S_N', 'MZ_N']
+                cols = [self.col_ant, self.col_new, 'SUGGESTED_SNC', 'MATCH_SUGGESTION', self.col_estado, 'COND_PROP', 'ESCENARIO', 'Z_N', 'S_N', 'MZ_N']
                 # Filtrar cols que existen
                 cols = [c for c in cols if c in self.df_clean.columns]
                 self.df_clean[cols].head(5000).to_excel(writer, sheet_name='DATA_TAGGED', index=False)
@@ -595,12 +602,13 @@ def procesar_renumeracion(file_stream, tipo_config, col_snc_manual=None, col_ant
         prefix = "[ADVERTENCIA] " if e['TIPO'] != 'ERROR' else ""
         final_errors.append({
             'REGLA': f"{prefix}{e['REGLA']}",
-            'DETALLE': f"{e['ESCENARIO']}: {e['DETALLE']}",
+            'DETALLE': f"{e['ESCENARIO']} ({e.get('ESTADO', 'N/A')}): {e['DETALLE']}",
             'ANTERIOR': e['ANTERIOR'],
             'NUEVO': e['NUEVO'],
             'ZONA': e.get('ZONA'),
             'SECTOR': e.get('SECTOR'),
             'MANZANA': e.get('MANZANA'),
+            'ESTADO': e.get('ESTADO', 'N/A'),
             'TIPO_REAL': e['TIPO']
         })
         
