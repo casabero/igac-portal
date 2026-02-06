@@ -21,8 +21,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar todo el código fuente
 COPY . .
 
-# Crear la carpeta data para asegurar que existe (Persistencia Logs)
-RUN mkdir -p /app/data
+# Crear carpetas de datos persistentes (Logs + Atlas GIS)
+RUN mkdir -p /app/data /app/data/geodata
 
 # Exponer puerto 8000 (Estándar Coolify)
 EXPOSE 8000
