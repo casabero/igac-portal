@@ -255,7 +255,7 @@ def render_map(municipio_id, layers_data, selected_geom=None, selected_code=None
     # Composicion cartografica para PDF
     if for_pdf:
         # Titulo
-        fig.text(0.5, 0.95, f'ATLAS CATASTRAL',
+        fig.text(0.5, 0.95, f'KARTA CATASTRAL',
                  ha='center', fontsize=14, fontweight='bold', fontfamily='sans-serif')
         if selected_code:
             fig.text(0.5, 0.925, f'Predio: {selected_code}',
