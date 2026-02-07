@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Karta GIS - IGAC Portal{% endblock %}
+{% block page_title %}Gestión Cartográfica{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6">
+    <div class="mb-8 border-l-4 border-gray-200 dark:border-gray-700 pl-6">
+        <h3 class="text-2xl font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">
+            ADMINISTRACIÓN // KARTA_GIS
+        </h3>
+        <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-widest font-bold">
+            Gestión de Departamentos, Municipios y Bases Geográficas (GDB)
+        </p>
+    </div>
+
+    <!-- Layout Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Panel: Crear Departamentos/Municipios -->
+        <div class="premium-card p-6">
+            <h4 class="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">
+                <span class="material-symbols-outlined text-lg align-bottom mr-2">domain</span>
+                Estructura Territorial
+            </h4>
+            
+            <div class="space-y-6">
+                <!-- Crear Depto -->
+                <div>
+                    <label class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">1. Nuevo Departamento</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="new-dep-name" class="flex-1 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs" placeholder="Nombre Departamento">
+                        <input type="text" id="new-dep-code" class="w-24 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs" placeholder="Cod (Opc)">
+                        <button onclick="createDep()" class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:opacity-90">
+                            Crear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Crear Municipio -->
+                <div>
+                    <label class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">2. Nuevo Municipio</label>
+                    <div class="bg-gray-50 dark:bg-gray-900/30 p-4 rounded-xl border border-gray-100 dark:border-gray-800 space-y-3">
+                        <select id="sel-dep-parent" class="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs mb-2">
+                            <option value="">-- Seleccionar Departamento Padre --</option>
+                            {% for dep in departamentos %}
+                            <option value="{{ dep.id }}">{{ dep.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="flex gap-2">
+                            <input type="text" id="new-muni-name" class="flex-1 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs" placeholder="Nombre Municipio">
+                            <input type="text" id="new-muni-code" class="w-24 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs" placeholder="Cod (Opc)">
+                            <button onclick="createMuni()" class="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:opacity-90">
+                                Crear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel: Cargar GDB -->
+        <div class="premium-card p-6">
+            <h4 class="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">
+                <span class="material-symbols-outlined text-lg align-bottom mr-2">cloud_upload</span>
+                Carga de Geodatabase
+            </h4>
+
+            <div class="space-y-4">
+                <p class="text-[10px] text-gray-500">Seleccione el municipio destino y suba el archivo .zip conteniendo la GDB o SHPs.</p>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Departamento</label>
+                        <select id="upload-dep" onchange="loadMunisForUpload()" class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs">
+                            <option value="">-- Seleccionar --</option>
+                            {% for dep in departamentos %}
+                            <option value="{{ dep.id }}">{{ dep.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Municipio</label>
+                        <select id="upload-muni" disabled class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs">
+                            <option value="">-- Seleccionar --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center hover:bg-gray-50 dark:hover:bg-gray-900/10 transition-colors">
+                    <input type="file" id="gdb-file" accept=".zip" class="hidden" onchange="updateFileName()">
+                    <label for="gdb-file" class="cursor-pointer">
+                        <span class="material-symbols-outlined text-4xl text-gray-300 mb-2">folder_zip</span>
+                        <p class="text-[10px] font-bold text-gray-600 dark:text-gray-300 uppercase">Click para seleccionar archivo ZIP</p>
+                        <p id="file-name" class="text-[9px] text-gray-400 mt-2 font-mono">Ningún archivo seleccionado</p>
+                    </label>
+                </div>
+
+                <button onclick="uploadGDB()" id="btn-upload" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-blue-700 transition-colors shadow-lg shadow-blue-900/20">
+                    Iniciar Carga
+                </button>
+
+                <!-- Status Console -->
+                <div id="console" class="hidden bg-gray-950 rounded-lg p-4 font-mono text-[10px] text-green-400 h-32 overflow-y-auto border border-gray-800">
+                    <p class="opacity-50">> Esperando comando...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <div class="mt-8 text-center">
+        <a href="/admin/dashboard" class="text-[10px] font-bold text-gray-400 hover:text-gray-900 dark:hover:text-white uppercase tracking-widest flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            Volver al Dashboard
+        </a>
+    </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toast(msg, type='ok') {
+        const c = document.getElementById('toast-container');
+        const el = document.createElement('div');
+        const colors = type === 'ok' 
+            ? 'bg-green-50 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-100 dark:border-green-800' 
+            : 'bg-red-50 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-100 dark:border-red-800';
+        el.className = `px-4 py-3 rounded-lg border text-[10px] font-bold uppercase tracking-wider shadow-lg ${colors} transition-all duration-300`;
+        el.textContent = msg;
+        c.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+    }
+
+    function log(msg, type='info') {
+        const c = document.getElementById('console');
+        c.classList.remove('hidden');
+        const l = document.createElement('p');
+        l.className = type === 'error' ? 'text-red-400' : (type === 'success' ? 'text-green-400' : 'text-gray-300');
+        l.textContent = `> ${msg}`;
+        c.appendChild(l);
+        c.scrollTop = c.scrollHeight;
+    }
+
+    async function createDep() {
+        const nombre = document.getElementById('new-dep-name').value.trim();
+        const codigo = document.getElementById('new-dep-code').value.trim();
+        if(!nombre) return toast('Nombre requerido', 'error');
+
+        try {
+            const res = await fetch('/karta/api/departamentos', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ nombre, codigo })
+            });
+            const data = await res.json();
+            if(!res.ok) throw new Error(data.error);
+            toast('Departamento creado');
+            location.reload(); 
+        } catch(e) {
+            toast(e.message, 'error');
+        }
+    }
+
+    async function createMuni() {
+        const depId = document.getElementById('sel-dep-parent').value;
+        const nombre = document.getElementById('new-muni-name').value.trim();
+        const codigo = document.getElementById('new-muni-code').value.trim();
+        
+        if(!depId) return toast('Seleccione departamento padre', 'error');
+        if(!nombre) return toast('Nombre requerido', 'error');
+
+        try {
+            const res = await fetch(`/karta/api/departamentos/${depId}/municipios`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ nombre, codigo })
+            });
+            const data = await res.json();
+            if(!res.ok) throw new Error(data.error);
+            toast('Municipio creado');
+            // Clean inputs but don't reload explicitly required
+            document.getElementById('new-muni-name').value = '';
+            document.getElementById('new-muni-code').value = '';
+        } catch(e) {
+            toast(e.message, 'error');
+        }
+    }
+
+    async function loadMunisForUpload() {
+        const depId = document.getElementById('upload-dep').value;
+        const sel = document.getElementById('upload-muni');
+        sel.innerHTML = '<option value="">-- Seleccionar --</option>';
+        sel.disabled = !depId;
+        if(!depId) return;
+
+        try {
+            const res = await fetch(`/karta/api/departamentos/${depId}/municipios`);
+            const data = await res.json();
+            data.forEach(m => {
+                sel.innerHTML += `<option value="${m.id}">${m.nombre}</option>`;
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    function updateFileName() {
+        const input = document.getElementById('gdb-file');
+        if(input.files.length) {
+            document.getElementById('file-name').textContent = input.files[0].name;
+        }
+    }
+
+    async function uploadGDB() {
+        const muniId = document.getElementById('upload-muni').value;
+        const fileInput = document.getElementById('gdb-file');
+        
+        if(!muniId) return toast('Seleccione un municipio', 'error');
+        if(!fileInput.files.length) return toast('Seleccione un archivo', 'error');
+
+        const formData = new FormData();
+        formData.append('archivo_zip', fileInput.files[0]);
+
+        document.getElementById('btn-upload').disabled = true;
+        document.getElementById('btn-upload').textContent = 'PROCESANDO...';
+        log('Iniciando carga de archivo...', 'info');
+
+        try {
+            const res = await fetch(`/karta/api/municipios/${muniId}/upload`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            
+            if(!res.ok) {
+                log(`Error: ${data.error || data.message}`, 'error');
+                toast('Error en carga', 'error');
+            } else {
+                log(`Carga exitosa! ${data.total_capas} capas procesadas.`, 'success');
+                if(data.errores && data.errores.length) {
+                    data.errores.forEach(e => log(`Warn: ${e}`, 'error'));
+                }
+                toast('Base geográfica actualizada');
+            }
+        } catch(e) {
+            log(`Error de red: ${e.message}`, 'error');
+        } finally {
+            document.getElementById('btn-upload').disabled = false;
+            document.getElementById('btn-upload').textContent = 'INICIAR CARGA';
+        }
+    }
+</script>
+{% endblock %}

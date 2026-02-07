@@ -1,0 +1,728 @@
+{% extends "base.html" %}
+
+{% block title %}Karta GIS — Portal IGAC{% endblock %}
+{% block page_title %}KARTA_GIS // GENERADOR_CARTOGRAFICO{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+    #atlas-map {
+        width: 100%;
+        height: 100%;
+        min-height: 500px;
+        background: #FAFAFA;
+        border: 1px solid #E5E5E5;
+        border-radius: 0.75rem;
+    }
+
+    .dark #atlas-map {
+        background: #1a1a1a;
+        border-color: #333;
+    }
+
+    .atlas-sidebar {
+        width: 320px;
+        min-width: 320px;
+    }
+
+    @media (max-width: 1024px) {
+        .atlas-sidebar {
+            width: 100%;
+            min-width: 100%;
+        }
+    }
+
+    .atlas-panel {
+        background: white;
+        border: 1px solid #E5E5E5;
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+
+    .dark .atlas-panel {
+        background: #1a1a1a;
+        border-color: #333;
+    }
+
+    .atlas-panel-header {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #E5E5E5;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .dark .atlas-panel-header {
+        border-color: #333;
+    }
+
+    .atlas-btn {
+        background: #F8FAFC;
+        border: 1px solid #E5E5E5;
+        color: #111;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .atlas-btn:hover {
+        background: #111;
+        color: white;
+        border-color: #111;
+    }
+
+    .dark .atlas-btn {
+        background: #222;
+        border-color: #444;
+        color: #eee;
+    }
+
+    .dark .atlas-btn:hover {
+        background: #fff;
+        color: #111;
+    }
+
+    .atlas-btn-primary {
+        background: #111;
+        color: white;
+        border-color: #111;
+    }
+
+    .atlas-btn-primary:hover {
+        background: #333;
+    }
+
+    .atlas-input {
+        width: 100%;
+        padding: 0.5rem 0.5rem;
+        /* Reduced padding */
+        border: 1px solid #E5E5E5;
+        border-radius: 0.5rem;
+        font-size: 10px;
+        /* Smaller font */
+        font-family: 'Fira Code', monospace;
+        background: #F8FAFC;
+        color: #111;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .atlas-input:focus {
+        border-color: #111;
+    }
+
+    .dark .atlas-input {
+        background: #111;
+        border-color: #444;
+        color: #eee;
+    }
+
+    .atlas-select {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #E5E5E5;
+        border-radius: 0.5rem;
+        font-size: 11px;
+        background: #F8FAFC;
+        color: #111;
+        outline: none;
+    }
+
+    .dark .atlas-select {
+        background: #111;
+        border-color: #444;
+        color: #eee;
+    }
+
+    .layer-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem 0;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .status-dot.ok {
+        background: #22c55e;
+    }
+
+    .status-dot.empty {
+        background: #eab308;
+    }
+
+    .status-dot.error {
+        background: #ef4444;
+    }
+
+    #map-preview-img {
+        max-width: 100%;
+        border-radius: 0.5rem;
+    }
+
+    .search-result-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    #toast-container {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        z-index: 9999;
+    }
+
+    .toast {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.5rem;
+        animation: slideIn 0.3s ease;
+        border: 1px solid;
+    }
+
+    .toast-ok {
+        background: #f0fdf4;
+        border-color: #86efac;
+        color: #166534;
+    }
+
+    .toast-error {
+        background: #fef2f2;
+        border-color: #fca5a5;
+        color: #991b1b;
+    }
+
+    .dark .toast-ok {
+        background: #052e16;
+        border-color: #166534;
+        color: #86efac;
+    }
+
+    .dark .toast-error {
+        background: #450a0a;
+        border-color: #991b1b;
+        color: #fca5a5;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-4 h-[calc(100vh-10rem)]">
+    <!-- SIDEBAR -->
+    <div class="atlas-sidebar flex flex-col gap-3 overflow-y-auto custom-scrollbar p-1">
+
+        <!-- Panel: Fuente de Datos -->
+        <div class="atlas-panel">
+            <div class="atlas-panel-header">
+                <span class="material-symbols-outlined text-[16px] font-light text-gray-400">database</span>
+                <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Fuente de
+                    Datos</span>
+            </div>
+            <div class="p-3 space-y-3">
+                {% if not is_admin %}
+                <div
+                    class="text-[9px] bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800 rounded-lg p-2">
+                    Modo consulta activo. Para agregar departamentos, municipios y bases geográficas ingrese por Gestión
+                    Admin.
+                </div>
+                {% endif %}
+                <!-- Departamento -->
+                <div>
+                    <label
+                        class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Departamento</label>
+                    <select id="sel-departamento" class="atlas-select w-full" onchange="onDepChange()">
+                        <option value="">-- Seleccionar --</option>
+                        {% for dep in departamentos %}
+                        <option value="{{ dep.id }}">{{ dep.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Municipio -->
+                <div>
+                    <label
+                        class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Municipio</label>
+                    <select id="sel-municipio" class="atlas-select w-full" onchange="onMuniChange()" disabled>
+                        <option value="">-- Seleccionar --</option>
+                    </select>
+                </div>
+
+                <!-- Info municipio cargado -->
+                <div id="muni-info"
+                    class="hidden text-[9px] text-gray-500 dark:text-gray-400 space-y-1 border-t border-gray-100 dark:border-gray-800 pt-2">
+                    <div class="flex justify-between"><span class="font-bold">SRS:</span> <span id="info-srs">-</span>
+                    </div>
+                    <div class="flex justify-between"><span class="font-bold">Capas:</span> <span
+                            id="info-capas">-</span></div>
+                    <div class="flex justify-between"><span class="font-bold">Cargado:</span> <span
+                            id="info-fecha">-</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel: Busqueda -->
+        <div class="atlas-panel">
+            <div class="atlas-panel-header">
+                <span class="material-symbols-outlined text-[16px] font-light text-gray-400">search</span>
+                <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Buscar
+                    Predio</span>
+            </div>
+            <div class="p-3 space-y-3">
+
+                <!-- Selector de Tipo de Busqueda -->
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <div class="relative flex items-center">
+                            <input type="radio" name="search-type" value="CODIGO" checked class="peer sr-only">
+                            <div
+                                class="w-3 h-3 border border-gray-300 rounded-full peer-checked:bg-gray-900 dark:peer-checked:bg-white transition-all">
+                            </div>
+                        </div>
+                        <span
+                            class="text-[9px] font-bold text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white uppercase transition-colors">Código
+                            Nuevo</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <div class="relative flex items-center">
+                            <input type="radio" name="search-type" value="CODIGO_ANTERIOR" class="peer sr-only">
+                            <div
+                                class="w-3 h-3 border border-gray-300 rounded-full peer-checked:bg-gray-900 dark:peer-checked:bg-white transition-all">
+                            </div>
+                        </div>
+                        <span
+                            class="text-[9px] font-bold text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white uppercase transition-colors">Código
+                            Anterior</span>
+                    </label>
+                </div>
+
+                <div class="flex gap-2">
+                    <input type="text" id="input-codigo" class="atlas-input flex-1 min-w-0"
+                        placeholder="Ingrese código..." onkeydown="if(event.key==='Enter')buscarPredio()" />
+                    <button class="atlas-btn atlas-btn-primary shrink-0" onclick="buscarPredio()">
+                        <span class="material-symbols-outlined text-[14px]">search</span>
+                    </button>
+                </div>
+                <div id="search-result"
+                    class="hidden text-[9px] space-y-1 p-2 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-800">
+                </div>
+                <!-- Historial -->
+                <div id="search-history" class="hidden">
+                    <label
+                        class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Historial</label>
+                    <div id="history-list" class="space-y-1 max-h-24 overflow-y-auto custom-scrollbar"></div>
+                </div>
+                <button class="atlas-btn atlas-btn-primary w-full justify-center mt-2" onclick="exportarPDFPredio()">
+                    <span class="material-symbols-outlined text-[14px]">picture_as_pdf</span>
+                    Generar PDF de Predio
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel: Coordenadas -->
+        <div class="atlas-panel">
+            <div class="atlas-panel-header">
+                <span class="material-symbols-outlined text-[16px] font-light text-gray-400">my_location</span>
+                <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Ir a
+                    Coordenada</span>
+            </div>
+            <div class="p-3 space-y-2">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[9px] font-bold text-gray-400 uppercase mb-0.5 block">X (Este)</label>
+                        <input type="number" id="input-x" class="atlas-input" placeholder="X" step="any" />
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-bold text-gray-400 uppercase mb-0.5 block">Y (Norte)</label>
+                        <input type="number" id="input-y" class="atlas-input" placeholder="Y" step="any" />
+                    </div>
+                </div>
+                <button class="atlas-btn w-full justify-center" onclick="irACoordenada()">
+                    <span class="material-symbols-outlined text-[14px]">pin_drop</span>
+                    Centrar
+                </button>
+                <button class="atlas-btn atlas-btn-primary w-full justify-center" onclick="exportarPDFCoordenada()">
+                    <span class="material-symbols-outlined text-[14px]">picture_as_pdf</span>
+                    PDF por Coordenada
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel: Capas (TOC) -->
+        <div class="atlas-panel" id="panel-capas" style="display:none">
+            <div class="atlas-panel-header">
+                <span class="material-symbols-outlined text-[16px] font-light text-gray-400">layers</span>
+                <span
+                    class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Capas</span>
+            </div>
+            <div class="p-3" id="capas-list"></div>
+        </div>
+
+        <!-- Panel: Exportar -->
+        <div class="atlas-panel">
+            <div class="atlas-panel-header">
+                <span class="material-symbols-outlined text-[16px] font-light text-gray-400">picture_as_pdf</span>
+                <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Exportar
+                    PDF General</span>
+            </div>
+            <div class="p-3 space-y-2">
+                <div>
+                    <label class="text-[9px] font-bold text-gray-400 uppercase mb-0.5 block">Tamaño</label>
+                    <select id="sel-page-size" class="atlas-select">
+                        <option value="carta" selected>Carta (8.5" x 11")</option>
+                        <option value="oficio">Oficio (8.5" x 14")</option>
+                        <option value="plotter">Plotter (24" x 36")</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="chk-labels" checked class="rounded border-gray-300" />
+                    <label for="chk-labels" class="text-[9px] font-bold text-gray-500 uppercase">Incluir
+                        Etiquetas</label>
+                </div>
+                <button class="atlas-btn atlas-btn-primary w-full justify-center" onclick="exportarPDF()">
+                    <span class="material-symbols-outlined text-[14px]">download</span>
+                    Generar PDF
+                </button>
+            </div>
+        </div>
+
+    </div> <!-- End Sidebar -->
+
+    <!-- AREA DEL MAPA -->
+    <div class="flex-1 flex flex-col gap-3 min-h-0">
+        <!-- Preview del mapa (server-rendered) -->
+        <div class="flex-1 atlas-panel relative overflow-hidden flex items-center justify-center" id="map-container">
+            <div id="map-placeholder" class="text-center p-8">
+                <span class="material-symbols-outlined text-6xl text-gray-200 dark:text-gray-700 mb-4 block">map</span>
+                <p class="text-[11px] font-bold text-gray-300 dark:text-gray-600 uppercase tracking-widest">Seleccione
+                    un municipio con datos cargados</p>
+                <p class="text-[9px] text-gray-300 dark:text-gray-700 mt-1">El mapa se renderizará automáticamente</p>
+            </div>
+            <img id="map-preview-img" class="hidden max-h-full object-contain" alt="Vista previa del mapa" />
+
+            <div id="map-loading"
+                class="hidden absolute inset-0 bg-white/80 dark:bg-black/80 flex items-center justify-center">
+                <div class="text-center">
+                    <div
+                        class="animate-spin w-8 h-8 border-2 border-gray-300 border-t-gray-900 dark:border-gray-600 dark:border-t-gray-200 rounded-full mx-auto mb-3">
+                    </div>
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Renderizando...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra de estado -->
+        <div class="flex items-center justify-between text-[9px] text-gray-400 dark:text-gray-600 font-mono px-1">
+            <span id="status-bar">KARTA_READY // SIN_DATOS</span>
+            <span id="coords-bar">X: - / Y: -</span>
+        </div>
+    </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // --- State ---
+    let currentDepId = null;
+    let currentMuniId = null;
+    let currentBounds = null;
+    let currentCodigo = null;
+    let searchHistory = JSON.parse(localStorage.getItem('karta_history') || '[]');
+    let enabledLayers = [];
+
+    const isAdmin = {{ 'true' if is_admin else 'false' }};
+
+    // --- Toast ---
+    function toast(msg, type = 'ok') {
+        const c = document.getElementById('toast-container');
+        const el = document.createElement('div');
+        el.className = `toast toast-${type}`;
+        el.textContent = msg;
+        c.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+    }
+
+    function setStatus(msg) {
+        document.getElementById('status-bar').textContent = msg;
+    }
+
+    function showLoading(show) {
+        document.getElementById('map-loading').classList.toggle('hidden', !show);
+    }
+
+    // --- Departamento/Municipio selection ---
+    async function onDepChange() {
+        const sel = document.getElementById('sel-departamento');
+        currentDepId = sel.value ? parseInt(sel.value) : null;
+        const selMuni = document.getElementById('sel-municipio');
+        selMuni.innerHTML = '<option value="">-- Seleccionar --</option>';
+        selMuni.disabled = !currentDepId;
+        currentMuniId = null;
+        hideMap();
+
+        if (currentDepId) {
+            try {
+                const res = await fetch(`/karta/api/departamentos/${currentDepId}/municipios`);
+                const munis = await res.json();
+                munis.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.textContent = m.nombre + (m.gpkg_path ? ' [DATOS]' : '');
+                    selMuni.appendChild(opt);
+                });
+            } catch (e) {
+                toast('Error cargando municipios', 'error');
+            }
+        }
+    }
+
+    async function onMuniChange() {
+        const sel = document.getElementById('sel-municipio');
+        currentMuniId = sel.value ? parseInt(sel.value) : null;
+        currentBounds = null;
+        currentCodigo = null;
+
+        document.getElementById('muni-info').classList.add('hidden');
+        document.getElementById('panel-capas').style.display = 'none';
+        hideMap();
+
+        if (currentMuniId) {
+            try {
+                const res = await fetch(`/karta/api/municipios/${currentMuniId}`);
+                const muni = await res.json();
+
+                if (muni.gpkg_path) {
+                    document.getElementById('muni-info').classList.remove('hidden');
+                    document.getElementById('info-srs').textContent = muni.srs || 'N/A';
+                    const capas = muni.capas_disponibles;
+                    const nCapas = Array.isArray(capas) ? capas.length : 0;
+                    document.getElementById('info-capas').textContent = nCapas + ' capas';
+                    document.getElementById('info-fecha').textContent = muni.fecha_carga || '-';
+
+                    // Cargar TOC de capas
+                    await loadCapas();
+                    // Renderizar preview
+                    renderPreview();
+                    setStatus(`DATOS_CARGADOS // ${muni.nombre} // ${nCapas} CAPAS`);
+                } else {
+                    setStatus(`SIN_DATOS // Base geográfica pendiente para ${muni.nombre}`);
+                }
+            } catch (e) {
+                toast('Error cargando info del municipio', 'error');
+            }
+        }
+    }
+
+    async function loadCapas() {
+        if (!currentMuniId) return;
+        try {
+            const res = await fetch(`/karta/api/municipios/${currentMuniId}/capas`);
+            const data = await res.json();
+            if (data.capas) {
+                enabledLayers = [...data.capas];
+                const container = document.getElementById('capas-list');
+                container.innerHTML = '';
+                data.capas.forEach(capa => {
+                    const div = document.createElement('div');
+                    div.className = 'layer-toggle';
+                    div.innerHTML = `
+                        <input type="checkbox" checked data-layer="${capa}" 
+                               onchange="toggleLayer('${capa}', this.checked)"
+                               class="rounded border-gray-300 text-gray-900" />
+                        <span class="font-bold text-gray-600 dark:text-gray-300">${capa}</span>
+                    `;
+                    container.appendChild(div);
+                });
+                document.getElementById('panel-capas').style.display = '';
+            }
+        } catch (e) { }
+    }
+
+    function toggleLayer(name, enabled) {
+        if (enabled && !enabledLayers.includes(name)) enabledLayers.push(name);
+        if (!enabled) enabledLayers = enabledLayers.filter(l => l !== name);
+        renderPreview();
+    }
+
+    // --- Search ---
+    async function buscarPredio() {
+        if (!currentMuniId) { toast('Seleccione un municipio primero', 'error'); return; }
+        const codigo = document.getElementById('input-codigo').value.trim();
+        const tipoBusqueda = document.querySelector('input[name="search-type"]:checked').value;
+
+        if (!codigo) return;
+
+        try {
+            const res = await fetch(`/karta/api/municipios/${currentMuniId}/buscar?codigo=${encodeURIComponent(codigo)}&campo=${tipoBusqueda}`);
+            const data = await res.json();
+            const resultDiv = document.getElementById('search-result');
+            resultDiv.classList.remove('hidden');
+
+            if (!res.ok) {
+                resultDiv.innerHTML = `
+                    <div class="text-red-600 dark:text-red-400 font-bold">
+                        <span class="search-result-badge bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">NO ENCONTRADO</span>
+                        <span class="ml-2">${codigo}</span>
+                    </div>`;
+                return;
+            }
+
+            currentCodigo = data.codigo;
+            currentBounds = [data.bounds[0], data.bounds[1], data.bounds[2], data.bounds[3]];
+
+            resultDiv.innerHTML = `
+                <div class="space-y-1">
+                    <div><span class="search-result-badge bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800">ENCONTRADO</span>
+                    <span class="ml-2 font-bold text-gray-900 dark:text-white">${data.codigo}</span>
+                    </div>
+                    <div class="text-gray-400">Capa: ${data.layer} | Coincidencias: ${data.total_matches}</div>
+                </div>`;
+
+            // Add to history
+            addToHistory(codigo);
+
+            // Render focused on predio
+            renderPreview();
+            setStatus(`PREDIO_LOCALIZADO // ${data.codigo}`);
+        } catch (e) {
+            toast('Error en búsqueda', 'error');
+        }
+    }
+
+    function addToHistory(codigo) {
+        searchHistory = searchHistory.filter(h => h !== codigo);
+        searchHistory.unshift(codigo);
+        if (searchHistory.length > 10) searchHistory = searchHistory.slice(0, 10);
+        localStorage.setItem('karta_history', JSON.stringify(searchHistory));
+        renderHistory();
+    }
+
+    function renderHistory() {
+        if (!searchHistory.length) return;
+        document.getElementById('search-history').classList.remove('hidden');
+        const list = document.getElementById('history-list');
+        list.innerHTML = searchHistory.map(h => `
+            <button class="atlas-btn w-full justify-start text-[9px]" onclick="document.getElementById('input-codigo').value='${h}';buscarPredio()">
+                <span class="material-symbols-outlined text-[12px]">history</span>${h}
+            </button>`).join('');
+    }
+
+    // --- Coordenadas ---
+    async function irACoordenada() {
+        if (!currentMuniId) { toast('Seleccione un municipio primero', 'error'); return; }
+        const x = parseFloat(document.getElementById('input-x').value);
+        const y = parseFloat(document.getElementById('input-y').value);
+        if (isNaN(x) || isNaN(y)) { toast('Ingrese coordenadas válidas', 'error'); return; }
+
+        currentBounds = [x - 100, y - 100, x + 100, y + 100];
+        currentCodigo = null;
+        renderPreview();
+        setStatus(`COORDENADA // X:${x.toFixed(1)} Y:${y.toFixed(1)}`);
+        document.getElementById('coords-bar').textContent = `X: ${x.toFixed(2)} / Y: ${y.toFixed(2)}`;
+    }
+
+    // --- Render ---
+    async function renderPreview() {
+        if (!currentMuniId) return;
+        showLoading(true);
+
+        let url = `/karta/api/municipios/${currentMuniId}/preview?labels=${document.getElementById('chk-labels').checked}`;
+        if (currentBounds) url += `&minx=${currentBounds[0]}&miny=${currentBounds[1]}&maxx=${currentBounds[2]}&maxy=${currentBounds[3]}`;
+        if (currentCodigo) url += `&codigo=${encodeURIComponent(currentCodigo)}`;
+        if (enabledLayers.length) url += `&layers=${enabledLayers.join(',')}`;
+
+        try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Render failed');
+            const blob = await res.blob();
+            const imgUrl = URL.createObjectURL(blob);
+            const img = document.getElementById('map-preview-img');
+            img.src = imgUrl;
+            img.classList.remove('hidden');
+            document.getElementById('map-placeholder').classList.add('hidden');
+        } catch (e) {
+            toast('Error renderizando mapa', 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function hideMap() {
+        document.getElementById('map-preview-img').classList.add('hidden');
+        document.getElementById('map-placeholder').classList.remove('hidden');
+        document.getElementById('map-preview-img').src = '';
+    }
+
+    // --- PDF ---
+    function exportarPDFPredio() {
+        if (!currentCodigo) { toast('Primero busque un predio', 'error'); return; }
+        exportarPDF();
+    }
+
+    function exportarPDFCoordenada() {
+        const x = parseFloat(document.getElementById('input-x').value);
+        const y = parseFloat(document.getElementById('input-y').value);
+        if (isNaN(x) || isNaN(y)) { toast('Ingrese coordenadas válidas', 'error'); return; }
+        currentBounds = [x - 100, y - 100, x + 100, y + 100];
+        currentCodigo = null;
+        exportarPDF();
+    }
+
+    function exportarPDF() {
+        if (!currentMuniId) { toast('Seleccione un municipio primero', 'error'); return; }
+        const size = document.getElementById('sel-page-size').value;
+        const labels = document.getElementById('chk-labels').checked;
+
+        let url = `/karta/api/municipios/${currentMuniId}/pdf?size=${size}&labels=${labels}`;
+        if (currentBounds) url += `&minx=${currentBounds[0]}&miny=${currentBounds[1]}&maxx=${currentBounds[2]}&maxy=${currentBounds[3]}`;
+        if (currentCodigo) url += `&codigo=${encodeURIComponent(currentCodigo)}`;
+        if (enabledLayers.length) url += `&layers=${enabledLayers.join(',')}`;
+
+        toast('Generando PDF... puede tomar unos segundos');
+        window.open(url, '_blank');
+    }
+
+    // Init
+    renderHistory();
+</script>
+{% endblock %}

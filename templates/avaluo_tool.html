@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+
+{% block title %}Análisis de Avalúos - IGAC Apps{% endblock %}
+
+{% block page_title %}Análisis de Incremento Catastral{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .num {
+        font-feature-settings: "tnum";
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+    }
+
+    .truncate-name {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-[1400px] mx-auto">
+    <!-- FORMULARIO DE CARGA (SI NO HAY RESULTADOS) -->
+    {% if not resultados %}
+    <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-6 md:p-8 mt-4 relative overflow-hidden">
+        <div class="mb-10 border-l-4 border-gray-200 dark:border-gray-700 pl-6">
+            <h2 class="text-lg font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">02 //
+                ANALISIS AVALUOS
+            </h2>
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-widest font-bold">MONITOREO
+                DE
+                VARIACIÓN CATASTRAL
+            </p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-10">
+            <div class="grid grid-cols-2 gap-8">
+                <div class="space-y-4 font-sans">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">01. Archivo Base
+                        (Pre-cierre)</label>
+                    <input type="file" name="file_pre" id="file_pre" class="hidden" accept=".xlsx,.xls,.csv,.txt" {% if
+                        not session_data.name_pre %}required{% endif %}>
+                    <label for="file_pre"
+                        class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50/30 dark:bg-gray-800/30 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-200 dark:hover:border-white transition-all cursor-pointer group">
+                        <span
+                            class="material-symbols-outlined text-3xl text-gray-300 dark:text-gray-600 mb-3 group-hover:text-gray-900 dark:group-hover:text-white transition-colors font-light">terminal</span>
+                        <span
+                            class="text-[10px] font-bold text-gray-500 dark:text-gray-400 text-center px-4 uppercase tracking-tighter leading-tight"
+                            id="name_pre">
+                            {% if session_data.name_pre %}<span class="text-gray-900 dark:text-white">✓ {{
+                                session_data.name_pre.upper()
+                                }}</span>{%
+                            else %}Esperando archivo...{% endif %}
+                        </span>
+                    </label>
+                </div>
+                <div class="space-y-4 font-sans">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">02. Archivo
+                        Sistema (Post-cierre)</label>
+                    <input type="file" name="file_post" id="file_post" class="hidden" accept=".xlsx,.xls,.csv,.txt" {%
+                        if not session_data.name_post %}required{% endif %}>
+                    <label for="file_post"
+                        class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50/30 dark:bg-gray-800/30 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-200 dark:hover:border-white transition-all cursor-pointer group">
+                        <span
+                            class="material-symbols-outlined text-3xl text-gray-300 dark:text-gray-600 mb-3 group-hover:text-gray-900 dark:group-hover:text-white transition-colors font-light">terminal</span>
+                        <span
+                            class="text-[10px] font-bold text-gray-500 dark:text-gray-400 text-center px-4 uppercase tracking-tighter leading-tight"
+                            id="name_post">
+                            {% if session_data.name_post %}<span class="text-gray-900 dark:text-white">✓ {{
+                                session_data.name_post.upper() }}</span>{%
+                            else %}Esperando archivo...{% endif %}
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="space-y-8 border-t border-gray-100 pt-8 font-sans">
+                <div class="flex-1 space-y-4">
+                    <label
+                        class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-2">Configuración
+                        de Análisis</label>
+                    <select name="config_analisis"
+                        class="w-full text-xs border border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:ring-gray-400 focus:border-gray-400 dark:focus:border-gray-500 py-4 px-6 uppercase font-bold transition-all">
+                        <option value="VARIACION_GLOBAL">Variación Global de Avalúos</option>
+                        <option value="DETALLE_PREDIAL">Análisis Detallado por Predio</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 mb-4 uppercase tracking-widest">Seleccionar
+                        Zona de Predios</label>
+                    <select name="zona_filter" id="zona_filter"
+                        class="w-full text-xs border border-gray-100 dark:border-gray-700 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:ring-gray-900 focus:border-gray-200 dark:focus:border-gray-500 py-4 px-4 uppercase font-bold">
+                        <option value="TODOS">Todos los Predios</option>
+                        <option value="URBANO">Solo Urbana (01)</option>
+                        <option value="RURAL">Solo Rural (00)</option>
+                        <option value="CORREG">Corregimientos (>01)</option>
+                    </select>
+                </div>
+
+                <div
+                    class="bg-gray-50/30 dark:bg-gray-800/30 p-8 border border-gray-100 dark:border-gray-700 rounded-2xl grid grid-cols-2 gap-8">
+                    <div id="div_urbano">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-3">Incremento Esperado
+                            Urbano (%)</label>
+                        <input type="number" step="0.01" name="pct_urbano"
+                            class="w-full border border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white py-3 px-4 focus:border-gray-200 focus:ring-gray-900 dark:focus:border-white"
+                            value="0.00">
+                    </div>
+                    <div id="div_rural">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-3">Incremento Esperado
+                            Rural (%)</label>
+                        <input type="number" step="0.01" name="pct_rural"
+                            class="w-full border border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white py-3 px-4 focus:border-gray-200 focus:ring-gray-900 dark:focus:border-white"
+                            value="0.00">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">Cantidad de
+                            Predios a Revisar (Muestreo)</label>
+                        <span id="lblPct" class="text-xs font-bold text-gray-900 dark:text-white">100%</span>
+                    </div>
+                    <input type="range" name="sample_pct" id="sample_pct" min="1" max="100" value="100"
+                        class="w-full h-1 bg-gray-200 appearance-none cursor-pointer accent-gray-900 rounded-2xl"
+                        oninput="document.getElementById('lblPct').textContent = this.value + '%'">
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-gray-900 dark:bg-white border border-gray-900 dark:border-white text-white dark:text-gray-900 py-5 rounded-2xl hover:bg-white dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white transition-all font-bold text-[11px] tracking-[0.3em] flex justify-center items-center gap-4 uppercase active:scale-[0.98]">
+                <span class="material-symbols-outlined font-light">analytics</span> Ejecutar Análisis de Avalúos
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- RESULTADOS (SI EXISTEN) -->
+    {% if resultados %}
+    <div id="dashboard" class="space-y-8 uppercase font-sans">
+        <div class="flex items-center justify-between border-l-4 border-gray-200 pl-6 mb-4">
+            <h3
+                class="text-2xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-4 uppercase tracking-tighter">
+                <span class="material-symbols-outlined text-gray-900 dark:text-white font-light">analytics</span>
+                Reporte de Resultados // Resumen de Muestra
+            </h3>
+            <div class="flex gap-4">
+                <a href="/clear_analysis"
+                    class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white px-6 py-2 text-[10px] font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all flex items-center gap-3 tracking-widest">
+                    <span class="material-symbols-outlined text-[18px] font-light">refresh</span> Limpiar Datos
+                </a>
+            </div>
+        </div>
+
+        {% if resultados.stats.sample_mode %}
+        <div
+            class="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 flex items-center gap-6">
+            <div
+                class="w-12 h-12 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-xl flex items-center justify-center text-gray-400">
+                <span class="material-symbols-outlined text-2xl">info</span>
+            </div>
+            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-relaxed">
+                El algoritmo compara los avalúos actuales contra los del año anterior para identificar inconsistencias
+                masivas o variaciones fuera de rango.
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- KPIs -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-5 flex flex-col gap-1">
+                <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Predios Revisados</p>
+                <p class="text-3xl font-display font-bold text-gray-900 dark:text-white uppercase">{{
+                    resultados.stats.total_registros_muestra }}</p>
+            </div>
+            <div
+                class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-5 border-l-4 border-l-gray-900 dark:border-l-white flex flex-col gap-1">
+                <p class="text-[9px] text-gray-900 dark:text-white font-bold uppercase tracking-widest">Predios Nuevos
+                </p>
+                <p class="text-3xl font-display font-bold text-gray-900 dark:text-white uppercase">{{
+                    resultados.stats.nuevos }}</p>
+            </div>
+            <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-5 flex flex-col gap-1">
+                <p class="text-[9px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Predios
+                    Desaparecidos</p>
+                <p class="text-3xl font-display font-bold text-gray-900 dark:text-white uppercase">{{
+                    resultados.stats.desaparecidos }}
+                </p>
+            </div>
+            <div
+                class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-5 border-l-4 border-l-functional-error flex flex-col gap-1">
+                <p class="text-[9px] text-gray-900 dark:text-white font-bold uppercase tracking-widest">Diferencias de
+                    Valor</p>
+                <p class="text-3xl font-display font-bold text-gray-900 dark:text-white uppercase">{{
+                    resultados.stats.inconsistencias
+                    }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Financial Stats -->
+        <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-8 grid grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="border-r border-gray-100 dark:border-gray-700">
+                <p class="text-[9px] text-gray-500 dark:text-gray-400 font-bold uppercase mb-3 tracking-widest">Promedio
+                    de Avalúo</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">$ {{ "{:,.0f}".format(resultados.stats.mean)
+                    }}</p>
+            </div>
+            <div class="border-r border-gray-100 dark:border-gray-700">
+                <p class="text-[9px] text-gray-500 dark:text-gray-400 font-bold uppercase mb-3 tracking-widest">Avalúo
+                    Intermedio</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">$ {{
+                    "{:,.0f}".format(resultados.stats.median) }}</p>
+            </div>
+            <div
+                class="premium-card p-6 flex items-center gap-6 border-l-4 border-l-gray-300 dark:border-l-gray-600 dark:bg-gray-800">
+                <div
+                    class="w-14 h-14 bg-gray-50 dark:bg-gray-900 rounded-2xl flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
+                    <span class="material-symbols-outlined text-3xl font-light">request_quote</span>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Monto Total Analizado
+                    </p>
+                    <h4 class="text-2xl font-display font-bold text-gray-900 dark:text-white">${{
+                        "{:,.2f}".format(total_monto) }}</h4>
+                </div>
+            </div>
+            <div>
+                <p class="text-[9px] text-gray-500 font-bold uppercase mb-3 tracking-widest">Desviación de Valores</p>
+                <p class="text-xl font-bold text-red-600">$ {{ "{:,.0f}".format(resultados.stats.std) }}</p>
+            </div>
+        </div>
+
+        <!-- Detailed Table -->
+        <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 overflow-hidden">
+            <div
+                class="px-8 py-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/30 dark:bg-gray-800/30">
+                <h4
+                    class="text-[10px] font-bold text-gray-900 dark:text-white uppercase tracking-[0.2em] border-l-2 border-gray-200 dark:border-gray-600 pl-4">
+                    Detalle de los Predios Analizados</h4>
+            </div>
+            <div class="overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse text-[10px] uppercase font-sans">
+                    <thead
+                        class="sticky top-0 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 font-bold tracking-widest">
+                        <tr>
+                            <th class="px-8 py-5">Número Predial</th>
+                            <th class="px-8 py-5">Propietario</th>
+                            <th class="px-8 py-5 text-right">Avalúo Base</th>
+                            <th class="px-8 py-5 text-right">Avalúo Sistema</th>
+                            <th class="px-8 py-5 text-center">Cambio %</th>
+                            <th class="px-8 py-5">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                        {% for item in resultados.data %}
+                        <tr
+                            class="border-b border-gray-50 dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                            <td
+                                class="px-6 py-4 text-[11px] font-bold text-gray-900 dark:text-white uppercase tracking-tight">
+                                {{
+                                item.Predial_Nacional }}
+                            </td>
+                            <td class="px-6 py-4 text-[10px] text-gray-600 dark:text-gray-400">${{
+                                "{:,.0f}".format(item.Base) }}</td>
+                            <td class="px-6 py-4 text-[11px] font-bold text-gray-900 dark:text-white">${{
+                                "{:,.0f}".format(item.Sistema)
+                                }}
+                            </td>
+                            <td class="px-6 py-4">
+                                <span
+                                    class="px-3 py-1 text-[9px] font-bold rounded-full {{ 'bg-red-50 text-red-600' if item.Pct_Real * 100 > 10 else 'bg-green-50 text-green-600' }}">
+                                    {{ "%.2f"|format(item.Pct_Real * 100) }}%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span
+                                    class="px-3 py-1 text-[10px] font-bold rounded-full {{ 'bg-green-50 text-green-600' if item.Estado == 'OK' else 'bg-red-50 text-red-600 border border-red-100 shadow-sm' }}">
+                                    {{ item.Estado }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block help_content %}
+<div class="space-y-10 font-sans text-[11px] text-gray-900 dark:text-white uppercase">
+    <section>
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
+            <span class="material-symbols-outlined font-light">analytics</span>
+            01_PROTOCOLO_ANALISIS
+        </h4>
+        <p>Esta herramienta compara la información de los predios que tenía antes (archivo base) con la que tiene ahora
+            en el sistema (archivo post-cierre). Así podrá saber si los valores cambiaron correctamente.</p>
+    </section>
+
+    <section>
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
+            <span class="material-symbols-outlined font-light">rule</span>
+            02_GLOSARIO_ESTADOS
+        </h4>
+        <div class="space-y-6">
+            <div class="flex gap-4">
+                <span
+                    class="px-3 py-1 border border-gray-100 dark:border-gray-600 rounded-2xl text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 font-bold h-fit">Correcto</span>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">El predio está en ambos archivos y su valor
+                    cambió según lo
+                    esperado.</p>
+            </div>
+            <div class="flex gap-4">
+                <span
+                    class="px-3 py-1 border border-gray-200 dark:border-green-800 rounded-2xl text-gray-900 dark:text-white bg-functional-success dark:bg-green-900/30 font-bold h-fit">Nuevo</span>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">Es un predio que no existía antes y ahora
+                    aparece en el sistema.
+                </p>
+            </div>
+            <div class="flex gap-4">
+                <span
+                    class="px-3 py-1 border border-gray-200 dark:border-gray-600 rounded-2xl text-gray-400 dark:text-gray-500 font-bold h-fit">Desaparecido</span>
+                <p class="text-[10px] text-gray-400 dark:text-gray-500">Es un predio que estaba antes pero ya no se
+                    encuentra en el nuevo
+                    sistema.</p>
+            </div>
+            <div class="flex gap-4">
+                <span
+                    class="px-3 py-1 border border-gray-200 dark:border-red-800 rounded-2xl text-gray-900 dark:text-white bg-functional-error dark:bg-red-900/30 font-bold h-fit">Inconsistente</span>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">El valor del predio cambió de una forma
+                    inesperada o incorrecta.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section
+        class="bg-gray-50 dark:bg-gray-800 p-8 border border-gray-200 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white">
+        <h4
+            class="font-bold text-[11px] text-gray-900 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 dark:border-gray-600 pb-2">
+            <span class="material-symbols-outlined text-gray-400 font-light">calculate</span>
+            LOGICA_CALCULO :: REDONDEO
+        </h4>
+        <p class="text-[10px] text-gray-400 dark:text-gray-500 italic">Los valores se multiplican por el incremento y se
+            redondean al
+            millar más cercano, siguiendo las normas del IGAC.</p>
+    </section>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<div id="statusData" data-results="{{ 'true' if resultados else 'false' }}" class="hidden"></div>
+<script>
+    const statusData = document.getElementById('statusData');
+    const hasResultsA = statusData.dataset.results === 'true';
+    if (hasResultsA === false) {
+        // File inputs detection
+        const inputs = ['file_pre', 'file_post'];
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        const labelId = 'name_' + id.split('_')[1];
+                        document.getElementById(labelId).innerHTML =
+                            '<span class="text-gray-900 font-bold">✓ ' + e.target.files[0].name.toUpperCase() + '</span>';
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}

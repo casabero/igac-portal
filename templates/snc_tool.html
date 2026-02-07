@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Convertidor SNC - IGAC Apps{% endblock %}
+
+{% block page_title %}Convertidor Registros Catastrales{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-4">
+    <div id="loading-overlay"
+        class="hidden fixed inset-0 bg-white/90 dark:bg-[#111111]/90 backdrop-blur-md z-[100] flex flex-col items-center justify-center">
+        <div
+            class="w-20 h-20 border-4 border-gray-100 dark:border-gray-800 border-t-blue-600 rounded-full animate-spin mb-8">
+        </div>
+        <div class="text-center space-y-4">
+            <h3 class="text-xl font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">
+                Procesando Información
+            </h3>
+            <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] animate-pulse">
+                Optimizando
+                registros y generando Excel...</p>
+        </div>
+    </div>
+    <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-6 md:p-8 mt-4 relative overflow-hidden">
+        <div class="mb-10 border-l-4 border-gray-200 dark:border-gray-700 pl-6">
+            <h2 class="text-xl font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">01 //
+                CONVERTIDOR SNC
+            </h2>
+            <p class="text-[10px] font-mono text-gray-400 dark:text-gray-500 mt-2 uppercase tracking-widest font-bold">
+                FLUJO_PROCESO //
+                CONVERSIÓN_EXCEL</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-8">
+            <!-- 1. Selección de Registro -->
+            <div class="flex-1 space-y-4">
+                <label
+                    class="block text-[10px] font-mono font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest pl-2">01.
+                    Selección de Parámetros</label>
+                <select name="opcion"
+                    class="w-full text-xs border border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:ring-gray-400 focus:border-gray-400 dark:focus:border-gray-500 py-4 px-6 uppercase font-bold transition-all">
+                    <option value="" selected disabled>Seleccionar tipo de registro...</option>
+                    <option value="1">Datos Básicos de Predios (R1)</option>
+                    <option value="2">Detalles de Construcción (R2)</option>
+                    <option value="3">Procedimientos Generales (T1)</option>
+                    <option value="4">Detalles Físicos (T2)</option>
+                    <option value="5">Decretos Legales (T3)</option>
+                </select>
+            </div>
+
+            <!-- 2. Archivo -->
+            <div class="flex-1 space-y-4">
+                <label
+                    class="block text-[10px] font-mono font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest pl-2">02.
+                    Carga de Insumo (.txt/.prn)</label>
+                <input type="file" name="archivo" id="archivo" class="hidden" accept=".txt,.prn" required>
+                <label for="archivo" id="drop-zone"
+                    class="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-2xl bg-gray-50/30 dark:bg-gray-800/30 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-900 dark:hover:border-white transition-all cursor-pointer group">
+                    <span
+                        class="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-600 mb-3 group-hover:text-gray-900 dark:group-hover:text-white transition-colors font-light">upload_file</span>
+                    <span
+                        class="text-[10px] font-mono font-bold text-gray-400 dark:text-gray-500 text-center px-6 leading-relaxed uppercase"
+                        id="file_label">
+                        Esperando_archivo_fuente...
+                    </span>
+                </label>
+            </div>
+
+            <!-- 3. Acción -->
+            <div class="pt-6">
+                <button type="submit"
+                    class="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-5 rounded-2xl hover:bg-white dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white border border-gray-900 dark:border-white transition-all font-bold text-[11px] tracking-[0.3em] flex justify-center items-center gap-4 uppercase active:scale-[0.98]">
+                    <span class="material-symbols-outlined font-light">bolt</span> Ejecutar Sincronización SNC
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Info Card -->
+    <div
+        class="mt-10 premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-6 md:p-8 flex flex-col md:flex-row gap-4 md:gap-6 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-800/30">
+        <div class="text-accent">
+            <span class="material-symbols-outlined font-light">info</span>
+        </div>
+        <div>
+            <h4 class="text-[10px] font-sans font-bold text-gray-900 dark:text-white uppercase tracking-widest mb-2">
+                Nota del Sistema
+            </h4>
+            <p class="text-[11px] font-sans text-gray-500 dark:text-gray-400 leading-relaxed uppercase">
+                Esta herramienta organiza la información de los predios exactamente como viene en el archivo original,
+                asegurando que no se pierda ningún dato durante la conversión a Excel.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block help_content %}
+<div class="space-y-10 font-sans text-[11px] text-gray-900 dark:text-gray-200 uppercase">
+    <section>
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
+            <span class="material-symbols-outlined font-light">description</span>
+            01_PROPOSITO_HERRAMIENTA
+        </h4>
+        <p>Esta herramienta procesa archivos de predios exportados del Sistema Nacional Catastral. No necesita limpiar
+            los datos manualmente, el sistema lo hace por usted.</p>
+    </section>
+
+    <section>
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
+            <span class="material-symbols-outlined font-light">layers</span>
+            02_VERSIONES_SOPORTADAS
+        </h4>
+        <div class="grid grid-cols-1 gap-4">
+            <div class="border border-gray-100 dark:border-gray-700 rounded-2xl p-4 font-sans">
+                <p class="font-bold mb-1 underline">Datos Básicos (R1)</p>
+                <p class="text-gray-500 dark:text-gray-400">Contiene información de los propietarios, direcciones y
+                    valores de avalúo. Es
+                    el archivo más importante.</p>
+            </div>
+            <div class="border border-gray-100 dark:border-gray-700 rounded-2xl p-4 font-sans">
+                <p class="font-bold mb-1 underline">Morfología y Construcción (R2)</p>
+                <p class="text-gray-500 dark:text-gray-400">Detalles sobre las áreas de los predios, tipos de
+                    construcción, número de pisos
+                    y servicios.</p>
+            </div>
+            <div class="border border-gray-100 dark:border-gray-700 rounded-2xl p-4 font-sans">
+                <p class="font-bold mb-1 underline">Registros de Procesos (T1, T2, T3)</p>
+                <p class="text-gray-500 dark:text-gray-400">Archivos que registran los cambios y trámites realizados
+                    sobre los predios.</p>
+            </div>
+        </div>
+    </section>
+
+    <section
+        class="bg-gray-50 dark:bg-gray-800 p-8 border border-gray-200 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white shadow-none">
+        <h4
+            class="font-bold text-[11px] text-gray-900 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 dark:border-gray-600 pb-2">
+            <span class="material-symbols-outlined text-gray-400 font-light">tips_and_updates</span>
+            NOTAS_EJECUCION
+        </h4>
+        <ul class="space-y-3">
+            <li class="flex items-start gap-2">
+                <span>--</span>
+                <span>Suba el archivo original sin abrirlo ni modificarlo en otros programas.</span>
+            </li>
+            <li class="flex items-start gap-2">
+                <span>--</span>
+                <span>El sistema garantiza que los nombres y números se lean correctamente.</span>
+            </li>
+            <li class="flex items-start gap-2">
+                <span>--</span>
+                <span>La descarga comenzará automáticamente después de procesar el archivo.</span>
+            </li>
+        </ul>
+    </section>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    const fileInput = document.getElementById('archivo');
+    const fileLabel = document.getElementById('file_label');
+
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileLabel.innerHTML = '<b class="text-gray-900 dark:text-white">✓ ' + e.target.files[0].name.toUpperCase() + '</b>';
+            }
+        });
+
+        // Drag and drop Visuals
+        const dropzone = fileInput.parentElement;
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => {
+                dropzone.classList.add('border-gray-200', 'bg-gray-100', 'dark:border-gray-600', 'dark:bg-gray-800');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => {
+                dropzone.classList.remove('border-gray-200', 'bg-gray-100', 'dark:border-gray-600', 'dark:bg-gray-800');
+            }, false);
+        });
+    }
+</script>
+{% endblock %}

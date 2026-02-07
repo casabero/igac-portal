@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+
+{% block title %}Auditoría de Cierre - IGAC Apps{% endblock %}
+
+{% block page_title %}Auditoría de Cierre y Masivos{% endblock %}
+
+{% block head %}
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #111111;
+        border-radius: 0px;
+    }
+
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #f3f4f6;
+    }
+
+    tfoot {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        border-top: 1px solid #E5E7EB;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <!-- Sidebar: Configuración Local -->
+    <div class="lg:col-span-1 space-y-8">
+        <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-6">
+            <h2
+                class="text-[10px] font-sans font-bold mb-6 text-gray-500 dark:text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-gray-700 pb-2">
+                CONFIG_SISTEMA</h2>
+            <form action="/auditoria" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <div class="space-y-6">
+                    <div>
+                        <label
+                            class="block text-[10px] font-sans font-bold text-gray-900 dark:text-white mb-3 uppercase tracking-tight">Datos
+                            Propietarios (Excel)</label>
+                        <input type="file" name="file_prop" id="file_prop" class="hidden" accept=".xlsx" required>
+                        <label for="file_prop"
+                            class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-2xl bg-gray-50/30 dark:bg-gray-800/30 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-900 dark:hover:border-white transition-all cursor-pointer group">
+                            <span
+                                class="material-symbols-outlined text-3xl text-gray-300 dark:text-gray-600 mb-2 group-hover:text-gray-900 dark:group-hover:text-white transition-colors font-light">table_view</span>
+                            <span
+                                class="text-[9px] font-mono font-bold text-gray-400 dark:text-gray-500 text-center px-4 uppercase leading-tight"
+                                id="label_prop">
+                                Cargar_Propietarios.xlsx
+                            </span>
+                        </label>
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[10px] font-sans font-bold text-gray-900 dark:text-white mb-3 uppercase tracking-tight">Listado
+                            Auditoría (Excel)</label>
+                        <input type="file" name="file_calc" id="file_calc" class="hidden" accept=".xlsx" required>
+                        <label for="file_calc"
+                            class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-2xl bg-gray-50/30 dark:bg-gray-800/30 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-900 dark:hover:border-white transition-all cursor-pointer group">
+                            <span
+                                class="material-symbols-outlined text-3xl text-gray-300 dark:text-gray-600 mb-2 group-hover:text-gray-900 dark:group-hover:text-white transition-colors font-light">list_alt</span>
+                            <span
+                                class="text-[9px] font-mono font-bold text-gray-400 dark:text-gray-500 text-center px-4 uppercase leading-tight"
+                                id="label_calc">
+                                Cargar_Listado.xlsx
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-gray-100 flex flex-col gap-6">
+                    <div>
+                        <label
+                            class="block text-[10px] font-sans font-bold text-gray-500 dark:text-gray-400 uppercase mb-3">VALIDACIÓN_INCREMENTO
+                            (%)</label>
+                        <input type="number" step="0.01" name="incremento"
+                            value="{{ resultados.pct_incremento|default(3) }}"
+                            class="w-full bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 rounded-2xl text-xs font-sans px-4 py-3 text-gray-900 dark:text-white focus:ring-gray-900 dark:focus:ring-white focus:border-gray-200 dark:focus:border-gray-600"
+                            required>
+                    </div>
+
+                    <div>
+                        <div class="flex-1 space-y-4">
+                            <label
+                                class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-2">Sector
+                                de Auditoría</label>
+                            <select name="sector"
+                                class="w-full text-xs border border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:ring-gray-400 focus:border-gray-400 dark:focus:border-gray-500 py-4 px-6 uppercase font-bold transition-all">
+                                <option value="URBANO">Urbano / Cabeceras Municipales</option>
+                                <option value="RURAL">Rural / Áreas Rurales</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 border border-gray-900 dark:border-white font-sans font-bold py-4 px-4 rounded-2xl transition-all flex items-center justify-center gap-3 hover:bg-white dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white active:scale-[0.98] uppercase tracking-widest text-xs">
+                        <span class="material-symbols-outlined text-[20px] font-light">verified_user</span>
+                        Ejecutar Auditoría
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {% if resultados %}
+        <div
+            class="bg-gray-50 dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-200">
+            <h2
+                class="text-[10px] font-sans font-bold mb-5 text-gray-400 uppercase tracking-widest border-b border-gray-700 pb-2">
+                Exportación de Datos</h2>
+            <a href="/auditoria/pdf" target="_blank"
+                class="w-full flex items-center justify-center gap-3 px-4 py-4 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-2xl text-[10px] font-sans font-bold text-gray-900 dark:text-white transition-all uppercase tracking-widest">
+                <span class="material-symbols-outlined text-[20px] text-red-600 font-light">picture_as_pdf</span>
+                Obtener Reporte Oficial
+            </a>
+            <p class="text-[9px] font-sans text-gray-500 mt-4 text-center uppercase tracking-tighter">estatus: listo //
+                id: CASABERO_ARCH_V1</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Main Content: Resultados -->
+    <div class="lg:col-span-3 space-y-8">
+        {% if not resultados %}
+        <div
+            class="flex flex-col items-center justify-center py-40 text-gray-300 dark:text-gray-600 border border-dashed border-gray-200 dark:border-gray-700 bg-white/30 dark:bg-gray-800/30 rounded-xl">
+            <span class="material-symbols-outlined text-[64px] mb-6 opacity-30 font-light">sensors_off</span>
+            <p class="text-[10px] font-sans font-bold uppercase tracking-[0.3em]">esperando_flujo_datos...</p>
+        </div>
+        {% else %}
+        <div class="flex items-center justify-between border-l-4 border-gray-200 dark:border-gray-700 pl-6 mb-4">
+            <h2
+                class="text-2xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-4 uppercase tracking-tighter">
+                <span class="material-symbols-outlined text-gray-900 dark:text-white font-light">location_city</span>
+                DATOS CONSOLIDADOS
+            </h2>
+            <div class="flex items-center gap-6">
+                <button type="submit"
+                    class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white py-5 rounded-2xl hover:bg-white dark:hover:bg-gray-900 hover:border-gray-200 dark:hover:border-white transition-all font-bold text-[11px] tracking-[0.3em] flex justify-center items-center gap-4 uppercase active:scale-[0.98]">
+                    <span class="material-symbols-outlined font-light">verified</span> Iniciar Auditoría de Datos
+                </button>
+                <div class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-gray-50 rounded-full animate-pulse"></span>
+                    <span class="text-[10px] font-sans font-bold text-gray-900 uppercase tracking-widest">SISTEMA ::
+                        ACTIVO</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div
+                class="premium-card p-4 flex items-center gap-4 border-l-4 border-l-gray-300 dark:border-l-gray-600 dark:bg-[#1a1a1a] dark:border-gray-800">
+                <div
+                    class="w-14 h-14 bg-gray-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center text-gray-900 dark:text-white shadow-sm">
+                    <span class="material-symbols-outlined text-3xl font-light">fact_check</span>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Registros
+                        Auditados</p>
+                    <h4 class="text-2xl font-display font-bold text-gray-900 dark:text-white">{{
+                        "{:,.0f}".format(resultados.total_predios) }}</h4>
+                </div>
+            </div>
+            <div
+                class="premium-card p-5 border-l-4 border-l-gray-900 dark:border-l-white dark:bg-[#1a1a1a] dark:border-gray-800">
+                <p class="text-[9px] font-sans text-gray-900 dark:text-white uppercase font-bold mb-2 tracking-widest">
+                    CRIT_AVALÚO_NULO</p>
+                <p class="text-3xl font-display font-bold text-gray-900 dark:text-white uppercase">{{
+                    resultados.totales.conteo_zero_critico }}</p>
+            </div>
+            <div class="premium-card p-5 dark:bg-[#1a1a1a] dark:border-gray-800">
+                <p class="text-[9px] font-sans text-gray-400 uppercase font-bold mb-2 tracking-widest">Predios PH</p>
+                <p class="text-3xl font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">{{
+                    resultados.totales.conteo_zero_ph }}</p>
+            </div>
+            <div
+                class="bg-gray-50 dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white">
+                <p
+                    class="text-[9px] font-sans text-gray-500 dark:text-gray-400 uppercase font-bold mb-2 tracking-widest">
+                    Alertas Totales
+                </p>
+                <p class="text-3xl font-display font-bold text-gray-900 dark:text-white uppercase">{{
+                    resultados.total_predios -
+                    resultados.resumen_estados.get('OK', 0) }}</p>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-6 md:p-8 mt-4 relative overflow-hidden">
+            <div class="mb-10 border-l-4 border-gray-200 dark:border-gray-700 pl-6">
+                <h2 class="text-xl font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">03
+                    // AUDITORIA
+                    CIERRE
+                </h2>
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-2 uppercase tracking-widest font-bold">CONTROL
+                    CALIDAD DE CIERRE
+                    CATASTRAL</p>
+            </div>
+            <div
+                class="p-8 border-b border-gray-100 dark:border-gray-700 flex flex-wrap justify-between items-center gap-6 bg-gray-50/30 dark:bg-gray-800/30">
+                <h3
+                    class="text-[10px] font-bold text-gray-900 dark:text-white uppercase tracking-[0.2em] border-l-2 border-gray-200 dark:border-gray-600 pl-4">
+                    Auditoría de Registros</h3>
+                <div class="relative w-full sm:w-96">
+                    <span
+                        class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[18px] text-gray-400 font-light">terminal</span>
+                    <input type="text" id="tableSearch" placeholder="BUSCAR POR ID O ESTADO..."
+                        class="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl text-xs font-sans uppercase focus:ring-gray-900 dark:focus:ring-white focus:border-gray-200 dark:focus:border-gray-600 outline-none transition-all placeholder:text-gray-300 dark:text-white">
+                </div>
+            </div>
+
+            <div class="overflow-x-auto max-h-[700px] custom-scrollbar">
+                <table class="w-full text-[10px] font-sans text-left border-collapse uppercase" id="resultsTable">
+                    <thead
+                        class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 font-bold sticky top-0 z-10">
+                        <tr>
+                            <th class="px-8 py-5 text-[9px] font-bold tracking-widest uppercase">Número Predial</th>
+                            <th class="px-8 py-5 text-[9px] font-bold tracking-widest uppercase">Dirección</th>
+                            <th class="px-8 py-5 text-[9px] font-bold tracking-widest uppercase text-right">Avalúo</th>
+                            <th class="px-8 py-5 text-[9px] font-bold tracking-widest uppercase">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800" id="tableBody"></tbody>
+                </table>
+            </div>
+
+            <div
+                class="px-8 py-6 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-[10px] font-sans font-bold text-gray-400 bg-gray-50/10 dark:bg-gray-800/10">
+                <div id="paginationInfo">CONTEO DE DATOS ...</div>
+                <div class="flex gap-4">
+                    <button id="prevPage"
+                        class="px-6 py-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white font-bold hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-30 transition-all uppercase tracking-widest">Anterior</button>
+                    <button id="nextPage"
+                        class="px-6 py-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white font-bold hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-30 transition-all uppercase tracking-widest">Siguiente</button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block help_content %}
+<div class="space-y-10 font-sans text-[11px] text-gray-900 dark:text-white uppercase">
+    <section>
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
+            <span class="material-symbols-outlined font-light">checklist</span>
+            01_PROTOCOLO_AUDITORIA
+        </h4>
+        <p>Realiza una inspección profunda de los avalúos para asegurar que no existan predios con valor de $0 antes de
+            finalizar el proceso catastral. También separa los predios en Propiedad Horizontal (PH).</p>
+    </section>
+
+    <section>
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
+            <span class="material-symbols-outlined font-light">notifications_active</span>
+            02_GLOSARIO_ALERTAS
+        </h4>
+        <div class="space-y-6">
+            <div class="flex gap-4">
+                <span
+                    class="px-3 py-1 bg-functional-error text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-2xl font-bold h-fit">Alerta
+                    Máxima</span>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">Se detectó un predio activo pero con avalúo de
+                    $0 o campos vacíos.
+                    Requiere revisión urgente.</p>
+            </div>
+            <div class="flex gap-4">
+                <span
+                    class="px-3 py-1 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-600 rounded-2xl font-bold h-fit">Nota
+                    de PH</span>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">Predio identificado como parte de una Propiedad
+                    Horizontal.</p>
+            </div>
+        </div>
+    </section>
+
+    <section
+        class="bg-gray-50 dark:bg-gray-800 p-8 border border-gray-200 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white shadow-none">
+        <h4
+            class="font-bold text-[11px] text-gray-900 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 dark:border-gray-600 pb-2">
+            <span class="material-symbols-outlined text-gray-400 font-light">verified</span>
+            REPORTES_OFICIALES
+        </h4>
+        <p class="text-[10px] text-gray-400 dark:text-gray-500 italic">Al finalizar, puede descargar un PDF oficial que
+            sirve como soporte
+            técnico de la auditoría realizada.</p>
+    </section>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    // File Input Handling
+    const setupFileInput = (id, labelId) => {
+        const input = document.getElementById(id);
+        const label = document.getElementById(labelId);
+        if (input && label) {
+            input.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    label.innerHTML = '<b class="text-gray-900 dark:text-white">✓ ' + e.target.files[0].name.toUpperCase() + '</b>';
+                    label.parentElement.classList.add('border-gray-900', 'bg-white', 'dark:border-white', 'dark:bg-gray-900');
+                }
+            });
+        }
+    };
+    setupFileInput('file_prop', 'label_prop');
+    setupFileInput('file_calc', 'label_calc');
+</script>
+{% if resultados %}
+<div id="auditData" data-audit='{{ resultados.full_data | tojson | safe }}' class="hidden"></div>
+<script>
+    const dataElem = document.getElementById('auditData');
+    const rawData = JSON.parse(dataElem.dataset.audit);
+    let filteredData = [...rawData];
+    let currentPage = 1;
+    const rowsPerPage = 100;
+
+    const tableBody = document.getElementById('tableBody');
+    const searchInput = document.getElementById('tableSearch');
+    const prevBtn = document.getElementById('prevPage');
+    const nextBtn = document.getElementById('nextPage');
+    const info = document.getElementById('paginationInfo');
+
+    function renderTable() {
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const slice = filteredData.slice(start, end);
+
+        tableBody.innerHTML = slice.map(item => `
+            <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                <td class="px-8 py-5 font-sans text-gray-400 dark:text-gray-500">${item.Numero_Predial}</td>
+                <td class="px-8 py-5 text-gray-900 dark:text-white font-bold">${item.Zona.toUpperCase()}</td>
+                <td class="px-8 py-5 text-right font-sans text-gray-600 dark:text-gray-400">$${(item.Base_Usada || 0).toLocaleString('es-CO')}</td>
+                <td class="px-8 py-5 text-right font-bold text-gray-900 dark:text-white font-sans">$${(item.Valor_Cierre_Listado || 0).toLocaleString('es-CO')}</td>
+                <td class="px-8 py-5 text-right text-gray-900 dark:text-white font-bold font-sans">$${(item.Cierre_Calculado || 0).toLocaleString('es-CO')}</td>
+                <td class="px-8 py-5">
+                    <span class="px-3 py-1 border rounded-2xl text-[9px] font-bold tracking-widest
+                        ${item.Estado === 'OK' ? 'border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800' : 'border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white bg-functional-error'}">
+                        ${item.Estado}
+                    </span>
+                    <div class="text-[9px] text-gray-400 mt-2 font-sans">${(item.Pct_Variacion || 0).toFixed(2)}% VAR</div>
+                </td>
+            </tr>
+        `).join('');
+
+        const total = filteredData.length;
+        info.textContent = `FETCH_FRAME: ${start + 1}-${Math.min(end, total)} // TOTAL_RECORDS: ${total}`;
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = end >= total;
+    }
+
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        filteredData = rawData.filter(i =>
+            i.Numero_Predial.toLowerCase().includes(term) ||
+            i.Estado.toLowerCase().includes(term)
+        );
+        currentPage = 1;
+        renderTable();
+    });
+
+    prevBtn.addEventListener('click', () => { currentPage--; renderTable(); });
+    nextBtn.addEventListener('click', () => { currentPage++; renderTable(); });
+
+    renderTable();
+</script>
+{% endif %}
+{% endblock %}

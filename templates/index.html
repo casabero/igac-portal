@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Control - IGAC Portal{% endblock %}
+
+{% block page_title %}Panel de Aplicaciones{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-2">
+    <div class="mb-6 border-l-4 border-gray-200 dark:border-gray-700 pl-6">
+        <h3 class="text-2xl font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">
+            <span class="typewriter">TABLERO DE CONTROL // PORTAL DE PROCESOS</span>
+        </h3>
+        <p class="text-gray-500 dark:text-gray-400 mt-1 font-sans text-[10px] uppercase tracking-widest">Seleccione un
+            módulo principal para
+            ejecutar operaciones.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <!-- App 1: Convertidor SNC -->
+        <div
+            class="premium-card p-5 md:p-6 relative overflow-hidden group h-full flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:bg-white dark:hover:bg-[#1a1a1a] hover:border-gray-300 dark:hover:border-gray-600 active:scale-[0.99] active:bg-gray-50 dark:active:bg-gray-900">
+            <div>
+                <div
+                    class="w-12 h-12 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl flex items-center justify-center text-gray-900 dark:text-white mb-6 group-hover:bg-gray-100 dark:group-hover:bg-gray-800 group-hover:text-gray-900 dark:group-hover:text-white transition-all duration-300">
+                    <span class="material-symbols-outlined text-2xl font-light">data_object</span>
+                </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <h4 class="text-base font-mono font-bold text-gray-900 dark:text-white uppercase tracking-tighter">
+                        01 // CONVERTIDOR SNC
+                    </h4>
+                    <span
+                        class="px-2 py-0.5 text-[9px] font-sans font-bold bg-functional-success text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700">ESTABLE
+                        :: CORE</span>
+                </div>
+                <p class="text-[10px] font-sans text-gray-500 dark:text-gray-400 leading-relaxed mb-6 tracking-wide">
+                    {transformación de archivos de texto (.txt/.prn) a formato excel para facilitar su lectura.}
+                </p>
+            </div>
+            <a href="/snc"
+                class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white py-4 rounded-xl hover:bg-white dark:hover:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-600 transition-all font-bold text-[10px] tracking-[0.2em] flex justify-center items-center gap-3 uppercase">
+                Abrir Herramienta
+                <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </a>
+        </div>
+
+        <!-- App 2: Análisis Avalúos -->
+        <div
+            class="premium-card p-5 md:p-6 relative overflow-hidden group h-full flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:bg-white dark:hover:bg-[#1a1a1a] hover:border-gray-300 dark:hover:border-gray-600 active:scale-[0.99] active:bg-gray-50 dark:active:bg-gray-900">
+            <div>
+                <div
+                    class="w-12 h-12 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl flex items-center justify-center text-gray-900 dark:text-white mb-6 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-all duration-300">
+                    <span class="material-symbols-outlined text-2xl font-light">analytics</span>
+                </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <h4 class="text-base font-mono font-bold text-gray-900 dark:text-white uppercase tracking-tighter">
+                        02 // ANALISIS AVALUOS
+                    </h4>
+                    <span
+                        class="px-2 py-0.5 text-[9px] font-sans font-bold border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white bg-white dark:bg-gray-800">VERIFICACIÓN
+                        ::
+                        DELTA</span>
+                </div>
+                <p class="text-[10px] font-sans text-gray-500 dark:text-gray-400 leading-relaxed mb-6 tracking-wide">
+                    {comparación de datos antes y después del cierre catastral. identifica cambios en los predios.}
+                </p>
+            </div>
+            <a href="/avaluos"
+                class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white py-4 rounded-xl hover:bg-white dark:hover:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-600 transition-all font-bold text-[10px] tracking-[0.2em] flex justify-center items-center gap-3 uppercase">
+                Abrir Herramienta
+                <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </a>
+        </div>
+
+        <!-- App 3: Auditoría de Cierre -->
+        <div
+            class="premium-card p-5 md:p-6 relative overflow-hidden group h-full flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:bg-white dark:hover:bg-[#1a1a1a] hover:border-gray-300 dark:hover:border-gray-600 active:scale-[0.99] active:bg-gray-50 dark:active:bg-gray-900">
+            <div>
+                <div
+                    class="w-12 h-12 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl flex items-center justify-center text-gray-900 dark:text-white mb-6 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-all duration-300">
+                    <span class="material-symbols-outlined text-2xl font-light">verified</span>
+                </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <h4 class="text-base font-mono font-bold text-gray-900 dark:text-white uppercase tracking-tighter">
+                        03 // AUDITORIA CIERRE
+                    </h4>
+                    <span
+                        class="px-2 py-0.5 text-[9px] font-sans font-bold border border-gray-200 dark:border-gray-700 bg-functional-error text-gray-900 dark:text-white">OBLIGATORIO</span>
+                </div>
+                <p class="text-[10px] font-sans text-gray-500 dark:text-gray-400 leading-relaxed mb-6 tracking-wide">
+                    {generación de reportes pdf oficiales y detección de alertas en los valores de los predios.}
+                </p>
+            </div>
+            <a href="/auditoria"
+                class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white py-4 rounded-xl hover:bg-white dark:hover:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-600 transition-all font-bold text-[10px] tracking-[0.2em] flex justify-center items-center gap-3 uppercase">
+                Abrir Herramienta
+                <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </a>
+        </div>
+
+        <!-- App 4: Auditoría de Renumeración -->
+        <div
+            class="premium-card p-5 md:p-6 relative overflow-hidden group h-full flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:bg-white dark:hover:bg-[#1a1a1a] hover:border-gray-300 dark:hover:border-gray-600 active:scale-[0.99] active:bg-gray-50 dark:active:bg-gray-900">
+            <div>
+                <div
+                    class="w-12 h-12 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl flex items-center justify-center text-gray-900 dark:text-white mb-6 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-all duration-300">
+                    <span class="material-symbols-outlined text-2xl font-light">rule_folder</span>
+                </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <h4 class="text-base font-mono font-bold text-gray-900 dark:text-white uppercase tracking-tighter">
+                        04 // RENUMERACION AUDITORIA
+                    </h4>
+                    <span
+                        class="px-2 py-0.5 text-[9px] font-sans font-bold border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400">VALIDACIÓN</span>
+                </div>
+                <p class="text-[10px] font-sans text-gray-500 dark:text-gray-400 leading-relaxed mb-6 tracking-wide">
+                    {verificación de nuevos números prediales y permanencia de la información histórica.}
+                </p>
+            </div>
+            <a href="/renumeracion"
+                class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white py-4 rounded-xl hover:bg-white dark:hover:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-600 transition-all font-bold text-[10px] tracking-[0.2em] flex justify-center items-center gap-3 uppercase">
+                Abrir Herramienta
+                <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </a>
+        </div>
+
+        <!-- App 5: Renumeración Predios Informales -->
+        <div
+            class="premium-card p-5 md:p-6 relative overflow-hidden group h-full flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:bg-white dark:hover:bg-[#1a1a1a] hover:border-gray-300 dark:hover:border-gray-600 active:scale-[0.99] active:bg-gray-50 dark:active:bg-gray-900">
+            <div>
+                <div
+                    class="w-12 h-12 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl flex items-center justify-center text-gray-900 dark:text-white mb-6 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-all duration-300">
+                    <span class="material-symbols-outlined text-2xl font-light">location_searching</span>
+                </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <h4 class="text-base font-mono font-bold text-gray-900 dark:text-white uppercase tracking-tighter">
+                        05 // PREDIOS INFORMALES
+                    </h4>
+                    <span
+                        class="px-2 py-0.5 text-[9px] font-sans font-bold bg-functional-warning text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-2xl">MAPAS</span>
+                </div>
+                <p class="text-[10px] font-sans text-gray-500 dark:text-gray-400 leading-relaxed mb-6 tracking-wide">
+                    {asignación automática de números prediales usando capas geográficas y cruce de áreas.}
+                </p>
+            </div>
+            <a href="/renumeracion-informales"
+                class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white py-4 rounded-xl hover:bg-white dark:hover:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-600 transition-all font-bold text-[10px] tracking-[0.2em] flex justify-center items-center gap-3 uppercase">
+                Abrir Herramienta
+                <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </a>
+        </div>
+
+        <!-- App 6: GIS Converter -->
+        <div
+            class="premium-card p-5 md:p-6 relative overflow-hidden group h-full flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:bg-white dark:hover:bg-[#1a1a1a] hover:border-gray-300 dark:hover:border-gray-600 active:scale-[0.99] active:bg-gray-50 dark:active:bg-gray-900">
+            <div>
+                <div
+                    class="w-12 h-12 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl flex items-center justify-center text-gray-900 dark:text-white mb-6 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-all duration-300">
+                    <span class="material-symbols-outlined text-2xl font-light">layers</span>
+                </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <h4 class="text-base font-mono font-bold text-gray-900 dark:text-white uppercase tracking-tighter">
+                        06 // GDB CONVERTER
+                    </h4>
+                    <span
+                        class="px-2 py-0.5 text-[9px] font-sans font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-sm">UTILIDAD</span>
+                </div>
+                <p class="text-[10px] font-sans text-gray-500 dark:text-gray-400 leading-relaxed mb-6 tracking-wide">
+                    {conversión rápida de geodatabases (.gdb) a formato geopackage (.gpkg) para interoperabilidad.}
+                </p>
+            </div>
+            <a href="/gis/gdb-gpkg"
+                class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white py-4 rounded-xl hover:bg-white dark:hover:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-600 transition-all font-bold text-[10px] tracking-[0.2em] flex justify-center items-center gap-3 uppercase">
+                Abrir Herramienta
+                <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </a>
+        </div>
+
+        <!-- App 7: Atlas GIS -->
+        <div
+            class="premium-card p-5 md:p-6 relative overflow-hidden group h-full flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:bg-white dark:hover:bg-[#1a1a1a] hover:border-gray-300 dark:hover:border-gray-600 active:scale-[0.99] active:bg-gray-50 dark:active:bg-gray-900 ring-2 ring-green-200 dark:ring-green-900">
+            <div>
+                <div
+                    class="w-12 h-12 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-2xl flex items-center justify-center text-green-700 dark:text-green-400 mb-6 group-hover:bg-green-100 dark:group-hover:bg-green-900/50 transition-all duration-300">
+                    <span class="material-symbols-outlined text-2xl font-light">map</span>
+                </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <h4 class="text-base font-mono font-bold text-gray-900 dark:text-white uppercase tracking-tighter">
+                        07 // KARTA GIS
+                    </h4>
+                    <span
+                        class="px-2 py-0.5 text-[9px] font-sans font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 rounded-sm">NUEVO</span>
+                </div>
+                <p class="text-[10px] font-sans text-gray-500 dark:text-gray-400 leading-relaxed mb-6 tracking-wide">
+                    {generador de karta catastral. busca predios por codigo, visualiza capas GIS y exporta mapas PDF de alta calidad.}
+                </p>
+            </div>
+            <a href="/karta"
+                class="w-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 py-4 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/40 hover:border-green-300 dark:hover:border-green-700 transition-all font-bold text-[10px] tracking-[0.2em] flex justify-center items-center gap-3 uppercase">
+                Abrir Karta
+                <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </a>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block help_content %}
+<div class="space-y-6">
+    <section>
+        <h4
+            class="text-gray-900 dark:text-white font-bold text-[11px] mb-2 uppercase tracking-widest border-b border-gray-200 dark:border-gray-700 pb-2 flex items-center gap-2">
+            <span class="material-symbols-outlined font-light text-[18px]">info</span>
+            Sobre el Portal
+        </h4>
+        <p class="text-xs font-sans uppercase leading-relaxed text-gray-900 dark:text-white">
+            Sistema desarrollado para la <b
+                class="bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-700 px-1">GESTIÓN
+                NACIONAL</b> de alta precisión para el
+            procesamiento de datos catastrales.
+        </p>
+    </section>
+
+    <section>
+        <h4
+            class="text-gray-900 dark:text-white font-bold text-[11px] mb-4 uppercase tracking-widest border-b border-gray-200 dark:border-gray-700 pb-2 flex items-center gap-2">
+            <span class="material-symbols-outlined font-light text-[18px]">explore</span>
+            Guía de Uso
+        </h4>
+        <ul class="space-y-4">
+            <li class="flex items-start gap-4">
+                <span
+                    class="material-symbols-outlined text-gray-900 dark:text-white font-light mt-0.5">table_view</span>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-900 dark:text-white tracking-tighter uppercase">
+                        Convertidor de Archivos
+                    </p>
+                    <p class="text-[10px] font-sans text-gray-500 dark:text-gray-400 uppercase mt-1">Organiza archivos
+                        de texto en tablas
+                        de Excel fáciles de usar.</p>
+                </div>
+            </li>
+            <li class="flex items-start gap-4">
+                <span class="material-symbols-outlined text-gray-900 dark:text-white font-light mt-0.5">analytics</span>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-900 dark:text-white tracking-tighter uppercase">Análisis
+                        de Avalúos</p>
+                    <p class="text-[10px] font-sans text-gray-500 dark:text-gray-400 uppercase mt-1">Compara los valores
+                        de los predios en
+                        dos fechas diferentes.</p>
+                </div>
+            </li>
+            <li class="flex items-start gap-4">
+                <span
+                    class="material-symbols-outlined text-gray-900 dark:text-white font-light mt-0.5">verified_user</span>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-900 dark:text-white tracking-tighter uppercase">Auditoría
+                        de Cierre</p>
+                    <p class="text-[10px] font-sans text-gray-500 dark:text-gray-400 uppercase mt-1">Busca errores en
+                        los valores y genera
+                        reportes oficiales.</p>
+                </div>
+            </li>
+            <li class="flex items-start gap-4">
+                <span class="material-symbols-outlined text-gray-900 dark:text-white font-light mt-0.5">pin_drop</span>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-900 dark:text-white tracking-tighter uppercase">Predios
+                        Informales</p>
+                    <p class="text-[10px] font-sans text-gray-500 dark:text-gray-400 uppercase mt-1">Cruza mapas para
+                        asignar números
+                        prediales a terrenos informales.</p>
+                </div>
+            </li>
+            <li class="flex items-start gap-4">
+                <span class="material-symbols-outlined text-gray-900 dark:text-white font-light mt-0.5">layers</span>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-900 dark:text-white tracking-tighter uppercase">Conversor
+                        GIS</p>
+                    <p class="text-[10px] font-sans text-gray-500 dark:text-gray-400 uppercase mt-1">Transforma
+                        Geodatabases en GeoPackages portables.</p>
+                </div>
+            </li>
+        </ul>
+    </section>
+</div>
+{% endblock %}

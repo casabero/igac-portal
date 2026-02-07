@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - IGAC Portal{% endblock %}
+
+{% block page_title %}Dashboard de Métricas{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header Actions -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="border-l-4 border-gray-200 pl-6">
+            <h2 class="text-3xl font-display font-bold text-gray-900 uppercase tracking-tighter">04 // Dashboard Central
+            </h2>
+            <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-widest font-bold">MONITOREO DE TRÁFICO DEL
+                SISTEMA</p>
+        </div>
+        <div class="flex gap-4 uppercase font-sans">
+            <a href="/admin/export-csv?inicio={{ fecha_inicio }}&fin={{ fecha_fin }}"
+                class="flex items-center gap-3 px-6 py-3 bg-white border border-gray-100 rounded-2xl text-gray-900 font-bold text-[10px] hover:bg-gray-50 transition-all tracking-widest">
+                <span class="material-symbols-outlined text-[18px] font-light">download</span>
+                EXPORTAR CSV
+            </a>
+            <a href="/admin/logout"
+                class="flex items-center gap-3 px-6 py-3 bg-functional-error text-gray-900 rounded-2xl font-bold text-[10px] hover:bg-white hover:border-gray-200 border border-transparent transition-all tracking-widest">
+                <span class="material-symbols-outlined text-[18px] font-light">logout</span>
+                CERRAR SESIÓN
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div
+        class="premium-card p-4 border-dashed border-gray-200 flex flex-col md:flex-row items-center justify-center gap-8">
+        <form class="flex flex-wrap items-center justify-center gap-6 font-sans text-[10px] uppercase font-bold">
+            <div class="flex items-center gap-3">
+                <label class="text-gray-400">DESDE:</label>
+                <input type="date" name="inicio" value="{{ fecha_inicio }}"
+                    class="border-b border-gray-200 focus:border-gray-200 outline-none bg-transparent py-1 font-bold text-gray-900">
+            </div>
+            <div class="flex items-center gap-3">
+                <label class="text-gray-400">HASTA:</label>
+                <input type="date" name="fin" value="{{ fecha_fin }}"
+                    class="border-b border-gray-200 focus:border-gray-200 outline-none bg-transparent py-1 font-bold text-gray-900">
+            </div>
+            <button type="submit"
+                class="bg-gray-50 border border-gray-200 text-gray-900 px-8 py-2 rounded-2xl hover:bg-white hover:border-gray-200 transition-all tracking-[0.2em] font-bold">
+                FILTRAR DATOS
+            </button>
+            <a href="/karta/admin"
+                class="bg-blue-600 text-white px-8 py-2 rounded-2xl hover:bg-blue-700 transition-all tracking-[0.2em] font-bold shadow-lg shadow-blue-900/20 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[14px]">map</span>
+                GESTIONAR KARTA
+            </a>
+        </form>
+    </div>
+
+    <!-- Top Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="premium-card p-6 flex items-center gap-4">
+            <div
+                class="w-12 h-12 bg-gray-50 text-gray-900 border border-gray-100 rounded-2xl flex items-center justify-center">
+                <span class="material-symbols-outlined text-[28px] font-light">ads_click</span>
+            </div>
+            <div>
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Total Operaciones</p>
+                <h4 class="text-2xl font-display font-bold text-gray-900">{{ total_logs }}</h4>
+            </div>
+        </div>
+
+        <div class="premium-card p-6 flex items-center gap-4">
+            <div
+                class="w-12 h-12 bg-gray-50 text-gray-900 border border-gray-100 rounded-2xl flex items-center justify-center">
+                <span class="material-symbols-outlined text-[28px] font-light">group</span>
+            </div>
+            <div>
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Usuarios Únicos</p>
+                <h4 class="text-2xl font-display font-bold text-gray-900">{{ usuarios_unicos }}</h4>
+            </div>
+        </div>
+
+        <div class="premium-card p-6 flex items-center gap-4">
+            <div
+                class="w-12 h-12 bg-gray-50 text-gray-900 border border-gray-100 border border-gray-200 rounded-2xl flex items-center justify-center">
+                <span class="material-symbols-outlined text-[28px] font-light">query_stats</span>
+            </div>
+            <div>
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Módulo Más Usado</p>
+                <h4 class="text-2xl font-display font-bold text-gray-900">{{ modulo_top }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Usage Chart -->
+        <div class="premium-card p-8">
+            <div class="flex items-center justify-between mb-8">
+                <h4
+                    class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-gray-200 pl-4">
+                    Uso por Módulos</h4>
+                <span class="material-symbols-outlined text-gray-300 font-light">pie_chart</span>
+            </div>
+            <div class="h-64">
+                <canvas id="moduloChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Activity Timeline -->
+        <div class="premium-card p-8">
+            <div class="flex items-center justify-between mb-8">
+                <h4
+                    class="text-[10px] font-bold text-gray-900 uppercase tracking-[0.2em] border-l-2 border-gray-200 pl-4">
+                    Actividad Reciente</h4>
+                <span class="material-symbols-outlined text-gray-300 font-light">history</span>
+            </div>
+            <div class="space-y-6 max-h-[256px] overflow-y-auto custom-scrollbar pr-4">
+                {% for log in logs %}
+                <div class="flex items-start gap-4 pb-4 border-b border-gray-50 last:border-0 uppercase font-sans">
+                    <div
+                        class="mt-1 w-2 h-2 rounded-2xl {% if log.modulo == 'SNC' %}bg-gray-400{% elif log.modulo == 'AVALUOS' %}bg-gray-50{% else %}bg-gray-200{% endif %}">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] font-bold text-gray-900">{{ log.modulo }} // {{ log.accion
+                                }}</span>
+                            <span class="text-[8px] text-gray-400">{{ log.timestamp }}</span>
+                        </div>
+                        <p class="text-[9px] text-gray-500 lowercase">{{ log.ip }} :: {{ log.user_agent[:60] }}...</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div id="dashboardData" data-chart='{{ chart_data | tojson | safe }}' class="hidden"></div>
+<script>
+    const dataElem = document.getElementById('dashboardData');
+    const chartData = JSON.parse(dataElem.dataset.chart);
+    const ctx = document.getElementById('moduloChart').getContext('2d');
+
+    if (chartData && Object.keys(chartData).length > 0) {
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(chartData),
+                datasets: [{
+                    data: Object.values(chartData),
+                    backgroundColor: ['#666666', '#999999', '#CCCCCC', '#E5E5E5', '#F3F4F6'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            font: { family: 'Fira Code', size: 10 },
+                            usePointStyle: true,
+                            padding: 20,
+                            color: '#111111'
+                        }
+                    }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}
+
+{% block help_content %}
+<div class="space-y-10 font-sans text-[11px] text-gray-900 uppercase">
+    <section>
+        <h4 class="border-b border-gray-100 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest">
+            <span class="material-symbols-outlined font-light">monitoring</span>
+            01_PROTOCOLO_MONITOREO
+        </h4>
+        <p>El sistema agrupa las métricas por <b>ID_SESION</b> de forma persistente. Esto permite un seguimiento
+            granular del tráfico incluso tras multiplexación de IP pública.</p>
+    </section>
+
+    <section class="bg-gray-50 p-8 border border-gray-200 rounded-2xl text-gray-900">
+        <h4
+            class="font-bold text-[11px] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 pb-2">
+            <span class="material-symbols-outlined text-gray-400 font-light">dns</span>
+            02_FLUJO_DATOS_CLOUD
+        </h4>
+        <p class="text-[10px] text-gray-400 italic">Los logs capturan la metadata de la petición pero anonimizan datos
+            sensibles de los predios para cumplir con normativas de privacidad.</p>
+    </section>
+</div>
+{% endblock %}

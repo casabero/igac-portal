@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>{% block title %}IGAC Portal{% endblock %}</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL,GRAD@200,0,0&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"],
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["Fira Code", "monospace"],
+                    },
+                    colors: {
+                        gray: {
+                            900: "#111111", 700: "#333333", 500: "#666666", 200: "#E5E5E5", 50: "#F9FAFB"
+                        },
+                        primary: "#111111",
+                        secondary: "#333333",
+                        accent: "#666666",
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #111111;
+            border-radius: 0px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #333333;
+        }
+
+        .nav-item-active {
+            background-color: #F8FAFC;
+            color: #111111;
+            border: 1px solid #E5E5E5;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        }
+
+        .grid-bg {
+            background-color: #FFFFFF;
+        }
+
+        .premium-card {
+            background: white;
+            border: 1px solid #E5E5E5;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border-radius: 1.25rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .premium-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        .dark .premium-card {
+            background: #1a1a1a;
+            border-color: #333333;
+            color: white;
+        }
+
+        @keyframes node-pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+        }
+
+        .logo-node {
+            animation: node-pulse 2s infinite ease-in-out;
+        }
+
+        .logo-node-2 {
+            animation-delay: 0.5s;
+        }
+
+        .logo-node-3 {
+            animation-delay: 1s;
+        }
+
+        .logo-node-4 {
+            animation-delay: 1.5s;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0
+            }
+
+            to {
+                width: 100%
+            }
+        }
+
+        .typewriter {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid #111111;
+            animation: typing 1.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes blink-caret {
+
+            from,
+            to {
+                border-color: transparent
+            }
+
+            50% {
+                border-color: #111111
+            }
+        }
+    </style>
+    <style>
+        /* Dark Mode Transitions & Animations */
+        .theme-transition {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        #system-reboot-overlay {
+            backdrop-filter: blur(10px);
+        }
+
+        .terminal-text {
+            border-right: 2px solid;
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 2s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        /* Sidebar Responsive Transitions */
+        @media (max-width: 768px) {
+            .sidebar-closed {
+                transform: translateX(-100%);
+            }
+
+            .sidebar-open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <script>
+        // Immediate Theme Check to prevent flicker
+        // Default to LIGHT mode (White Mode) explicitly requested
+        if (localStorage.theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    {% block head %}{% endblock %}
+</head>
+
+<body
+    class="bg-[#F8FAFC] dark:bg-[#111111] text-gray-900 dark:text-gray-100 font-sans antialiased min-h-screen flex theme-transition">
+
+    <!-- MOBILE OVERLAY -->
+    <div id="sidebarOverlay" onclick="toggleSidebar()"
+        class="fixed inset-0 bg-black/50 z-30 hidden backdrop-blur-sm transition-opacity duration-300 opacity-0"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar"
+        class="w-64 bg-white dark:bg-[#111111] border-r border-gray-100 dark:border-gray-800 flex flex-col fixed h-full z-40 transition-transform duration-300 sidebar-closed md:translate-x-0">
+        <div class="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+            <a href="/" class="flex flex-col gap-1">
+                <span class="text-lg font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">
+                    Portal IGAC
+                </span>
+                <span class="text-[7px] font-sans text-gray-400 uppercase tracking-[0.3em]">Gestión Catastral
+                    2026</span>
+            </a>
+            <button onclick="toggleSidebar()" class="md:hidden text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <nav class="flex-1 py-4 overflow-y-auto custom-scrollbar">
+            <!-- Sidebar Header: Simplified -->
+            <div class="px-6 mb-2">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">
+                    HERRAMIENTAS RÁPIDAS</p>
+            </div>
+            <div class="px-3 mb-2">
+                <a href="/snc"
+                    class="flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group {% if request.path == '/snc' %} bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-bold border border-gray-100 dark:border-gray-700 shadow-sm {% else %} text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white {% endif %}">
+                    <span class="material-symbols-outlined text-[20px] font-light">data_object</span>
+                    <span class="text-[11px] uppercase tracking-wider font-bold">CONVERTIDOR_SNC</span>
+                </a>
+                <a href="/avaluos"
+                    class="flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group {% if request.path == '/avaluos' %} bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-bold border border-gray-100 dark:border-gray-700 shadow-sm {% else %} text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white {% endif %}">
+                    <span class="material-symbols-outlined text-[20px] font-light">analytics</span>
+                    <span class="text-[11px] uppercase tracking-wider font-bold">ANALISIS_AVALUOS</span>
+                </a>
+                <a href="/auditoria"
+                    class="flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group {% if request.path == '/auditoria' %} bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-bold border border-gray-100 dark:border-gray-700 shadow-sm {% else %} text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white {% endif %}">
+                    <span class="material-symbols-outlined text-[20px] font-light">verified</span>
+                    <span class="text-[11px] uppercase tracking-wider font-bold">AUDITORIA_CIERRE</span>
+                </a>
+                <a href="/renumeracion"
+                    class="flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group {% if request.path == '/renumeracion' %} bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-bold border border-gray-100 dark:border-gray-700 shadow-sm {% else %} text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white {% endif %}">
+                    <span class="material-symbols-outlined text-[20px] font-light">rule_folder</span>
+                    <span class="text-[11px] uppercase tracking-wider font-bold">RENUM_AUDITORIA</span>
+                </a>
+                <a href="/renumeracion-informales"
+                    class="flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group {% if request.path == '/renumeracion-informales' %} bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-bold border border-gray-100 dark:border-gray-700 shadow-sm {% else %} text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white {% endif %}">
+                    <span class="material-symbols-outlined text-[20px] font-light">location_searching</span>
+                    <span class="text-[11px] uppercase tracking-wider font-bold">RENUM_INFORMALES</span>
+                </a>
+                <a href="/gis/gdb-gpkg"
+                    class="flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group {% if request.path == '/gis/gdb-gpkg' %} bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-bold border border-gray-100 dark:border-gray-700 shadow-sm {% else %} text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white {% endif %}">
+                    <span class="material-symbols-outlined text-[20px] font-light">layers</span>
+                    <span class="text-[11px] uppercase tracking-wider font-bold">CONVERSOR_GIS</span>
+                </a>
+            </div>
+            <div class="px-6 mb-2 mt-4">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">
+                    APLICACIONES</p>
+            </div>
+            <div class="px-3 mb-2">
+                <a href="/karta"
+                    class="flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group {% if request.path.startswith('/karta') %} bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-bold border border-green-200 dark:border-green-800 shadow-sm {% else %} text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white {% endif %}">
+                    <span class="material-symbols-outlined text-[20px] font-light">map</span>
+                    <span class="text-[11px] uppercase tracking-wider font-bold">KARTA_GIS</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="px-3 mb-2 mt-4 space-y-1">
+            <button onclick="toggleHelpModal()"
+                class="w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white group">
+                <span class="material-symbols-outlined text-[20px] font-light">help_center</span>
+                <span class="text-[11px] uppercase tracking-wider font-bold">Ayuda y Guía</span>
+            </button>
+            <a href="/admin/login"
+                class="w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white group">
+                <span class="material-symbols-outlined text-[20px] font-light">admin_panel_settings</span>
+                <span class="text-[11px] uppercase tracking-wider font-bold">Gestión Admin</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div
+        class="flex-1 md:ml-64 flex flex-col min-h-screen grid-bg dark:bg-[#111111] transition-colors duration-300 w-full">
+        <!-- TOPBAR -->
+        <header
+            class="h-14 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 md:px-6 sticky top-0 z-30 transition-colors duration-300">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()"
+                    class="md:hidden p-2 -ml-2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <h2 class="text-[10px] font-sans font-bold text-gray-400 uppercase tracking-[0.2em]">
+                    {% block page_title %}PANEL_CONTROL{% endblock %}
+                </h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <span
+                    class="hidden sm:inline-block text-[10px] bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-full font-bold"
+                    id="mode-badge">
+                    V_2.5 // DARK_MODE_READY
+                </span>
+                <div class="h-9 w-9 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
+                    onclick="toggleTheme()" id="theme-toggle">
+                    <span class="material-symbols-outlined text-[20px] font-light" id="theme-icon">dark_mode</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="p-4 md:p-6 flex-1">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+            <div
+                class="mb-6 p-4 {% if 'Error' in message or 'Faltan' in message %}bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400{% else %}bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900/50 text-green-700 dark:text-green-400{% endif %} border rounded-xl text-[10px] font-sans flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+                <span class="material-symbols-outlined text-[18px] font-light">info</span>
+                <span class="font-bold uppercase tracking-tight">REPORTE :: {{ message }}</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer
+            class="p-8 md:p-12 border-t border-gray-50 dark:border-gray-900 bg-white dark:bg-[#111111] flex flex-col items-center">
+            <p class="text-[11px] text-gray-300 uppercase tracking-[0.4em] font-bold">
+                PORTAL IGAC 2026
+            </p>
+        </footer>
+    </div>
+
+    <!-- HELP MODAL -->
+    <div id="helpModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-50/40 transition-opacity" aria-hidden="true" onclick="toggleHelpModal()">
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white dark:bg-[#1a1a1a] rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-100 dark:border-gray-800">
+                <div
+                    class="bg-gray-50 dark:bg-[#111111] px-8 py-6 flex justify-between items-center text-gray-900 dark:text-white">
+                    <h3
+                        class="text-[10px] font-mono font-bold flex items-center gap-3 uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                        <span class="material-symbols-outlined font-light">terminal</span>
+                        SISTEMA_AYUDA // DOCUMENTACIÓN_USUARIO
+                    </h3>
+                    <button onclick="toggleHelpModal()"
+                        class="hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-full transition-colors flex items-center justify-center text-gray-900 dark:text-gray-400 dark:hover:text-white">
+                        <span class="material-symbols-outlined font-light">close</span>
+                    </button>
+                </div>
+                <div class="px-8 py-8 max-h-[60vh] overflow-y-auto custom-scrollbar bg-white dark:bg-[#1a1a1a]">
+                    <div id="helpContent"
+                        class="prose prose-sm max-w-none text-gray-600 dark:text-gray-300 font-sans text-xs leading-relaxed">
+                        {% block help_content %}
+                        <div
+                            class="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 mb-6">
+                            <h4
+                                class="font-bold text-[11px] text-gray-900 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-gray-700 dark:border-gray-600 pb-2">
+                                [MENSAJE_SISTEMA]:</h4>
+                            <p>Bienvenido al Centro de Documentación. Seleccione un módulo en el menú lateral para ver
+                                instrucciones específicas de operación.</p>
+                        </div>
+                        {% endblock %}
+                    </div>
+                </div>
+                <div
+                    class="bg-gray-50 dark:bg-[#111111] border-t border-gray-100 dark:border-gray-800 px-8 py-6 flex justify-end">
+                    <button onclick="toggleHelpModal()"
+                        class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 px-8 py-2 rounded-xl text-[10px] font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all uppercase tracking-widest">
+                        Cerrar Guía
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SYSTEM REBOOT OVERLAY -->
+    <div id="system-reboot-overlay"
+        class="fixed inset-0 z-[200] bg-[#111111] hidden items-center justify-center flex-col">
+        <div class="text-[#d1fae5] font-mono text-[12px] font-bold uppercase tracking-widest p-4">
+            <span id="reboot-text" class="terminal-text"></span>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            if (sidebar.classList.contains('sidebar-closed')) {
+                sidebar.classList.remove('sidebar-closed');
+                sidebar.classList.add('sidebar-open');
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    overlay.classList.add('opacity-100');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            } else {
+                sidebar.classList.remove('sidebar-open');
+                sidebar.classList.add('sidebar-closed');
+                overlay.classList.remove('opacity-100');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300);
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function toggleHelpModal() {
+            const modal = document.getElementById('helpModal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Hardware Sensing (Resolution)
+        (function () {
+            const res = window.screen.width + "x" + window.screen.height;
+            document.cookie = "screen_res=" + res + "; path=/; max-age=31536000";
+        })();
+
+        // Theme Logic with System Reboot Animation
+        const overlay = document.getElementById('system-reboot-overlay');
+        const rebootText = document.getElementById('reboot-text');
+        const themeIcon = document.getElementById('theme-icon');
+
+        const modeBadge = document.getElementById('mode-badge');
+
+        function updateIcon() {
+            if (document.documentElement.classList.contains('dark')) {
+                themeIcon.textContent = 'light_mode';
+                if (modeBadge) modeBadge.textContent = 'V_2.5 // BRIGHT-WHITE_MODE_READY';
+            } else {
+                themeIcon.textContent = 'dark_mode';
+                if (modeBadge) modeBadge.textContent = 'V_2.5 // DARK_MODE_READY';
+            }
+        }
+        updateIcon();
+
+        function toggleTheme() {
+            // 1. Show Overlay
+            const isDark = document.documentElement.classList.contains('dark');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            overlay.style.backgroundColor = isDark ? '#FFFFFF' : '#111111'; // Inverse of current
+
+            const textColor = isDark ? '#111111' : '#d1fae5';
+            rebootText.style.color = textColor;
+            rebootText.style.borderColor = textColor;
+
+            // 2. Typewriter Effect
+            rebootText.textContent = "";
+            const msg = "[SISTEMA] :: REINICIANDO_INTERFAZ...";
+            rebootText.textContent = msg;
+
+            // 3. Wait for effect and Switch
+            setTimeout(() => {
+                if (isDark) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.theme = 'light';
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.theme = 'dark';
+                }
+                updateIcon();
+
+                // 4. Fade Out
+                overlay.style.transition = 'opacity 0.5s ease';
+                overlay.style.opacity = '0';
+
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    overlay.classList.remove('flex');
+                    overlay.style.opacity = '1';
+                    overlay.style.transition = '';
+                }, 500);
+
+            }, 1500); // Duration of typing roughly
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
+```

@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Conversor GIS - IGAC Apps{% endblock %}
+
+{% block page_title %}Conversor Geodatabases{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-4">
+    <!-- Overlay de carga (oculto por defecto) -->
+    <div id="loading-overlay"
+        class="hidden fixed inset-0 bg-white/90 dark:bg-[#111111]/90 backdrop-blur-md z-[100] flex flex-col items-center justify-center">
+        <div
+            class="w-20 h-20 border-4 border-gray-100 dark:border-gray-800 border-t-blue-600 rounded-full animate-spin mb-8">
+        </div>
+        <div class="text-center space-y-4">
+            <h3 class="text-xl font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">
+                Procesando Geometría
+            </h3>
+            <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] animate-pulse">
+                Convirtiendo capas y atributos...</p>
+        </div>
+    </div>
+
+    <div class="premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-6 md:p-8 mt-4 relative overflow-hidden">
+        <div class="mb-6 border-l-4 border-gray-200 dark:border-gray-700 pl-6">
+            <h2 class="text-lg font-display font-bold text-gray-900 dark:text-white uppercase tracking-tighter">06 //
+                GDB A GEOPACKAGE
+            </h2>
+            <p class="text-[10px] font-mono text-gray-400 dark:text-gray-500 mt-2 uppercase tracking-widest font-bold">
+                MOTOR: GEOPANDAS / PYOGRIO // INTEROPERABILIDAD</p>
+        </div>
+
+        <form action="{{ url_for('tools.gis_converter_tool') }}" method="post" enctype="multipart/form-data"
+            id="converterForm" class="space-y-8">
+
+            <!-- 1. Archivo -->
+            <div class="flex-1 space-y-4">
+                <label
+                    class="block text-[10px] font-mono font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest pl-2">01.
+                    Carga de Geodatabase (.zip)</label>
+                <input type="file" name="archivo_zip" id="archivo_zip" class="hidden" accept=".zip,.rar" required>
+                <label for="archivo_zip" id="drop-zone"
+                    class="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-2xl bg-gray-50/30 dark:bg-gray-800/30 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-900 dark:hover:border-white transition-all cursor-pointer group">
+                    <span
+                        class="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-600 mb-3 group-hover:text-gray-900 dark:group-hover:text-white transition-colors font-light">layers</span>
+                    <span
+                        class="text-[10px] font-mono font-bold text-gray-400 dark:text-gray-500 text-center px-6 leading-relaxed uppercase"
+                        id="file_label">
+                        Arrastre su archivo ZIP aquí...
+                    </span>
+                    <span class="text-[9px] text-gray-300 dark:text-gray-600 mt-2 uppercase tracking-wide">Debe contener
+                        carpeta .gdb</span>
+                </label>
+            </div>
+
+            <!-- 2. Acción -->
+            <div class="pt-6">
+                <button type="submit" id="btnConvertir"
+                    class="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-5 rounded-2xl hover:bg-white dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white border border-gray-900 dark:border-white transition-all font-bold text-[11px] tracking-[0.3em] flex justify-center items-center gap-4 uppercase active:scale-[0.98]">
+                    <span class="material-symbols-outlined font-light">autorenew</span> Iniciar Conversión
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Info Card -->
+    <div
+        class="mt-6 premium-card dark:bg-[#1a1a1a] dark:border-gray-800 p-6 flex gap-6 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-800/30">
+        <div class="text-accent">
+            <span class="material-symbols-outlined font-light">info</span>
+        </div>
+        <div>
+            <h4 class="text-[10px] font-sans font-bold text-gray-900 dark:text-white uppercase tracking-widest mb-2">
+                Especificaciones del Proceso
+            </h4>
+            <p class="text-[11px] font-sans text-gray-500 dark:text-gray-400 leading-relaxed uppercase">
+                Esta herramienta extraerá todas las capas vectoriales presentes en la File Geodatabase (.gdb) y las
+                consolidará en un único archivo GeoPackage (.gpkg) estandarizado. Proceso optimizado con Pyogrio.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block help_content %}
+<div class="space-y-10 font-sans text-[11px] text-gray-900 dark:text-gray-200 uppercase">
+    <section>
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
+            <span class="material-symbols-outlined font-light">layers</span>
+            01_FUNCIONAMIENTO
+        </h4>
+        <p>Convierte estructuras de datos complejas (GDB) en archivos portables de código abierto (GeoPackage). Ideal
+            para compartir datos sin restricciones de software propietario.</p>
+    </section>
+
+    <section>
+        <h4
+            class="border-b border-gray-100 dark:border-gray-700 pb-2 mb-4 flex items-center gap-3 font-bold tracking-widest text-gray-900 dark:text-white">
+            <span class="material-symbols-outlined font-light">warning</span>
+            02_REQUISITOS
+        </h4>
+        <ul class="space-y-3">
+            <li class="flex items-start gap-2">
+                <span>--</span>
+                <span>El archivo subido DEBE ser un .ZIP.</span>
+            </li>
+            <li class="flex items-start gap-2">
+                <span>--</span>
+                <span>Dentro del ZIP debe existir la carpeta .gdb original.</span>
+            </li>
+            <li class="flex items-start gap-2">
+                <span>--</span>
+                <span>Archivos muy grandes (>500MB) pueden tardar varios minutos.</span>
+            </li>
+        </ul>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const fileInput = document.getElementById('archivo_zip');
+    const fileLabel = document.getElementById('file_label');
+    const form = document.getElementById('converterForm');
+    const loadingOverlay = document.getElementById('loading-overlay');
+
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileLabel.innerHTML = '<b class="text-gray-900 dark:text-white">✓ ' + e.target.files[0].name.toUpperCase() + '</b>';
+            }
+        });
+
+        const dropzone = fileInput.parentElement;
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => {
+                dropzone.classList.add('border-gray-200', 'bg-gray-100', 'dark:border-gray-600', 'dark:bg-gray-800');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => {
+                dropzone.classList.remove('border-gray-200', 'bg-gray-100', 'dark:border-gray-600', 'dark:bg-gray-800');
+            }, false);
+        });
+    }
+
+    if (form) {
+        form.addEventListener('submit', function () {
+            loadingOverlay.classList.remove('hidden');
+        });
+    }
+</script>
+{% endblock %}
