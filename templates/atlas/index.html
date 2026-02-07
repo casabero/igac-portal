@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}Atlas GIS — Portal IGAC{% endblock %}
-{% block page_title %}ATLAS_GIS // GENERADOR_CARTOGRAFICO{% endblock %}
+{% block title %}Karta GIS — Portal IGAC{% endblock %}
+{% block page_title %}KARTA_GIS // GENERADOR_CARTOGRAFICO{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -221,6 +221,11 @@
                 <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Fuente de Datos</span>
             </div>
             <div class="p-3 space-y-3">
+                {% if not is_admin %}
+                <div class="text-[9px] bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800 rounded-lg p-2">
+                    Modo consulta activo. Para agregar departamentos, municipios y bases geográficas ingrese por Gestión Admin.
+                </div>
+                {% endif %}
                 <!-- Departamento -->
                 <div>
                     <label class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Departamento</label>
@@ -231,7 +236,7 @@
                             <option value="{{ dep.id }}">{{ dep.nombre }}</option>
                             {% endfor %}
                         </select>
-                        <button class="atlas-btn" onclick="openCreateDep()" title="Nuevo Departamento">
+                        <button class="atlas-btn" onclick="openCreateDep()" title="Nuevo Departamento" {% if not is_admin %}disabled{% endif %}>
                             <span class="material-symbols-outlined text-[14px]">add</span>
                         </button>
                     </div>
@@ -244,15 +249,16 @@
                         <select id="sel-municipio" class="atlas-select flex-1" onchange="onMuniChange()" disabled>
                             <option value="">-- Seleccionar --</option>
                         </select>
-                        <button class="atlas-btn" onclick="openCreateMuni()" title="Nuevo Municipio" id="btn-add-muni" disabled>
+                        <button class="atlas-btn" onclick="openCreateMuni()" title="Nuevo Municipio" id="btn-add-muni" disabled {% if not is_admin %}data-admin-locked="1"{% endif %}>
                             <span class="material-symbols-outlined text-[14px]">add</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Upload GDB -->
+                <!-- Agregar Base Geográfica (solo admin) -->
                 <div id="upload-section" class="hidden">
-                    <label class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Cargar GDB / SHP (.zip)</label>
+                    <p class="text-[9px] text-gray-400 mb-2">Disponible únicamente para sesión de administrador.</p>
+                    <label class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Agregar Base Geográfica (.zip)</label>
                     <div class="flex gap-2">
                         <input type="file" id="file-gdb" accept=".zip" class="atlas-input text-[9px]" />
                         <button class="atlas-btn atlas-btn-primary" onclick="uploadGDB()" id="btn-upload">
@@ -292,6 +298,10 @@
                     <label class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Historial</label>
                     <div id="history-list" class="space-y-1 max-h-24 overflow-y-auto custom-scrollbar"></div>
                 </div>
+                <button class="atlas-btn atlas-btn-primary w-full justify-center" onclick="exportarPDFPredio()">
+                    <span class="material-symbols-outlined text-[14px]">picture_as_pdf</span>
+                    Generar PDF de Predio
+                </button>
             </div>
         </div>
 
@@ -316,6 +326,10 @@
                     <span class="material-symbols-outlined text-[14px]">pin_drop</span>
                     Centrar en Coordenada
                 </button>
+                <button class="atlas-btn atlas-btn-primary w-full justify-center" onclick="exportarPDFCoordenada()">
+                    <span class="material-symbols-outlined text-[14px]">picture_as_pdf</span>
+                    Generar PDF por Coordenada
+                </button>
             </div>
         </div>
 
@@ -333,7 +347,7 @@
         <div class="atlas-panel">
             <div class="atlas-panel-header">
                 <span class="material-symbols-outlined text-[16px] font-light text-gray-400">picture_as_pdf</span>
-                <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Exportar PDF</span>
+                <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Exportar PDF General</span>
             </div>
             <div class="p-3 space-y-2">
                 <div>
@@ -380,7 +394,7 @@
 
         <!-- Barra de estado -->
         <div class="flex items-center justify-between text-[9px] text-gray-400 dark:text-gray-600 font-mono px-1">
-            <span id="status-bar">ATLAS_READY // SIN_DATOS</span>
+            <span id="status-bar">KARTA_READY // SIN_DATOS</span>
             <span id="coords-bar">X: - / Y: -</span>
         </div>
     </div>
@@ -419,9 +433,10 @@
     let currentMuniId = null;
     let currentBounds = null;
     let currentCodigo = null;
-    let searchHistory = JSON.parse(localStorage.getItem('atlas_history') || '[]');
+    let searchHistory = JSON.parse(localStorage.getItem('karta_history') || '[]');
     let enabledLayers = [];
     let modalMode = null; // 'dep' or 'muni'
+    const isAdmin = {{ 'true' if is_admin else 'false' }};
 
     // --- Toast ---
     function toast(msg, type = 'ok') {
@@ -435,6 +450,7 @@
 
     // --- Modal ---
     function openCreateDep() {
+        if (!isAdmin) { toast('Solo el administrador puede crear departamentos', 'error'); return; }
         modalMode = 'dep';
         document.getElementById('modal-title').textContent = 'Nuevo Departamento';
         document.getElementById('modal-nombre').value = '';
@@ -445,6 +461,7 @@
     }
 
     function openCreateMuni() {
+        if (!isAdmin) { toast('Solo el administrador puede crear municipios', 'error'); return; }
         if (!currentDepId) return;
         modalMode = 'muni';
         document.getElementById('modal-title').textContent = 'Nuevo Municipio';
@@ -467,7 +484,7 @@
 
         try {
             if (modalMode === 'dep') {
-                const res = await fetch('/atlas/api/departamentos', {
+                const res = await fetch('/karta/api/departamentos', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nombre, codigo: codigo || null })
@@ -484,7 +501,7 @@
                 onDepChange();
                 toast(`Departamento ${data.nombre} creado`);
             } else {
-                const res = await fetch(`/atlas/api/departamentos/${currentDepId}/municipios`, {
+                const res = await fetch(`/karta/api/departamentos/${currentDepId}/municipios`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nombre, codigo: codigo || null })
@@ -514,13 +531,13 @@
         const btnMuni = document.getElementById('btn-add-muni');
         selMuni.innerHTML = '<option value="">-- Seleccionar --</option>';
         selMuni.disabled = !currentDepId;
-        btnMuni.disabled = !currentDepId;
+        btnMuni.disabled = !currentDepId || !isAdmin;
         currentMuniId = null;
         hideMap();
 
         if (currentDepId) {
             try {
-                const res = await fetch(`/atlas/api/departamentos/${currentDepId}/municipios`);
+                const res = await fetch(`/karta/api/departamentos/${currentDepId}/municipios`);
                 const munis = await res.json();
                 munis.forEach(m => {
                     const opt = document.createElement('option');
@@ -540,14 +557,14 @@
         currentBounds = null;
         currentCodigo = null;
 
-        document.getElementById('upload-section').classList.toggle('hidden', !currentMuniId);
+        document.getElementById('upload-section').classList.toggle('hidden', !currentMuniId || !isAdmin);
         document.getElementById('muni-info').classList.add('hidden');
         document.getElementById('panel-capas').style.display = 'none';
         hideMap();
 
         if (currentMuniId) {
             try {
-                const res = await fetch(`/atlas/api/municipios/${currentMuniId}`);
+                const res = await fetch(`/karta/api/municipios/${currentMuniId}`);
                 const muni = await res.json();
 
                 if (muni.gpkg_path) {
@@ -564,7 +581,7 @@
                     renderPreview();
                     setStatus(`DATOS_CARGADOS // ${muni.nombre} // ${nCapas} CAPAS`);
                 } else {
-                    setStatus(`SIN_DATOS // Suba un archivo GDB para ${muni.nombre}`);
+                    setStatus(`SIN_DATOS // Base geográfica pendiente para ${muni.nombre}`);
                 }
             } catch (e) {
                 toast('Error cargando info del municipio', 'error');
@@ -575,7 +592,7 @@
     async function loadCapas() {
         if (!currentMuniId) return;
         try {
-            const res = await fetch(`/atlas/api/municipios/${currentMuniId}/capas`);
+            const res = await fetch(`/karta/api/municipios/${currentMuniId}/capas`);
             const data = await res.json();
             if (data.capas) {
                 enabledLayers = [...data.capas];
@@ -605,6 +622,7 @@
 
     // --- Upload ---
     async function uploadGDB() {
+        if (!isAdmin) { toast('Solo el administrador puede agregar base geográfica', 'error'); return; }
         if (!currentMuniId) return;
         const fileInput = document.getElementById('file-gdb');
         if (!fileInput.files.length) { toast('Seleccione un archivo .zip', 'error'); return; }
@@ -618,7 +636,7 @@
         statusEl.className = 'text-[9px] text-yellow-600 dark:text-yellow-400 mt-1';
 
         try {
-            const res = await fetch(`/atlas/api/municipios/${currentMuniId}/upload`, {
+            const res = await fetch(`/karta/api/municipios/${currentMuniId}/upload`, {
                 method: 'POST',
                 body: formData,
             });
@@ -652,7 +670,7 @@
         if (!codigo) return;
 
         try {
-            const res = await fetch(`/atlas/api/municipios/${currentMuniId}/buscar?codigo=${encodeURIComponent(codigo)}`);
+            const res = await fetch(`/karta/api/municipios/${currentMuniId}/buscar?codigo=${encodeURIComponent(codigo)}`);
             const data = await res.json();
             const resultDiv = document.getElementById('search-result');
             resultDiv.classList.remove('hidden');
@@ -693,7 +711,7 @@
         searchHistory = searchHistory.filter(h => h !== codigo);
         searchHistory.unshift(codigo);
         if (searchHistory.length > 10) searchHistory = searchHistory.slice(0, 10);
-        localStorage.setItem('atlas_history', JSON.stringify(searchHistory));
+        localStorage.setItem('karta_history', JSON.stringify(searchHistory));
         renderHistory();
     }
 
@@ -728,7 +746,7 @@
 
         showLoading(true);
 
-        let url = `/atlas/api/municipios/${currentMuniId}/preview?labels=${document.getElementById('chk-labels').checked}`;
+        let url = `/karta/api/municipios/${currentMuniId}/preview?labels=${document.getElementById('chk-labels').checked}`;
         if (currentBounds) {
             url += `&minx=${currentBounds[0]}&miny=${currentBounds[1]}&maxx=${currentBounds[2]}&maxy=${currentBounds[3]}`;
         }
@@ -756,6 +774,20 @@
         }
     }
 
+    function exportarPDFPredio() {
+        if (!currentCodigo) { toast('Primero busque un predio para generar su PDF', 'error'); return; }
+        exportarPDF();
+    }
+
+    function exportarPDFCoordenada() {
+        const x = parseFloat(document.getElementById('input-x').value);
+        const y = parseFloat(document.getElementById('input-y').value);
+        if (isNaN(x) || isNaN(y)) { toast('Ingrese coordenadas válidas primero', 'error'); return; }
+        currentBounds = [x - 100, y - 100, x + 100, y + 100];
+        currentCodigo = null;
+        exportarPDF();
+    }
+
     // --- PDF ---
     function exportarPDF() {
         if (!currentMuniId) { toast('Seleccione un municipio primero', 'error'); return; }
@@ -763,7 +795,7 @@
         const size = document.getElementById('sel-page-size').value;
         const labels = document.getElementById('chk-labels').checked;
 
-        let url = `/atlas/api/municipios/${currentMuniId}/pdf?size=${size}&labels=${labels}`;
+        let url = `/karta/api/municipios/${currentMuniId}/pdf?size=${size}&labels=${labels}`;
         if (currentBounds) {
             url += `&minx=${currentBounds[0]}&miny=${currentBounds[1]}&maxx=${currentBounds[2]}&maxy=${currentBounds[3]}`;
         }
@@ -803,7 +835,7 @@
     <section>
         <h4 class="text-gray-900 dark:text-white font-bold text-[11px] mb-2 uppercase tracking-widest border-b border-gray-200 dark:border-gray-700 pb-2 flex items-center gap-2">
             <span class="material-symbols-outlined font-light text-[18px]">map</span>
-            Atlas GIS — Generador Cartografico
+            Karta GIS — Generador Cartografico
         </h4>
         <p class="text-xs font-sans leading-relaxed text-gray-600 dark:text-gray-300">
             Herramienta para generar mapas catastrales en PDF a partir de datos vectoriales (GDB/SHP).
