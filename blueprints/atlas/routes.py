@@ -8,7 +8,7 @@ from .models import (
     eliminar_departamento, crear_municipio, listar_municipios, obtener_municipio,
     eliminar_municipio, obtener_municipio_completo
 )
-from .data_loader import procesar_upload_gdb, buscar_predio, cargar_capa
+from .data_loader import procesar_upload_gdb, buscar_predio, cargar_capa, buscar_predio_por_coordenada
 from .map_renderer import render_preview, render_pdf
 
 import json
@@ -153,15 +153,26 @@ def admin_page():
 # --- API: Busqueda de predio ---
 @atlas_bp.route('/api/municipios/<int:muni_id>/buscar', methods=['GET'])
 def api_buscar_predio(muni_id):
-    codigo = request.args.get('codigo', '').strip()
     campo = request.args.get('campo', 'CODIGO').strip()  # Default CODIGO
     
-    if not codigo:
-        return jsonify({'error': 'Código requerido'}), 400
+    if campo == 'COORDENADA':
+        x = request.args.get('x')
+        y = request.args.get('y')
+        if not x or not y:
+             return jsonify({'error': 'Coordenadas X, Y requeridas'}), 400
+        
+        resultado = buscar_predio_por_coordenada(muni_id, x, y)
+        if not resultado:
+            return jsonify({'error': 'No se encontró predio en esa coordenada'}), 404
+    else:
+        # Busqueda por codigo
+        codigo = request.args.get('codigo', '').strip()
+        if not codigo:
+            return jsonify({'error': 'Código requerido'}), 400
 
-    resultado = buscar_predio(muni_id, codigo, campo=campo)
-    if not resultado:
-        return jsonify({'error': 'Predio no encontrado', 'codigo': codigo}), 404
+        resultado = buscar_predio(muni_id, codigo, campo=campo)
+        if not resultado:
+            return jsonify({'error': 'Predio no encontrado', 'codigo': codigo}), 404
 
     # Serializar bounds (no la geometria completa)
     return jsonify({

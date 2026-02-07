@@ -299,3 +299,80 @@ def buscar_predio(municipio_id, codigo, campo='CODIGO'):
         'layer': row.get('_source_layer', 'TERRENO'),
         'total_matches': len(match),
     }
+
+
+def buscar_predio_por_coordenada(municipio_id, x, y):
+    """Busca un predio en capas de terreno que contenga el punto (x, y)."""
+    muni = obtener_municipio(municipio_id)
+    if not muni or not muni.get('gpkg_path'):
+        return None
+
+    gpkg_path = muni['gpkg_path']
+    from shapely.geometry import Point
+
+    # Intentar crear punto (validar inputs antes de llamar)
+    try:
+        p = Point(float(x), float(y))
+    except (ValueError, TypeError):
+        return None
+
+    # Identificar capas de terreno
+    try:
+        all_layers = fiona.listlayers(gpkg_path)
+    except Exception:
+        return None
+
+    capas_terreno = []
+    for ln in all_layers:
+        norm = normalizar_nombre_capa(ln)
+        if norm in ('u_terreno', 'r_terreno'):
+            capas_terreno.append(ln)
+
+    if not capas_terreno:
+        return None
+
+    # Buscar en cada capa (spatial filter es mas eficiente pero geopandas read_file con bbox/mask es complejo con puntos)
+    # Una optimizacion: cargar solo geometrias que intersecten un bbox pequeño alrededor del punto
+    # bbox = (x-1, y-1, x+1, y+1)
+    
+    # Dado que son archivos locales GPKG, leer todo y filtrar es lento si son grandes.
+    # Usaremos bbox en read_file para optimizar.
+    
+    delta = 1000 # 1km bbox search buffer for safety/accuracy with arbitrary coords? No, exact point.
+    # A point has no dimension, bbox needs extension. Let's try small delta.
+    delta = 50 
+    bbox = (x - delta, y - delta, x + delta, y + delta)
+
+    for layer_name in capas_terreno:
+        try:
+            # Usar bbox filter para cargar solo geometrias cercanas
+            gdf = gpd.read_file(gpkg_path, layer=layer_name, bbox=bbox)
+            if gdf.empty:
+                continue
+            
+            # Filtrar exacto (contains)
+            matches = gdf[gdf.geometry.contains(p)]
+            if not matches.empty:
+                row = matches.iloc[0]
+                attrs = {k: str(v) for k, v in row.drop('geometry').items()}
+                
+                # Intentar buscar codigo en columnas comunes
+                codigo = "SIN_CODIGO"
+                for col in gdf.columns:
+                    if 'CODIGO' in col.upper():
+                        codigo = str(row[col])
+                        break
+                        
+                return {
+                    'geometry': row.geometry,
+                    'bounds': row.geometry.bounds,
+                    'codigo': codigo,
+                    'attributes': attrs,
+                    'layer': layer_name,
+                    'total_matches': 1
+                }
+        except Exception as e:
+            print(f"Error espacial en {layer_name}: {e}")
+            continue
+
+    return None

@@ -11,11 +11,11 @@ from modules.db_logger import DB_PATH
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
 DEFAULT_ADMIN_USER = "casabero"
-DEFAULT_ADMIN_PASS = "casabe123"
+DEFAULT_ADMIN_PASS = "casamix123"
 
 
 def ensure_admin_user():
-    """Garantiza la existencia del usuario admin por defecto en SQLite."""
+    """Garantiza la existencia del usuario admin por defecto en SQLite y actualiza su contraseña."""
     conn = sqlite3.connect(DB_PATH)
     try:
         cursor = conn.cursor()
@@ -31,11 +31,21 @@ def ensure_admin_user():
         )
         cursor.execute("SELECT id FROM admin_users WHERE username=?", (DEFAULT_ADMIN_USER,))
         exists = cursor.fetchone()
+        
+        new_hash = generate_password_hash(DEFAULT_ADMIN_PASS)
+        
         if not exists:
             cursor.execute(
                 "INSERT INTO admin_users (username, password_hash) VALUES (?, ?)",
-                (DEFAULT_ADMIN_USER, generate_password_hash(DEFAULT_ADMIN_PASS)),
+                (DEFAULT_ADMIN_USER, new_hash),
             )
+        else:
+            # Update password for existing user to ensure it matches current default
+            cursor.execute(
+                "UPDATE admin_users SET password_hash=? WHERE username=?",
+                (new_hash, DEFAULT_ADMIN_USER),
+            )
+            
         conn.commit()
     finally:
         conn.close()
