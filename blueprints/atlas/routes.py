@@ -1,6 +1,6 @@
 """Blueprint: GIS Atlas Generator — Rutas para gestión de datos y generación de mapas."""
 
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, Response, send_file
+from flask import Blueprint, render_template, request, jsonify, Response, session
 from modules.db_logger import registrar_visita
 
 from .models import (
@@ -14,16 +14,16 @@ from .map_renderer import render_preview, render_pdf
 import json
 import fiona
 
-atlas_bp = Blueprint('atlas', __name__, url_prefix='/atlas',
+atlas_bp = Blueprint('atlas', __name__, url_prefix='/karta',
                       template_folder='../../templates/atlas')
 
 
 # --- Pagina principal ---
 @atlas_bp.route('/')
 def index():
-    registrar_visita('/atlas')
+    registrar_visita('/karta')
     departamentos = listar_departamentos()
-    return render_template('atlas/index.html', departamentos=departamentos)
+    return render_template('atlas/index.html', departamentos=departamentos, is_admin=session.get('admin_logged_in', False))
 
 
 # --- API: Departamentos ---
@@ -34,6 +34,9 @@ def api_listar_departamentos():
 
 @atlas_bp.route('/api/departamentos', methods=['POST'])
 def api_crear_departamento():
+    if not session.get('admin_logged_in'):
+        return jsonify({'error': 'Acceso solo para administrador'}), 403
+
     data = request.get_json()
     if not data or not data.get('nombre'):
         return jsonify({'error': 'Nombre requerido'}), 400
@@ -46,6 +49,9 @@ def api_crear_departamento():
 
 @atlas_bp.route('/api/departamentos/<int:dep_id>', methods=['DELETE'])
 def api_eliminar_departamento(dep_id):
+    if not session.get('admin_logged_in'):
+        return jsonify({'error': 'Acceso solo para administrador'}), 403
+
     try:
         eliminar_departamento(dep_id)
         return jsonify({'status': 'ok'})
@@ -61,6 +67,9 @@ def api_listar_municipios(dep_id):
 
 @atlas_bp.route('/api/departamentos/<int:dep_id>/municipios', methods=['POST'])
 def api_crear_municipio(dep_id):
+    if not session.get('admin_logged_in'):
+        return jsonify({'error': 'Acceso solo para administrador'}), 403
+
     data = request.get_json()
     if not data or not data.get('nombre'):
         return jsonify({'error': 'Nombre requerido'}), 400
@@ -73,6 +82,9 @@ def api_crear_municipio(dep_id):
 
 @atlas_bp.route('/api/municipios/<int:muni_id>', methods=['DELETE'])
 def api_eliminar_municipio(muni_id):
+    if not session.get('admin_logged_in'):
+        return jsonify({'error': 'Acceso solo para administrador'}), 403
+
     try:
         eliminar_municipio(muni_id)
         return jsonify({'status': 'ok'})
@@ -97,6 +109,9 @@ def api_obtener_municipio(muni_id):
 # --- API: Upload GDB ---
 @atlas_bp.route('/api/municipios/<int:muni_id>/upload', methods=['POST'])
 def api_upload_gdb(muni_id):
+    if not session.get('admin_logged_in'):
+        return jsonify({'error': 'Acceso solo para administrador'}), 403
+
     if 'archivo_zip' not in request.files:
         return jsonify({'error': 'No se recibió archivo'}), 400
     file = request.files['archivo_zip']
@@ -236,7 +251,7 @@ def api_generate_pdf(muni_id):
     if output is None:
         return jsonify({'error': 'No se pudo generar PDF'}), 500
 
-    filename = f"Atlas_{codigo or 'mapa'}_{page_size}.pdf"
+    filename = f"{(codigo or 'MAPA').strip()}.pdf"
     return Response(
         output.getvalue(),
         mimetype='application/pdf',

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, redirect
 from modules.db_logger import init_db, registrar_visita
 
 import os
@@ -30,6 +30,14 @@ except Exception as e:
     print(f"Advertencia: No se pudo iniciar la DB del Atlas: {e}")
 
 
+
+try:
+    from blueprints.admin import ensure_admin_user
+    ensure_admin_user()
+    print("Usuario admin por defecto asegurado en SQLite.")
+except Exception as e:
+    print(f"Advertencia: No se pudo asegurar el admin por defecto: {e}")
+
 # --- Filtros de template ---
 @app.template_filter('format_number')
 def format_number(value):
@@ -39,6 +47,17 @@ def format_number(value):
     except:
         return value
 
+
+
+
+@app.route('/atlas')
+def legacy_atlas_redirect():
+    return redirect('/karta', code=302)
+
+
+@app.route('/atlas/<path:subpath>')
+def legacy_atlas_subpath_redirect(subpath):
+    return redirect(f'/karta/{subpath}', code=302)
 
 # --- RUTA HOME ---
 @app.route('/')

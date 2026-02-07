@@ -1,12 +1,55 @@
 """Blueprint: Panel de administración y analytics."""
 
+import sqlite3
+
 from flask import Blueprint, render_template, request, session, flash, redirect, url_for, Response
 from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from modules.db_logger import DB_PATH
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
-ADMIN_USER = "casabero_admin"
-ADMIN_PASS = "casa123"
+DEFAULT_ADMIN_USER = "casabero"
+DEFAULT_ADMIN_PASS = "casabe123"
+
+
+def ensure_admin_user():
+    """Garantiza la existencia del usuario admin por defecto en SQLite."""
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS admin_users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+        cursor.execute("SELECT id FROM admin_users WHERE username=?", (DEFAULT_ADMIN_USER,))
+        exists = cursor.fetchone()
+        if not exists:
+            cursor.execute(
+                "INSERT INTO admin_users (username, password_hash) VALUES (?, ?)",
+                (DEFAULT_ADMIN_USER, generate_password_hash(DEFAULT_ADMIN_PASS)),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def validar_admin(username, password):
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT password_hash FROM admin_users WHERE username=?", (username,))
+        row = cursor.fetchone()
+        return bool(row and check_password_hash(row[0], password))
+    finally:
+        conn.close()
 
 
 def login_required(f):
@@ -20,11 +63,13 @@ def login_required(f):
 
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def admin_login():
+    ensure_admin_user()
     if request.method == 'POST':
-        user = request.form.get('username')
+        user = request.form.get('username', '').strip().lower()
         pw = request.form.get('password')
-        if user == ADMIN_USER and pw == ADMIN_PASS:
+        if validar_admin(user, pw):
             session['admin_logged_in'] = True
+            session['admin_username'] = user
             flash('SIS_ACCESO_CONCEDIDO // BIENVENIDO_ADMIN_ROOT', 'success')
             return redirect(url_for('admin.admin_dashboard'))
         else:
@@ -35,6 +80,7 @@ def admin_login():
 @admin_bp.route('/logout')
 def admin_logout():
     session.pop('admin_logged_in', None)
+    session.pop('admin_username', None)
     flash('SIS_SESIÓN_TERMINADA // REINICIO_CONEXIÓN', 'info')
     return redirect(url_for('index'))
 
