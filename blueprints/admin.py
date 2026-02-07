@@ -113,18 +113,50 @@ def admin_dashboard():
     if fecha_fin:
         query_base += " AND timestamp <= ?"
         params.append(f"{fecha_fin} 23:59:59")
+    
+    # Obtener total de visitas (total_logs en el template)
     cursor.execute(f"SELECT COUNT(*) as total {query_base}", params)
-    total_visitas = cursor.fetchone()['total']
+    total_logs = cursor.fetchone()['total']
+    
+    # Obtener visitantes únicos (usuarios_unicos en el template)
     cursor.execute(f"SELECT COUNT(DISTINCT session_id) as total {query_base}", params)
-    visitantes_unicos = cursor.fetchone()['total']
+    usuarios_unicos = cursor.fetchone()['total']
+    
+    # Obtener el módulo más usado (modulo_top en el template)
+    cursor.execute(f"SELECT ruta, COUNT(*) as count {query_base} AND ruta != '/admin/dashboard' GROUP BY ruta ORDER BY count DESC LIMIT 1", params)
+    res_top = cursor.fetchone()
+    modulo_top = res_top['ruta'] if res_top else "N/A"
+    
+    # Datos para el gráfico de torta (chart_data en el template)
     cursor.execute(f"SELECT ruta, COUNT(*) as count {query_base} AND ruta != '/admin/dashboard' GROUP BY ruta ORDER BY count DESC LIMIT 5", params)
-    top_apps = [dict(row) for row in cursor.fetchall()]
+    top_apps = cursor.fetchall()
+    chart_data = {row['ruta']: row['count'] for row in top_apps}
+    
+    # Estadísticas por país (usado en logs pero no resumido en el template actual de forma directa, se mantiene por compatibilidad)
     cursor.execute(f"SELECT pais, COUNT(*) as count {query_base} GROUP BY pais ORDER BY count DESC LIMIT 5", params)
     stats_pais = [dict(row) for row in cursor.fetchall()]
+    
+    # Últimos logs (logs en el template)
     cursor.execute(f"SELECT * {query_base} ORDER BY timestamp DESC LIMIT 100", params)
-    ultimos_logs = [dict(row) for row in cursor.fetchall()]
+    logs = []
+    for row in cursor.fetchall():
+        d = dict(row)
+        # El template espera 'modulo', 'accion', 'ip'
+        d['modulo'] = d.get('ruta', 'SISTEMA')
+        d['accion'] = d.get('metodo', 'VISITA')
+        d['ip'] = d.get('ip_publica', '0.0.0.0')
+        logs.append(d)
+        
     conn.close()
-    return render_template('admin_dashboard.html', total_visitas=total_visitas, visitantes_unicos=visitantes_unicos, top_apps=top_apps, stats_pais=stats_pais, ultimos_logs=ultimos_logs, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin)
+    return render_template('admin_dashboard.html', 
+                          total_logs=total_logs, 
+                          usuarios_unicos=usuarios_unicos, 
+                          modulo_top=modulo_top, 
+                          chart_data=chart_data,
+                          stats_pais=stats_pais, 
+                          logs=logs, 
+                          fecha_inicio=fecha_inicio, 
+                          fecha_fin=fecha_fin)
 
 
 @admin_bp.route('/export-csv')

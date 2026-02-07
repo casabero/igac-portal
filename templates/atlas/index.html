@@ -63,6 +63,7 @@
         color: #111;
         padding: 0.5rem 1rem;
         border-radius: 1rem;
+        /* rounded-2xl */
         font-size: 10px;
         font-weight: 700;
         text-transform: uppercase;
@@ -106,6 +107,7 @@
         padding: 0.6rem 0.8rem;
         border: 1px solid #E5E5E5;
         border-radius: 1rem;
+        /* rounded-2xl */
         font-size: 11px;
         /* Smaller font */
         font-family: 'Fira Code', monospace;
@@ -129,7 +131,7 @@
         width: 100%;
         padding: 0.5rem 0.75rem;
         border: 1px solid #E5E5E5;
-        border-radius: 0.5rem;
+        border-radius: 1rem;
         font-size: 11px;
         background: #F8FAFC;
         color: #111;
@@ -173,7 +175,7 @@
 
     #map-preview-img {
         max-width: 100%;
-        border-radius: 0.5rem;
+        border-radius: 1rem;
     }
 
     .search-result-badge {
@@ -195,7 +197,7 @@
 
     .toast {
         padding: 0.75rem 1rem;
-        border-radius: 0.5rem;
+        border-radius: 1rem;
         font-size: 10px;
         font-weight: 600;
         text-transform: uppercase;
@@ -276,9 +278,8 @@
                 </div>
 
                 <!-- Municipio -->
-                <div>
-                    <label
-                        class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Municipio</label>
+                <div class="space-y-1">
+                    <label class="text-[9px] font-bold text-gray-400 uppercase tracking-widest block">Municipio</label>
                     <select id="sel-municipio" class="atlas-select w-full" onchange="onMuniChange()" disabled>
                         <option value="">-- Seleccionar --</option>
                     </select>
@@ -361,17 +362,19 @@
                 <div id="search-input-coord" class="hidden space-y-2">
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-[9px] font-bold text-gray-400 uppercase mb-0.5 block">X (Este)</label>
+                            <label class="text-[9px] font-bold text-gray-400 uppercase mb-0.5 block">X (Este)
+                                [9377]</label>
                             <input type="number" id="search-x" class="atlas-input" placeholder="X" step="any" />
                         </div>
                         <div>
-                            <label class="text-[9px] font-bold text-gray-400 uppercase mb-0.5 block">Y (Norte)</label>
+                            <label class="text-[9px] font-bold text-gray-400 uppercase mb-0.5 block">Y (Norte)
+                                [9377]</label>
                             <input type="number" id="search-y" class="atlas-input" placeholder="Y" step="any" />
                         </div>
                     </div>
                     <div class="text-[9px] text-gray-400 italic px-1">
-                        Ingrese una coordenada interna del predio para ubicarlo (el sistema buscará el polígono que la
-                        contiene).
+                        Ingrese coordenadas en <b>Origen Nacional (EPSG:9377)</b>. El sistema buscará el predio que
+                        contiene este punto.
                     </div>
                     <button class="atlas-btn atlas-btn-primary w-full justify-center" onclick="buscarPredio()">
                         <span class="material-symbols-outlined text-[14px]">pin_drop</span>
@@ -395,36 +398,7 @@
             </div>
         </div>
 
-        <!-- Panel: Coordenadas -->
-        <div class="atlas-panel">
-            <div class="atlas-panel-header">
-                <span class="material-symbols-outlined text-[16px] font-light text-gray-400">my_location</span>
-                <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Ir a
-                    Coordenada</span>
-            </div>
-            <div class="p-3 space-y-2">
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-[9px] font-bold text-gray-400 uppercase mb-0.5 block">X (Este)</label>
-                        <input type="number" id="input-x" class="atlas-input" placeholder="X" step="any" />
-                    </div>
-                    <div>
-                        <label class="text-[9px] font-bold text-gray-400 uppercase mb-0.5 block">Y (Norte)</label>
-                        <input type="number" id="input-y" class="atlas-input" placeholder="Y" step="any" />
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    <button class="atlas-btn w-full justify-center" onclick="irACoordenada()">
-                        <span class="material-symbols-outlined text-[14px]">pin_drop</span>
-                        Centrar
-                    </button>
-                    <button class="atlas-btn atlas-btn-primary w-full justify-center" onclick="exportarPDFCoordenada()">
-                        <span class="material-symbols-outlined text-[14px]">picture_as_pdf</span>
-                        PDF
-                    </button>
-                </div>
-            </div>
-        </div>
+
 
         <!-- Panel: Capas (TOC) -->
         <div class="atlas-panel" id="panel-capas" style="display:none">
