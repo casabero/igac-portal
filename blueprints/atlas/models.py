@@ -39,9 +39,16 @@ def init_atlas_db():
             capas_disponibles TEXT,
             fecha_carga TEXT,
             fecha_actualizacion TEXT,
+            fecha_version TEXT,
             UNIQUE(departamento_id, nombre)
         );
     """)
+    # Migration: Add fecha_version if not exists
+    try:
+        conn.execute("ALTER TABLE municipios ADD COLUMN fecha_version TEXT")
+        conn.commit()
+    except:
+        pass  # Column already exists
     conn.commit()
     conn.close()
 
@@ -129,13 +136,13 @@ def obtener_municipio(muni_id):
         conn.close()
 
 
-def actualizar_municipio_gpkg(muni_id, gpkg_path, srs, capas):
+def actualizar_municipio_gpkg(muni_id, gpkg_path, srs, capas, fecha_version=None):
     conn = get_db()
     try:
         conn.execute(
             """UPDATE municipios SET gpkg_path=?, srs=?, capas_disponibles=?,
-               fecha_carga=?, fecha_actualizacion=? WHERE id=?""",
-            (gpkg_path, srs, json.dumps(capas), now_col(), now_col(), muni_id)
+               fecha_carga=?, fecha_actualizacion=?, fecha_version=? WHERE id=?""",
+            (gpkg_path, srs, json.dumps(capas), now_col(), now_col(), fecha_version, muni_id)
         )
         conn.commit()
     finally:

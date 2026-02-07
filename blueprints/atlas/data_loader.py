@@ -75,7 +75,7 @@ def get_municipio_dir(departamento_nombre, municipio_nombre):
     return os.path.join(DATA_DIR, dep_slug, muni_slug)
 
 
-def procesar_upload_gdb(zip_file_storage, municipio_id):
+def procesar_upload_gdb(zip_file_storage, municipio_id, fecha_version=None):
     """
     Procesa un archivo ZIP subido que contiene GDB/SHP/GPKG.
     Lo convierte a GPKG y lo almacena permanentemente.
@@ -83,6 +83,7 @@ def procesar_upload_gdb(zip_file_storage, municipio_id):
     Args:
         zip_file_storage: FileStorage de Flask (archivo subido)
         municipio_id: ID del municipio en la BD
+        fecha_version: Optional date string for GDB version
 
     Returns:
         dict con status, capas detectadas, SRS, etc.
@@ -162,7 +163,7 @@ def procesar_upload_gdb(zip_file_storage, municipio_id):
 
         # Actualizar BD
         nombres_capas = [c['nombre_original'] for c in capas_cargadas]
-        actualizar_municipio_gpkg(municipio_id, output_gpkg, srs, nombres_capas)
+        actualizar_municipio_gpkg(municipio_id, output_gpkg, srs, nombres_capas, fecha_version)
 
         # Guardar metadata
         metadata = {

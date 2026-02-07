@@ -120,7 +120,8 @@ def api_upload_gdb(muni_id):
     if not file.filename.lower().endswith('.zip'):
         return jsonify({'error': 'Solo se aceptan archivos .zip'}), 400
 
-    result = procesar_upload_gdb(file, muni_id)
+    fecha_version = request.form.get('fecha_version')
+    result = procesar_upload_gdb(file, muni_id, fecha_version)
     if result['status'] == 'error':
         return jsonify(result), 400
     return jsonify(result)
@@ -147,7 +148,22 @@ def admin_page():
     if not session.get('admin_logged_in'):
         return redirect('/admin/login')
     departamentos = listar_departamentos()
-    return render_template('atlas/admin.html', departamentos=departamentos)
+    
+    # Build list of all municipalities with their versions for display
+    municipios_con_version = []
+    for dep in departamentos:
+        munis = listar_municipios(dep['id'])
+        for m in munis:
+            municipios_con_version.append({
+                'id': m['id'],
+                'nombre': m['nombre'],
+                'departamento': dep['nombre'],
+                'fecha_version': m.get('fecha_version') or '-',
+                'fecha_carga': m.get('fecha_carga') or '-',
+                'tiene_gdb': bool(m.get('gpkg_path'))
+            })
+    
+    return render_template('atlas/admin.html', departamentos=departamentos, municipios=municipios_con_version)
 
 
 # --- API: Busqueda de predio ---
