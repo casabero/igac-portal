@@ -106,15 +106,22 @@
         width: 100%;
         padding: 0.6rem 0.8rem;
         border: 1px solid #E5E5E5;
-        border-radius: 1rem;
-        /* rounded-2xl */
+        border-radius: 0.75rem;
         font-size: 11px;
-        /* Smaller font */
         font-family: 'Fira Code', monospace;
         background: #F8FAFC;
         color: #111;
         outline: none;
         transition: border-color 0.2s;
+        -webkit-appearance: none;
+        -moz-appearance: textfield;
+        appearance: none;
+    }
+
+    .atlas-input::-webkit-inner-spin-button,
+    .atlas-input::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
     }
 
     .atlas-input:focus {
@@ -129,13 +136,17 @@
 
     .atlas-select {
         width: 100%;
+        max-width: 100%;
         padding: 0.5rem 0.75rem;
         border: 1px solid #E5E5E5;
-        border-radius: 1rem;
+        border-radius: 0.75rem;
         font-size: 11px;
         background: #F8FAFC;
         color: #111;
         outline: none;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .dark .atlas-select {
