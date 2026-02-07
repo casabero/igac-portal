@@ -1,6 +1,6 @@
 """Blueprint: Panel de administración y analytics."""
 
-from flask import Blueprint, render_template, request, session, flash, redirect, url_for, Response
+from flask import Blueprint, render_template, request, session, flash, redirect, url_for, Response, jsonify
 from functools import wraps
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -10,12 +10,21 @@ ADMIN_PASS = "casa123"
 
 
 def login_required(f):
+    """Decorador reutilizable — protege rutas que requieren admin."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('admin_logged_in'):
+            # Si es API (JSON), devolver 401 en vez de redirect
+            if request.path.startswith('/api/') or request.is_json or request.headers.get('Accept') == 'application/json':
+                return jsonify({'error': 'Autenticación requerida'}), 401
             return redirect(url_for('admin.admin_login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
+
+
+def is_admin():
+    """Helper para verificar si el usuario actual es admin."""
+    return bool(session.get('admin_logged_in'))
 
 
 @admin_bp.route('/login', methods=['GET', 'POST'])

@@ -217,8 +217,13 @@ def cargar_capa(municipio_id, layer_name, bbox=None):
         return None
 
 
-def buscar_predio(municipio_id, codigo):
-    """Busca un predio por su CODIGO en las capas de terrenos.
+def buscar_predio(municipio_id, codigo, campo='CODIGO'):
+    """Busca un predio en U_TERRENO + R_TERRENO (combinadas) por CODIGO o CODIGO_ANTERIOR.
+
+    Args:
+        municipio_id: ID del municipio
+        codigo: Valor a buscar
+        campo: 'CODIGO' o 'CODIGO_ANTERIOR' — el usuario elige
 
     Returns:
         dict con 'geometry', 'bounds', 'attributes', 'layer' o None
@@ -228,52 +233,69 @@ def buscar_predio(municipio_id, codigo):
         return None
 
     gpkg_path = muni['gpkg_path']
-    capas_terreno = []
 
-    # Buscar en capas que contengan terrenos
+    # Solo buscar en capas de terrenos (U_TERRENO y R_TERRENO)
     try:
         all_layers = fiona.listlayers(gpkg_path)
     except Exception:
         return None
 
+    capas_terreno = []
     for ln in all_layers:
         norm = normalizar_nombre_capa(ln)
-        if 'terreno' in norm:
+        if norm in ('u_terreno', 'r_terreno'):
             capas_terreno.append(ln)
 
+    if not capas_terreno:
+        return None
+
+    # Cargar y combinar U_TERRENO + R_TERRENO como una sola fuente
+    frames = []
     for layer_name in capas_terreno:
         try:
             gdf = gpd.read_file(gpkg_path, layer=layer_name)
-            # Buscar columna CODIGO (case-insensitive)
-            col_codigo = None
-            for col in gdf.columns:
-                if col.upper() == 'CODIGO':
-                    col_codigo = col
-                    break
-
-            if not col_codigo:
-                continue
-
-            # Buscar match exacto o parcial
-            match = gdf[gdf[col_codigo].astype(str).str.strip() == str(codigo).strip()]
-            if match.empty:
-                # Buscar parcial (contiene)
-                match = gdf[gdf[col_codigo].astype(str).str.contains(str(codigo).strip(), na=False)]
-
-            if not match.empty:
-                row = match.iloc[0]
-                bounds = row.geometry.bounds  # (minx, miny, maxx, maxy)
-                attrs = {k: str(v) for k, v in row.drop('geometry').items()}
-                return {
-                    'geometry': row.geometry,
-                    'bounds': bounds,
-                    'codigo': str(row[col_codigo]),
-                    'attributes': attrs,
-                    'layer': layer_name,
-                    'total_matches': len(match),
-                }
+            if not gdf.empty:
+                gdf['_source_layer'] = layer_name
+                frames.append(gdf)
         except Exception as e:
-            print(f"Error buscando en {layer_name}: {e}")
-            continue
+            print(f"Error cargando {layer_name}: {e}")
 
-    return None
+    if not frames:
+        return None
+
+    import pandas as pd
+    terrenos = pd.concat(frames, ignore_index=True)
+
+    # Buscar la columna del campo solicitado (case-insensitive)
+    campo_upper = campo.upper()
+    col_match = None
+    for col in terrenos.columns:
+        if col.upper() == campo_upper:
+            col_match = col
+            break
+
+    if not col_match:
+        return None
+
+    # Match exacto primero
+    codigo_str = str(codigo).strip()
+    match = terrenos[terrenos[col_match].astype(str).str.strip() == codigo_str]
+
+    # Si no hay match exacto, buscar parcial (contiene)
+    if match.empty:
+        match = terrenos[terrenos[col_match].astype(str).str.contains(codigo_str, na=False)]
+
+    if match.empty:
+        return None
+
+    row = match.iloc[0]
+    bounds = row.geometry.bounds
+    attrs = {k: str(v) for k, v in row.drop('geometry').items() if k != '_source_layer'}
+    return {
+        'geometry': row.geometry,
+        'bounds': bounds,
+        'codigo': str(row[col_match]),
+        'attributes': attrs,
+        'layer': row.get('_source_layer', 'TERRENO'),
+        'total_matches': len(match),
+    }

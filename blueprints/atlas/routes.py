@@ -1,14 +1,16 @@
-"""Blueprint: GIS Atlas Generator — Rutas para gestión de datos y generación de mapas."""
+"""Blueprint: Karta GIS — Rutas para visualizacion de datos y generacion de mapas.
+Gestion de datos (dept/muni/upload) solo para admin."""
 
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, Response, send_file
+from flask import Blueprint, render_template, request, jsonify, session, Response
 from modules.db_logger import registrar_visita
+from blueprints.admin import login_required, is_admin
 
 from .models import (
     init_atlas_db, crear_departamento, listar_departamentos, obtener_departamento,
     eliminar_departamento, crear_municipio, listar_municipios, obtener_municipio,
     eliminar_municipio, obtener_municipio_completo
 )
-from .data_loader import procesar_upload_gdb, buscar_predio, cargar_capa
+from .data_loader import procesar_upload_gdb, buscar_predio
 from .map_renderer import render_preview, render_pdf
 
 import json
@@ -18,66 +20,28 @@ atlas_bp = Blueprint('atlas', __name__, url_prefix='/atlas',
                       template_folder='../../templates/atlas')
 
 
-# --- Pagina principal ---
+# --- Pagina publica (visualizacion) ---
 @atlas_bp.route('/')
 def index():
     registrar_visita('/atlas')
     departamentos = listar_departamentos()
-    return render_template('atlas/index.html', departamentos=departamentos)
+    return render_template('atlas/index.html',
+                           departamentos=departamentos,
+                           is_admin=is_admin())
 
 
-# --- API: Departamentos ---
+# =============================================
+# API PUBLICA — lectura y visualizacion
+# =============================================
+
 @atlas_bp.route('/api/departamentos', methods=['GET'])
 def api_listar_departamentos():
     return jsonify(listar_departamentos())
 
 
-@atlas_bp.route('/api/departamentos', methods=['POST'])
-def api_crear_departamento():
-    data = request.get_json()
-    if not data or not data.get('nombre'):
-        return jsonify({'error': 'Nombre requerido'}), 400
-    try:
-        dep = crear_departamento(data['nombre'], data.get('codigo'))
-        return jsonify(dict(dep)), 201
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-
-@atlas_bp.route('/api/departamentos/<int:dep_id>', methods=['DELETE'])
-def api_eliminar_departamento(dep_id):
-    try:
-        eliminar_departamento(dep_id)
-        return jsonify({'status': 'ok'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-
-# --- API: Municipios ---
 @atlas_bp.route('/api/departamentos/<int:dep_id>/municipios', methods=['GET'])
 def api_listar_municipios(dep_id):
     return jsonify(listar_municipios(dep_id))
-
-
-@atlas_bp.route('/api/departamentos/<int:dep_id>/municipios', methods=['POST'])
-def api_crear_municipio(dep_id):
-    data = request.get_json()
-    if not data or not data.get('nombre'):
-        return jsonify({'error': 'Nombre requerido'}), 400
-    try:
-        muni = crear_municipio(dep_id, data['nombre'], data.get('codigo'))
-        return jsonify(dict(muni)), 201
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-
-@atlas_bp.route('/api/municipios/<int:muni_id>', methods=['DELETE'])
-def api_eliminar_municipio(muni_id):
-    try:
-        eliminar_municipio(muni_id)
-        return jsonify({'status': 'ok'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
 
 
 @atlas_bp.route('/api/municipios/<int:muni_id>', methods=['GET'])
@@ -85,7 +49,6 @@ def api_obtener_municipio(muni_id):
     muni = obtener_municipio_completo(muni_id)
     if not muni:
         return jsonify({'error': 'No encontrado'}), 404
-    # Parsear capas JSON
     if muni.get('capas_disponibles'):
         try:
             muni['capas_disponibles'] = json.loads(muni['capas_disponibles'])
@@ -94,24 +57,6 @@ def api_obtener_municipio(muni_id):
     return jsonify(muni)
 
 
-# --- API: Upload GDB ---
-@atlas_bp.route('/api/municipios/<int:muni_id>/upload', methods=['POST'])
-def api_upload_gdb(muni_id):
-    if 'archivo_zip' not in request.files:
-        return jsonify({'error': 'No se recibió archivo'}), 400
-    file = request.files['archivo_zip']
-    if file.filename == '':
-        return jsonify({'error': 'Archivo vacío'}), 400
-    if not file.filename.lower().endswith('.zip'):
-        return jsonify({'error': 'Solo se aceptan archivos .zip'}), 400
-
-    result = procesar_upload_gdb(file, muni_id)
-    if result['status'] == 'error':
-        return jsonify(result), 400
-    return jsonify(result)
-
-
-# --- API: Capas disponibles ---
 @atlas_bp.route('/api/municipios/<int:muni_id>/capas', methods=['GET'])
 def api_listar_capas(muni_id):
     muni = obtener_municipio(muni_id)
@@ -127,36 +72,39 @@ def api_listar_capas(muni_id):
         return jsonify({'error': str(e)}), 500
 
 
-# --- API: Busqueda de predio ---
+# --- Busqueda de predio (CODIGO o CODIGO_ANTERIOR) ---
 @atlas_bp.route('/api/municipios/<int:muni_id>/buscar', methods=['GET'])
 def api_buscar_predio(muni_id):
     codigo = request.args.get('codigo', '').strip()
+    campo = request.args.get('campo', 'CODIGO').strip().upper()
     if not codigo:
-        return jsonify({'error': 'Código requerido'}), 400
+        return jsonify({'error': 'Codigo requerido'}), 400
+    if campo not in ('CODIGO', 'CODIGO_ANTERIOR'):
+        return jsonify({'error': 'Campo debe ser CODIGO o CODIGO_ANTERIOR'}), 400
 
-    resultado = buscar_predio(muni_id, codigo)
+    resultado = buscar_predio(muni_id, codigo, campo=campo)
     if not resultado:
-        return jsonify({'error': 'Predio no encontrado', 'codigo': codigo}), 404
+        return jsonify({'error': 'Predio no encontrado', 'codigo': codigo, 'campo': campo}), 404
 
-    # Serializar bounds (no la geometria completa)
     return jsonify({
         'codigo': resultado['codigo'],
         'bounds': resultado['bounds'],
         'layer': resultado['layer'],
         'attributes': resultado['attributes'],
         'total_matches': resultado['total_matches'],
+        'campo_busqueda': campo,
     })
 
 
-# --- API: Preview (PNG) ---
+# --- Preview (PNG) ---
 @atlas_bp.route('/api/municipios/<int:muni_id>/preview', methods=['GET'])
 def api_render_preview(muni_id):
-    # Parametros opcionales de extent
     minx = request.args.get('minx', type=float)
     miny = request.args.get('miny', type=float)
     maxx = request.args.get('maxx', type=float)
     maxy = request.args.get('maxy', type=float)
     codigo = request.args.get('codigo', '').strip()
+    campo = request.args.get('campo', 'CODIGO').strip().upper()
     show_labels = request.args.get('labels', 'true').lower() == 'true'
 
     bounds = None
@@ -166,14 +114,13 @@ def api_render_preview(muni_id):
     selected_geom = None
     selected_code = None
     if codigo:
-        resultado = buscar_predio(muni_id, codigo)
+        resultado = buscar_predio(muni_id, codigo, campo=campo)
         if resultado:
             selected_geom = resultado['geometry']
             selected_code = resultado['codigo']
             if bounds is None:
                 bounds = resultado['bounds']
 
-    # Layers habilitados
     layers_param = request.args.get('layers', '')
     enabled_layers = layers_param.split(',') if layers_param else None
 
@@ -192,7 +139,7 @@ def api_render_preview(muni_id):
     return Response(output.getvalue(), mimetype='image/png')
 
 
-# --- API: PDF ---
+# --- PDF ---
 @atlas_bp.route('/api/municipios/<int:muni_id>/pdf', methods=['GET'])
 def api_generate_pdf(muni_id):
     minx = request.args.get('minx', type=float)
@@ -200,6 +147,7 @@ def api_generate_pdf(muni_id):
     maxx = request.args.get('maxx', type=float)
     maxy = request.args.get('maxy', type=float)
     codigo = request.args.get('codigo', '').strip()
+    campo = request.args.get('campo', 'CODIGO').strip().upper()
     page_size = request.args.get('size', 'carta').lower()
     show_labels = request.args.get('labels', 'true').lower() == 'true'
 
@@ -210,7 +158,7 @@ def api_generate_pdf(muni_id):
     selected_geom = None
     selected_code = None
     if codigo:
-        resultado = buscar_predio(muni_id, codigo)
+        resultado = buscar_predio(muni_id, codigo, campo=campo)
         if resultado:
             selected_geom = resultado['geometry']
             selected_code = resultado['codigo']
@@ -236,7 +184,7 @@ def api_generate_pdf(muni_id):
     if output is None:
         return jsonify({'error': 'No se pudo generar PDF'}), 500
 
-    filename = f"Atlas_{codigo or 'mapa'}_{page_size}.pdf"
+    filename = f"Karta_{codigo or 'mapa'}_{page_size}.pdf"
     return Response(
         output.getvalue(),
         mimetype='application/pdf',
@@ -244,7 +192,7 @@ def api_generate_pdf(muni_id):
     )
 
 
-# --- API: Ir a coordenada ---
+# --- Ir a coordenada ---
 @atlas_bp.route('/api/municipios/<int:muni_id>/coordenada', methods=['GET'])
 def api_ir_coordenada(muni_id):
     x = request.args.get('x', type=float)
@@ -252,7 +200,6 @@ def api_ir_coordenada(muni_id):
     if x is None or y is None:
         return jsonify({'error': 'Se requieren coordenadas X e Y'}), 400
 
-    # Generar preview centrada en la coordenada con un buffer fijo
     buffer = request.args.get('buffer', 100, type=float)
     bounds = (x - buffer, y - buffer, x + buffer, y + buffer)
 
@@ -266,3 +213,70 @@ def api_ir_coordenada(muni_id):
         return jsonify({'error': 'No se pudo renderizar en esa coordenada'}), 500
 
     return Response(output.getvalue(), mimetype='image/png')
+
+
+# =============================================
+# API ADMIN — gestion de datos (protegida)
+# =============================================
+
+@atlas_bp.route('/api/departamentos', methods=['POST'])
+@login_required
+def api_crear_departamento():
+    data = request.get_json()
+    if not data or not data.get('nombre'):
+        return jsonify({'error': 'Nombre requerido'}), 400
+    try:
+        dep = crear_departamento(data['nombre'], data.get('codigo'))
+        return jsonify(dict(dep)), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+
+@atlas_bp.route('/api/departamentos/<int:dep_id>', methods=['DELETE'])
+@login_required
+def api_eliminar_departamento(dep_id):
+    try:
+        eliminar_departamento(dep_id)
+        return jsonify({'status': 'ok'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+
+@atlas_bp.route('/api/departamentos/<int:dep_id>/municipios', methods=['POST'])
+@login_required
+def api_crear_municipio(dep_id):
+    data = request.get_json()
+    if not data or not data.get('nombre'):
+        return jsonify({'error': 'Nombre requerido'}), 400
+    try:
+        muni = crear_municipio(dep_id, data['nombre'], data.get('codigo'))
+        return jsonify(dict(muni)), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+
+@atlas_bp.route('/api/municipios/<int:muni_id>', methods=['DELETE'])
+@login_required
+def api_eliminar_municipio(muni_id):
+    try:
+        eliminar_municipio(muni_id)
+        return jsonify({'status': 'ok'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+
+@atlas_bp.route('/api/municipios/<int:muni_id>/upload', methods=['POST'])
+@login_required
+def api_upload_gdb(muni_id):
+    if 'archivo_zip' not in request.files:
+        return jsonify({'error': 'No se recibio archivo'}), 400
+    file = request.files['archivo_zip']
+    if file.filename == '':
+        return jsonify({'error': 'Archivo vacio'}), 400
+    if not file.filename.lower().endswith('.zip'):
+        return jsonify({'error': 'Solo se aceptan archivos .zip'}), 400
+
+    result = procesar_upload_gdb(file, muni_id)
+    if result['status'] == 'error':
+        return jsonify(result), 400
+    return jsonify(result)
