@@ -64,23 +64,17 @@ def login_required(f):
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def admin_login():
     ensure_admin_user()
-    login_error = None
-    username_value = ''
-
     if request.method == 'POST':
         user = request.form.get('username', '').strip().lower()
         pw = request.form.get('password')
-        username_value = user
         if validar_admin(user, pw):
             session['admin_logged_in'] = True
             session['admin_username'] = user
             flash('SIS_ACCESO_CONCEDIDO // BIENVENIDO_ADMIN_ROOT', 'success')
             return redirect(url_for('admin.admin_dashboard'))
-
-        login_error = 'Credenciales inválidas. Verifique usuario y contraseña e intente de nuevo.'
-        flash('SIS_ACCESO_DENEGADO // TOKEN_INVÁLIDO_BLOQUEADO', 'danger')
-
-    return render_template('admin_login.html', login_error=login_error, username_value=username_value)
+        else:
+            flash('SIS_ACCESO_DENEGADO // TOKEN_INVÁLIDO_BLOQUEADO', 'danger')
+    return render_template('admin_login.html')
 
 
 @admin_bp.route('/logout')
@@ -120,35 +114,7 @@ def admin_dashboard():
     cursor.execute(f"SELECT * {query_base} ORDER BY timestamp DESC LIMIT 100", params)
     ultimos_logs = [dict(row) for row in cursor.fetchall()]
     conn.close()
-
-    chart_data = {row['ruta']: row['count'] for row in top_apps}
-    modulo_top = top_apps[0]['ruta'] if top_apps else 'N/A'
-    logs = [
-        {
-            'modulo': row.get('ruta', 'N/A'),
-            'accion': row.get('metodo', 'GET'),
-            'timestamp': row.get('timestamp', ''),
-            'ip': row.get('ip_publica', 'N/A'),
-            'user_agent': row.get('user_agent', ''),
-        }
-        for row in ultimos_logs
-    ]
-
-    return render_template(
-        'admin_dashboard.html',
-        total_visitas=total_visitas,
-        visitantes_unicos=visitantes_unicos,
-        top_apps=top_apps,
-        stats_pais=stats_pais,
-        ultimos_logs=ultimos_logs,
-        fecha_inicio=fecha_inicio,
-        fecha_fin=fecha_fin,
-        total_logs=total_visitas,
-        usuarios_unicos=visitantes_unicos,
-        modulo_top=modulo_top,
-        logs=logs,
-        chart_data=chart_data,
-    )
+    return render_template('admin_dashboard.html', total_visitas=total_visitas, visitantes_unicos=visitantes_unicos, top_apps=top_apps, stats_pais=stats_pais, ultimos_logs=ultimos_logs, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin)
 
 
 @admin_bp.route('/export-csv')
